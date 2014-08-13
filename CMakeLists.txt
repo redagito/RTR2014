@@ -62,6 +62,7 @@ file(GLOB_RECURSE SRC_FILES
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_BINARY_DIR}/src/*.cpp
 	${CMAKE_BINARY_DIR}/src/*.h
+	${CMAKE_SOURCE_DIR}/shaders/*.glsl
 )
 
 add_executable(RTR2014Demo ${SRC_FILES})
