@@ -1,0 +1,12 @@
+#pragma once
+
+// WARNING!
+// This file is generated automatically.
+
+class @SHADER_NAME@
+{
+   public:
+    const char* const FS = "@SHADER_FS@";
+
+    const char* const VS = "@SHADER_VS@";
+};
