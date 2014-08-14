@@ -65,9 +65,9 @@ file(GLOB_RECURSE SRC_FILES
 	${CMAKE_SOURCE_DIR}/shaders/*.glsl
 )
 
-add_executable(RTR2014Demo ${SRC_FILES})
+add_executable(RTRDemo ${SRC_FILES})
 
-target_link_libraries(RTR2014Demo
+target_link_libraries(RTRDemo
 	${OPENGL_LIBRARY}
 	glfw ${GLFW_LIBRARIES}
 	assimp
