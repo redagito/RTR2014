@@ -29,6 +29,8 @@ set (SHADER_SRC_DIR "src/shaders/generated")
 file (GLOB SHADER_DIRECTORIES "shaders/[^.]*")
 foreach (SHADER_DIRECTORY ${SHADER_DIRECTORIES})
 	get_filename_component(SHADER_NAME ${SHADER_DIRECTORY} NAME)
+	source_group("Shaders\\GLSL\\${SHADER_NAME}" shaders/${SHADER_NAME}/*)
+	
 	set(SHADER_NAME "${SHADER_NAME}Shader")
 	message("Generating shader '${SHADER_NAME}'.")
 	
@@ -41,9 +43,7 @@ foreach (SHADER_DIRECTORY ${SHADER_DIRECTORIES})
 	configure_file(
 		"${SHADER_SRC_DIR}/Shader.h.in" 
 		"${SHADER_SRC_DIR}/${SHADER_NAME}.h" 
-		ESCAPE_QUOTES
-		@ONLY
-		)
+		ESCAPE_QUOTES @ONLY )
 endforeach()
 
 # ===
@@ -74,4 +74,5 @@ target_link_libraries(RTR2014Demo
 )
 
 source_group("Demo" src/demo/*)
-source_group("Shaders" src/shaders/**/*)
+source_group("Shaders" src/shaders)
+source_group("Shaders\\Generated" src/shaders/generated/*)
