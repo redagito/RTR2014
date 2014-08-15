@@ -32,9 +32,12 @@ int RTRDemo::run()
         return -1;
     }
   
-    flextInit(m_window);
-
     glfwMakeContextCurrent(m_window);
+
+    if (flextInit(m_window) != GL_TRUE) {
+        glfwTerminate();
+        return 1;
+    }
 
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 
