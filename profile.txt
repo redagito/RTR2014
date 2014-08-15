@@ -1,4 +1,4 @@
-version 3.3 core
+version 4.1 core
 
 extension ARB_vertex_array_object required
 extension EXT_texture_filter_anisotropic optional

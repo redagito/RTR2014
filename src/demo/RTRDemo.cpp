@@ -31,6 +31,8 @@ int RTRDemo::run()
         glfwTerminate();
         return -1;
     }
+  
+    flextInit(m_window);
 
     glfwMakeContextCurrent(m_window);
 

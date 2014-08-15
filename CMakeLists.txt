@@ -75,6 +75,7 @@ file(GLOB_RECURSE SRC_FILES
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_BINARY_DIR}/src/*.cpp
+	${CMAKE_BINARY_DIR}/src/*.c
 	${CMAKE_BINARY_DIR}/src/*.h
 	${CMAKE_SOURCE_DIR}/shaders/*.glsl
 )

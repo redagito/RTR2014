@@ -1,6 +1,7 @@
 #pragma once
 
-#define GLFW_INCLUDE_GLCOREARB
+//#define GLFW_INCLUDE_GLCOREARB
+#include "generated/flextGL.h"
 #include <GLFW/glfw3.h>
 
 class RTRDemo
