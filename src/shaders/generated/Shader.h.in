@@ -6,6 +6,6 @@
 class @SHADER_NAME@
 {
    public:
-   	constexpr static const char* const VS = "@SHADER_VS@";
-    constexpr static const char* const FS = "@SHADER_FS@";
+   	static const char* const VS;
+    static const char* const FS;
 };

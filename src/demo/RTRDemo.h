@@ -1,7 +1,12 @@
 #pragma once
 
-//#define GLFW_INCLUDE_GLCOREARB
-#include "generated/flextGL.h"
+#ifdef _WIN32
+#    include "generated/flextGL.h"
+#else
+#    define GLFW_INCLUDE_GLCOREARB
+#    define flextInit
+#endif
+
 #include <GLFW/glfw3.h>
 
 class RTRDemo

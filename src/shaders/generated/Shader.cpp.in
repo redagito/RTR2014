@@ -1,0 +1,7 @@
+#include "@SHADER_NAME@.h"
+
+// WARNING!
+// This file is generated automatically.
+
+const char* const @SHADER_NAME@::VS = "@SHADER_VS@";
+const char* const @SHADER_NAME@::FS = "@SHADER_FS@";

@@ -5,7 +5,10 @@ project (RTR2014)
 # third party libraries
 # ===
 
+if (WIN32)
 find_package (PythonInterp 3.4 REQUIRED)
+endif()
+
 find_package (OpenGL REQUIRED)
 
 option(GLFW_BUILD_DOCS OFF)
@@ -45,12 +48,17 @@ foreach (SHADER_DIRECTORY ${SHADER_DIRECTORIES})
 		"${SHADER_SRC_DIR}/Shader.h.in" 
 		"${SHADER_SRC_DIR}/${SHADER_NAME}.h" 
 		ESCAPE_QUOTES @ONLY )
+	configure_file(
+		"${SHADER_SRC_DIR}/Shader.cpp.in" 
+		"${SHADER_SRC_DIR}/${SHADER_NAME}.cpp" 
+		ESCAPE_QUOTES @ONLY )
 endforeach()
 
 # ===
 # flextGL
 # ===
 
+if (WIN32)
 add_custom_target(RunFlextGL ALL
     COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py" -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt
     DEPENDS ${PROJECT_SOURCE_DIR}/profile.txt
@@ -58,7 +66,7 @@ add_custom_target(RunFlextGL ALL
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flext.py
             ${PROJECT_SOURCE_DIR}/libs/flextGL/templates/glfw3/flextGL.h.template
             ${PROJECT_SOURCE_DIR}/libs/flextGL/templates/glfw3/flextGL.c.template)
-
+endif()
 
 # ===
 # demo executable
@@ -88,7 +96,9 @@ target_link_libraries(RTRDemo
 	assimp
 )
 
+if (WIN32)
 add_dependencies(RTRDemo RunFlextGL)
+endif()
 
 source_group("Demo" src/demo/*)
 source_group("Scene" src/scene/*)
