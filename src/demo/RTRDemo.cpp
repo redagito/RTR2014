@@ -34,10 +34,12 @@ int RTRDemo::run()
   
     glfwMakeContextCurrent(m_window);
 
+#ifndef __APPLE__
     if (flextInit(m_window) != GL_TRUE) {
         glfwTerminate();
         return 1;
     }
+#endif
 
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 

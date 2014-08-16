@@ -5,7 +5,7 @@ project (RTR2014)
 # third party libraries
 # ===
 
-if (WIN32)
+if (NOT APPLE)
 find_package (PythonInterp 3.4 REQUIRED)
 endif()
 
@@ -58,7 +58,7 @@ endforeach()
 # flextGL
 # ===
 
-if (WIN32)
+if (NOT APPLE)
 add_custom_target(RunFlextGL ALL
     COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py" -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt
     DEPENDS ${PROJECT_SOURCE_DIR}/profile.txt
@@ -83,10 +83,13 @@ file(GLOB_RECURSE SRC_FILES
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_BINARY_DIR}/src/*.cpp
-	${CMAKE_BINARY_DIR}/src/*.c
 	${CMAKE_BINARY_DIR}/src/*.h
 	${CMAKE_SOURCE_DIR}/shaders/*.glsl
 )
+
+if (NOT APPLE)
+  set (SRC_FILES "${SRC_FILES};${CMAKE_BINARY_DIR}/src/generated/flextGL.c;${CMAKE_BINARY_DIR}/src/generated/flextGL.h")
+endif()
 
 add_executable(RTRDemo ${SRC_FILES})
 
@@ -96,11 +99,12 @@ target_link_libraries(RTRDemo
 	assimp
 )
 
-if (WIN32)
+if (NOT APPLE)
 add_dependencies(RTRDemo RunFlextGL)
 endif()
 
 source_group("Demo" src/demo/*)
+source_group("Generated" src/generated/*)
 source_group("Scene" src/scene/*)
 source_group("Shaders" src/shaders)
 source_group("Shaders\\Generated" src/shaders/generated/*)

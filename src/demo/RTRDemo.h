@@ -1,10 +1,9 @@
 #pragma once
 
-#ifdef _WIN32
+#ifndef __APPLE__
 #    include "generated/flextGL.h"
 #else
 #    define GLFW_INCLUDE_GLCOREARB
-#    define flextInit
 #endif
 
 #include <GLFW/glfw3.h>
