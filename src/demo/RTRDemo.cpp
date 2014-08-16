@@ -3,7 +3,10 @@
 #include <string>
 #include <vector>
 
-#include "shaders/Shader.h"
+#include "scene/CScene.h"
+#include "scene/CSceneObject.h"
+
+#include "shaders/TShader.h"
 #include "shaders/generated/SimpleShader.h"
 
 RTRDemo::RTRDemo() {}
@@ -31,11 +34,12 @@ int RTRDemo::run()
         glfwTerminate();
         return -1;
     }
-  
+
     glfwMakeContextCurrent(m_window);
 
 #ifndef __APPLE__
-    if (flextInit(m_window) != GL_TRUE) {
+    if (flextInit(m_window) != GL_TRUE)
+    {
         glfwTerminate();
         return 1;
     }
@@ -45,33 +49,38 @@ int RTRDemo::run()
 
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
 
-    GLuint VertexArrayID;
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
-
-    Shader<SimpleShader> simple;
+    // shader
+    TShader<SimpleShader> simple;
     simple.init();
 
-    static const GLfloat g_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    };
+    // scene
+    CScene scene;
 
-    GLuint vertexbuffer;
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data,
-                 GL_STATIC_DRAW);
+    std::shared_ptr<CSceneObject> object = std::make_shared<CSceneObject>();
+    object->load({
+        -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    });
+
+    scene.addObject(object);
 
     do
     {
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(simple.getProgramID());
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        for (const std::shared_ptr<CSceneObject>& object : scene.getObjects())
+        {
+            glBindVertexArray(object->getVertexArrayID());
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, object->getVertexBufferID());
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();

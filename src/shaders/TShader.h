@@ -1,11 +1,11 @@
 #pragma once
 
 template <class T>
-class Shader
+class TShader
 {
    public:
-    Shader() {}
-    ~Shader() {}
+    TShader() {}
+    ~TShader() {}
 
     GLuint getProgramID() { return m_program_id; }
 
