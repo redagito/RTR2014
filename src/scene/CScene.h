@@ -1,8 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
-#include "CSceneObject.h"
+class CSceneObject;
 
 class CScene
 {
