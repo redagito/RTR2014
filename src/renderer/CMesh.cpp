@@ -1,10 +1,11 @@
 #include "CMesh.h"
 #include "debug/Log.h"
 
-CMesh::CMesh(std::unique_ptr<CVertexBuffer> vertices, std::unique_ptr<CVertexBuffer> normals,
-             std::unique_ptr<CVertexBuffer> uvs)
-    : m_vertices(std::move(vertices)), m_normals(std::move(normals)), m_uvs(std::move(uvs))
+CMesh::CMesh(const std::vector<float>& vertices, const std::vector<float>& normals,
+        const std::vector<float>& uvs)
+    : m_vertices(new CVertexBuffer(vertices)), m_normals(new CVertexBuffer(normals)), m_uvs(new CVertexBuffer(uvs))
 {
+
 }
 
 CMesh::~CMesh() { return; }

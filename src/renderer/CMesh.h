@@ -1,9 +1,9 @@
 #pragma once
 
-#include "CVertexBuffer.h"
-
 #include <memory>
 #include <vector>
+
+#include "core/CVertexBuffer.h"
 
 /**
 * \brief Contains mesh data (vertices, faces, normals and uv data).
@@ -15,8 +15,8 @@
 class CMesh
 {
    public:
-    CMesh(std::unique_ptr<CVertexBuffer> vertices, std::unique_ptr<CVertexBuffer> normals,
-          std::unique_ptr<CVertexBuffer> uvs);
+    CMesh(const std::vector<float>& vertices, const std::vector<float>& normals,
+          const std::vector<float>& uvs);
 
     CMesh(const CMesh&) = delete;
     CMesh& operator=(const CMesh&) = delete;
