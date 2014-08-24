@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "renderer/core/Config.h"
+
 #include "scene/CScene.h"
 #include "scene/CSceneObject.h"
 

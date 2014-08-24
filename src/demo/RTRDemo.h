@@ -1,12 +1,6 @@
 #pragma once
 
-#ifndef __APPLE__
-#    include "generated/flextGL.h"
-#else
-#    define GLFW_INCLUDE_GLCOREARB
-#endif
-
-#include <GLFW/glfw3.h>
+class GLFWwindow;
 
 class RTRDemo
 {

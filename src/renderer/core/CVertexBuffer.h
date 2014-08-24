@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "generated/flextGL.h"
+#include "Config.h"
 
 /*
 * \brief Manages an OpenGL VBO in VRAM.
