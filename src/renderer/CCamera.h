@@ -7,8 +7,7 @@
  */
 class CCamera
 {
-
-private:
-	glm::mat4 m_view;
-	glm::mat4 m_projection;
+   private:
+    glm::mat4 m_view;
+    glm::mat4 m_projection;
 };

@@ -2,10 +2,11 @@
 #include "debug/Log.h"
 
 CMesh::CMesh(const std::vector<float>& vertices, const std::vector<float>& normals,
-        const std::vector<float>& uvs)
-    : m_vertices(new CVertexBuffer(vertices)), m_normals(new CVertexBuffer(normals)), m_uvs(new CVertexBuffer(uvs))
+             const std::vector<float>& uvs)
+    : m_vertices(new CVertexBuffer(vertices)),
+      m_normals(new CVertexBuffer(normals)),
+      m_uvs(new CVertexBuffer(uvs))
 {
-
 }
 
 CMesh::~CMesh() { return; }

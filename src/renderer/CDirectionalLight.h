@@ -4,7 +4,6 @@
 
 class CDirectionalLight : public ALight
 {
-
-private:
-	glm::vec3 m_direction;
+   private:
+    glm::vec3 m_direction;
 };

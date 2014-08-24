@@ -7,12 +7,12 @@
  */
 class ALight
 {
-public:
-	virtual ~ALight();
+   public:
+    virtual ~ALight();
 
-protected:
-	ALight(const glm::vec3& color);
+   protected:
+    ALight(const glm::vec3& color);
 
-private:
-	glm::vec3 m_color; /**< Light color. */
+   private:
+    glm::vec3 m_color; /**< Light color. */
 };
