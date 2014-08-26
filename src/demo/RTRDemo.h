@@ -1,6 +1,6 @@
 #pragma once
 
-class GLFWwindow;
+struct GLFWwindow;
 
 class RTRDemo
 {

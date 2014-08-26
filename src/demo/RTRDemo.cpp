@@ -3,13 +3,19 @@
 #include <string>
 #include <vector>
 
-#include "renderer/core/Config.h"
+#include "graphics/renderer/core/Config.h"
+#include <GLFW/glfw3.h>
 
-#include "scene/CScene.h"
-#include "scene/CSceneObject.h"
+#include "graphics/scene/CScene.h"
+#include "graphics/scene/CSceneObject.h"
 
 #include "shaders/TShader.h"
 #include "shaders/generated/SimpleShader.h"
+
+#include "graphics/window/CGlfwWindow.h"
+#include "resource/CResourceManager.h"
+#include "graphics/renderer/CRenderer.h"
+#include "graphics/camera/CFirstPersonCamera.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -47,6 +53,12 @@ int RTRDemo::run()
     }
 #endif
 
+    std::shared_ptr<IResourceManager> resourceManager(new CResourceManager);
+    std::shared_ptr<IWindow> window(new CGlfwWindow(m_window));
+    std::shared_ptr<IRenderer> renderer(new CRenderer(resourceManager));
+    std::shared_ptr<IScene> scene(new CScene);
+    std::shared_ptr<ICamera> camera(new CFirstPersonCamera);
+
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
@@ -56,21 +68,25 @@ int RTRDemo::run()
     simple.init();
 
     // scene
-    CScene scene;
+    CScene oldscene;
 
     std::shared_ptr<CSceneObject> object = std::make_shared<CSceneObject>();
     object->load({
         -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     });
 
-    scene.addObject(object);
+    oldscene.addObject(object);
 
     do
     {
+        // Should be
+        renderer->draw(*scene.get(), *camera.get(), *window.get());
+
+        // instead of
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(simple.getProgramID());
 
-        for (const std::shared_ptr<CSceneObject>& object : scene.getObjects())
+        for (const std::shared_ptr<CSceneObject>& object : oldscene.getObjects())
         {
             glBindVertexArray(object->getVertexArrayID());
 

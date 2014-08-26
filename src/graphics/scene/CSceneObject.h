@@ -1,13 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
-#ifndef __APPLE__
-#include "generated/flextGL.h"
-#else
-#define GLFW_INCLUDE_GLCOREARB
-#endif
-#include <GLFW/glfw3.h>
+#include "graphics/renderer/core/Config.h"
 
 class CSceneObject
 {
