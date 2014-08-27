@@ -13,7 +13,7 @@
 #include "shaders/generated/SimpleShader.h"
 
 #include "graphics/window/CGlfwWindow.h"
-#include "resource/CResourceManager.h"
+#include "graphics/resource/CResourceManager.h"
 #include "graphics/renderer/CRenderer.h"
 #include "graphics/camera/CFirstPersonCamera.h"
 

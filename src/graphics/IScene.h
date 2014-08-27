@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include "resource/IResourceManager.h"
+#include "IResourceManager.h"
 
 class ICamera;
 
@@ -27,9 +27,37 @@ class IScene
     /**
      * \brief Creates object in scene and returns id.
      */
-    virtual ObjectId createObject(IResourceManager::MeshId, IResourceManager::MaterialId,
-                                  const glm::vec3& position, const glm::vec3& rotation,
-                                  const glm::vec3& scale) = 0;
+    virtual ObjectId createObject(IResourceManager::ResourceId mesh,
+                                  IResourceManager::ResourceId material, const glm::vec3& position,
+                                  const glm::vec3& rotation, const glm::vec3& scale) = 0;
+
+    /**
+     * \brief Returns mesh id for object id.
+     */
+    virtual IResourceManager::ResourceId getMesh(ObjectId object) const = 0;
+
+    /**
+     * \brief Returns material id for object id.
+     */
+    virtual IResourceManager::ResourceId getMaterial(ObjectId object) const = 0;
+
+    /**
+     * \brief Returns position for the object id.
+     * Return by value, not by reference to remain thread safe.
+     */
+    virtual glm::vec3 getPosition(ObjectId object) const = 0;
+
+    /**
+     * \brief Returns rotation for the object id.
+     * Return by value, not by reference to remain thread safe.
+     */
+    virtual glm::vec3 getRotation(ObjectId object) const = 0;
+
+    /**
+     * \brief Returns scale for the object id.
+     * Return by value, not by reference to remain thread safe.
+     */
+    virtual glm::vec3 getScale(ObjectId object) const = 0;
 
     /**
      * \brief Creates light in scene and returns id.
@@ -40,20 +68,20 @@ class IScene
     /**
      * \brief Creates query id for objects in the scene, visible by the camera.
      */
-    virtual ObjectQueryId queryVisibleObjects(const ICamera& camera) = 0;
+    virtual ObjectQueryId queryVisibleObjects(const ICamera& camera) const = 0;
 
     /**
      * \brief Creates query id for lights in the scene, visible by the camera.
      */
-    virtual LightQueryId queryVisibleLights(const ICamera& camera) = 0;
+    virtual LightQueryId queryVisibleLights(const ICamera& camera) const = 0;
 
     /**
      * \brief Returns next visible object for the provided id.
      */
-    virtual ObjectId getNextObject(ObjectQueryId query) = 0;
+    virtual ObjectId getNextObject(ObjectQueryId query) const = 0;
 
     /**
      * \brief Returns next visible light for the provided id.
      */
-    virtual ObjectId getNextLight(ObjectQueryId query) = 0;
+    virtual ObjectId getNextLight(ObjectQueryId query) const = 0;
 };
