@@ -3,7 +3,7 @@
 #include "command/console/CConsole.h"
 #include "command/handler/CPrintHandler.h"
 
-class GLFWwindow;
+struct GLFWwindow;
 
 class RTRDemo
 {

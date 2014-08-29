@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "graphics/renderer/core/Config.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
 #include <GLFW/glfw3.h>
 
 #include "graphics/scene/CScene.h"
