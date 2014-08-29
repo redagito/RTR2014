@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-class IResourceManager;
 class IScene;
 class IWindow;
 class ICamera;
@@ -15,8 +14,8 @@ class IRenderer
 {
    public:
     /**
-    * \brief Virtual destructor for interface class.
-    */
+	* \brief Virtual destructor for interface class.
+	*/
     virtual ~IRenderer();
 
     /**

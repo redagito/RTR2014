@@ -1,5 +1,7 @@
 #include "CScene.h"
 
+#include "CSceneQuery.h"
+
 CScene::CScene() {}
 
 CScene::~CScene() {}
@@ -8,70 +10,62 @@ void CScene::addObject(std::shared_ptr<CSceneObject> object) { m_objects.push_ba
 
 const std::vector<std::shared_ptr<CSceneObject>>& CScene::getObjects() { return m_objects; }
 
-IScene::ObjectId CScene::createObject(IResourceManager::ResourceId, IResourceManager::ResourceId,
-                                      const glm::vec3& position, const glm::vec3& rotation,
-                                      const glm::vec3& scale)
+SceneObjectId CScene::createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
+                                   const glm::vec3& rotation, const glm::vec3& scale)
 {
     // TODO Implement
     return -1;
 }
 
-IResourceManager::ResourceId CScene::getMesh(IScene::ObjectId object) const
+ResourceId CScene::getMesh(SceneObjectId object) const
 {
     // TODO Implement
     return -1;
 }
 
-IResourceManager::ResourceId CScene::getMaterial(IScene::ObjectId object) const
+ResourceId CScene::getMaterial(SceneObjectId object) const
 {
     // TODO Implement
     return -1;
 }
 
-glm::vec3 CScene::getPosition(IScene::ObjectId object) const
+glm::vec3 CScene::getObjectPosition(SceneObjectId object) const
 {
     // TODO Implement
     return glm::vec3(0.f);
 }
 
-glm::vec3 CScene::getRotation(IScene::ObjectId object) const
+glm::vec3 CScene::getObjectRotation(SceneObjectId object) const
 {
     // TODO Implement
     return glm::vec3(0.f);
 }
 
-glm::vec3 CScene::getScale(IScene::ObjectId object) const
+glm::vec3 CScene::getObjectScale(SceneObjectId object) const
 {
     // TODO Implement
     return glm::vec3(0.f);
 }
 
-IScene::LightId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
+SceneObjectId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
 {
     // TODO Implement
     return -1;
 }
 
-IScene::ObjectQueryId CScene::queryVisibleObjects(const ICamera& camera) const
+glm::vec3 CScene::getLightColor(SceneObjectId light) const
 {
     // TODO Implement
-    return -1;
+    return glm::vec3(0.f);
 }
 
-IScene::LightQueryId CScene::queryVisibleLights(const ICamera& camera) const
+std::unique_ptr<ISceneQuery> CScene::createQuery(const ICamera& camera) const
 {
-    // TODO Implement
-    return -1;
-}
+    // New query
+    CSceneQuery* query = new CSceneQuery;
 
-IScene::ObjectId CScene::getNextObject(IScene::ObjectQueryId query) const
-{
-    // TODO Implement
-    return -1;
-}
+    // TODO Add visible objects
 
-IScene::ObjectId CScene::getNextLight(IScene::ObjectQueryId query) const
-{
-    // TODO Implement
-    return -1;
+    // Return query
+    return std::unique_ptr<ISceneQuery>(query);
 }

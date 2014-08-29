@@ -7,12 +7,14 @@
 #include <glm/glm.hpp>
 
 #include "graphics/IRenderer.h"
-#include "graphics/IResourceManager.h"
 #include "graphics/IResourceListener.h"
+#include "graphics/ResourceConfig.h"
 
 #include "CMesh.h"
 #include "CTexture.h"
 #include "CMaterial.h"
+
+class IResourceManager;
 
 /**
  * \brief Renderer implementation for deferred rendering.
@@ -40,8 +42,8 @@ class CRenderer : public IRenderer, IResourceListener
      * \brief Draws single mesh.
      * Resolves ids to objects and forwards call.
      */
-    void draw(IResourceManager::ResourceId mesh, const glm::vec3& position,
-              const glm::vec3& rotation, const glm::vec3& scale, IResourceManager::ResourceId);
+    void draw(ResourceId mesh, const glm::vec3& position, const glm::vec3& rotation,
+              const glm::vec3& scale, ResourceId);
 
     /**
      * \brief Draws mesh to current rendering target.
@@ -52,28 +54,28 @@ class CRenderer : public IRenderer, IResourceListener
 
     void onAttach(IResourceManager* resourceManager);
     void onDetach(IResourceManager* resourceManager);
-    void notify(IResourceManager::EResourceType type, IResourceManager::ResourceId,
-                IResourceManager::EListenerEvent event, IResourceManager* resourceManager);
+    void notify(EResourceType type, ResourceId, EListenerEvent event,
+                IResourceManager* resourceManager);
 
    protected:
     /**
      * \brief Maps mesh id to internal mesh object.
      */
-    const std::unique_ptr<CMesh>& getMesh(IResourceManager::ResourceId);
+    const std::unique_ptr<CMesh>& getMesh(ResourceId);
 
     /**
      * \brief Maps material id to internal material object.
      */
-    const std::unique_ptr<CMaterial>& getMaterial(IResourceManager::ResourceId);
+    const std::unique_ptr<CMaterial>& getMaterial(ResourceId);
 
    private:
     std::shared_ptr<IResourceManager> m_resourceManager; /**< Shared resource manager. */
 
     // TODO Store as arrays?
-    std::unordered_map<IResourceManager::ResourceId, std::unique_ptr<CMesh>>
+    std::unordered_map<ResourceId, std::unique_ptr<CMesh>>
         m_meshes; /**< Maps mesh id from resource manager to GPU side mesh. */
-    std::unordered_map<IResourceManager::ResourceId, std::unique_ptr<CTexture>>
+    std::unordered_map<ResourceId, std::unique_ptr<CTexture>>
         m_textures; /**< Maps image id from resource manager to GPU side texture. */
-    std::unordered_map<IResourceManager::ResourceId, std::unique_ptr<CMaterial>>
+    std::unordered_map<ResourceId, std::unique_ptr<CMaterial>>
         m_materials; /**< Maps material id from resource manager to cached material. */
 };

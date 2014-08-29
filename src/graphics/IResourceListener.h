@@ -1,6 +1,8 @@
 #pragma once
 
-#include "IResourceManager.h"
+#include "ResourceConfig.h"
+
+class IResourceManager;
 
 /**
  * \brief Resource listener interface class.
@@ -27,7 +29,6 @@ class IResourceListener
     /**
      * \brief Called on resource event.
      */
-    virtual void notify(IResourceManager::EResourceType type, IResourceManager::ResourceId id,
-                        IResourceManager::EListenerEvent event,
+    virtual void notify(EResourceType type, ResourceId id, EListenerEvent event,
                         IResourceManager* resourceManager) = 0;
 };

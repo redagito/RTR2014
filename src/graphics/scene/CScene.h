@@ -18,24 +18,20 @@ class CScene : public IScene
     void addObject(std::shared_ptr<CSceneObject> object);
     const std::vector<std::shared_ptr<CSceneObject>>& getObjects();
 
-    ObjectId createObject(IResourceManager::ResourceId, IResourceManager::ResourceId,
-                          const glm::vec3& position, const glm::vec3& rotation,
-                          const glm::vec3& scale);
+    SceneObjectId createObject(ResourceId, ResourceId, const glm::vec3& position,
+                               const glm::vec3& rotation, const glm::vec3& scale);
 
-    IResourceManager::ResourceId getMesh(ObjectId object) const;
-    IResourceManager::ResourceId getMaterial(ObjectId object) const;
+    ResourceId getMesh(SceneObjectId object) const;
+    ResourceId getMaterial(SceneObjectId object) const;
 
-    glm::vec3 getPosition(ObjectId object) const;
-    glm::vec3 getRotation(ObjectId object) const;
-    glm::vec3 getScale(ObjectId object) const;
+    glm::vec3 getObjectPosition(SceneObjectId object) const;
+    glm::vec3 getObjectRotation(SceneObjectId object) const;
+    glm::vec3 getObjectScale(SceneObjectId object) const;
 
-    LightId createLight(const glm::vec3& position, float radius, const glm::vec3& color);
+    SceneObjectId createLight(const glm::vec3& position, float radius, const glm::vec3& color);
+    glm::vec3 getLightColor(SceneObjectId light) const;
 
-    ObjectQueryId queryVisibleObjects(const ICamera& camera) const;
-    LightQueryId queryVisibleLights(const ICamera& camera) const;
-
-    ObjectId getNextObject(ObjectQueryId query) const;
-    ObjectId getNextLight(ObjectQueryId query) const;
+    std::unique_ptr<ISceneQuery> createQuery(const ICamera& camera) const;
 
    private:
     std::vector<std::shared_ptr<CSceneObject>> m_objects;

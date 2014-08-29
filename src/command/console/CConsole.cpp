@@ -1,48 +1,13 @@
 #include "CConsole.h"
 
-void CConsole::handleCommand(const std::string& command)
-{
-    auto iter = m_commandHandlers.find(command);
-    if (iter == m_commandHandlers.end())
-    {
-        // No handlers found
-        return;
-    }
+#include "command/ICommandHandler.h"
 
-    // Send command to handlers
-    for (auto handler : iter->second)
-    {
-        handler->handleCommand(command);
-    }
+void CConsole::sendCommand(std::string command)
+{
+    // Split command string
 }
 
-void CConsole::handleCommand(const std::string& command, const std::string& arg0)
-{
-    std::vector<std::string> args;
-    args.push_back(arg0);
-    handleCommand(command, args);
-}
-
-void CConsole::handleCommand(const std::string& command, const std::string& arg0,
-                             const std::string& arg1)
-{
-    std::vector<std::string> args;
-    args.push_back(arg0);
-    args.push_back(arg1);
-    handleCommand(command, args);
-}
-
-void CConsole::handleCommand(const std::string& command, const std::string& arg0,
-                             const std::string& arg1, const std::string& arg2)
-{
-    std::vector<std::string> args;
-    args.push_back(arg0);
-    args.push_back(arg1);
-    args.push_back(arg2);
-    handleCommand(command, args);
-}
-
-void CConsole::handleCommand(const std::string& command, const std::vector<std::string>& arguments)
+void CConsole::sendCommand(const std::string& command, const std::vector<std::string>& arguments)
 {
     // Handle commands for variable/value management
     if (command == "set" && arguments.size() == 2)  // Adds variable to value mapping
@@ -92,7 +57,7 @@ void CConsole::handleCommand(const std::string& command, const std::vector<std::
         // Forward command to handlers
         for (auto handler : iter->second)
         {
-            handler->handleCommand(command, newArguments);
+            handler->handleCommand(newArguments);
         }
     }
 }

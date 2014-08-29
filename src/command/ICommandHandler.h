@@ -12,13 +12,7 @@ class ICommandHandler
     virtual ~ICommandHandler();
 
     /**
-     * \brief handles command without arguments.
+     * \brief Handles command arguments.
      */
-    virtual void handleCommand(const std::string& command) = 0;
-
-    /**
-     * \brief handles command with arguments.
-     */
-    virtual void handleCommand(const std::string& command,
-                               const std::vector<std::string>& arguments) = 0;
+    virtual void handleCommand(const std::vector<std::string>& arguments) = 0;
 };

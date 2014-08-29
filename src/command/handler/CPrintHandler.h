@@ -5,6 +5,5 @@
 class CPrintHandler : public ICommandHandler
 {
    public:
-    void handleCommand(const std::string& command);
-    void handleCommand(const std::string& command, const std::vector<std::string>& arguments);
+    void handleCommand(const std::vector<std::string>& arguments);
 };

@@ -7,6 +7,7 @@
 #include "graphics/IScene.h"
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
+#include "graphics/IResourceManager.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
     : m_resourceManager(resourceManager)
@@ -29,30 +30,31 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
 
     // TODO Implement multi pass system
 
-    // Query visible objects
-    IScene::ObjectQueryId objectQuery = scene.queryVisibleObjects(camera);
+    // Query visible scene objects
+    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Traverse visible objects
-    IScene::ObjectId sceneObject = scene.getNextObject(objectQuery);
-    while (sceneObject > -1)
+    while (query->hasNextObject())
     {
+        // Get next visible object
+        SceneObjectId id = query->getNextObject();
+
         // Get object attributes
-        IResourceManager::ResourceId mesh = scene.getMesh(sceneObject);
-        IResourceManager::ResourceId material = scene.getMaterial(sceneObject);
+        ResourceId mesh = scene.getMesh(id);
+        ResourceId material = scene.getMaterial(id);
 
         // Get object transformation
-        glm::vec3 position = scene.getPosition(sceneObject);
-        glm::vec3 rotation = scene.getRotation(sceneObject);
-        glm::vec3 scale = scene.getScale(sceneObject);
+        glm::vec3 position = scene.getObjectPosition(id);
+        glm::vec3 rotation = scene.getObjectRotation(id);
+        glm::vec3 scale = scene.getObjectScale(id);
 
         // Draw call
         draw(mesh, position, rotation, scale, material);
     }
 }
 
-void CRenderer::draw(IResourceManager::ResourceId meshId, const glm::vec3& position,
-                     const glm::vec3& rotation, const glm::vec3& scale,
-                     IResourceManager::ResourceId materialId)
+void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::vec3& rotation,
+                     const glm::vec3& scale, ResourceId materialId)
 {
     // Resolve ids
     const std::unique_ptr<CMesh>& mesh = getMesh(meshId);
@@ -87,19 +89,19 @@ void CRenderer::onDetach(IResourceManager* resourceManager)
     return;
 }
 
-void CRenderer::notify(IResourceManager::EResourceType type, IResourceManager::ResourceId,
-                       IResourceManager::EListenerEvent event, IResourceManager* resourceManager)
+void CRenderer::notify(EResourceType type, ResourceId, EListenerEvent event,
+                       IResourceManager* resourceManager)
 {
     // Handle events
     switch (event)
     {
-    case IResourceManager::EListenerEvent::Create:
+    case EListenerEvent::Create:
         break;
 
-    case IResourceManager::EListenerEvent::Change:
+    case EListenerEvent::Change:
         break;
 
-    case IResourceManager::EListenerEvent::Delete:
+    case EListenerEvent::Delete:
         break;
     default:
         // TODO Error handling
@@ -107,7 +109,7 @@ void CRenderer::notify(IResourceManager::EResourceType type, IResourceManager::R
     }
 }
 
-const std::unique_ptr<CMesh>& CRenderer::getMesh(IResourceManager::ResourceId meshId)
+const std::unique_ptr<CMesh>& CRenderer::getMesh(ResourceId meshId)
 {
     // Search for id
     auto iter = m_meshes.find(meshId);
@@ -119,7 +121,7 @@ const std::unique_ptr<CMesh>& CRenderer::getMesh(IResourceManager::ResourceId me
     return iter->second;
 }
 
-const std::unique_ptr<CMaterial>& CRenderer::getMaterial(IResourceManager::ResourceId materialId)
+const std::unique_ptr<CMaterial>& CRenderer::getMaterial(ResourceId materialId)
 {
     // Search for id
     auto iter = m_materials.find(materialId);

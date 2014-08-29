@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <functional>
-#include <cstdint>
+
+#include "ResourceConfig.h"
 
 class IResourceListener; /**< Listener class. */
 
@@ -13,54 +14,6 @@ class IResourceListener; /**< Listener class. */
 class IResourceManager
 {
    public:
-    /**
-     * \brief Resource types.
-     */
-    enum class EResourceType
-    {
-        Mesh,
-        Image,
-        String,
-        Shader,
-        Material
-    };
-
-    /**
-    * \brief Primitive type for vertex data.
-    */
-    enum class EPrimitiveType
-    {
-        Point,
-        Line,
-        Triangle,
-        Quad,
-        Invalid
-    };
-
-    /**
-    * \brief Color format for texture data.
-    */
-    enum class EColorFormat
-    {
-        GreyScale8,
-        RGB24,
-        RGBA32,
-        Invalid
-    };
-
-    /**
-     * \brief Possible listener events.
-     */
-    enum class EListenerEvent
-    {
-        Create, /**< Specified resource was created. */
-        Change, /**< Specified resource was changed. */
-        Delete  /**< Specified resource was deleted. */
-    };
-
-    typedef std::int64_t ResourceId; /**< Resource id, -1 is reserved invalid/unused, all other
-                                        values < -1 are invalid. */
-
     /**
      * \brief Virtual destructor for interface class.
      */

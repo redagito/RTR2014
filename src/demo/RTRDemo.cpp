@@ -23,6 +23,9 @@ RTRDemo::~RTRDemo() {}
 
 int RTRDemo::run()
 {
+    m_console.addCommandHandler("print", &m_printHandler);
+    m_console.sendCommand("print Start");
+
     if (!glfwInit())
     {
         // TODO log

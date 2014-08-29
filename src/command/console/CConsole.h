@@ -5,23 +5,17 @@
 #include <vector>
 #include <list>
 
-#include "ICommandHandler.h"
+#include "command/IConsole.h"
 
 /**
  * \brief Console class.
  * A console can receive and distribute commands to attached command handlers
  * and store console variables.
  */
-class CConsole : public ICommandHandler
+class CConsole : public IConsole
 {
    public:
-    void handleCommand(const std::string& command);
-    void handleCommand(const std::string& command, const std::string& arg0);
-    void handleCommand(const std::string& command, const std::string& arg0,
-                       const std::string& arg1);
-    void handleCommand(const std::string& command, const std::string& arg0, const std::string& arg1,
-                       const std::string& arg2);
-    void handleCommand(const std::string& command, const std::vector<std::string>& arguments);
+    void sendCommand(std::string command);
 
     /**
      * \brief Adds handler for the specified command.
@@ -33,14 +27,10 @@ class CConsole : public ICommandHandler
      */
     void removeCommandHandler(const std::string& command, ICommandHandler* handler);
 
-    /**
-     * \brief Sets variable to specified value.
-     */
-    void setVariable(const std::string& name, const std::string& value);
+   protected:
+    void sendCommand(const std::string& command, const std::vector<std::string>& arguments);
 
-    /**
-     * \brief Removes variable mapping.
-     */
+    void setVariable(const std::string& name, const std::string& value);
     void unsetVariable(const std::string& name);
 
    private:

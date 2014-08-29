@@ -3,8 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "graphics/renderer/core/Config.h"
-
+#include "graphics/renderer/core/RendererCoreConfig.h"
 class CSceneObject
 {
    public:
