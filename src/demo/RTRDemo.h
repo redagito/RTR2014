@@ -1,9 +1,14 @@
 #pragma once
 
-#include "command/console/CConsole.h"
-#include "command/handler/CPrintHandler.h"
+#include <memory>
 
 struct GLFWwindow;
+
+class IResourceManager;
+class IWindow;
+class IRenderer;
+class IScene;
+class ICamera;
 
 class RTRDemo
 {
@@ -11,10 +16,15 @@ class RTRDemo
     RTRDemo();
     ~RTRDemo();
 
+    int init();
     int run();
 
    private:
-    CPrintHandler m_printHandler;
-    CConsole m_console;
-    GLFWwindow* m_window;
+    GLFWwindow* m_glfw_window;
+
+    std::shared_ptr<IResourceManager> m_resourceManager = nullptr;
+    std::shared_ptr<IWindow> m_window = nullptr;
+    std::shared_ptr<IRenderer> m_renderer = nullptr;
+    std::shared_ptr<IScene> m_scene = nullptr;
+    std::shared_ptr<ICamera> m_camera = nullptr;
 };
