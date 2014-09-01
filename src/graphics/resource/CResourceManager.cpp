@@ -24,6 +24,24 @@ ResourceId CResourceManager::createMesh(const std::vector<float>& vertices,
     return id;
 }
 
+bool CResourceManager::getMesh(ResourceId id, std::vector<float>& vertices, std::vector<unsigned int>& indices,
+	std::vector<float>& normals, std::vector<float>& uvs, EPrimitiveType& type) const
+{
+	// Retrieve from map
+	auto iter = m_meshes.find(id);
+	if (iter == m_meshes.end())
+	{
+		return false;
+	}
+	// Copy data
+	vertices = iter->second.m_vertices;
+	indices = iter->second.m_indices;
+	normals = iter->second.m_normals;
+	uvs = iter->second.m_uvs;
+	type = iter->second.m_type;
+	return true;
+}
+
 ResourceId CResourceManager::createImage(const std::vector<unsigned char>& imageData,
                                          unsigned int width, unsigned int height,
                                          EColorFormat format)
@@ -39,6 +57,23 @@ ResourceId CResourceManager::createImage(const std::vector<unsigned char>& image
     // Notify listener with create event
     notifyResourceListeners(EResourceType::Image, id, EListenerEvent::Create);
     return id;
+}
+
+bool CResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
+	unsigned int& height, EColorFormat& format) const
+{
+	// Retrieve from map
+	auto iter = m_images.find(id);
+	if (iter == m_images.end())
+	{
+		return false;
+	}
+	// Copy data
+	data = iter->second.m_data;
+	width = iter->second.m_width;
+	height = iter->second.m_height;
+	format = iter->second.m_format;
+	return true;
 }
 
 ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha, ResourceId normal,

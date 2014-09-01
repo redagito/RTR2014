@@ -22,8 +22,16 @@ class CResourceManager : public IResourceManager
                           const std::vector<unsigned int>& indices,
                           const std::vector<float>& normals, const std::vector<float>& uvs,
                           EPrimitiveType type);
+
+    bool getMesh(ResourceId id, std::vector<float>& vertices, std::vector<unsigned int>& indices,
+                 std::vector<float>& normals, std::vector<float>& uvs, EPrimitiveType& type) const;
+
     ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
                            unsigned int height, EColorFormat format);
+
+    bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
+                  unsigned int& height, EColorFormat& format) const;
+
     ResourceId createMaterial(ResourceId diffuse, ResourceId alpha, ResourceId normal,
                               ResourceId specular, ResourceId glow);
     ResourceId createString(const std::string& text);

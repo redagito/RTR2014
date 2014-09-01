@@ -5,10 +5,12 @@
 
 #include "debug/Log.h"
 
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include <GLFW/glfw3.h>
+
 #include "graphics/camera/CFirstPersonCamera.h"
 #include "graphics/renderer/CRenderer.h"
 #include "graphics/resource/CResourceManager.h"
-#include "graphics/renderer/core/RendererCoreConfig.h"
 #include "graphics/scene/CScene.h"
 #include "graphics/scene/CSceneObject.h"
 #include "graphics/window/CGlfwWindow.h"
@@ -20,19 +22,20 @@ RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo() {}
 
-int RTRDemo::init() {
+int RTRDemo::init()
+{
     if (!glfwInit())
     {
         LOG_ERROR("glfwInit() failed.");
         return -1;
     }
-    
+
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+
     m_glfw_window = glfwCreateWindow(1024, 768, "RTR Demo", NULL, NULL);
     if (m_glfw_window == nullptr)
     {
@@ -40,25 +43,25 @@ int RTRDemo::init() {
         glfwTerminate();
         return -1;
     }
-    
+
     glfwMakeContextCurrent(m_glfw_window);
-    
+
 #ifndef __APPLE__
-    if (flextInit(m_window) != GL_TRUE)
+    if (flextInit(m_glfw_window) != GL_TRUE)
     {
         glfwTerminate();
         return 1;
     }
 #endif
-    
+
     m_resourceManager = std::make_shared<CResourceManager>();
     m_window = std::make_shared<CGlfwWindow>(m_glfw_window);
     m_renderer = std::make_shared<CRenderer>(m_resourceManager);
     m_scene = std::make_shared<CScene>();
     m_camera = std::make_shared<CFirstPersonCamera>();
-    
+
     glfwSetInputMode(m_glfw_window, GLFW_STICKY_KEYS, GL_TRUE);
-    
+
     return 0;
 }
 

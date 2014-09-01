@@ -89,22 +89,29 @@ void CRenderer::onDetach(IResourceManager* resourceManager)
     return;
 }
 
-void CRenderer::notify(EResourceType type, ResourceId, EListenerEvent event,
+void CRenderer::notify(EResourceType type, ResourceId id, EListenerEvent event,
                        IResourceManager* resourceManager)
 {
     // Handle events
-    switch (event)
+    switch (type)
     {
-    case EListenerEvent::Create:
+    case EResourceType::Image:
+        handleImageEvent(id, event, resourceManager);
         break;
-
-    case EListenerEvent::Change:
+    case EResourceType::Material:
+        handleMaterialEvent(id, event, resourceManager);
         break;
-
-    case EListenerEvent::Delete:
+    case EResourceType::Mesh:
+        handleMeshEvent(id, event, resourceManager);
+        break;
+    case EResourceType::Shader:
+        handleShaderEvent(id, event, resourceManager);
+        break;
+    case EResourceType::String:
+        handleStringEvent(id, event, resourceManager);
         break;
     default:
-        // TODO Error handling
+        assert(false && "Unknown resource type.");
         break;
     }
 }
@@ -131,4 +138,104 @@ const std::unique_ptr<CMaterial>& CRenderer::getMaterial(ResourceId materialId)
     assert(iter != m_materials.end());
 
     return iter->second;
+}
+
+void CRenderer::handleImageEvent(ResourceId id, EListenerEvent event,
+                                 IResourceManager* resourceManager)
+{
+    std::vector<unsigned char> data;
+    unsigned int width;
+    unsigned int height;
+    EColorFormat format;
+
+    switch (event)
+    {
+    case EListenerEvent::Create:
+        assert(m_textures.count(id) == 0 && "Texture id already exists");
+
+        if (!resourceManager->getImage(id, data, width, height, format))
+        {
+            assert(false && "Failed to access image resource");
+        }
+        // Create new texture
+        m_textures[id] =
+            std::move(std::unique_ptr<CTexture>(new CTexture(data, width, height, format, 4)));
+        break;
+
+    case EListenerEvent::Change:
+        assert(m_textures.count(id) == 1 && "Texture id does not exist");
+
+        if (!resourceManager->getImage(id, data, width, height, format))
+        {
+            assert(false && "Failed to access image resource");
+        }
+        // Reinitialize texture on change
+        m_textures.at(id)->init(data, width, height, format, 4);
+        break;
+
+    case EListenerEvent::Delete:
+        // Keep texture?
+        break;
+
+    default:
+        break;
+    }
+}
+
+void CRenderer::handleMeshEvent(ResourceId id, EListenerEvent event,
+                                IResourceManager* resourceManager)
+{
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<float> normals;
+    std::vector<float> uvs;
+    EPrimitiveType type;
+
+    switch (event)
+    {
+    case EListenerEvent::Create:
+        assert(m_meshes.count(id) == 0 && "Mesh id already exists");
+
+        if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
+        {
+            assert(false && "Failed to access mesh resource");
+        }
+        // Create new texture
+        m_meshes[id] =
+            std::move(std::unique_ptr<CMesh>(new CMesh(vertices, indices, normals, uvs, type)));
+        break;
+
+    case EListenerEvent::Change:
+        assert(m_meshes.count(id) == 1 && "Mesh id does not exist");
+
+        if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
+        {
+            assert(false && "Failed to access mesh resource");
+        }
+        // Reinitialize mesh on change
+        m_meshes.at(id)->init(vertices, indices, normals, uvs, type);
+        break;
+
+    case EListenerEvent::Delete:
+        // Keep mesh?
+        break;
+
+    default:
+        break;
+    }
+}
+
+void CRenderer::handleMaterialEvent(ResourceId, EListenerEvent event,
+                                    IResourceManager* resourceManager)
+{
+}
+
+void CRenderer::handleShaderEvent(ResourceId, EListenerEvent event,
+                                  IResourceManager* resourceManager)
+{
+}
+
+void CRenderer::handleStringEvent(ResourceId, EListenerEvent event,
+                                  IResourceManager* resourceManager)
+{
 }

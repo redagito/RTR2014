@@ -22,10 +22,9 @@ enum class EResourceType
 */
 enum class EPrimitiveType
 {
-    Point,
-    Line,
-    Triangle,
-    Quad,
+    Point = 1,
+    Line = 2,
+    Triangle = 3,
     Invalid
 };
 
@@ -34,9 +33,9 @@ enum class EPrimitiveType
 */
 enum class EColorFormat
 {
-    GreyScale8,
-    RGB24,
-    RGBA32,
+    GreyScale8 = 1,
+    RGB24 = 3,
+    RGBA32 = 4,
     Invalid
 };
 

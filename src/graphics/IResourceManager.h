@@ -29,6 +29,13 @@ class IResourceManager
                                   EPrimitiveType type) = 0;
 
     /**
+    * \brief Retrieves mesh data.
+    */
+    virtual bool getMesh(ResourceId id, std::vector<float>& vertices,
+                         std::vector<unsigned int>& indices, std::vector<float>& normals,
+                         std::vector<float>& uvs, EPrimitiveType& type) const = 0;
+
+    /**
      * \brief Creates texture object from image data and returns id.
      * \parm imageData  Raw image data.
      * \parm width Image width.
@@ -37,6 +44,12 @@ class IResourceManager
      */
     virtual ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
                                    unsigned int height, EColorFormat format) = 0;
+
+    /**
+    * \brief Retrieves image data.
+    */
+    virtual bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
+                          unsigned int& height, EColorFormat& format) const = 0;
 
     /**
      * \brief Creates material.
