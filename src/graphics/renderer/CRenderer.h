@@ -13,7 +13,7 @@
 #include "CMesh.h"
 #include "CTexture.h"
 #include "CMaterial.h"
-#include "CShaderObject.h"
+#include "TShaderObject.h"
 #include "CShaderProgram.h"
 
 class IResourceManager;
@@ -86,8 +86,16 @@ class CRenderer : public IRenderer, IResourceListener
         m_textures; /**< Maps image id from resource manager to GPU side texture. */
     std::unordered_map<ResourceId, std::unique_ptr<CMaterial>>
         m_materials; /**< Maps material id from resource manager to cached material. */
-    std::unordered_map<ResourceId, std::unique_ptr<CShaderObject>>
-        m_shaderObjects; /**< Maps string resource ids to compiled shader objects. */
+	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>>>
+		m_vertexShader; /**< Maps string resource ids to compiled vertex shader objects. */
+	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_GEOMETRY_SHADER>>>
+		m_geometryShader; /**< Maps string resource ids to compiled geometry shader objects. */
+	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_CONTROL_SHADER>>>
+		m_tessConstrolShader; /**< Maps string resource ids to compiled tessellation control shader objects. */
+	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_EVALUATION_SHADER>>>
+		m_tessEvalShader; /**< Maps string resource ids to compiled tessellation evaluation shader objects. */
+	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_FRAGMENT_SHADER>>>
+		m_fragmentShader; /**< Maps string resource ids to compiled fragment shader objects. */
     std::unordered_map<ResourceId, std::unique_ptr<CShaderProgram>>
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 };

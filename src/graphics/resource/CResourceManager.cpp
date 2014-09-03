@@ -2,7 +2,7 @@
 
 #include "graphics/IResourceListener.h"
 
-CResourceManager::CResourceManager() : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0)
+CResourceManager::CResourceManager() : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0), m_nextStringId(0), m_nextShaderId(0)
 {
     return;
 }
@@ -83,7 +83,7 @@ ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha
     ResourceId id = m_nextMaterialId;
     ++m_nextMaterialId;
 
-    // Add mesh
+    // Add material
     m_materials[id] = SMaterial(diffuse, alpha, normal, specular, glow);
 
     // Notify listener with create event
@@ -91,13 +91,84 @@ ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha
     return id;
 }
 
-ResourceId CResourceManager::createString(const std::string& text) { return -1; }
+bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& alpha, ResourceId& normal,
+	ResourceId& specular, ResourceId& glow) const
+{
+	// Retrieve from map
+	auto iter = m_materials.find(id);
+	if (iter == m_materials.end())
+	{
+		return false;
+	}
+	// Copy data
+	diffuse = iter->second.m_diffuse;
+	alpha = iter->second.m_alpha;
+	normal = iter->second.m_normal;
+	specular = iter->second.m_specular;
+	glow = iter->second.m_glow;
+	return true;
+}
+
+ResourceId CResourceManager::createString(const std::string& text)
+{
+	// Create string
+	ResourceId id = m_nextStringId;
+	++m_nextStringId;
+
+	// Add string
+	m_strings[id] = text;
+
+	// Notify listener with create event
+	notifyResourceListeners(EResourceType::String, id, EListenerEvent::Create);
+	return id;
+}
+
+bool CResourceManager::getString(ResourceId id, std::string& text) const
+{
+	// Retrieve from map
+	auto iter = m_strings.find(id);
+	if (iter == m_strings.end())
+	{
+		return false;
+	}
+	// Copy data
+	text = iter->second;
+	return true;
+}
 
 ResourceId CResourceManager::createShader(ResourceId vertex, ResourceId tessCtrl,
                                           ResourceId tessEval, ResourceId geometry,
                                           ResourceId fragment)
 {
-    return -1;
+	// Create shader
+	ResourceId id = m_nextShaderId;
+	++m_nextShaderId;
+
+	// Add shader
+	m_shaders[id] = SShader(vertex, tessCtrl, tessEval, geometry, fragment);
+
+	// Notify listener with create event
+	notifyResourceListeners(EResourceType::Shader, id, EListenerEvent::Create);
+	return id;
+}
+
+bool CResourceManager::getShader(ResourceId id, ResourceId& vertex, ResourceId& tessCtrl,
+	ResourceId& tessEval, ResourceId& geometry,
+	ResourceId& fragment) const
+{
+	// Retrieve from map
+	auto iter = m_shaders.find(id);
+	if (iter == m_shaders.end())
+	{
+		return false;
+	}
+	// Copy data
+	vertex = iter->second.m_vertex;
+	tessCtrl = iter->second.m_tessCtrl;
+	tessEval = iter->second.m_tessEval;
+	geometry = iter->second.m_geometry;
+	fragment = iter->second.m_fragment;
+	return true;
 }
 
 void CResourceManager::addResourceListener(IResourceListener* listener)

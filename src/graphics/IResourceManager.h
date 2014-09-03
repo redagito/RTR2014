@@ -52,16 +52,28 @@ class IResourceManager
                           unsigned int& height, EColorFormat& format) const = 0;
 
     /**
-     * \brief Creates material.
-     */
+    * \brief Creates material.
+    */
     virtual ResourceId createMaterial(ResourceId diffuseImage, ResourceId alphaImage,
                                       ResourceId normalImage, ResourceId specularImage,
                                       ResourceId glowImage) = 0;
 
     /**
+    * \brief Returns material data.
+    */
+    virtual bool getMaterial(ResourceId id, ResourceId& diffuseImage, ResourceId& alphaImage,
+                             ResourceId& normalImage, ResourceId& specularImage,
+                             ResourceId& glowImage) const = 0;
+
+    /**
      * \brief Creates string resource.
      */
     virtual ResourceId createString(const std::string& text) = 0;
+
+    /**
+    * \brief Returns string resource.
+    */
+    virtual bool getString(ResourceId id, std::string& text) const = 0;
 
     /**
      * \brief Creates shader resource.
@@ -71,6 +83,15 @@ class IResourceManager
                                     ResourceId tessellationEvaluationShaderString,
                                     ResourceId geometryShaderString,
                                     ResourceId fragmentShaderString) = 0;
+
+    /**
+    * \brief Creates shader resource.
+    */
+    virtual bool getShader(ResourceId id, ResourceId& vertexShaderString,
+                           ResourceId& tessellationControlShaderString,
+                           ResourceId& tessellationEvaluationShaderString,
+                           ResourceId& geometryShaderString,
+                           ResourceId& fragmentShaderString) const = 0;
 
     /**
      * \brief Adds resource listener.
