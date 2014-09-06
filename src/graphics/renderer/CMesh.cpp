@@ -64,12 +64,14 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
 	// TODO The data data size (second param) should be deduced by the data type of the provided vertex data
 	//  basically we would need a std::vector<glm::vec3> instead of a std::vector<float> to deduce the size
 	// TODO Consider packing all vertex data into a single buffer for better performance
+	glEnableVertexAttribArray(vertexDataShaderLocation);
 	glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	// Set normal data attributes
 	if (m_normals != nullptr)
 	{
 		m_normals->setActive();
+		glEnableVertexAttribArray(normalDataShaderLocation);
 		glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
@@ -77,6 +79,7 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
 	if (m_uvs != nullptr)
 	{
 		m_uvs->setActive();
+		glEnableVertexAttribArray(uvDataShaderLocation);
 		glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
