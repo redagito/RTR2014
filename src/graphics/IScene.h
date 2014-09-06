@@ -32,32 +32,10 @@ class IScene
                                        const glm::vec3& scale) = 0;
 
     /**
-     * \brief Returns mesh id for object id.
+     * \brief Returns scene object data.
      */
-    virtual ResourceId getMesh(SceneObjectId object) const = 0;
-
-    /**
-     * \brief Returns material id for object id.
-     */
-    virtual ResourceId getMaterial(SceneObjectId object) const = 0;
-
-    /**
-     * \brief Returns position for the object id.
-     * Return by value, not by reference to remain thread safe.
-     */
-    virtual glm::vec3 getObjectPosition(SceneObjectId object) const = 0;
-
-    /**
-     * \brief Returns rotation for the object id.
-     * Return by value, not by reference to remain thread safe.
-     */
-    virtual glm::vec3 getObjectRotation(SceneObjectId object) const = 0;
-
-    /**
-     * \brief Returns scale for the object id.
-     * Return by value, not by reference to remain thread safe.
-     */
-    virtual glm::vec3 getObjectScale(SceneObjectId object) const = 0;
+    virtual bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
+                           glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const = 0;
 
     /**
      * \brief Creates light in scene and returns id.
@@ -68,7 +46,8 @@ class IScene
     /**
      * \brief Returns light color in RGB format.
      */
-    virtual glm::vec3 getLightColor(SceneObjectId light) const = 0;
+    virtual bool getLight(SceneObjectId id, glm::vec3& position, float& radius,
+                          glm::vec3& color) const = 0;
 
     /**
      * \brief Creates scene query for specified camera.

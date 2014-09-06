@@ -77,7 +77,7 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
 	if (m_uvs != nullptr)
 	{
 		m_uvs->setActive();
-		glVertexAttribPointer(uvDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
 	// Disable vao

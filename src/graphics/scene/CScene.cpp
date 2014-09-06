@@ -1,70 +1,73 @@
 #include "CScene.h"
 
 #include "CSceneQuery.h"
+#include "SSceneObject.h"
+#include "SSceneLight.h"
 
 CScene::CScene() {}
 
 CScene::~CScene() {}
 
-void CScene::addObject(std::shared_ptr<CSceneObject> object) { m_objects.push_back(object); }
-
-const std::vector<std::shared_ptr<CSceneObject>>& CScene::getObjects() { return m_objects; }
-
 SceneObjectId CScene::createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
                                    const glm::vec3& rotation, const glm::vec3& scale)
 {
-    // TODO Implement
-    return -1;
+    m_objects.push_back(SSceneObject(mesh, material, position, rotation, scale));
+    return m_objects.size() - 1;
 }
 
-ResourceId CScene::getMesh(SceneObjectId object) const
+bool CScene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
+                       glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const
 {
-    // TODO Implement
-    return -1;
-}
+	// TODO Needs to be changed for better data structures
+	if (id < 0 || id >= m_objects.size())
+	{
+		return false;
+	}
 
-ResourceId CScene::getMaterial(SceneObjectId object) const
-{
-    // TODO Implement
-    return -1;
-}
-
-glm::vec3 CScene::getObjectPosition(SceneObjectId object) const
-{
-    // TODO Implement
-    return glm::vec3(0.f);
-}
-
-glm::vec3 CScene::getObjectRotation(SceneObjectId object) const
-{
-    // TODO Implement
-    return glm::vec3(0.f);
-}
-
-glm::vec3 CScene::getObjectScale(SceneObjectId object) const
-{
-    // TODO Implement
-    return glm::vec3(0.f);
+	// Write data
+	mesh = m_objects.at(id).m_mesh;
+	material = m_objects.at(id).m_material;
+	position = m_objects.at(id).m_position;
+	rotation = m_objects.at(id).m_rotation;
+	scale = m_objects.at(id).m_scale;
+	return true;
 }
 
 SceneObjectId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
 {
-    // TODO Implement
-    return -1;
+	// TODO Implement
+	return -1;
 }
 
-glm::vec3 CScene::getLightColor(SceneObjectId light) const
+bool CScene::getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const
 {
-    // TODO Implement
-    return glm::vec3(0.f);
+	// TODO Implement
+	return false;
 }
 
 std::unique_ptr<ISceneQuery> CScene::createQuery(const ICamera& camera) const
 {
-    // New query
-    CSceneQuery* query = new CSceneQuery;
+    // TODO Extract frustum planes from camera
 
-    // TODO Add visible objects
+    // New query with max storage
+    // TODO Allocate less storage, needs experiments on how much is actually needed
+    CSceneQuery* query = new CSceneQuery(m_objects.size(), m_lights.size());
+
+    // TODO Frustum culling, occlusion culling, better data structure for objects
+    // For now add all objects
+    for (unsigned int i = 0; i < m_objects.size(); ++i)
+    {
+        // Counter variable is object id
+        query->addObject(i);
+    }
+
+    // TODO Light culling
+    // For now add all lights
+    for (unsigned int i = 0; i < m_lights.size(); ++i)
+    {
+        // Counter variable is light id
+        query->addLight(i);
+    }
 
     // Return query
     return std::unique_ptr<ISceneQuery>(query);

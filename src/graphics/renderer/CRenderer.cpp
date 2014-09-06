@@ -10,6 +10,7 @@
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
 #include "graphics/IResourceManager.h"
+#include "debug/RendererDebug.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
     : m_resourceManager(resourceManager)
@@ -32,6 +33,13 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
     // Draw init
     window.setActive();
 
+	// Initializiation
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_BACK);
+	// Reset viewport
+	glViewport(0, 0, window.getWidth(), window.getHeight());
+
     // TODO Implement multi pass system
 
     // Query visible scene objects
@@ -43,18 +51,32 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
         // Get next visible object
         SceneObjectId id = query->getNextObject();
 
-        // Get object attributes
-        ResourceId mesh = scene.getMesh(id);
-        ResourceId material = scene.getMaterial(id);
-
-        // Get object transformation
-        glm::vec3 position = scene.getObjectPosition(id);
-        glm::vec3 rotation = scene.getObjectRotation(id);
-        glm::vec3 scale = scene.getObjectScale(id);
-
-        // Draw call
-        draw(mesh, position, rotation, scale, material);
+        // Object attributes
+        ResourceId mesh = -1;
+        ResourceId material = -1;
+		glm::vec3 position;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+		
+		// Retrieve object data
+		if (!scene.getObject(id, mesh, material, position, rotation, scale))
+		{
+			// Invalid id
+			LOG_ERROR("Invalid scene object id %l.", id);
+		}
+		else
+		{
+			// Draw call
+			draw(mesh, position, rotation, scale, material);
+		}
     }
+
+	// Post draw error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
 }
 
 void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::vec3& rotation,
@@ -77,21 +99,17 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
 void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
                      const glm::mat4& scale, CMaterial* material)
 {
-    // Clear frame buffer
-    glClear(GL_COLOR_BUFFER_BIT);
     // TODO Rendering logic
 
     // Custom shader
     if (material->hasCustomShader())
     {
         material->getCustomShader()->setActive();
-        mesh->setActive();
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
     }
+	mesh->setActive();
+
+	// Draw call
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)

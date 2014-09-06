@@ -12,7 +12,6 @@
 #include "graphics/renderer/CRenderer.h"
 #include "graphics/resource/CResourceManager.h"
 #include "graphics/scene/CScene.h"
-#include "graphics/scene/CSceneObject.h"
 #include "graphics/window/CGlfwWindow.h"
 
 #include "shaders/TShader.h"
@@ -69,15 +68,11 @@ int RTRDemo::run()
 {
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
 
-    std::shared_ptr<CSceneObject> object = std::make_shared<CSceneObject>();
-    object->load({
-        -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    });
-
     // Create mesh
     ResourceId mesh =
         m_resourceManager->createMesh({-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f}, {},
                                       {}, {}, EPrimitiveType::Triangle);
+
     // Create strings with source code
     ResourceId vso = m_resourceManager->createString(SimpleShader::VS);
     ResourceId fso = m_resourceManager->createString(SimpleShader::FS);
@@ -93,26 +88,6 @@ int RTRDemo::run()
     {
         // Should be
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
-
-        // instead of
-        /*
-        glClear(GL_COLOR_BUFFER_BIT);
-glUseProgram(simple.getProgramID());
-
-for (const std::shared_ptr<CSceneObject>& object : oldscene.getObjects())
-{
-    glBindVertexArray(object->getVertexArrayID());
-
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, object->getVertexBufferID());
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-        */
 
         glfwSwapBuffers(m_glfw_window);
         glfwPollEvents();

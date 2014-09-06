@@ -7,7 +7,8 @@
 
 #include "graphics/IScene.h"
 
-class CSceneObject;
+struct SSceneObject;
+struct SSceneLight;
 
 class CScene : public IScene
 {
@@ -15,24 +16,19 @@ class CScene : public IScene
     CScene();
     ~CScene();
 
-    void addObject(std::shared_ptr<CSceneObject> object);
-    const std::vector<std::shared_ptr<CSceneObject>>& getObjects();
-
-    SceneObjectId createObject(ResourceId, ResourceId, const glm::vec3& position,
+    SceneObjectId createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
                                const glm::vec3& rotation, const glm::vec3& scale);
 
-    ResourceId getMesh(SceneObjectId object) const;
-    ResourceId getMaterial(SceneObjectId object) const;
-
-    glm::vec3 getObjectPosition(SceneObjectId object) const;
-    glm::vec3 getObjectRotation(SceneObjectId object) const;
-    glm::vec3 getObjectScale(SceneObjectId object) const;
+    bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, glm::vec3& position,
+                   glm::vec3& rotation, glm::vec3& scale) const;
 
     SceneObjectId createLight(const glm::vec3& position, float radius, const glm::vec3& color);
-    glm::vec3 getLightColor(SceneObjectId light) const;
+
+    bool getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const;
 
     std::unique_ptr<ISceneQuery> createQuery(const ICamera& camera) const;
 
    private:
-    std::vector<std::shared_ptr<CSceneObject>> m_objects;
+    std::vector<SSceneObject> m_objects;
+    std::vector<SSceneLight> m_lights;
 };
