@@ -4,7 +4,7 @@
 
 CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
                    EColorFormat format, unsigned int mipmapLevel)
-    : m_textureId(0), m_width(width), m_height(height), m_format(format)
+    : m_valid(false), m_textureId(0), m_width(width), m_height(height), m_format(format)
 {
 	// Init texture with data
     init(image, width, height, format, mipmapLevel);
@@ -20,11 +20,6 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     {
         return false;
     }
-
-    // Create id
-    GLuint textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
 
     // Set format
     unsigned int bytePerPixel = 0;
@@ -54,6 +49,12 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
 		return false;
 	}
 
+	// Create id
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+
+	// TODO Filter should be based on arguments and mip map level
     // Set filters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -78,13 +79,16 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
 
     // Set new texture id
     m_textureId = textureId;
+	m_valid = true;
     return true;
 }
 
-/**
-* \brief Returns texture id.
-*/
 GLuint CTexture::getId() const
 {
 	return m_textureId;
+}
+
+bool CTexture::isValid() const
+{
+	return m_valid;
 }

@@ -1,7 +1,7 @@
 #include "CVertexBuffer.h"
 
 CVertexBuffer::CVertexBuffer(const std::vector<float>& data, GLenum usage)
-    : m_bufferId(0), m_valid(false)
+	: m_bufferId(0), m_valid(false), m_size(data.size())
 {
     // Create GL buffer resource
     glGenBuffers(1, &m_bufferId);
@@ -15,6 +15,14 @@ CVertexBuffer::CVertexBuffer(const std::vector<float>& data, GLenum usage)
 CVertexBuffer::~CVertexBuffer() { glDeleteBuffers(1, &m_bufferId); }
 
 void CVertexBuffer::setActive() const { glBindBuffer(GL_ARRAY_BUFFER, m_bufferId); }
+
+void CVertexBuffer::apply(GLuint index) const
+{
+	glBindVertexArray(0);
+	setActive();
+	glEnableVertexAttribArray(index);
+	glVertexAttribPointer(0, m_size, GL_FLOAT, GL_FALSE, 0, (void*)0);
+}
 
 bool CVertexBuffer::isValid() const { return m_valid; }
 

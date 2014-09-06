@@ -3,7 +3,7 @@
 
 CMesh::CMesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
              const std::vector<float>& normals, const std::vector<float>& uvs, EPrimitiveType type)
-    : m_vertices(nullptr), m_normals(nullptr), m_uvs(nullptr), m_type(EPrimitiveType::Invalid)
+			 : m_vertices(nullptr), m_normals(nullptr), m_uvs(nullptr), m_type(EPrimitiveType::Invalid), m_vao(0)
 {
     init(vertices, indices, normals, uvs, type);
 }
@@ -30,8 +30,20 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
     // Set uvs
     m_uvs.reset(new CVertexBuffer(uvs));
 
+	// Create new vertex array object to store buffer state
+	m_vao.reset(new CVertexArrayObject);
+
     // Set primitive type
     m_type = type;
+
+	// Initialize state
+	m_vao->setActive();
+
+	
+
+
+	m_vao->setInactive();
+
     return true;
 }
 
@@ -42,3 +54,8 @@ const std::unique_ptr<CIndexBuffer>& CMesh::getIndexBuffer() const { return m_in
 const std::unique_ptr<CVertexBuffer>& CMesh::getNormalBuffer() const { return m_normals; }
 
 const std::unique_ptr<CVertexBuffer>& CMesh::getUVBuffer() const { return m_uvs; }
+
+void CMesh::setActive() const
+{
+	glBindVertexArray(m_vao);
+}

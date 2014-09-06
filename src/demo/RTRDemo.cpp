@@ -69,19 +69,25 @@ int RTRDemo::run()
 {
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
 
-    // shader
-    TShader<SimpleShader> simple;
-    simple.init();
-
-    // scene
-    CScene oldscene;
-
     std::shared_ptr<CSceneObject> object = std::make_shared<CSceneObject>();
     object->load({
         -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     });
 
-    oldscene.addObject(object);
+    // Create mesh
+    ResourceId mesh =
+        m_resourceManager->createMesh({-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f}, {},
+                                      {}, {}, EPrimitiveType::Triangle);
+    // Create strings with source code
+    ResourceId vso = m_resourceManager->createString(SimpleShader::VS);
+    ResourceId fso = m_resourceManager->createString(SimpleShader::FS);
+    // Create shader
+    ResourceId shader = m_resourceManager->createShader(vso, -1, -1, -1, fso);
+    // Create material with custom shader
+    ResourceId material = m_resourceManager->createMaterial(-1, -1, -1, -1, -1, shader);
+    // Create scene object with mesh and material
+    SceneObjectId sceneObj =
+        m_scene->createObject(mesh, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
 
     do
     {
@@ -89,22 +95,24 @@ int RTRDemo::run()
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
         // instead of
+        /*
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(simple.getProgramID());
+glUseProgram(simple.getProgramID());
 
-        for (const std::shared_ptr<CSceneObject>& object : oldscene.getObjects())
-        {
-            glBindVertexArray(object->getVertexArrayID());
+for (const std::shared_ptr<CSceneObject>& object : oldscene.getObjects())
+{
+    glBindVertexArray(object->getVertexArrayID());
 
-            glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, object->getVertexBufferID());
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, object->getVertexBufferID());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-        }
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+        */
 
         glfwSwapBuffers(m_glfw_window);
         glfwPollEvents();

@@ -4,6 +4,8 @@
 
 #include <glm/ext.hpp>
 
+#include "debug/Log.h"
+
 #include "graphics/IScene.h"
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
@@ -14,6 +16,8 @@ CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
 {
     // Add resource listener
     m_resourceManager->addResourceListener(this);
+	// Set clear color
+	glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
     return;
 }
 
@@ -57,8 +61,8 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
                      const glm::vec3& scale, ResourceId materialId)
 {
     // Resolve ids
-    const std::unique_ptr<CMesh>& mesh = getMesh(meshId);
-    const std::unique_ptr<CMaterial>& material = getMaterial(materialId);
+    const CMesh* mesh = getMesh(meshId);
+    CMaterial* material = getMaterial(materialId);
 
     // Create matrices
     glm::mat4 translationMatrix = glm::translate(position);
@@ -70,11 +74,25 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
 }
 
-void CRenderer::draw(const std::unique_ptr<CMesh>& mesh, const glm::mat4& translation,
+void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation,
                      const glm::mat4& rotation, const glm::mat4& scale,
-                     const std::unique_ptr<CMaterial>& material)
+                     CMaterial* material)
 {
-    // TODO Rendering logic
+	// Clear frame buffer
+	glClear(GL_COLOR_BUFFER_BIT);
+	// TODO Rendering logic
+
+	// Custom shader
+	if (material->hasCustomShader())
+	{
+		material->getCustomShader()->setActive();
+		mesh->setActive();
+
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)
@@ -116,29 +134,225 @@ void CRenderer::notify(EResourceType type, ResourceId id, EListenerEvent event,
     }
 }
 
-const std::unique_ptr<CMesh>& CRenderer::getMesh(ResourceId meshId)
+CMesh* CRenderer::getMesh(ResourceId id) const
 {
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
     // Search for id
-    auto iter = m_meshes.find(meshId);
+    auto iter = m_meshes.find(id);
 
     // Id must exist
     // TODO Allow mesh loading if not found?
     assert(iter != m_meshes.end());
-
-    return iter->second;
+    return iter->second.get();
 }
 
-const std::unique_ptr<CMaterial>& CRenderer::getMaterial(ResourceId materialId)
+CMaterial* CRenderer::getMaterial(ResourceId id) const
 {
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
     // Search for id
-    auto iter = m_materials.find(materialId);
+    auto iter = m_materials.find(id);
 
     // Id must exist
     // TODO Allow material loading if not found?
     assert(iter != m_materials.end());
-
-    return iter->second;
+    return iter->second.get();
 }
+
+CTexture* CRenderer::getTexture(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_textures.find(id);
+
+    // Id must exist
+    // TODO Allow texture loading if not found?
+    assert(iter != m_textures.end());
+    return iter->second.get();
+}
+
+CShaderProgram* CRenderer::getShaderProgram(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_shaderPrograms.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_shaderPrograms.end());
+    return iter->second.get();
+}
+
+bool CRenderer::loadVertexShader(ResourceId id, IResourceManager* resourceManager)
+{
+	// Unused id
+	if (id == -1)
+	{
+		return true;
+	}
+	// Already loaded
+	if (m_vertexShader.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resoucre manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		LOG_ERROR("%s", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	m_vertexShader[id] = std::move(shader);
+	return true;
+}
+
+bool CRenderer::loadTessControlShader(ResourceId id, IResourceManager* resourceManager)
+{
+	// Unused id
+	if (id == -1)
+	{
+		return true;
+	}
+	// Already loaded
+	if (m_vertexShader.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resoucre manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		LOG_ERROR("%s", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	m_vertexShader[id] = std::move(shader);
+	return true;
+}
+
+bool CRenderer::loadTessEvalShader(ResourceId id, IResourceManager* resourceManager)
+{
+	// Unused id
+	if (id == -1)
+	{
+		return true;
+	}
+	// Already loaded
+	if (m_vertexShader.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resoucre manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		LOG_ERROR("%s", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	m_vertexShader[id] = std::move(shader);
+	return true;
+}
+
+bool CRenderer::loadFGeometryShader(ResourceId id, IResourceManager* resourceManager)
+{
+	// Unused id
+	if (id == -1)
+	{
+		return true;
+	}
+	// Already loaded
+	if (m_vertexShader.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resoucre manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		LOG_ERROR("%s", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	m_vertexShader[id] = std::move(shader);
+	return true;
+}
+
+bool CRenderer::loadFragmentShader(ResourceId id, IResourceManager* resourceManager)
+{
+	// Unused id
+	if (id == -1)
+	{
+		return true;
+	}
+	// Already loaded
+	if (m_vertexShader.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resoucre manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		LOG_ERROR("%s", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	m_vertexShader[id] = std::move(shader);
+	return true;
+}
+
 
 void CRenderer::handleImageEvent(ResourceId id, EListenerEvent event,
                                  IResourceManager* resourceManager)
@@ -225,17 +439,124 @@ void CRenderer::handleMeshEvent(ResourceId id, EListenerEvent event,
     }
 }
 
-void CRenderer::handleMaterialEvent(ResourceId, EListenerEvent event,
+void CRenderer::handleMaterialEvent(ResourceId id, EListenerEvent event,
                                     IResourceManager* resourceManager)
 {
+    ResourceId diffuse;
+    ResourceId normal;
+    ResourceId specular;
+    ResourceId glow;
+    ResourceId alpha;
+    ResourceId customShader;
+
+    switch (event)
+    {
+    case EListenerEvent::Create:
+        assert(m_materials.count(id) == 0 && "Material id already exists");
+
+        if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
+        {
+            assert(false && "Failed to access material resource");
+        }
+
+        // Create new material
+        m_materials[id] = std::move(std::unique_ptr<CMaterial>(
+            new CMaterial(getTexture(diffuse), getTexture(normal), getTexture(specular),
+                          getTexture(glow), getTexture(alpha), getShaderProgram(customShader))));
+        break;
+
+    case EListenerEvent::Change:
+        assert(m_materials.count(id) == 1 && "Material id does not exist");
+
+        if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
+        {
+            assert(false && "Failed to access material resource");
+        }
+
+		// Reinitialize material on change
+        m_materials.at(id)->init(getTexture(diffuse), getTexture(normal), getTexture(specular),
+                                 getTexture(glow), getTexture(alpha),
+                                 getShaderProgram(customShader));
+        break;
+
+    case EListenerEvent::Delete:
+        // Keep material?
+        break;
+
+    default:
+        break;
+    }
 }
 
-void CRenderer::handleShaderEvent(ResourceId, EListenerEvent event,
+void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
+	ResourceId vertex;
+	ResourceId tessControl;
+	ResourceId tessEval;
+	ResourceId geometry;
+	ResourceId fragment;
+
+	switch (event)
+	{
+	case EListenerEvent::Create:
+		assert(m_shaderPrograms.count(id) == 0 && "Shader id already exists");
+		// Load shader source ids
+		if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
+		{
+			assert(false && "Failed to access shader resource");
+		}
+		// Load shader objects from source
+		if (loadVertexShader(vertex) && loadTessControlShader(tessControl && loadTessEvalShader(tessEval) && loadFGeometryShader(geometry) && loadFragmentShader(fragment))
+		{
+			
+		}
+		
+
+		// Create new texture
+		m_meshes[id] =
+			std::move(std::unique_ptr<CMesh>(new CMesh(vertices, indices, normals, uvs, type)));
+		break;
+
+	case EListenerEvent::Change:
+		assert(m_meshes.count(id) == 1 && "Mesh id does not exist");
+
+		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
+		{
+			assert(false && "Failed to access mesh resource");
+		}
+		// Reinitialize mesh on change
+		m_meshes.at(id)->init(vertices, indices, normals, uvs, type);
+		break;
+
+	case EListenerEvent::Delete:
+		// Keep mesh?
+		break;
+
+	default:
+		break;
+	}
 }
 
-void CRenderer::handleStringEvent(ResourceId, EListenerEvent event,
+void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
+	switch (event)
+	{
+	case EListenerEvent::Create:
+		// Ignore create events
+		break;
+
+	case EListenerEvent::Change:
+		// Change events must be processed if the string id belongs to a compiled shader object
+		// TODO Implement
+		break;
+
+	case EListenerEvent::Delete:
+		// Keep shader object?
+		break;
+
+	default:
+		break;
+	}
 }

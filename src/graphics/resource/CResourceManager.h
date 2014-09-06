@@ -33,10 +33,10 @@ class CResourceManager : public IResourceManager
                   unsigned int& height, EColorFormat& format) const;
 
     ResourceId createMaterial(ResourceId diffuse, ResourceId alpha, ResourceId normal,
-                              ResourceId specular, ResourceId glow);
+                              ResourceId specular, ResourceId glow, ResourceId customShader);
 
     bool getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& alpha, ResourceId& normal,
-                     ResourceId& specular, ResourceId& glow) const;
+                     ResourceId& specular, ResourceId& glow, ResourceId& customShader) const;
 
     ResourceId createString(const std::string& text);
 

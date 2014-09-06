@@ -50,9 +50,9 @@ class CRenderer : public IRenderer, IResourceListener
     /**
      * \brief Draws mesh to current rendering target.
      */
-    void draw(const std::unique_ptr<CMesh>& mesh, const glm::mat4& translation,
+    void draw(const CMesh* mesh, const glm::mat4& translation,
               const glm::mat4& rotation, const glm::mat4& scale,
-              const std::unique_ptr<CMaterial>& material);
+              CMaterial* material);
 
     void onAttach(IResourceManager* resourceManager);
     void onDetach(IResourceManager* resourceManager);
@@ -61,14 +61,18 @@ class CRenderer : public IRenderer, IResourceListener
 
    protected:
     /**
-     * \brief Maps mesh id to internal mesh object.
+     * \brief Maps id to internal resource object.
      */
-    const std::unique_ptr<CMesh>& getMesh(ResourceId);
+	CMesh* getMesh(ResourceId) const;
+	CMaterial* getMaterial(ResourceId) const;
+	CTexture* getTexture(ResourceId) const;
+	CShaderProgram* getShaderProgram(ResourceId) const;
 
-    /**
-     * \brief Maps material id to internal material object.
-     */
-    const std::unique_ptr<CMaterial>& getMaterial(ResourceId);
+	bool loadVertexShader(ResourceId id, IResourceManager* resourceManager);
+	bool loadTessControlShader(ResourceId id, IResourceManager* resourceManager);
+	bool loadTessEvalShader(ResourceId id, IResourceManager* resourceManager);
+	bool loadFGeometryShader(ResourceId id, IResourceManager* resourceManager);
+	bool loadFragmentShader(ResourceId id, IResourceManager* resourceManager);
 
 	void handleImageEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
 	void handleMeshEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);

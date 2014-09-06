@@ -6,6 +6,7 @@
 #include "graphics/ResourceConfig.h"
 #include "core/CVertexBuffer.h"
 #include "core/CIndexBuffer.h"
+#include "core/CVertexArrayObject.h"
 
 /**
 * \brief Contains mesh data (vertices, faces, normals and uv data).
@@ -55,10 +56,16 @@ class CMesh
     */
     const std::unique_ptr<CVertexBuffer>& getUVBuffer() const;
 
+	/**
+	* \brief Sets mesh active for rendering.
+	*/
+	void setActive() const;
+
    private:
     std::unique_ptr<CVertexBuffer> m_vertices; /**< Mesh vertices. */
     std::unique_ptr<CIndexBuffer> m_indices;   /**< Mesh indices. */
     std::unique_ptr<CVertexBuffer> m_normals;  /**< Per vertex normals. */
     std::unique_ptr<CVertexBuffer> m_uvs;      /**< Texture coordinates. */
+	std::unique_ptr<CVertexArrayObject> m_vao; /**< Vertex array object. */
     EPrimitiveType m_type;                     /**< Mesh primitoive type. */
 };

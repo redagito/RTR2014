@@ -77,14 +77,14 @@ bool CResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
 }
 
 ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha, ResourceId normal,
-                                            ResourceId specular, ResourceId glow)
+                                            ResourceId specular, ResourceId glow, ResourceId customShader)
 {
     // Create material
     ResourceId id = m_nextMaterialId;
     ++m_nextMaterialId;
 
     // Add material
-    m_materials[id] = SMaterial(diffuse, alpha, normal, specular, glow);
+    m_materials[id] = SMaterial(diffuse, alpha, normal, specular, glow, customShader);
 
     // Notify listener with create event
     notifyResourceListeners(EResourceType::Material, id, EListenerEvent::Create);
@@ -92,7 +92,7 @@ ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha
 }
 
 bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& alpha, ResourceId& normal,
-	ResourceId& specular, ResourceId& glow) const
+	ResourceId& specular, ResourceId& glow, ResourceId& customShader) const
 {
 	// Retrieve from map
 	auto iter = m_materials.find(id);
@@ -106,6 +106,7 @@ bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceI
 	normal = iter->second.m_normal;
 	specular = iter->second.m_specular;
 	glow = iter->second.m_glow;
+	customShader = iter->second.m_customShader;
 	return true;
 }
 

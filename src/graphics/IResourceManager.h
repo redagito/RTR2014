@@ -56,14 +56,14 @@ class IResourceManager
     */
     virtual ResourceId createMaterial(ResourceId diffuseImage, ResourceId alphaImage,
                                       ResourceId normalImage, ResourceId specularImage,
-                                      ResourceId glowImage) = 0;
+                                      ResourceId glowImage, ResourceId customShader) = 0;
 
     /**
     * \brief Returns material data.
     */
     virtual bool getMaterial(ResourceId id, ResourceId& diffuseImage, ResourceId& alphaImage,
                              ResourceId& normalImage, ResourceId& specularImage,
-                             ResourceId& glowImage) const = 0;
+							 ResourceId& glowImage, ResourceId& customShader) const = 0;
 
     /**
      * \brief Creates string resource.

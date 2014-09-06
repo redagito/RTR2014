@@ -32,6 +32,11 @@ class CVertexBuffer
     */
     void setActive() const;
 
+	/**
+	* \brief Apply for rendering.
+	*/
+	void apply(GLuint index) const;
+
     /**
     * \brief Returns buffer validity.
     */
@@ -46,4 +51,5 @@ class CVertexBuffer
    private:
     GLuint m_bufferId; /**< GL buffer object id. */
     bool m_valid;
+	unsigned int m_size;
 };
