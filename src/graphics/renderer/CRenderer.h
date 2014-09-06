@@ -50,9 +50,8 @@ class CRenderer : public IRenderer, IResourceListener
     /**
      * \brief Draws mesh to current rendering target.
      */
-    void draw(const CMesh* mesh, const glm::mat4& translation,
-              const glm::mat4& rotation, const glm::mat4& scale,
-              CMaterial* material);
+    void draw(const CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
+              const glm::mat4& scale, CMaterial* material);
 
     void onAttach(IResourceManager* resourceManager);
     void onDetach(IResourceManager* resourceManager);
@@ -63,22 +62,28 @@ class CRenderer : public IRenderer, IResourceListener
     /**
      * \brief Maps id to internal resource object.
      */
-	CMesh* getMesh(ResourceId) const;
-	CMaterial* getMaterial(ResourceId) const;
-	CTexture* getTexture(ResourceId) const;
-	CShaderProgram* getShaderProgram(ResourceId) const;
+    CMesh* getMesh(ResourceId) const;
+    CMaterial* getMaterial(ResourceId) const;
+    CTexture* getTexture(ResourceId) const;
+    CShaderProgram* getShaderProgram(ResourceId) const;
 
-	bool loadVertexShader(ResourceId id, IResourceManager* resourceManager);
-	bool loadTessControlShader(ResourceId id, IResourceManager* resourceManager);
-	bool loadTessEvalShader(ResourceId id, IResourceManager* resourceManager);
-	bool loadFGeometryShader(ResourceId id, IResourceManager* resourceManager);
-	bool loadFragmentShader(ResourceId id, IResourceManager* resourceManager);
+    TShaderObject<GL_VERTEX_SHADER>* getVertexShaderObject(ResourceId) const;
+    TShaderObject<GL_TESS_CONTROL_SHADER>* getTessControlShaderObject(ResourceId) const;
+    TShaderObject<GL_TESS_EVALUATION_SHADER>* getTessEvalShaderObject(ResourceId) const;
+    TShaderObject<GL_GEOMETRY_SHADER>* getGeometryShaderObject(ResourceId) const;
+    TShaderObject<GL_FRAGMENT_SHADER>* getFragmentShaderObject(ResourceId) const;
 
-	void handleImageEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
-	void handleMeshEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
-	void handleMaterialEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
-	void handleShaderEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
-	void handleStringEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
+    bool loadVertexShader(ResourceId id, IResourceManager* resourceManager);
+    bool loadTessControlShader(ResourceId id, IResourceManager* resourceManager);
+    bool loadTessEvalShader(ResourceId id, IResourceManager* resourceManager);
+    bool loadFGeometryShader(ResourceId id, IResourceManager* resourceManager);
+    bool loadFragmentShader(ResourceId id, IResourceManager* resourceManager);
+
+    void handleImageEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
+    void handleMeshEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
+    void handleMaterialEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
+    void handleShaderEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
+    void handleStringEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
 
    private:
     std::shared_ptr<IResourceManager> m_resourceManager; /**< Shared resource manager. */
@@ -90,16 +95,18 @@ class CRenderer : public IRenderer, IResourceListener
         m_textures; /**< Maps image id from resource manager to GPU side texture. */
     std::unordered_map<ResourceId, std::unique_ptr<CMaterial>>
         m_materials; /**< Maps material id from resource manager to cached material. */
-	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>>>
-		m_vertexShader; /**< Maps string resource ids to compiled vertex shader objects. */
-	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_GEOMETRY_SHADER>>>
-		m_geometryShader; /**< Maps string resource ids to compiled geometry shader objects. */
-	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_CONTROL_SHADER>>>
-		m_tessConstrolShader; /**< Maps string resource ids to compiled tessellation control shader objects. */
-	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_EVALUATION_SHADER>>>
-		m_tessEvalShader; /**< Maps string resource ids to compiled tessellation evaluation shader objects. */
-	std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_FRAGMENT_SHADER>>>
-		m_fragmentShader; /**< Maps string resource ids to compiled fragment shader objects. */
+    std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>>>
+        m_vertexShader; /**< Maps string resource ids to compiled vertex shader objects. */
+    std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_CONTROL_SHADER>>>
+        m_tessConstrolShader; /**< Maps string resource ids to compiled tessellation control
+                                 shader objects. */
+    std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_TESS_EVALUATION_SHADER>>>
+        m_tessEvalShader; /**< Maps string resource ids to compiled tessellation evaluation shader
+                             objects. */
+    std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_GEOMETRY_SHADER>>>
+        m_geometryShader; /**< Maps string resource ids to compiled geometry shader objects. */
+    std::unordered_map<ResourceId, std::unique_ptr<TShaderObject<GL_FRAGMENT_SHADER>>>
+        m_fragmentShader; /**< Maps string resource ids to compiled fragment shader objects. */
     std::unordered_map<ResourceId, std::unique_ptr<CShaderProgram>>
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 };

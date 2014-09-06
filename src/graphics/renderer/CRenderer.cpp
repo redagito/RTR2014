@@ -16,8 +16,8 @@ CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
 {
     // Add resource listener
     m_resourceManager->addResourceListener(this);
-	// Set clear color
-	glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
+    // Set clear color
+    glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
     return;
 }
 
@@ -74,25 +74,24 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
 }
 
-void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation,
-                     const glm::mat4& rotation, const glm::mat4& scale,
-                     CMaterial* material)
+void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
+                     const glm::mat4& scale, CMaterial* material)
 {
-	// Clear frame buffer
-	glClear(GL_COLOR_BUFFER_BIT);
-	// TODO Rendering logic
+    // Clear frame buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+    // TODO Rendering logic
 
-	// Custom shader
-	if (material->hasCustomShader())
-	{
-		material->getCustomShader()->setActive();
-		mesh->setActive();
+    // Custom shader
+    if (material->hasCustomShader())
+    {
+        material->getCustomShader()->setActive();
+        mesh->setActive();
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)
@@ -198,161 +197,245 @@ CShaderProgram* CRenderer::getShaderProgram(ResourceId id) const
     return iter->second.get();
 }
 
+TShaderObject<GL_VERTEX_SHADER>* CRenderer::getVertexShaderObject(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_vertexShader.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_vertexShader.end());
+    return iter->second.get();
+}
+
+TShaderObject<GL_TESS_CONTROL_SHADER>* CRenderer::getTessControlShaderObject(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_tessConstrolShader.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_tessConstrolShader.end());
+    return iter->second.get();
+}
+
+TShaderObject<GL_TESS_EVALUATION_SHADER>* CRenderer::getTessEvalShaderObject(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_tessEvalShader.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_tessEvalShader.end());
+    return iter->second.get();
+}
+
+TShaderObject<GL_GEOMETRY_SHADER>* CRenderer::getGeometryShaderObject(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_geometryShader.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_geometryShader.end());
+    return iter->second.get();
+}
+
+TShaderObject<GL_FRAGMENT_SHADER>* CRenderer::getFragmentShaderObject(ResourceId id) const
+{
+    // Invalid id
+    if (id == -1)
+    {
+        return nullptr;
+    }
+    // Search for id
+    auto iter = m_fragmentShader.find(id);
+
+    // Id must exist
+    // TODO Allow shader loading if not found?
+    assert(iter != m_fragmentShader.end());
+    return iter->second.get();
+}
+
 bool CRenderer::loadVertexShader(ResourceId id, IResourceManager* resourceManager)
 {
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
+    // Unused id
+    if (id == -1)
+    {
+        return true;
+    }
+    // Already loaded
+    if (m_vertexShader.count(id) != 0)
+    {
+        return true;
+    }
+    // Load from resoucre manager
+    std::string text;
+    resourceManager->getString(id, text);
+    if (text.empty())
+    {
+        return false;
+    }
+    std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(
+        new TShaderObject<GL_VERTEX_SHADER>(text));
+    // Check compile error
+    if (!shader->isValid())
+    {
+        LOG_ERROR("%s", shader->getErrorString().c_str());
+        return false;
+    }
+    // Move to map
+    m_vertexShader[id] = std::move(shader);
+    return true;
 }
 
 bool CRenderer::loadTessControlShader(ResourceId id, IResourceManager* resourceManager)
 {
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
+    // Unused id
+    if (id == -1)
+    {
+        return true;
+    }
+    // Already loaded
+	if (m_tessConstrolShader.count(id) != 0)
+    {
+        return true;
+    }
+    // Load from resoucre manager
+    std::string text;
+    resourceManager->getString(id, text);
+    if (text.empty())
+    {
+        return false;
+    }
+    std::unique_ptr<TShaderObject<GL_TESS_CONTROL_SHADER>> shader(
+		new TShaderObject<GL_TESS_CONTROL_SHADER>(text));
+    // Check compile error
+    if (!shader->isValid())
+    {
+        LOG_ERROR("%s", shader->getErrorString().c_str());
+        return false;
+    }
+    // Move to map
+    m_tessConstrolShader[id] = std::move(shader);
+    return true;
 }
 
 bool CRenderer::loadTessEvalShader(ResourceId id, IResourceManager* resourceManager)
 {
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
+    // Unused id
+    if (id == -1)
+    {
+        return true;
+    }
+    // Already loaded
+    if (m_tessEvalShader.count(id) != 0)
+    {
+        return true;
+    }
+    // Load from resoucre manager
+    std::string text;
+    resourceManager->getString(id, text);
+    if (text.empty())
+    {
+        return false;
+    }
+    std::unique_ptr<TShaderObject<GL_TESS_EVALUATION_SHADER>> shader(
+		new TShaderObject<GL_TESS_EVALUATION_SHADER>(text));
+    // Check compile error
+    if (!shader->isValid())
+    {
+        LOG_ERROR("%s", shader->getErrorString().c_str());
+        return false;
+    }
+    // Move to map
+	m_tessEvalShader[id] = std::move(shader);
+    return true;
 }
 
 bool CRenderer::loadFGeometryShader(ResourceId id, IResourceManager* resourceManager)
 {
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
+    // Unused id
+    if (id == -1)
+    {
+        return true;
+    }
+    // Already loaded
+    if (m_geometryShader.count(id) != 0)
+    {
+        return true;
+    }
+    // Load from resoucre manager
+    std::string text;
+    resourceManager->getString(id, text);
+    if (text.empty())
+    {
+        return false;
+    }
+    std::unique_ptr<TShaderObject<GL_GEOMETRY_SHADER>> shader(
+		new TShaderObject<GL_GEOMETRY_SHADER>(text));
+    // Check compile error
+    if (!shader->isValid())
+    {
+        LOG_ERROR("%s", shader->getErrorString().c_str());
+        return false;
+    }
+    // Move to map
+	m_geometryShader[id] = std::move(shader);
+    return true;
 }
 
 bool CRenderer::loadFragmentShader(ResourceId id, IResourceManager* resourceManager)
 {
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<TShaderObject<GL_VERTEX_SHADER>> shader(new TShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
+    // Unused id
+    if (id == -1)
+    {
+        return true;
+    }
+    // Already loaded
+    if (m_fragmentShader.count(id) != 0)
+    {
+        return true;
+    }
+    // Load from resoucre manager
+    std::string text;
+    resourceManager->getString(id, text);
+    if (text.empty())
+    {
+        return false;
+    }
+    std::unique_ptr<TShaderObject<GL_FRAGMENT_SHADER>> shader(
+		new TShaderObject<GL_FRAGMENT_SHADER>(text));
+    // Check compile error
+    if (!shader->isValid())
+    {
+        LOG_ERROR("%s", shader->getErrorString().c_str());
+        return false;
+    }
+    // Move to map
+	m_fragmentShader[id] = std::move(shader);
+    return true;
 }
-
 
 void CRenderer::handleImageEvent(ResourceId id, EListenerEvent event,
                                  IResourceManager* resourceManager)
@@ -473,7 +556,7 @@ void CRenderer::handleMaterialEvent(ResourceId id, EListenerEvent event,
             assert(false && "Failed to access material resource");
         }
 
-		// Reinitialize material on change
+        // Reinitialize material on change
         m_materials.at(id)->init(getTexture(diffuse), getTexture(normal), getTexture(specular),
                                  getTexture(glow), getTexture(alpha),
                                  getShaderProgram(customShader));
@@ -491,72 +574,59 @@ void CRenderer::handleMaterialEvent(ResourceId id, EListenerEvent event,
 void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
-	ResourceId vertex;
-	ResourceId tessControl;
-	ResourceId tessEval;
-	ResourceId geometry;
-	ResourceId fragment;
+    ResourceId vertex;
+    ResourceId tessControl;
+    ResourceId tessEval;
+    ResourceId geometry;
+    ResourceId fragment;
 
-	switch (event)
-	{
-	case EListenerEvent::Create:
-		assert(m_shaderPrograms.count(id) == 0 && "Shader id already exists");
-		// Load shader source ids
-		if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
-		{
+    switch (event)
+    {
+    case EListenerEvent::Create:
+        // TODO Replace assert with log statement and global error handler
+        assert(m_shaderPrograms.count(id) == 0 && "Shader id already exists");
+
+        // Load shader source ids
+        if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
+        {
+			// TODO Replace assert with log statement and global error handler
 			assert(false && "Failed to access shader resource");
-		}
-		// Load shader objects from source
-		if (loadVertexShader(vertex) && loadTessControlShader(tessControl && loadTessEvalShader(tessEval) && loadFGeometryShader(geometry) && loadFragmentShader(fragment))
-		{
-			
-		}
-		
+        }
 
-		// Create new texture
-		m_meshes[id] =
-			std::move(std::unique_ptr<CMesh>(new CMesh(vertices, indices, normals, uvs, type)));
-		break;
+        // Load shader objects from source
+        if (!loadVertexShader(vertex, resourceManager) ||
+            !loadTessControlShader(tessControl, resourceManager) ||
+            !loadTessEvalShader(tessEval, resourceManager) ||
+            !loadFGeometryShader(geometry, resourceManager) ||
+            !loadFragmentShader(fragment, resourceManager))
+        {
+            // TODO Log error
+            return;
+        }
+
+        // Add create shader program
+        m_shaderPrograms[id] = std::move(std::unique_ptr<CShaderProgram>(new CShaderProgram(
+            getVertexShaderObject(vertex), getTessControlShaderObject(tessControl),
+            getTessEvalShaderObject(tessEval), getGeometryShaderObject(geometry),
+            getFragmentShaderObject(fragment))));
+
+        break;
 
 	case EListenerEvent::Change:
-		assert(m_meshes.count(id) == 1 && "Mesh id does not exist");
+		// TODO Implement
 
-		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
-		{
-			assert(false && "Failed to access mesh resource");
-		}
-		// Reinitialize mesh on change
-		m_meshes.at(id)->init(vertices, indices, normals, uvs, type);
-		break;
+    case EListenerEvent::Delete:
+        // TODO Keep shader?
+        break;
 
-	case EListenerEvent::Delete:
-		// Keep mesh?
-		break;
-
-	default:
-		break;
-	}
+    default:
+		// TODO Log error on unknown event?
+        break;
+    }
 }
 
 void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
-	switch (event)
-	{
-	case EListenerEvent::Create:
-		// Ignore create events
-		break;
-
-	case EListenerEvent::Change:
-		// Change events must be processed if the string id belongs to a compiled shader object
-		// TODO Implement
-		break;
-
-	case EListenerEvent::Delete:
-		// Keep shader object?
-		break;
-
-	default:
-		break;
-	}
+	// Does not need processing, shader events handel source loading 
 }
