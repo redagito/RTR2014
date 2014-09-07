@@ -33,12 +33,12 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
     // Draw init
     window.setActive();
 
-	// Initializiation
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_BACK);
-	// Reset viewport
-	glViewport(0, 0, window.getWidth(), window.getHeight());
+    // Initializiation
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_BACK);
+    // Reset viewport
+    glViewport(0, 0, window.getWidth(), window.getHeight());
 
     // TODO Implement multi pass system
 
@@ -54,45 +54,45 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
         // Object attributes
         ResourceId mesh = -1;
         ResourceId material = -1;
-		glm::vec3 position;
+        glm::vec3 position;
         glm::vec3 rotation;
         glm::vec3 scale;
-		
-		// Retrieve object data
-		if (!scene.getObject(id, mesh, material, position, rotation, scale))
-		{
-			// Invalid id
-			LOG_ERROR("Invalid scene object id %l.", id);
-		}
-		else
-		{
-			// Draw call
-			draw(mesh, position, rotation, scale, material);
-		}
+
+        // Retrieve object data
+        if (!scene.getObject(id, mesh, material, position, rotation, scale))
+        {
+            // Invalid id
+            LOG_ERROR("Invalid scene object id %l.", id);
+        }
+        else
+        {
+            // Forward draw call
+            draw(mesh, position, rotation, scale, material);
+        }
     }
 
-	// Post draw error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
+    // Post draw error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
 }
 
 void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::vec3& rotation,
                      const glm::vec3& scale, ResourceId materialId)
 {
     // Resolve ids
-    const CMesh* mesh = getMesh(meshId);
+    CMesh* mesh = getMesh(meshId);
     CMaterial* material = getMaterial(materialId);
 
     // Create matrices
     glm::mat4 translationMatrix = glm::translate(position);
-    // TODO Is this correct?
+    // TODO Rotation calculation is probably wrong
     glm::mat4 rotationMatrix = glm::rotate(1.f, rotation);
     glm::mat4 scaleMatrix = glm::scale(scale);
 
-    // Draw call
+    // Forward draw call
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
 }
 
@@ -100,16 +100,54 @@ void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation, const glm:
                      const glm::mat4& scale, CMaterial* material)
 {
     // TODO Rendering logic
-
+    // TODO Set default builtin shader
+    CShaderProgram* shader = nullptr;
     // Custom shader
     if (material->hasCustomShader())
     {
-        material->getCustomShader()->setActive();
+        shader = material->getCustomShader();
     }
-	mesh->setActive();
 
-	// Draw call
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+    shader->setActive();
+
+    // Draw mesh
+    // TODO Consider custom shader bindings for meshes
+    mesh->getVertexArray()->setActive();
+
+    // Set draw mode
+    GLenum mode;
+    unsigned int primitiveSize = 0;
+    switch (mesh->getPrimitiveType())
+    {
+    case EPrimitiveType::Point:
+        mode = GL_POINTS;
+        primitiveSize = 1;
+        break;
+    case EPrimitiveType::Line:
+        mode = GL_LINE;
+        primitiveSize = 2;
+        break;
+    case EPrimitiveType::Triangle:
+        mode = GL_TRIANGLES;
+        primitiveSize = 3;
+        break;
+    default:
+        LOG_ERROR("Invalid primitive type");
+        return;
+    }
+
+    // Decide on draw method based on the stored data
+    if (mesh->hasIndexBuffer())
+    {
+        // Indexed draw, probably faster
+        mesh->getIndexBuffer()->setActive();
+		glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        // Slowest draw method
+        glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
+    }
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)
@@ -335,7 +373,7 @@ bool CRenderer::loadTessControlShader(ResourceId id, IResourceManager* resourceM
         return true;
     }
     // Already loaded
-	if (m_tessConstrolShader.count(id) != 0)
+    if (m_tessConstrolShader.count(id) != 0)
     {
         return true;
     }
@@ -347,7 +385,7 @@ bool CRenderer::loadTessControlShader(ResourceId id, IResourceManager* resourceM
         return false;
     }
     std::unique_ptr<TShaderObject<GL_TESS_CONTROL_SHADER>> shader(
-		new TShaderObject<GL_TESS_CONTROL_SHADER>(text));
+        new TShaderObject<GL_TESS_CONTROL_SHADER>(text));
     // Check compile error
     if (!shader->isValid())
     {
@@ -379,7 +417,7 @@ bool CRenderer::loadTessEvalShader(ResourceId id, IResourceManager* resourceMana
         return false;
     }
     std::unique_ptr<TShaderObject<GL_TESS_EVALUATION_SHADER>> shader(
-		new TShaderObject<GL_TESS_EVALUATION_SHADER>(text));
+        new TShaderObject<GL_TESS_EVALUATION_SHADER>(text));
     // Check compile error
     if (!shader->isValid())
     {
@@ -387,11 +425,11 @@ bool CRenderer::loadTessEvalShader(ResourceId id, IResourceManager* resourceMana
         return false;
     }
     // Move to map
-	m_tessEvalShader[id] = std::move(shader);
+    m_tessEvalShader[id] = std::move(shader);
     return true;
 }
 
-bool CRenderer::loadFGeometryShader(ResourceId id, IResourceManager* resourceManager)
+bool CRenderer::loadGeometryShader(ResourceId id, IResourceManager* resourceManager)
 {
     // Unused id
     if (id == -1)
@@ -411,7 +449,7 @@ bool CRenderer::loadFGeometryShader(ResourceId id, IResourceManager* resourceMan
         return false;
     }
     std::unique_ptr<TShaderObject<GL_GEOMETRY_SHADER>> shader(
-		new TShaderObject<GL_GEOMETRY_SHADER>(text));
+        new TShaderObject<GL_GEOMETRY_SHADER>(text));
     // Check compile error
     if (!shader->isValid())
     {
@@ -419,7 +457,7 @@ bool CRenderer::loadFGeometryShader(ResourceId id, IResourceManager* resourceMan
         return false;
     }
     // Move to map
-	m_geometryShader[id] = std::move(shader);
+    m_geometryShader[id] = std::move(shader);
     return true;
 }
 
@@ -443,7 +481,7 @@ bool CRenderer::loadFragmentShader(ResourceId id, IResourceManager* resourceMana
         return false;
     }
     std::unique_ptr<TShaderObject<GL_FRAGMENT_SHADER>> shader(
-		new TShaderObject<GL_FRAGMENT_SHADER>(text));
+        new TShaderObject<GL_FRAGMENT_SHADER>(text));
     // Check compile error
     if (!shader->isValid())
     {
@@ -451,7 +489,7 @@ bool CRenderer::loadFragmentShader(ResourceId id, IResourceManager* resourceMana
         return false;
     }
     // Move to map
-	m_fragmentShader[id] = std::move(shader);
+    m_fragmentShader[id] = std::move(shader);
     return true;
 }
 
@@ -607,15 +645,15 @@ void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
         // Load shader source ids
         if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
         {
-			// TODO Replace assert with log statement and global error handler
-			assert(false && "Failed to access shader resource");
+            // TODO Replace assert with log statement and global error handler
+            assert(false && "Failed to access shader resource");
         }
 
         // Load shader objects from source
         if (!loadVertexShader(vertex, resourceManager) ||
             !loadTessControlShader(tessControl, resourceManager) ||
             !loadTessEvalShader(tessEval, resourceManager) ||
-            !loadFGeometryShader(geometry, resourceManager) ||
+            !loadGeometryShader(geometry, resourceManager) ||
             !loadFragmentShader(fragment, resourceManager))
         {
             // TODO Log error
@@ -630,15 +668,15 @@ void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
 
         break;
 
-	case EListenerEvent::Change:
-		// TODO Implement
+    case EListenerEvent::Change:
+		 // TODO Implement
 
     case EListenerEvent::Delete:
         // TODO Keep shader?
         break;
 
     default:
-		// TODO Log error on unknown event?
+        // TODO Log error on unknown event?
         break;
     }
 }
@@ -646,5 +684,5 @@ void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
 void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
-	// Does not need processing, shader events handel source loading 
+    // Does not need processing, shader events handel source loading
 }

@@ -36,6 +36,11 @@ class CMesh
               const std::vector<float>& normals, const std::vector<float>& uvs,
               EPrimitiveType type);
 
+	/**
+	* \brief Returns whether or not an index buffer has been set.
+	*/
+	bool hasIndexBuffer() const;
+
     /**
     * \brief Read access to vertex buffer
     */
@@ -56,16 +61,21 @@ class CMesh
     */
     const std::unique_ptr<CVertexBuffer>& getUVBuffer() const;
 
-	/**
-	* \brief Sets mesh active for rendering.
-	*/
-	void setActive() const;
+    /**
+    * \brief Returns primitive type of the mesh.
+    */
+    const EPrimitiveType getPrimitiveType() const;
+
+    /**
+    * \brief Returns vertex array object.
+    */
+    const std::unique_ptr<CVertexArrayObject>& getVertexArray() const;
 
    private:
     std::unique_ptr<CVertexBuffer> m_vertices; /**< Mesh vertices. */
     std::unique_ptr<CIndexBuffer> m_indices;   /**< Mesh indices. */
     std::unique_ptr<CVertexBuffer> m_normals;  /**< Per vertex normals. */
     std::unique_ptr<CVertexBuffer> m_uvs;      /**< Texture coordinates. */
-	std::unique_ptr<CVertexArrayObject> m_vao; /**< Vertex array object. */
+    std::unique_ptr<CVertexArrayObject> m_vao; /**< Vertex array object. */
     EPrimitiveType m_type;                     /**< Mesh primitoive type. */
 };

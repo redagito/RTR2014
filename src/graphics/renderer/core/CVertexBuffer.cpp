@@ -27,3 +27,5 @@ void CVertexBuffer::apply(GLuint index) const
 bool CVertexBuffer::isValid() const { return m_valid; }
 
 GLuint CVertexBuffer::getId() const { return m_bufferId; }
+
+unsigned int CVertexBuffer::getSize() const { return m_size; }
