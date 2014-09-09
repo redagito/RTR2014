@@ -16,6 +16,8 @@
 #include "TShaderObject.h"
 #include "CShaderProgram.h"
 
+#include "SRenderRequest.h"
+
 class IResourceManager;
 
 /**
@@ -79,7 +81,7 @@ class CRenderer : public IRenderer, IResourceListener
     * Selects the rendering method (indexed, direct, etc.) based on the available mesh data
     * and performs actual draw call.
     */
-    void draw(const CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
+    void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material);
 
     /**
@@ -184,6 +186,7 @@ class CRenderer : public IRenderer, IResourceListener
     std::shared_ptr<IResourceManager> m_resourceManager; /**< Shared resource manager. */
 
     // TODO Store as arrays?
+	// TODO Move resource storage/id mapping to separate class?
     std::unordered_map<ResourceId, std::unique_ptr<CMesh>>
         m_meshes; /**< Maps mesh id from resource manager to GPU side mesh. */
     std::unordered_map<ResourceId, std::unique_ptr<CTexture>>
@@ -204,4 +207,6 @@ class CRenderer : public IRenderer, IResourceListener
         m_fragmentShader; /**< Maps string resource ids to compiled fragment shader objects. */
     std::unordered_map<ResourceId, std::unique_ptr<CShaderProgram>>
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
+
+	std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 };

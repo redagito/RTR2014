@@ -1,18 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <cstdint>
 
 #include <glm/glm.hpp>
 
 #include "SceneConfig.h"
 #include "ResourceConfig.h"
 
-// Needed for unique_ptr
-#include "ISceneQuery.h"
-
 class ICamera;
-class IResourceManager;
+class ISceneQuery;
 
 /**
  * \brief Scene interface class.
@@ -38,6 +34,13 @@ class IScene
                            glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const = 0;
 
     /**
+    * \brief Set object parameters.
+    */
+    virtual void setObject(ResourceId id, ResourceId mesh, ResourceId material,
+                           const glm::vec3& position, const glm::vec3& rotation,
+                           const glm::vec3& scale) = 0;
+
+    /**
      * \brief Creates light in scene and returns id.
      */
     virtual SceneObjectId createLight(const glm::vec3& position, float radius,
@@ -51,6 +54,7 @@ class IScene
 
     /**
      * \brief Creates scene query for specified camera.
+     * Returns heap allocated query object. Control is transfered to the calling function.
      */
-    virtual std::unique_ptr<ISceneQuery> createQuery(const ICamera& camera) const = 0;
+    virtual ISceneQuery* createQuery(const ICamera& camera) const = 0;
 };

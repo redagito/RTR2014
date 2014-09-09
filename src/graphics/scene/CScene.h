@@ -22,11 +22,14 @@ class CScene : public IScene
     bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, glm::vec3& position,
                    glm::vec3& rotation, glm::vec3& scale) const;
 
+    void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
+                   const glm::vec3& rotation, const glm::vec3& scale);
+
     SceneObjectId createLight(const glm::vec3& position, float radius, const glm::vec3& color);
 
     bool getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const;
 
-    std::unique_ptr<ISceneQuery> createQuery(const ICamera& camera) const;
+    ISceneQuery* createQuery(const ICamera& camera) const;
 
    private:
     std::vector<SSceneObject> m_objects;

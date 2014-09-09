@@ -33,6 +33,21 @@ bool CScene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
 	return true;
 }
 
+void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
+	const glm::vec3& rotation, const glm::vec3& scale)
+{
+	// TODO Needs to be changed for better data structures
+	assert(id >= 0 && id < m_objects.size() && "Invalid scene object id");
+
+	// Write data
+	m_objects[id].m_mesh = mesh;
+	m_objects[id].m_material = material;
+	m_objects[id].m_position = position;
+	m_objects[id].m_rotation = rotation;
+	m_objects[id].m_scale = scale;
+	return;
+}
+
 SceneObjectId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
 {
 	// TODO Implement
@@ -45,7 +60,7 @@ bool CScene::getLight(SceneObjectId id, glm::vec3& position, float& radius, glm:
 	return false;
 }
 
-std::unique_ptr<ISceneQuery> CScene::createQuery(const ICamera& camera) const
+ISceneQuery* CScene::createQuery(const ICamera& camera) const
 {
     // TODO Extract frustum planes from camera
 
@@ -70,5 +85,5 @@ std::unique_ptr<ISceneQuery> CScene::createQuery(const ICamera& camera) const
     }
 
     // Return query
-    return std::unique_ptr<ISceneQuery>(query);
+    return query;
 }

@@ -17,6 +17,8 @@
 #include "shaders/TShader.h"
 #include "shaders/generated/SimpleShader.h"
 
+#include "resource/loader/tiny_obj_loader.h"
+
 RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo() {}
@@ -68,6 +70,11 @@ int RTRDemo::run()
 {
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
 
+	// Load cube
+	std::vector<tinyobj::shape_t> shapes;
+	tinyobj::LoadObj(shapes, "data/cube.obj");
+	ResourceId cube = m_resourceManager->createMesh(shapes.at(0).mesh.positions, shapes.at(0).mesh.indices, shapes.at(0).mesh.normals, shapes.at(0).mesh.texcoords, EPrimitiveType::Triangle);
+	
     // Create mesh
     ResourceId mesh =
         m_resourceManager->createMesh({-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f}, {},

@@ -7,9 +7,11 @@
 #include "debug/Log.h"
 
 #include "graphics/IScene.h"
+#include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
 #include "graphics/IResourceManager.h"
+
 #include "debug/RendererDebug.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
@@ -92,11 +94,17 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
     glm::mat4 rotationMatrix = glm::rotate(1.f, rotation);
     glm::mat4 scaleMatrix = glm::scale(scale);
 
+	// Defer rendering for materials with custom shaders
+	if (material->hasCustomShader())
+	{
+		m_customShaderMeshes.push_back(SRenderRequest(mesh, material, translationMatrix, rotationMatrix, scaleMatrix));
+		return;
+	}
     // Forward draw call
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
 }
 
-void CRenderer::draw(const CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
+void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
                      const glm::mat4& scale, CMaterial* material)
 {
     // TODO Rendering logic

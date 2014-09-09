@@ -8,12 +8,12 @@ GLuint CShaderProgram::s_activeShaderProgram = 0;
 
 CShaderProgram::CShaderProgram(TShaderObject<GL_VERTEX_SHADER>* vertex,
                                TShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
-							   TShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
-							   TShaderObject<GL_GEOMETRY_SHADER>* geometry,
+                               TShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
+                               TShaderObject<GL_GEOMETRY_SHADER>* geometry,
                                TShaderObject<GL_FRAGMENT_SHADER>* fragment)
     : m_programId(0), m_valid(false)
 {
-	init(vertex, tessControl, tessEval, geometry, fragment);
+    init(vertex, tessControl, tessEval, geometry, fragment);
 }
 
 CShaderProgram::~CShaderProgram()
@@ -26,8 +26,8 @@ CShaderProgram::~CShaderProgram()
 
 bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
                           TShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
-						  TShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
-						  TShaderObject<GL_GEOMETRY_SHADER>* geometry,
+                          TShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
+                          TShaderObject<GL_GEOMETRY_SHADER>* geometry,
                           TShaderObject<GL_FRAGMENT_SHADER>* fragment)
 {
     // Needs vertex shader
@@ -109,6 +109,8 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     m_programId = programId;
     // Set validity flag
     m_valid = true;
+    // Clear uniform location cache
+    m_uniformLocations.clear();
     return true;
 }
 
@@ -128,7 +130,18 @@ bool CShaderProgram::isValid() const { return m_valid; }
 
 GLint CShaderProgram::getUniformLocation(const std::string& uniformName) const
 {
-    return glGetUniformLocation(m_programId, uniformName.data());
+    // Search for cached location
+    auto iter = m_uniformLocations.find(uniformName);
+    // Not found
+    if (iter == m_uniformLocations.end())
+    {
+        // Cache location
+        GLint location = glGetUniformLocation(m_programId, uniformName.data());
+        m_uniformLocations[uniformName] = location;
+        return location;
+    }
+    // Found
+    return iter->second;
 }
 
 GLint CShaderProgram::getAttributeLocation(const std::string& attributeName) const
@@ -142,10 +155,20 @@ void CShaderProgram::setUniform(GLint location, int i)
     glUniform1i(location, i);
 }
 
+void CShaderProgram::setUniform(const std::string& name, int i)
+{
+    setUniform(getUniformLocation(name), i);
+}
+
 void CShaderProgram::setUniform(GLint location, float f)
 {
     setActive();
     glUniform1f(location, f);
+}
+
+void CShaderProgram::setUniform(const std::string& name, float f)
+{
+    setUniform(getUniformLocation(name), f);
 }
 
 void CShaderProgram::setUniform(GLint location, const glm::vec3& v)
@@ -154,10 +177,20 @@ void CShaderProgram::setUniform(GLint location, const glm::vec3& v)
     glUniform3f(location, v.x, v.y, v.z);
 }
 
+void CShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
+{
+    setUniform(getUniformLocation(name), v);
+}
+
 void CShaderProgram::setUniform(GLint location, const glm::vec4& v)
 {
     setActive();
     glUniform4f(location, v.x, v.y, v.z, v.w);
+}
+
+void CShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
+{
+    setUniform(getUniformLocation(name), v);
 }
 
 void CShaderProgram::setUniform(GLint location, const glm::mat2& m)
@@ -166,14 +199,29 @@ void CShaderProgram::setUniform(GLint location, const glm::mat2& m)
     glUniformMatrix2fv(location, 1, GL_TRUE, glm::value_ptr(m));
 }
 
+void CShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
+{
+    setUniform(getUniformLocation(name), m);
+}
+
 void CShaderProgram::setUniform(GLint location, const glm::mat3& m)
 {
     setActive();
     glUniformMatrix3fv(location, 1, GL_TRUE, glm::value_ptr(m));
 }
 
+void CShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
+{
+    setUniform(getUniformLocation(name), m);
+}
+
 void CShaderProgram::setUniform(GLint location, const glm::mat4& m)
 {
     setActive();
     glUniformMatrix4fv(location, 1, GL_TRUE, glm::value_ptr(m));
+}
+
+void CShaderProgram::setUniform(const std::string& name, const glm::mat4& m)
+{
+    setUniform(getUniformLocation(name), m);
 }
