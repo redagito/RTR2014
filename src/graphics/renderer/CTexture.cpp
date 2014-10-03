@@ -6,7 +6,7 @@ CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, 
                    EColorFormat format, unsigned int mipmapLevel)
     : m_valid(false), m_textureId(0), m_width(width), m_height(height), m_format(format)
 {
-	// Init texture with data
+    // Init texture with data
     init(image, width, height, format, mipmapLevel);
 }
 
@@ -16,7 +16,7 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
                     unsigned int height, EColorFormat format, unsigned int mipmapLevel)
 {
     // Sanity checks
-    if (width == 0 || height == 0 || image.empty() || format == EColorFormat::Invalid)
+    if (width == 0 || height == 0 || format == EColorFormat::Invalid)
     {
         return false;
     }
@@ -39,22 +39,22 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         internalFormat = GL_RGBA;
         break;
     default:
-		return false;
+        return false;
         break;
     }
 
-	// Size check
-	if (image.size() != width * height * bytePerPixel)
-	{
-		return false;
-	}
+    // Image data is either empty or has correct size
+    if (!image.empty() && (image.size() != width * height * bytePerPixel))
+    {
+        return false;
+    }
 
-	// Create id
-	GLuint textureId;
-	glGenTextures(1, &textureId);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+    // Create id
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
 
-	// TODO Filter should be based on arguments and mip map level
+    // TODO Filter should be based on arguments and mip map level
     // Set filters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -79,16 +79,10 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
 
     // Set new texture id
     m_textureId = textureId;
-	m_valid = true;
+    m_valid = true;
     return true;
 }
 
-GLuint CTexture::getId() const
-{
-	return m_textureId;
-}
+GLuint CTexture::getId() const { return m_textureId; }
 
-bool CTexture::isValid() const
-{
-	return m_valid;
-}
+bool CTexture::isValid() const { return m_valid; }

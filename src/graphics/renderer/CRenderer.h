@@ -15,6 +15,7 @@
 #include "CMaterial.h"
 #include "TShaderObject.h"
 #include "CShaderProgram.h"
+#include "CFrameBuffer.h"
 
 #include "SRenderRequest.h"
 
@@ -83,6 +84,11 @@ class CRenderer : public IRenderer, IResourceListener
     */
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material);
+
+	/**
+	* \brief Draws meshes with custom shaders set in their materials.
+	*/
+	void drawCustom();
 
     /**
      * \brief Maps id to internal mesh object.
@@ -183,6 +189,9 @@ class CRenderer : public IRenderer, IResourceListener
     void handleStringEvent(ResourceId, EListenerEvent event, IResourceManager* resourceManager);
 
    private:
+	void initDefaultShaders();
+	void initFrameBuffer();
+
     std::shared_ptr<IResourceManager> m_resourceManager; /**< Shared resource manager. */
 
     // TODO Store as arrays?
@@ -209,4 +218,6 @@ class CRenderer : public IRenderer, IResourceListener
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 
 	std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
+
+	std::shared_ptr<CFrameBuffer> m_gBuffer; /**< GBuffer frame buffer. */
 };

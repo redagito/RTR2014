@@ -21,12 +21,16 @@ class IResourceManager
 
     /**
      * \brief Creates mesh and returns id.
-     * TODO It seems that indexed draw in OpenGL cannot handle GL_QUADS primitive, investigate.
      */
     virtual ResourceId createMesh(const std::vector<float>& vertices,
                                   const std::vector<unsigned int>& indices,
                                   const std::vector<float>& normals, const std::vector<float>& uvs,
                                   EPrimitiveType type) = 0;
+
+	/**
+	* \brief Loads mesh from file.
+	*/
+	virtual ResourceId loadMesh(const std::string& file) = 0;
 
     /**
     * \brief Retrieves mesh data.
@@ -45,6 +49,11 @@ class IResourceManager
     virtual ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
                                    unsigned int height, EColorFormat format) = 0;
 
+	/**
+	* \brief Loads image from file.
+	*/
+	virtual ResourceId loadImage(const std::string& file, EColorFormat format) = 0;
+
     /**
     * \brief Retrieves image data.
     */
@@ -58,6 +67,11 @@ class IResourceManager
                                       ResourceId normalImage, ResourceId specularImage,
                                       ResourceId glowImage, ResourceId customShader) = 0;
 
+	/**
+	* \brief Loads material from file.
+	*/
+	virtual ResourceId loadMaterial(const std::string& file) = 0;
+
     /**
     * \brief Returns material data.
     */
@@ -69,6 +83,11 @@ class IResourceManager
      * \brief Creates string resource.
      */
     virtual ResourceId createString(const std::string& text) = 0;
+
+	/**
+	* \brief Loads file as string into memory.
+	*/
+	virtual ResourceId loadString(const std::string& file) = 0;
 
     /**
     * \brief Returns string resource.
@@ -83,6 +102,14 @@ class IResourceManager
                                     ResourceId tessellationEvaluationShaderString,
                                     ResourceId geometryShaderString,
                                     ResourceId fragmentShaderString) = 0;
+
+	/**
+	* \brief Loads shader program from file.
+	* The file should usually contain refernces to the shader sources used for the shading stages.
+	* For now, .ini files are used.
+	* Does not reload already loaded files.
+	*/
+	virtual ResourceId loadShader(const std::string& shaderIniFile) = 0;
 
     /**
     * \brief Creates shader resource.

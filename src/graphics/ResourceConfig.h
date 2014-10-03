@@ -19,6 +19,7 @@ enum class EResourceType
 
 /**
 * \brief Primitive type for vertex data.
+* NOTE GL_QUAD is deprecated.
 */
 enum class EPrimitiveType
 {

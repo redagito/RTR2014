@@ -8,7 +8,7 @@ class IResourceManager;
 class IWindow;
 class IRenderer;
 class IScene;
-class ICamera;
+class CLookAtCamera;
 
 class RTRDemo
 {
@@ -26,5 +26,5 @@ class RTRDemo
     std::shared_ptr<IWindow> m_window = nullptr;
     std::shared_ptr<IRenderer> m_renderer = nullptr;
     std::shared_ptr<IScene> m_scene = nullptr;
-    std::shared_ptr<ICamera> m_camera = nullptr;
+    std::shared_ptr<CLookAtCamera> m_camera = nullptr;
 };

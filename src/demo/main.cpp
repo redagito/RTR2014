@@ -1,7 +1,11 @@
 #include "demo/RTRDemo.h"
 
-int main(void)
+#include <iostream>
+#include <fstream>
+
+int main(int argc, char** argv)
 {
+
     RTRDemo demo;
     
     int result = demo.init();

@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "graphics/camera/CFirstPersonCamera.h"
+#include "graphics/camera/CLookAtCamera.h"
 #include "graphics/renderer/CRenderer.h"
 #include "graphics/resource/CResourceManager.h"
 #include "graphics/scene/CScene.h"
@@ -17,7 +18,7 @@
 #include "shaders/TShader.h"
 #include "shaders/generated/SimpleShader.h"
 
-#include "resource/loader/tiny_obj_loader.h"
+#include "io/tinyobj/tiny_obj_loader.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -47,6 +48,7 @@ int RTRDemo::init()
 
     glfwMakeContextCurrent(m_glfw_window);
 
+	// TODO This is just ugly...
 #ifndef __APPLE__
     if (flextInit(m_glfw_window) != GL_TRUE)
     {
@@ -59,7 +61,7 @@ int RTRDemo::init()
     m_window = std::make_shared<CGlfwWindow>(m_glfw_window);
     m_renderer = std::make_shared<CRenderer>(m_resourceManager);
     m_scene = std::make_shared<CScene>();
-    m_camera = std::make_shared<CFirstPersonCamera>();
+    m_camera = std::make_shared<CLookAtCamera>();
 
     glfwSetInputMode(m_glfw_window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -89,11 +91,10 @@ int RTRDemo::run()
     ResourceId material = m_resourceManager->createMaterial(-1, -1, -1, -1, -1, shader);
     // Create scene object with mesh and material
     SceneObjectId sceneObj =
-        m_scene->createObject(mesh, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
+        m_scene->createObject(cube, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
 
     do
     {
-        // Should be
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
         glfwSwapBuffers(m_glfw_window);

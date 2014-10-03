@@ -15,10 +15,17 @@
 #include "debug/RendererDebug.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-    : m_resourceManager(resourceManager)
+	: m_resourceManager(resourceManager), m_gBuffer(nullptr)
 {
     // Add resource listener
     m_resourceManager->addResourceListener(this);
+
+	// Init default shaders
+	initDefaultShaders();
+
+	// Init GBuffer for deferred rendering
+	initFrameBuffer();
+
     // Set clear color
     glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
     return;
@@ -39,6 +46,7 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glCullFace(GL_BACK);
+
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
 
@@ -68,10 +76,17 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
         }
         else
         {
-            // Forward draw call
+            // Forward draw call, stores render requests with custom shader set in material
             draw(mesh, position, rotation, scale, material);
         }
     }
+
+	// Draw objects with custom shader set
+	for (auto& request : m_customShaderMeshes)
+	{
+		draw(request.m_mesh, request.m_translation, request.m_rotation, request.m_scale, request.m_material);
+	}
+	m_customShaderMeshes.clear();
 
     // Post draw error check
     std::string error;
@@ -111,8 +126,10 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
     // TODO Set default builtin shader
     CShaderProgram* shader = nullptr;
     // Custom shader
+	bool customShader = false;
     if (material->hasCustomShader())
     {
+		customShader = true;
         shader = material->getCustomShader();
     }
 
@@ -693,4 +710,14 @@ void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
                                   IResourceManager* resourceManager)
 {
     // Does not need processing, shader events handel source loading
+}
+
+void CRenderer::initDefaultShaders()
+{
+
+}
+
+void CRenderer::initFrameBuffer()
+{
+
 }
