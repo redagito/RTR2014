@@ -23,6 +23,7 @@ class CIndexBuffer
     * Binds the VBO to GL_INDEX_ARRAY.
     */
     void setActive() const;
+	void setInactive() const;
 
     /**
     * \brief Returns buffer validity.

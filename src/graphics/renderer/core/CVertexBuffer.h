@@ -31,11 +31,7 @@ class CVertexBuffer
     * Binds the VBO to GL_ARRAY_BUFFER.
     */
     void setActive() const;
-
-	/**
-	* \brief Apply for rendering.
-	*/
-	void apply(GLuint index) const;
+	void setInactive() const;
 
     /**
     * \brief Returns buffer validity.

@@ -1,8 +1,8 @@
-#version 410 core
+#version 330 core
 
 // Vertex data streams
 layout (location = 0) in vec3 vertexPositionModelSpace;
-layout (location = 1) in vec3 vertexNormal;
+layout (location = 1) in vec3 vertexNormalModelSpace;
 layout (location = 2) in vec2 vertexUV;
 
 // Transformation matrices
@@ -26,7 +26,7 @@ void main(void)
 	// Calculate vertex position in camera space
 	gl_Position = projection * view * model * vec4(vertexPositionModelSpace, 1.f);
 	// Forward texture coordinates
-	uv = vertexUV:
+	uv = vertexUV;
 	// Calculate transformed normal vector, assumes uniform scale
-	normalVectorCameraSpace = (view * translation * rotation * vec4(vertexNormal, 0.f)).xyz;
+	normalVectorCameraSpace = (view * translation * rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
 }

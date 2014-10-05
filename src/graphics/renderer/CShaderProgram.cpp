@@ -1,5 +1,8 @@
 #include "CShaderProgram.h"
 
+#include "debug/RendererDebug.h"
+#include "debug/Log.h"
+
 #include <cassert>
 
 #include <glm/ext.hpp>
@@ -111,6 +114,14 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     m_valid = true;
     // Clear uniform location cache
     m_uniformLocations.clear();
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     return true;
 }
 

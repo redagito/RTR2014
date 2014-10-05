@@ -217,6 +217,8 @@ class CRenderer : public IRenderer, IResourceListener
     std::unordered_map<ResourceId, std::unique_ptr<CShaderProgram>>
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 
+	CShaderProgram* m_defaultShader; /**< Default shader for rendering. TODO for testing, remove later. */
+
 	std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 
 	std::shared_ptr<CFrameBuffer> m_gBuffer; /**< GBuffer frame buffer. */

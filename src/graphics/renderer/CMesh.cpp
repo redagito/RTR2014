@@ -2,12 +2,14 @@
 #include "debug/Log.h"
 
 #include "core/RendererCoreConfig.h"
+#include "debug/RendererDebug.h"
 
 #include <cassert>
 
 CMesh::CMesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
              const std::vector<float>& normals, const std::vector<float>& uvs, EPrimitiveType type)
     : m_vertices(nullptr),
+	  m_indices(nullptr),
       m_normals(nullptr),
       m_uvs(nullptr),
       m_type(EPrimitiveType::Invalid),
@@ -62,7 +64,6 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
         return false;
     }
 
-    m_vertices->setActive();
     // Set vertex data attributes
     // TODO The location should be in some kind of shader interface definition
     // TODO The data data size (second param) should be deduced by the data type of the provided
@@ -70,27 +71,37 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
     //  basically we would need a std::vector<glm::vec3> instead of a std::vector<float> to deduce
     //  the size
     // TODO Consider packing all vertex data into a single buffer for better performance
-    glEnableVertexAttribArray(vertexDataShaderLocation);
-    glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	m_vertices->setActive();
+	glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vertexDataShaderLocation);
 
     // Set normal data attributes
     if (m_normals != nullptr)
     {
-        m_normals->setActive();
-        glEnableVertexAttribArray(normalDataShaderLocation);
-        glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		m_normals->setActive();
+		glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		m_normals->setInactive();
+		glEnableVertexAttribArray(normalDataShaderLocation);
     }
 
     // Set uv data attributes
     if (m_uvs != nullptr)
     {
-        m_uvs->setActive();
-        glEnableVertexAttribArray(uvDataShaderLocation);
-        glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		m_uvs->setActive();
+		glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(uvDataShaderLocation);
     }
 
     // Disable vao
     m_vao->setInactive();
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     return true;
 }
 

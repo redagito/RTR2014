@@ -1,5 +1,8 @@
 #include "CIndexBuffer.h"
 
+#include "graphics/renderer/debug/RendererDebug.h"
+#include "debug/Log.h"
+
 CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usage) : m_bufferId(0), m_size(0), m_valid(false)
 {
 	if (indices.empty())
@@ -14,7 +17,14 @@ CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usag
 	// TODO Check error
 	m_valid = true;
 	// Unbind
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	setInactive();
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
 }
 
 CIndexBuffer::~CIndexBuffer() { glDeleteBuffers(1, &m_bufferId); }
@@ -22,6 +32,11 @@ CIndexBuffer::~CIndexBuffer() { glDeleteBuffers(1, &m_bufferId); }
 void CIndexBuffer::setActive() const
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
+}
+
+void CIndexBuffer::setInactive() const
+{
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 bool CIndexBuffer::isValid() const

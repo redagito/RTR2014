@@ -1,6 +1,7 @@
 #include "CRenderer.h"
 
 #include <cassert>
+#include <string>
 
 #include <glm/ext.hpp>
 
@@ -27,7 +28,25 @@ CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
 	initFrameBuffer();
 
     // Set clear color
-    glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
+    glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
+
+	// Depth
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	// Backface culling disabled for debugging
+	glDisable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	// Winding order, standard is counter-clockwise
+	glFrontFace(GL_CCW);
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
     return;
 }
 
@@ -44,11 +63,14 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
 
     // Initializiation
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glCullFace(GL_BACK);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
+
+	// TODO Default shader for rendering, remove later
+	m_defaultShader->setUniform("view", camera.getView());
+	m_defaultShader->setUniform("projection", camera.getProjection());
 
     // TODO Implement multi pass system
 
@@ -89,7 +111,7 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
 	m_customShaderMeshes.clear();
 
     // Post draw error check
-    std::string error;
+	std::string error;
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
@@ -106,7 +128,7 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
     // Create matrices
     glm::mat4 translationMatrix = glm::translate(position);
     // TODO Rotation calculation is probably wrong
-    glm::mat4 rotationMatrix = glm::rotate(1.f, rotation);
+	glm::mat4 rotationMatrix = glm::mat4(1.f); // glm::rotate(1.f, rotation);
     glm::mat4 scaleMatrix = glm::scale(scale);
 
 	// Defer rendering for materials with custom shaders
@@ -124,20 +146,17 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
 {
     // TODO Rendering logic
     // TODO Set default builtin shader
-    CShaderProgram* shader = nullptr;
-    // Custom shader
-	bool customShader = false;
-    if (material->hasCustomShader())
-    {
-		customShader = true;
-        shader = material->getCustomShader();
-    }
+	CShaderProgram* shader = m_defaultShader;
+	shader->setUniform("rotation", rotation);
+	shader->setUniform("translation", translation);
+	shader->setUniform("scale", scale);
+	shader->setUniform("model", translation * rotation * scale);
 
     shader->setActive();
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
-    mesh->getVertexArray()->setActive();
+	mesh->getVertexArray()->setActive();
 
     // Set draw mode
     GLenum mode;
@@ -165,14 +184,16 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
     if (mesh->hasIndexBuffer())
     {
         // Indexed draw, probably faster
-        mesh->getIndexBuffer()->setActive();
+		mesh->getIndexBuffer()->setActive();
 		glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
+		mesh->getIndexBuffer()->setInactive();
     }
     else
     {
         // Slowest draw method
         glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
-    }
+	}
+	mesh->getVertexArray()->setInactive();
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)
@@ -537,7 +558,7 @@ void CRenderer::handleImageEvent(ResourceId id, EListenerEvent event,
         }
         // Create new texture
         m_textures[id] =
-            std::move(std::unique_ptr<CTexture>(new CTexture(data, width, height, format, 4)));
+            std::move(std::unique_ptr<CTexture>(new CTexture(data, width, height, format)));
         break;
 
     case EListenerEvent::Change:
@@ -548,7 +569,7 @@ void CRenderer::handleImageEvent(ResourceId id, EListenerEvent event,
             assert(false && "Failed to access image resource");
         }
         // Reinitialize texture on change
-        m_textures.at(id)->init(data, width, height, format, 4);
+        m_textures.at(id)->init(data, width, height, format);
         break;
 
     case EListenerEvent::Delete:
@@ -714,7 +735,8 @@ void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
 
 void CRenderer::initDefaultShaders()
 {
-
+	ResourceId shaderId = m_resourceManager->loadShader("data/shader/shader_test_0.ini");
+	m_defaultShader = m_shaderPrograms.at(shaderId).get();
 }
 
 void CRenderer::initFrameBuffer()

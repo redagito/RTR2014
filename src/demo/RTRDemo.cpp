@@ -6,6 +6,8 @@
 #include "debug/Log.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
+#include "graphics/renderer/debug/RendererDebug.h"
+
 #include <GLFW/glfw3.h>
 
 #include "graphics/camera/CFirstPersonCamera.h"
@@ -14,11 +16,6 @@
 #include "graphics/resource/CResourceManager.h"
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
-
-#include "shaders/TShader.h"
-#include "shaders/generated/SimpleShader.h"
-
-#include "io/tinyobj/tiny_obj_loader.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -70,31 +67,31 @@ int RTRDemo::init()
 
 int RTRDemo::run()
 {
-    glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
-
 	// Load cube
-	std::vector<tinyobj::shape_t> shapes;
-	tinyobj::LoadObj(shapes, "data/cube.obj");
-	ResourceId cube = m_resourceManager->createMesh(shapes.at(0).mesh.positions, shapes.at(0).mesh.indices, shapes.at(0).mesh.normals, shapes.at(0).mesh.texcoords, EPrimitiveType::Triangle);
-	
-    // Create mesh
-    ResourceId mesh =
-        m_resourceManager->createMesh({-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f}, {},
-                                      {}, {}, EPrimitiveType::Triangle);
+	ResourceId cube = m_resourceManager->loadMesh("data/mesh/cube.obj");
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+    ResourceId material = m_resourceManager->loadMaterial("data/material/material_test_0.ini");
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
 
-    // Create strings with source code
-    ResourceId vso = m_resourceManager->createString(SimpleShader::VS);
-    ResourceId fso = m_resourceManager->createString(SimpleShader::FS);
-    // Create shader
-    ResourceId shader = m_resourceManager->createShader(vso, -1, -1, -1, fso);
-    // Create material with custom shader
-    ResourceId material = m_resourceManager->createMaterial(-1, -1, -1, -1, -1, shader);
     // Create scene object with mesh and material
     SceneObjectId sceneObj =
         m_scene->createObject(cube, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
 
+	// Set camera
+	m_camera->setProjection(90.f, 4.f / 3.f, 1.f, 1000.f);
+	m_camera->setView(glm::vec3(40.f, 30.f, 40.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
     do
-    {
+	{
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
         glfwSwapBuffers(m_glfw_window);

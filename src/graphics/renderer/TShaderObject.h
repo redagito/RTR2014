@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "core/RendererCoreConfig.h"
+#include "debug/RendererDebug.h"
+#include "debug/Log.h"
 
 /**
 * \brief Represents a compiled shader object.
@@ -111,6 +113,14 @@ bool TShaderObject<ShaderType>::init(const std::string& source)
 	m_objectId = objectId;
 	// Set validity flag
 	m_valid = true;
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
 	return true;
 }
 
