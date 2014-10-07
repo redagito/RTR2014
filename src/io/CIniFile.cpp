@@ -8,7 +8,7 @@ bool CIniFile::load(const std::string& file)
 	d_entries.clear();
 
 	std::ifstream ifs(file);
-	if (!ifs.is_open)
+	if (!ifs.is_open())
 	{
 		return false;
 	}
