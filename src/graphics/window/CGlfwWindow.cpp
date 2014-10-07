@@ -46,6 +46,21 @@ void CGlfwWindow::setActive() const { glfwMakeContextCurrent(m_window); }
 
 void CGlfwWindow::swapBuffer() { glfwSwapBuffers(m_window); }
 
+void CGlfwWindow::toggleMouseCapture()
+{
+    // Set capture mode
+    if (m_mouseCaptured)
+    {
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    else
+    {
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    // Toggle
+    m_mouseCaptured = !m_mouseCaptured;
+}
+
 void CGlfwWindow::resizeCallback(GLFWwindow* window, int width, int height)
 {
     assert(width > 0);

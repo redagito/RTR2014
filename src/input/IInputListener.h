@@ -3,8 +3,8 @@
 /**
  * \brief Input handler interface class.
  */
-class IInputHandler
+class IInputListener
 {
 public:
-	virtual ~IInputHandler();
+	virtual ~IInputListener();
 };

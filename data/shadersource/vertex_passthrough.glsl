@@ -28,5 +28,5 @@ void main(void)
 	// Forward texture coordinates
 	uv = vertexUV;
 	// Calculate transformed normal vector, assumes uniform scale
-	normalVectorCameraSpace = (view * translation * rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
+	normalVectorCameraSpace = vertexNormalModelSpace; //(view * translation * rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
 }

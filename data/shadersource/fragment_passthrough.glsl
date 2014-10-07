@@ -7,5 +7,5 @@ out vec3 fragmentColor;
 
 void main(void)
 {
-	fragmentColor = vec3(1.f, 0.f, 0.f);
+	fragmentColor = normalVectorCameraSpace;
 }

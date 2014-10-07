@@ -87,16 +87,37 @@ int RTRDemo::run()
         m_scene->createObject(cube, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
 
 	// Set camera
-	m_camera->setProjection(90.f, 4.f / 3.f, 1.f, 1000.f);
-	m_camera->setView(glm::vec3(40.f, 30.f, 40.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
+	m_camera->setView(glm::vec3(10.f, 5.f, 3.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
+	double f1Cooldown = 0.f;
+	double timeDiff = 0;
 
     do
 	{
+		double startTime = glfwGetTime();
+
+		// Cooldowns
+		f1Cooldown -= timeDiff;
+
+		// Draw call
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
-        glfwSwapBuffers(m_glfw_window);
-        glfwPollEvents();
+        // Buffer swap
+		m_window->swapBuffer();
 
+		// Update input
+		glfwPollEvents();
+		
+		if (glfwGetKey(m_glfw_window, GLFW_KEY_F1) == GLFW_PRESS && f1Cooldown <= 0.f)
+		{
+			// Reset cooldown
+			f1Cooldown = 0.5f;
+			// Capure/uncapture mouse
+			m_window->toggleMouseCapture();
+		}
+
+		timeDiff = glfwGetTime() - startTime;
     }  // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(m_glfw_window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(m_glfw_window) == 0);

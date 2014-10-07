@@ -23,10 +23,15 @@ class CGlfwWindow : public IWindow
 
     void setActive() const;
 
-    /**
+    /** 
      * \brief Swaps back and front buffers.
      */
     void swapBuffer();
+
+	/**
+	* \brief Toggles mouse capture state.
+	*/
+	void toggleMouseCapture();
 
    private:
     static void resizeCallback(GLFWwindow* window, int width, int height);
@@ -37,4 +42,6 @@ class CGlfwWindow : public IWindow
     GLFWwindow* m_window;  /**< Window resource. */
     unsigned int m_width;  /**< Current window width. */
     unsigned int m_height; /**< Current window height. */
+
+	bool m_mouseCaptured; /**< Current mouse capture state. */
 };

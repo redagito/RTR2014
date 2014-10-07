@@ -147,12 +147,12 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
     // TODO Rendering logic
     // TODO Set default builtin shader
 	CShaderProgram* shader = m_defaultShader;
+	shader->setActive();
+
 	shader->setUniform("rotation", rotation);
 	shader->setUniform("translation", translation);
 	shader->setUniform("scale", scale);
 	shader->setUniform("model", translation * rotation * scale);
-
-    shader->setActive();
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
