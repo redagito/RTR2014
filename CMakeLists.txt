@@ -18,41 +18,49 @@ option(GLFW_INSTALL OFF)
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 
 add_subdirectory(libs/glfw)
-add_subdirectory(libs/assimp)
-
 include_directories(libs/glfw/include)
+
+add_subdirectory(libs/assimp)
 include_directories(libs/assimp/include)
+
+add_subdirectory(libs/tinyobjloader)
+include_directories(libs/tinyobjloader)
+
 include_directories(libs/glm)
+
+file(GLOB LODEPNG_SOURCES ${CMAKE_SOURCE_DIR}/libs/lodepng/*.cpp)
+set(THIRD_PARTY_SOURCES ${THIRD_PARTY_SOURCES} ${LODEPNG_SOURCES})
+include_directories(libs/lodepng)
 
 # ===
 # generate shaders
 # ===
 
-set (SHADER_SRC_DIR "src/shaders/generated")
-
-file (GLOB SHADER_DIRECTORIES "shaders/[^.]*")
-foreach (SHADER_DIRECTORY ${SHADER_DIRECTORIES})
-	get_filename_component(SHADER_NAME ${SHADER_DIRECTORY} NAME)
-	source_group("shaders\\GLSL\\${SHADER_NAME}" shaders/${SHADER_NAME}/*)
-	
-	set(SHADER_NAME "${SHADER_NAME}Shader")
-	message("Generating shader '${SHADER_NAME}'.")
-	
-	file(READ ${SHADER_DIRECTORY}/vs.glsl SHADER_VS)
-	file(READ ${SHADER_DIRECTORY}/fs.glsl SHADER_FS)
-	
-	string(REGEX REPLACE "\n" "\\\\n" SHADER_VS "${SHADER_VS}")
-	string(REGEX REPLACE "\n" "\\\\n" SHADER_FS "${SHADER_FS}")
-	
-	configure_file(
-		"${SHADER_SRC_DIR}/Shader.h.in" 
-		"${SHADER_SRC_DIR}/${SHADER_NAME}.h" 
-		ESCAPE_QUOTES @ONLY )
-	configure_file(
-		"${SHADER_SRC_DIR}/Shader.cpp.in" 
-		"${SHADER_SRC_DIR}/${SHADER_NAME}.cpp" 
-		ESCAPE_QUOTES @ONLY )
-endforeach()
+#set (SHADER_SRC_DIR "src/shaders/generated")
+#
+#file (GLOB SHADER_DIRECTORIES "shaders/[^.]*")
+#foreach (SHADER_DIRECTORY ${SHADER_DIRECTORIES})
+#	get_filename_component(SHADER_NAME ${SHADER_DIRECTORY} NAME)
+#	source_group("shaders\\GLSL\\${SHADER_NAME}" shaders/${SHADER_NAME}/*)
+#
+#	set(SHADER_NAME "${SHADER_NAME}Shader")
+#	message("Generating shader '${SHADER_NAME}'.")
+#
+#	file(READ ${SHADER_DIRECTORY}/vs.glsl SHADER_VS)
+#	file(READ ${SHADER_DIRECTORY}/fs.glsl SHADER_FS)
+#
+#	string(REGEX REPLACE "\n" "\\\\n" SHADER_VS "${SHADER_VS}")
+#	string(REGEX REPLACE "\n" "\\\\n" SHADER_FS "${SHADER_FS}")
+#
+#	configure_file(
+#		"${SHADER_SRC_DIR}/Shader.h.in"
+#		"${SHADER_SRC_DIR}/${SHADER_NAME}.h"
+#		ESCAPE_QUOTES @ONLY )
+#	configure_file(
+#		"${SHADER_SRC_DIR}/Shader.cpp.in"
+#		"${SHADER_SRC_DIR}/${SHADER_NAME}.cpp"
+#		ESCAPE_QUOTES @ONLY )
+#endforeach()
 
 # ===
 # flextGL
@@ -78,14 +86,19 @@ include_directories(
 	)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
 file(GLOB_RECURSE SRC_FILES
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_BINARY_DIR}/src/*.cpp
 	${CMAKE_BINARY_DIR}/src/*.h
-	${CMAKE_SOURCE_DIR}/shaders/*.glsl
+#	${CMAKE_SOURCE_DIR}/shaders/*.glsl
+    ${CMAKE_SOURCE_DIR}/data/shadersource/*.glsl
 )
+
+set(SRC_FILES ${SRC_FILES} ${THIRD_PARTY_SOURCES})
 
 if (NOT APPLE)
   set (SRC_FILES "${SRC_FILES};${CMAKE_BINARY_DIR}/src/generated/flextGL.c;${CMAKE_BINARY_DIR}/src/generated/flextGL.h")
@@ -97,6 +110,7 @@ target_link_libraries(RTRDemo
 	${OPENGL_LIBRARY}
 	glfw ${GLFW_LIBRARIES}
 	assimp
+    tinyobjloader
 )
 
 if (NOT APPLE)
@@ -123,6 +137,8 @@ function(create_source_groups DIR PARENT_GROUP)
     endforeach()
 endfunction()
 
-create_source_groups("${CMAKE_SOURCE_DIR}/src" "" "")
+create_source_groups("${CMAKE_SOURCE_DIR}/src" "src")
+create_source_groups("${CMAKE_SOURCE_DIR}/libs" "libs")
 
-source_group("shaders\\generated" src/shaders/generated/*)
+#source_group("shaders\\generated" src/shaders/generated/*)
+source_group("shaders" ${CMAKE_SOURCE_DIR}/data/shadersource/*)

@@ -10,3 +10,6 @@
 [submodule "libs/flextGL"]
 	path = libs/flextGL
 	url = https://github.com/ginkgo/flextGL.git
+[submodule "libs/tinyobjloader"]
+	path = libs/tinyobjloader
+	url = git@github.com:syoyo/tinyobjloader.git

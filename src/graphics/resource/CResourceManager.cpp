@@ -3,12 +3,13 @@
 #include <fstream>
 #include <sstream>
 
+#include "lodepng.h"
+#include "tiny_obj_loader.h"
+
 #include "graphics/IResourceListener.h"
 
 #include "io/CIniFile.h"
 #include "io/CObjModelLoader.h"
-#include "io/tinyobj/tiny_obj_loader.h"
-#include "io/lodepng/lodepng.h"
 
 #include "debug/Log.h"
 
