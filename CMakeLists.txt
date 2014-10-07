@@ -76,8 +76,10 @@ include_directories(libs/lodepng)
 # ===
 
 if (NOT APPLE)
+set(RUN_FLEXT_GL_ARGS ${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${RUN_FLEXT_GL_ARGS})
 add_custom_target(RunFlextGL ALL
-    COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py" -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt
+    COMMAND ${PYTHON_EXECUTABLE} ${RUN_FLEXT_GL_ARGS}
     DEPENDS ${PROJECT_SOURCE_DIR}/profile.txt
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flext.py
@@ -96,7 +98,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 include_directories(
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_BINARY_DIR}/src
-	)
+)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
