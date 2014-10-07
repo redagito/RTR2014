@@ -115,12 +115,12 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     // Clear uniform location cache
     m_uniformLocations.clear();
 
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
 
     return true;
 }
@@ -207,7 +207,7 @@ void CShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
 void CShaderProgram::setUniform(GLint location, const glm::mat2& m)
 {
     setActive();
-	glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(m));
+    glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void CShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
@@ -218,7 +218,7 @@ void CShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
 void CShaderProgram::setUniform(GLint location, const glm::mat3& m)
 {
     setActive();
-	glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m));
+    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void CShaderProgram::setUniform(const std::string& name, const glm::mat3& m)

@@ -16,37 +16,37 @@
 #include "debug/RendererDebug.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-	: m_resourceManager(resourceManager), m_gBuffer(nullptr)
+    : m_resourceManager(resourceManager), m_gBuffer(nullptr)
 {
     // Add resource listener
     m_resourceManager->addResourceListener(this);
 
-	// Init default shaders
-	initDefaultShaders();
+    // Init default shaders
+    initDefaultShaders();
 
-	// Init GBuffer for deferred rendering
-	initFrameBuffer();
+    // Init GBuffer for deferred rendering
+    initFrameBuffer();
 
     // Set clear color
     glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
-	// Depth
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+    // Depth
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-	// Backface culling disabled for debugging
-	glDisable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+    // Backface culling disabled for debugging
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
-	// Winding order, standard is counter-clockwise
-	glFrontFace(GL_CCW);
+    // Winding order, standard is counter-clockwise
+    glFrontFace(GL_CCW);
 
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
     return;
 }
 
@@ -63,14 +63,14 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
 
     // Initializiation
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
 
-	// TODO Default shader for rendering, remove later
-	m_defaultShader->setUniform("view", camera.getView());
-	m_defaultShader->setUniform("projection", camera.getProjection());
+    // TODO Default shader for rendering, remove later
+    m_defaultShader->setUniform("view", camera.getView());
+    m_defaultShader->setUniform("projection", camera.getProjection());
 
     // TODO Implement multi pass system
 
@@ -103,15 +103,16 @@ void CRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& 
         }
     }
 
-	// Draw objects with custom shader set
-	for (auto& request : m_customShaderMeshes)
-	{
-		draw(request.m_mesh, request.m_translation, request.m_rotation, request.m_scale, request.m_material);
-	}
-	m_customShaderMeshes.clear();
+    // Draw objects with custom shader set
+    for (auto& request : m_customShaderMeshes)
+    {
+        draw(request.m_mesh, request.m_translation, request.m_rotation, request.m_scale,
+             request.m_material);
+    }
+    m_customShaderMeshes.clear();
 
     // Post draw error check
-	std::string error;
+    std::string error;
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
@@ -128,15 +129,16 @@ void CRenderer::draw(ResourceId meshId, const glm::vec3& position, const glm::ve
     // Create matrices
     glm::mat4 translationMatrix = glm::translate(position);
     // TODO Rotation calculation is probably wrong
-	glm::mat4 rotationMatrix = glm::mat4(1.f); // glm::rotate(1.f, rotation);
+    glm::mat4 rotationMatrix = glm::mat4(1.f);  // glm::rotate(1.f, rotation);
     glm::mat4 scaleMatrix = glm::scale(scale);
 
-	// Defer rendering for materials with custom shaders
-	if (material->hasCustomShader())
-	{
-		m_customShaderMeshes.push_back(SRenderRequest(mesh, material, translationMatrix, rotationMatrix, scaleMatrix));
-		return;
-	}
+    // Defer rendering for materials with custom shaders
+    if (material->hasCustomShader())
+    {
+        m_customShaderMeshes.push_back(
+            SRenderRequest(mesh, material, translationMatrix, rotationMatrix, scaleMatrix));
+        return;
+    }
     // Forward draw call
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
 }
@@ -146,17 +148,17 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
 {
     // TODO Rendering logic
     // TODO Set default builtin shader
-	CShaderProgram* shader = m_defaultShader;
-	shader->setActive();
+    CShaderProgram* shader = m_defaultShader;
+    shader->setActive();
 
-	shader->setUniform("rotation", rotation);
-	shader->setUniform("translation", translation);
-	shader->setUniform("scale", scale);
-	shader->setUniform("model", translation * rotation * scale);
+    shader->setUniform("rotation", rotation);
+    shader->setUniform("translation", translation);
+    shader->setUniform("scale", scale);
+    shader->setUniform("model", translation * rotation * scale);
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
-	mesh->getVertexArray()->setActive();
+    mesh->getVertexArray()->setActive();
 
     // Set draw mode
     GLenum mode;
@@ -184,16 +186,16 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
     if (mesh->hasIndexBuffer())
     {
         // Indexed draw, probably faster
-		mesh->getIndexBuffer()->setActive();
-		glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
-		mesh->getIndexBuffer()->setInactive();
+        mesh->getIndexBuffer()->setActive();
+        glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
+        mesh->getIndexBuffer()->setInactive();
     }
     else
     {
         // Slowest draw method
         glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
-	}
-	mesh->getVertexArray()->setInactive();
+    }
+    mesh->getVertexArray()->setInactive();
 }
 
 void CRenderer::onAttach(IResourceManager* resourceManager)
@@ -715,7 +717,7 @@ void CRenderer::handleShaderEvent(ResourceId id, EListenerEvent event,
         break;
 
     case EListenerEvent::Change:
-		 // TODO Implement
+    // TODO Implement
 
     case EListenerEvent::Delete:
         // TODO Keep shader?
@@ -735,11 +737,8 @@ void CRenderer::handleStringEvent(ResourceId id, EListenerEvent event,
 
 void CRenderer::initDefaultShaders()
 {
-	ResourceId shaderId = m_resourceManager->loadShader("data/shader/shader_test_0.ini");
-	m_defaultShader = m_shaderPrograms.at(shaderId).get();
+    ResourceId shaderId = m_resourceManager->loadShader("data/shader/shader_test_0.ini");
+    m_defaultShader = m_shaderPrograms.at(shaderId).get();
 }
 
-void CRenderer::initFrameBuffer()
-{
-
-}
+void CRenderer::initFrameBuffer() {}

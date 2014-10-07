@@ -6,7 +6,7 @@
 
 std::unordered_map<GLFWwindow*, CGlfwWindow*> CGlfwWindow::s_windows; /**< Window mapping. */
 
-CGlfwWindow::CGlfwWindow(GLFWwindow* window) : m_window(window), m_width(0), m_height(0)
+CGlfwWindow::CGlfwWindow(GLFWwindow* window) : m_window(window), m_width(0), m_height(0), m_mouseCaptured(false)
 {
     assert(m_window != nullptr);
 

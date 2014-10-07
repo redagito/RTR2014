@@ -68,7 +68,7 @@ int RTRDemo::init()
 int RTRDemo::run()
 {
 	// Load cube
-	ResourceId cube = m_resourceManager->loadMesh("data/mesh/cube.obj");
+	ResourceId cube = m_resourceManager->loadMesh("data/mesh/cave.obj");
 	// Error check
 	std::string error;
 	if (hasGLError(error))
