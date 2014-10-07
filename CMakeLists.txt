@@ -29,6 +29,9 @@ include_directories(libs/tinyobjloader)
 add_subdirectory(libs/jsoncpp)
 include_directories(libs/jsoncpp/include)
 
+add_subdirectory(libs/freetype)
+include_directories(libs/freetype/include)
+
 include_directories(libs/glm)
 
 file(GLOB LODEPNG_SOURCES ${CMAKE_SOURCE_DIR}/libs/lodepng/*.cpp)
@@ -115,6 +118,7 @@ target_link_libraries(RTRDemo
 	assimp
     tinyobjloader
     jsoncpp_lib
+    freetype
 )
 
 if (NOT APPLE)
