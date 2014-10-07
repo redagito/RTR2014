@@ -13,16 +13,25 @@
 #include "graphics/IWindow.h"
 #include "graphics/IResourceManager.h"
 
+#include "MaterialConfig.h"
 #include "debug/RendererDebug.h"
 
 CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-    : m_resourceManager(resourceManager), m_gBuffer(nullptr)
+    : m_defaultShader(nullptr),
+      m_defaultAlphaTexture(nullptr),
+      m_defaultGlowTexture(nullptr),
+      m_defaultNormalTexture(nullptr),
+      m_defaultSpecularTexture(nullptr),
+      m_resourceManager(resourceManager),
+      m_gBuffer(nullptr)
 {
     // Add resource listener
     m_resourceManager->addResourceListener(this);
 
     // Init default shaders
     initDefaultShaders();
+	// Defaukt textures
+	initDefaultTextures();
 
     // Init GBuffer for deferred rendering
     initFrameBuffer();
@@ -35,7 +44,7 @@ CRenderer::CRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
     glDepthFunc(GL_LESS);
 
     // Backface culling disabled for debugging
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     // Winding order, standard is counter-clockwise
@@ -149,12 +158,69 @@ void CRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4&
     // TODO Rendering logic
     // TODO Set default builtin shader
     CShaderProgram* shader = m_defaultShader;
+    if (material->hasCustomShader())
+    {
+        shader = material->getCustomShader();
+    }
+
     shader->setActive();
 
     shader->setUniform("rotation", rotation);
     shader->setUniform("translation", translation);
     shader->setUniform("scale", scale);
     shader->setUniform("model", translation * rotation * scale);
+
+    // Send material textures to shader
+    if (material->hasDiffuse())
+    {
+        material->getDiffuse()->setActive(diffuseTextureUnit);
+        shader->setUniform("diffuse_texture", diffuseTextureUnit);
+    }
+
+    if (material->hasNormal())
+    {
+        material->getNormal()->setActive(normalTextureUnit);
+    }
+	else
+	{
+		// Use default texture
+		m_defaultNormalTexture->setActive(normalTextureUnit);
+	}
+	shader->setUniform("normal_texture", normalTextureUnit);
+
+    if (material->hasSpecular())
+    {
+        material->getSpecular()->setActive(specularTextureUnit);
+	}
+	else
+	{
+		// Use default texture
+		m_defaultSpecularTexture->setActive(specularTextureUnit);
+	}
+	shader->setUniform("specular_texture", specularTextureUnit);
+
+    if (material->hasGlow())
+    {
+        material->getGlow()->setActive(glowTextureUnit);
+	}
+	else
+	{
+		// Use default texture
+		m_defaultGlowTexture->setActive(glowTextureUnit);
+	}
+	shader->setUniform("glow_texture", glowTextureUnit);
+
+	// TODO Sort materials with alpha texture for blending.
+	// TODO Implement alpha masks?
+    if (material->hasAlpha())
+    {
+        material->getAlpha()->setActive(alphaTextureUnit);
+	}
+	else
+	{
+		m_defaultAlphaTexture->setActive(alphaTextureUnit);
+	}
+	shader->setUniform("alpha_texture", alphaTextureUnit);
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
@@ -739,6 +805,22 @@ void CRenderer::initDefaultShaders()
 {
     ResourceId shaderId = m_resourceManager->loadShader("data/shader/shader_test_0.ini");
     m_defaultShader = m_shaderPrograms.at(shaderId).get();
+}
+
+void CRenderer::initDefaultTextures()
+{
+	// Default normal map with straight normals
+	// Discussion here: http://www.gameartisans.org/forums/threads/1985-Normal-Map-RGB-127-127-255-or-128-128-255
+	ResourceId id = m_resourceManager->createImage({128, 128, 255}, 1, 1, EColorFormat::RGB24);
+	m_defaultNormalTexture = getTexture(id);
+
+	// Default specular map has no highlights
+	id = m_resourceManager->createImage({ 0 }, 1, 1, EColorFormat::GreyScale8);
+	m_defaultSpecularTexture = getTexture(id);
+	// Same for default glow texture
+	m_defaultGlowTexture = getTexture(id);
+	// and alpha texture
+	m_defaultAlphaTexture = getTexture(id);
 }
 
 void CRenderer::initFrameBuffer() {}

@@ -191,6 +191,7 @@ class CRenderer : public IRenderer, IResourceListener
 
    private:
 	void initDefaultShaders();
+	void initDefaultTextures();
 	void initFrameBuffer();
 
     std::shared_ptr<IResourceManager> m_resourceManager; /**< Shared resource manager. */
@@ -219,6 +220,10 @@ class CRenderer : public IRenderer, IResourceListener
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 
 	CShaderProgram* m_defaultShader; /**< Default shader for rendering. TODO for testing, remove later. */
+	CTexture* m_defaultNormalTexture;
+	CTexture* m_defaultSpecularTexture;
+	CTexture* m_defaultGlowTexture;
+	CTexture* m_defaultAlphaTexture;
 
 	std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 

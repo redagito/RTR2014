@@ -1,5 +1,7 @@
 #include "CMaterial.h"
 
+#include "debug/Log.h"
+
 CMaterial::CMaterial(const CTexture* diffuse, const CTexture* normal, const CTexture* specular,
                      const CTexture* glow, const CTexture* alpha,
                      CShaderProgram* customShader)
@@ -20,23 +22,28 @@ bool CMaterial::init(const CTexture* diffuse, const CTexture* normal, const CTex
     // Textures must either be nullptr (unused) or valid
     if (diffuse != nullptr && !diffuse->isValid())
     {
+		LOG_ERROR("Diffuse texture is not valid.");
         return false;
     }
     if (normal != nullptr && !normal->isValid())
     {
-        return false;
+		LOG_ERROR("Normal texture is not valid.");
+		return false;
     }
     if (specular != nullptr && !specular->isValid())
     {
-        return false;
+		LOG_ERROR("Specular texture is not valid.");
+		return false;
     }
-    if (glow != nullptr && glow->isValid())
+    if (glow != nullptr && !glow->isValid())
     {
-        return false;
+		LOG_ERROR("Glow texture is not valid.");
+		return false;
     }
     if (alpha != nullptr && !alpha->isValid())
     {
-        return false;
+		LOG_ERROR("Alpha texture is not valid.");
+		return false;
     }
     // Custom shader must either be nullptr for unused or valid
     if (customShader != nullptr && !customShader->isValid())

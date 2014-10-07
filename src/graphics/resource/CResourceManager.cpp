@@ -54,14 +54,14 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
     }
     std::string extension = file.substr(file.find_last_of('.') + 1);
 
-	// Mesh resource id
-	ResourceId meshId = -1;
+    // Mesh resource id
+    ResourceId meshId = -1;
 
-	// Decide loading method based on extension
-	// TODO Register loader functions for extensions
+    // Decide loading method based on extension
+    // TODO Register loader functions for extensions
     if (extension == "obj")
-	{
-		// Wavefront OBJ file format loaded with tinyobj
+    {
+        // Wavefront OBJ file format loaded with tinyobj
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         // Load as obj
@@ -83,20 +83,21 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
         }
         // Create mesh resource
         meshId = createMesh(shapes.at(0).mesh.positions, shapes.at(0).mesh.indices,
-                                       shapes.at(0).mesh.normals, shapes.at(0).mesh.texcoords,
-                                       EPrimitiveType::Triangle);
+                            shapes.at(0).mesh.normals, shapes.at(0).mesh.texcoords,
+                            EPrimitiveType::Triangle);
     }
-	else if (extension == "oni")
-	{
-		// Load without building index buffer
-		CObjModelLoader objLoader;
-		if (!objLoader.load(file))
-		{
-			LOG_ERROR("Failed to load mesh file %s as non-indexed obj file.", file.c_str());
-			return -1;
-		}
-		meshId = createMesh(objLoader.getVertices(), {}, objLoader.getNormals(), objLoader.getUV(), EPrimitiveType::Triangle);
-	}
+    else if (extension == "oni")
+    {
+        // Load without building index buffer
+        CObjModelLoader objLoader;
+        if (!objLoader.load(file))
+        {
+            LOG_ERROR("Failed to load mesh file %s as non-indexed obj file.", file.c_str());
+            return -1;
+        }
+        meshId = createMesh(objLoader.getVertices(), {}, objLoader.getNormals(), objLoader.getUV(),
+                            EPrimitiveType::Triangle);
+    }
 
     if (meshId == -1)
     {
@@ -212,8 +213,8 @@ bool CResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
     return true;
 }
 
-ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha, ResourceId normal,
-                                            ResourceId specular, ResourceId glow,
+ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId normal,
+                                            ResourceId specular, ResourceId glow, ResourceId alpha,
                                             ResourceId customShader)
 {
     // Create material
@@ -221,7 +222,7 @@ ResourceId CResourceManager::createMaterial(ResourceId diffuse, ResourceId alpha
     ++m_nextMaterialId;
 
     // Add material
-    m_materials[id] = SMaterial(diffuse, alpha, normal, specular, glow, customShader);
+    m_materials[id] = SMaterial(diffuse, normal, specular, glow, alpha, customShader);
 
     // Notify listener with create event
     notifyResourceListeners(EResourceType::Material, id, EListenerEvent::Create);
@@ -252,18 +253,6 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         {
             LOG_ERROR("Failed to load diffuse texture specified in material file %s.",
                       file.c_str());
-            return -1;
-        }
-    }
-
-    ResourceId alphaId = -1;
-    if (ini.hasKey("alpha", "file"))
-    {
-        // Alpha texture is grey-scale format
-        alphaId = loadImage(ini.getValue("alpha", "file", "error"), EColorFormat::GreyScale8);
-        if (alphaId == -1)
-        {
-            LOG_ERROR("Failed to load alpha texture specified in material file %s.", file.c_str());
             return -1;
         }
     }
@@ -305,6 +294,18 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         }
     }
 
+    ResourceId alphaId = -1;
+    if (ini.hasKey("alpha", "file"))
+    {
+        // Alpha texture is grey-scale format
+        alphaId = loadImage(ini.getValue("alpha", "file", "error"), EColorFormat::GreyScale8);
+        if (alphaId == -1)
+        {
+            LOG_ERROR("Failed to load alpha texture specified in material file %s.", file.c_str());
+            return -1;
+        }
+    }
+
     ResourceId customShaderId = -1;
     if (ini.hasKey("shader", "file"))
     {
@@ -319,7 +320,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
     }
 
     ResourceId materialId =
-        createMaterial(diffuseId, alphaId, normalId, specularId, glowId, customShaderId);
+        createMaterial(diffuseId, normalId, specularId, glowId, alphaId, customShaderId);
     if (materialId == -1)
     {
         LOG_ERROR("Failed to create material resource id for material file %s.", file.c_str());
@@ -329,8 +330,8 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
     return materialId;
 }
 
-bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& alpha,
-                                   ResourceId& normal, ResourceId& specular, ResourceId& glow,
+bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal,
+                                   ResourceId& specular, ResourceId& glow, ResourceId& alpha,
                                    ResourceId& customShader) const
 {
     // Retrieve from map
@@ -341,10 +342,10 @@ bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceI
     }
     // Copy data
     diffuse = iter->second.m_diffuse;
-    alpha = iter->second.m_alpha;
     normal = iter->second.m_normal;
     specular = iter->second.m_specular;
-    glow = iter->second.m_glow;
+	glow = iter->second.m_glow;
+	alpha = iter->second.m_alpha;
     customShader = iter->second.m_customShader;
     return true;
 }

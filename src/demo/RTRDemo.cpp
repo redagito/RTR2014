@@ -35,7 +35,7 @@ int RTRDemo::init()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_glfw_window = glfwCreateWindow(1024, 768, "RTR Demo", NULL, NULL);
+    m_glfw_window = glfwCreateWindow(800, 600, "RTR Demo", NULL, NULL);
     if (m_glfw_window == nullptr)
     {
         LOG_ERROR("glfwCreateWindow() failed.");
@@ -45,7 +45,7 @@ int RTRDemo::init()
 
     glfwMakeContextCurrent(m_glfw_window);
 
-	// TODO This is just ugly...
+// TODO This is just ugly...
 #ifndef __APPLE__
     if (flextInit(m_glfw_window) != GL_TRUE)
     {
@@ -67,57 +67,85 @@ int RTRDemo::init()
 
 int RTRDemo::run()
 {
-	// Load cube
-	ResourceId cube = m_resourceManager->loadMesh("data/mesh/cave.obj");
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
-    ResourceId material = m_resourceManager->loadMaterial("data/material/material_test_0.ini");
-	// Error check
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
+    // Load cube
+    ResourceId cube = m_resourceManager->loadMesh("data/mesh/cube.obj");
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
+    ResourceId material1 =
+        m_resourceManager->loadMaterial("data/material/stone_repeated_1_diffuse_normal.ini");
+    ResourceId material2 = m_resourceManager->loadMaterial(
+        "data/material/stone_repeated_1_diffuse_normal_specular.ini");
+    ResourceId material3 = m_resourceManager->loadMaterial("data/material/test_1.ini");
+
+    ResourceId material4 =
+        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse.ini");
+    ResourceId material5 =
+        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse_specular.ini");
+    ResourceId material6 =
+        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse_normal.ini");
+    ResourceId material7 = m_resourceManager->loadMaterial(
+        "data/material/brick_repeated_1_diffuse_normal_specular.ini");
+
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
 
     // Create scene object with mesh and material
-    SceneObjectId sceneObj =
-        m_scene->createObject(cube, material, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj1 = m_scene->createObject(cube, material1, glm::vec3(-2.2f, 0.f, 0.f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj2 = m_scene->createObject(cube, material2, glm::vec3(2.2f, 0.f, 0.f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj3 = m_scene->createObject(cube, material3, glm::vec3(0.f, 0.f, 0.f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
 
-	// Set camera
-	m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
-	m_camera->setView(glm::vec3(10.f, 5.f, 3.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+    SceneObjectId sceneObj4 = m_scene->createObject(cube, material4, glm::vec3(-2.2f, 0.f, -2.2f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj5 = m_scene->createObject(cube, material5, glm::vec3(0.f, 0.f, -2.2f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj6 = m_scene->createObject(cube, material6, glm::vec3(2.2f, 0.f, -2.2f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
 
-	double f1Cooldown = 0.f;
-	double timeDiff = 0;
+    SceneObjectId sceneObj7 = m_scene->createObject(cube, material7, glm::vec3(-2.2f, 0.f, 2.2f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+
+    // Set camera
+    m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
+    m_camera->setView(glm::vec3(3.f, 5.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
+    double f1Cooldown = 0.f;
+    double timeDiff = 0;
 
     do
-	{
-		double startTime = glfwGetTime();
+    {
+        double startTime = glfwGetTime();
 
-		// Cooldowns
-		f1Cooldown -= timeDiff;
+        // Cooldowns
+        f1Cooldown -= timeDiff;
 
-		// Draw call
+        // Draw call
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
         // Buffer swap
-		m_window->swapBuffer();
+        m_window->swapBuffer();
 
-		// Update input
-		glfwPollEvents();
-		
-		if (glfwGetKey(m_glfw_window, GLFW_KEY_F1) == GLFW_PRESS && f1Cooldown <= 0.f)
-		{
-			// Reset cooldown
-			f1Cooldown = 0.5f;
-			// Capure/uncapture mouse
-			m_window->toggleMouseCapture();
-		}
+        // Update input
+        glfwPollEvents();
 
-		timeDiff = glfwGetTime() - startTime;
+        if (glfwGetKey(m_glfw_window, GLFW_KEY_F1) == GLFW_PRESS && f1Cooldown <= 0.f)
+        {
+            // Reset cooldown
+            f1Cooldown = 0.5f;
+            // Capure/uncapture mouse
+            m_window->toggleMouseCapture();
+        }
+
+        timeDiff = glfwGetTime() - startTime;
     }  // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(m_glfw_window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(m_glfw_window) == 0);

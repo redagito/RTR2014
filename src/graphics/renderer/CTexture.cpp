@@ -10,7 +10,10 @@ CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, 
     : m_valid(false), m_textureId(0), m_width(width), m_height(height), m_format(format)
 {
     // Init texture with data
-    init(image, width, height, format, mipmapLevel);
+    if (!init(image, width, height, format, mipmapLevel))
+	{ 
+		LOG_ERROR("Failed to initialize texture.");
+	}
 }
 
 CTexture::~CTexture() { glDeleteTextures(1, &m_textureId); }
@@ -18,7 +21,6 @@ CTexture::~CTexture() { glDeleteTextures(1, &m_textureId); }
 bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
                     unsigned int height, EColorFormat format, unsigned int mipmapLevel)
 {
-
 	// Error check
 	std::string error;
 	if (hasGLError(error))
@@ -127,3 +129,10 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
 GLuint CTexture::getId() const { return m_textureId; }
 
 bool CTexture::isValid() const { return m_valid; }
+
+void CTexture::setActive(GLint textureUnit) const
+{
+	assert(isValid());
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(GL_TEXTURE_2D, m_textureId);
+}

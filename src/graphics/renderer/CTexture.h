@@ -32,6 +32,11 @@ class CTexture
 	*/
 	bool isValid() const;
 
+	/**
+	* \bref Sets texture active as texture unit.
+	*/
+	void setActive(GLint textureUnit) const;
+
    private:
     bool m_valid;
     GLuint m_textureId;
