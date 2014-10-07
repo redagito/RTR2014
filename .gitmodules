@@ -13,3 +13,6 @@
 [submodule "libs/tinyobjloader"]
 	path = libs/tinyobjloader
 	url = git@github.com:syoyo/tinyobjloader.git
+[submodule "libs/jsoncpp"]
+	path = libs/jsoncpp
+	url = git@github.com:open-source-parsers/jsoncpp.git

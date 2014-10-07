@@ -63,8 +63,9 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
 	{
 		// Wavefront OBJ file format loaded with tinyobj
         std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
         // Load as obj
-        std::string err = tinyobj::LoadObj(shapes, file.c_str());
+        std::string err = tinyobj::LoadObj(shapes, materials, file.c_str());
 
         if (!err.empty())
         {
