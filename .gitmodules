@@ -10,12 +10,12 @@
 [submodule "libs/flextGL"]
 	path = libs/flextGL
 	url = https://github.com/ginkgo/flextGL.git
-[submodule "libs/tinyobjloader"]
-	path = libs/tinyobjloader
-	url = git@github.com:syoyo/tinyobjloader.git
-[submodule "libs/jsoncpp"]
-	path = libs/jsoncpp
-	url = git@github.com:open-source-parsers/jsoncpp.git
 [submodule "libs/freetype"]
 	path = libs/freetype
 	url = http://git.savannah.gnu.org/cgit/freetype/freetype2.git/
+[submodule "libs/jsoncpp"]
+	path = libs/jsoncpp
+	url = git@github.com:open-source-parsers/jsoncpp.git
+[submodule "libs/tinyobjloader"]
+	path = libs/tinyobjloader
+	url = git@github.com:syoyo/tinyobjloader.git
