@@ -16,6 +16,9 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 option(GLFW_INSTALL OFF)
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+option(JSONCPP_WITH_TESTS OFF)
+option(JSONCPP_WITH_POST_BUILD_UNITTEST OFF)
+option(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF)
 
 add_subdirectory(libs/glfw)
 include_directories(libs/glfw/include)
@@ -73,8 +76,10 @@ include_directories(libs/lodepng)
 # ===
 
 if (NOT APPLE)
+set(RUN_FLEXT_GL_ARGS ${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${RUN_FLEXT_GL_ARGS})
 add_custom_target(RunFlextGL ALL
-    COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py" -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt
+    COMMAND ${PYTHON_EXECUTABLE} ${RUN_FLEXT_GL_ARGS}
     DEPENDS ${PROJECT_SOURCE_DIR}/profile.txt
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flext.py
@@ -86,10 +91,14 @@ endif()
 # demo executable
 # ===
 
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_BINARY_DIR}/src
-	)
+)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
