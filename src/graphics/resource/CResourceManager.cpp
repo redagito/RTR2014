@@ -3,11 +3,12 @@
 #include <fstream>
 #include <sstream>
 
+#include "lodepng.h"
+#include "tiny_obj_loader.h"
+
 #include "graphics/IResourceListener.h"
 
 #include "io/CIniFile.h"
-#include "io/tinyobj/tiny_obj_loader.h"
-#include "io/lodepng/lodepng.h"
 
 #include "debug/Log.h"
 
@@ -44,8 +45,9 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
 	// TODO obj type assumed, check extension
 
 	std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
 	// Load as obj
-	std::string err = tinyobj::LoadObj(shapes, file.c_str());
+	std::string err = tinyobj::LoadObj(shapes, materials, file.c_str());
 
 	if (!err.empty())
 	{

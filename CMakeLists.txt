@@ -18,11 +18,19 @@ option(GLFW_INSTALL OFF)
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 
 add_subdirectory(libs/glfw)
-add_subdirectory(libs/assimp)
-
 include_directories(libs/glfw/include)
+
+add_subdirectory(libs/assimp)
 include_directories(libs/assimp/include)
+
+add_subdirectory(libs/tinyobjloader)
+include_directories(libs/tinyobjloader)
+
 include_directories(libs/glm)
+
+file(GLOB LODEPNG_SOURCES ${CMAKE_SOURCE_DIR}/libs/lodepng/*.cpp)
+set(THIRD_PARTY_SOURCES ${THIRD_PARTY_SOURCES} ${LODEPNG_SOURCES})
+include_directories(libs/lodepng)
 
 # ===
 # generate shaders
@@ -86,6 +94,8 @@ file(GLOB_RECURSE SRC_FILES
 	${CMAKE_BINARY_DIR}/src/*.h
 	${CMAKE_SOURCE_DIR}/shaders/*.glsl
 )
+
+set(SRC_FILES ${SRC_FILES} ${THIRD_PARTY_SOURCES})
 
 if (NOT APPLE)
   set (SRC_FILES "${SRC_FILES};${CMAKE_BINARY_DIR}/src/generated/flextGL.c;${CMAKE_BINARY_DIR}/src/generated/flextGL.h")
