@@ -107,6 +107,7 @@ target_link_libraries(RTRDemo
 	${OPENGL_LIBRARY}
 	glfw ${GLFW_LIBRARIES}
 	assimp
+    tinyobjloader
 )
 
 if (NOT APPLE)
