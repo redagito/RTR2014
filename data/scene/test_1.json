@@ -1,0 +1,67 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse.ini",
+            "position" :  [ -2.2, 0, 2.2 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal.ini",
+            "position" :  [ 0, 0, 2.2],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_specular.ini",
+            "position" :  [ 2.2, 0, 2.2],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ -2.2, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/moss_1_diffuse.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/moss_1_diffuse_normal.ini",
+            "position" :  [ 2.2, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/moss_1_diffuse_specular.ini",
+            "position" :  [ -2.2, 0, -2.2 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/moss_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, 0, -2.2 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/metal_1_diffuse_specular.ini",
+            "position" :  [ 2.2, 0, -2.2 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        }
+    ]
+}

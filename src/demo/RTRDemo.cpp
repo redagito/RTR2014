@@ -12,10 +12,12 @@
 
 #include "graphics/camera/CFirstPersonCamera.h"
 #include "graphics/camera/CLookAtCamera.h"
-#include "graphics/renderer/CRenderer.h"
+#include "graphics/renderer/CForwardRenderer.h"
 #include "graphics/resource/CResourceManager.h"
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
+
+#include "io/CSceneLoader.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -56,7 +58,7 @@ int RTRDemo::init()
 
     m_resourceManager = std::make_shared<CResourceManager>();
     m_window = std::make_shared<CGlfwWindow>(m_glfw_window);
-    m_renderer = std::make_shared<CRenderer>(m_resourceManager);
+    m_renderer = std::make_shared<CForwardRenderer>(m_resourceManager);
     m_scene = std::make_shared<CScene>();
     m_camera = std::make_shared<CLookAtCamera>();
 
@@ -67,56 +69,12 @@ int RTRDemo::init()
 
 int RTRDemo::run()
 {
-    // Load cube
-    ResourceId cube = m_resourceManager->loadMesh("data/mesh/cube.obj");
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        LOG_ERROR("GL Error: %s", error.c_str());
-    }
-    ResourceId material1 =
-        m_resourceManager->loadMaterial("data/material/stone_repeated_1_diffuse_normal.ini");
-    ResourceId material2 = m_resourceManager->loadMaterial(
-        "data/material/stone_repeated_1_diffuse_normal_specular.ini");
-    ResourceId material3 = m_resourceManager->loadMaterial("data/material/test_1.ini");
-
-    ResourceId material4 =
-        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse.ini");
-    ResourceId material5 =
-        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse_specular.ini");
-    ResourceId material6 =
-        m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse_normal.ini");
-    ResourceId material7 = m_resourceManager->loadMaterial(
-        "data/material/brick_repeated_1_diffuse_normal_specular.ini");
-    ResourceId material8 =
-        m_resourceManager->loadMaterial("data/material/moss_1_diffuse_normal_specular.ini");
-
-    // Error check
-    if (hasGLError(error))
-    {
-        LOG_ERROR("GL Error: %s", error.c_str());
-    }
-
-    // Create scene object with mesh and material
-    SceneObjectId sceneObj1 = m_scene->createObject(cube, material1, glm::vec3(-2.2f, 0.f, 0.f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj3 = m_scene->createObject(cube, material3, glm::vec3(0.f, 0.f, 0.f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj2 = m_scene->createObject(cube, material2, glm::vec3(2.2f, 0.f, 0.f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-
-    SceneObjectId sceneObj4 = m_scene->createObject(cube, material4, glm::vec3(-2.2f, 0.f, -2.2f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj5 = m_scene->createObject(cube, material5, glm::vec3(0.f, 0.f, -2.2f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj6 = m_scene->createObject(cube, material6, glm::vec3(2.2f, 0.f, -2.2f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-
-    SceneObjectId sceneObj7 = m_scene->createObject(cube, material7, glm::vec3(-2.2f, 0.f, 2.2f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj8 = m_scene->createObject(cube, material8, glm::vec3(0.f, 0.f, 2.2f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
+	CSceneLoader loader(*m_resourceManager);
+	if (!loader.load("data/scene/test_1.json", *m_scene))
+	{
+		LOG_ERROR("Failed to load scene file.");
+		return 1;
+	}
 
     // Set camera
     m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);

@@ -86,11 +86,6 @@ class CRenderer : public IRenderer, IResourceListener
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material);
 
-	/**
-	* \brief Draws meshes with custom shaders set in their materials.
-	*/
-	void drawCustom();
-
     /**
      * \brief Maps id to internal mesh object.
      */
