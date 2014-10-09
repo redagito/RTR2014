@@ -23,8 +23,14 @@ RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo() {}
 
-int RTRDemo::init()
+int RTRDemo::init(const std::string& configFile)
 {
+    if (!m_config.load(configFile))
+    {
+        LOG_WARNING("Failed to load config file %s, starting with default settings.",
+                    configFile.c_str());
+    }
+
     if (!glfwInit())
     {
         LOG_ERROR("glfwInit() failed.");
@@ -69,12 +75,12 @@ int RTRDemo::init()
 
 int RTRDemo::run()
 {
-	CSceneLoader loader(*m_resourceManager);
-	if (!loader.load("data/scene/test_1.json", *m_scene))
-	{
-		LOG_ERROR("Failed to load scene file.");
-		return 1;
-	}
+    CSceneLoader loader(*m_resourceManager);
+    if (!loader.load(m_config.getValue("scene", "file", "data/scene/test_1.json"), *m_scene))
+    {
+        LOG_ERROR("Failed to load scene file.");
+        return 1;
+    }
 
     // Set camera
     m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
