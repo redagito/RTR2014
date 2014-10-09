@@ -89,6 +89,8 @@ int RTRDemo::run()
         m_resourceManager->loadMaterial("data/material/brick_repeated_1_diffuse_normal.ini");
     ResourceId material7 = m_resourceManager->loadMaterial(
         "data/material/brick_repeated_1_diffuse_normal_specular.ini");
+    ResourceId material8 =
+        m_resourceManager->loadMaterial("data/material/moss_1_diffuse_normal_specular.ini");
 
     // Error check
     if (hasGLError(error))
@@ -99,9 +101,9 @@ int RTRDemo::run()
     // Create scene object with mesh and material
     SceneObjectId sceneObj1 = m_scene->createObject(cube, material1, glm::vec3(-2.2f, 0.f, 0.f),
                                                     glm::vec3(0.f), glm::vec3(1.f));
-    SceneObjectId sceneObj2 = m_scene->createObject(cube, material2, glm::vec3(2.2f, 0.f, 0.f),
-                                                    glm::vec3(0.f), glm::vec3(1.f));
     SceneObjectId sceneObj3 = m_scene->createObject(cube, material3, glm::vec3(0.f, 0.f, 0.f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj2 = m_scene->createObject(cube, material2, glm::vec3(2.2f, 0.f, 0.f),
                                                     glm::vec3(0.f), glm::vec3(1.f));
 
     SceneObjectId sceneObj4 = m_scene->createObject(cube, material4, glm::vec3(-2.2f, 0.f, -2.2f),
@@ -112,6 +114,8 @@ int RTRDemo::run()
                                                     glm::vec3(0.f), glm::vec3(1.f));
 
     SceneObjectId sceneObj7 = m_scene->createObject(cube, material7, glm::vec3(-2.2f, 0.f, 2.2f),
+                                                    glm::vec3(0.f), glm::vec3(1.f));
+    SceneObjectId sceneObj8 = m_scene->createObject(cube, material8, glm::vec3(0.f, 0.f, 2.2f),
                                                     glm::vec3(0.f), glm::vec3(1.f));
 
     // Set camera
