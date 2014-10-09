@@ -7,16 +7,16 @@
 #include "debug/Log.h"
 
 ARenderer::ARenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-	: m_resourceManager(resourceManager),
-	m_defaultAlphaTexture(nullptr),
-	m_defaultGlowTexture(nullptr),
-	m_defaultNormalTexture(nullptr),
-	m_defaultSpecularTexture(nullptr)
+    : m_resourceManager(resourceManager),
+      m_defaultAlphaTexture(nullptr),
+      m_defaultGlowTexture(nullptr),
+      m_defaultNormalTexture(nullptr),
+      m_defaultSpecularTexture(nullptr)
 {
     // Register self as resource listener
     m_resourceManager->addResourceListener(this);
-	// Create default textures
-	initDefaultTextures();
+    // Create default textures
+    initDefaultTextures();
     return;
 }
 
@@ -67,28 +67,50 @@ void ARenderer::notify(EResourceType type, ResourceId id, EListenerEvent event,
     }
 }
 
-IResourceManager* ARenderer::getResourceManager() const
+void ARenderer::draw(CMesh* mesh)
 {
-	return m_resourceManager.get();
+	mesh->getVertexArray()->setActive();
+	
+	// Set primitive draw mode
+	GLenum mode = CMesh::toGLPrimitive(mesh->getPrimitiveType());
+	unsigned int primitiveSize = CMesh::getPrimitiveSize(mesh->getPrimitiveType());
+
+	// Decide on draw method based on the stored data
+	if (mesh->hasIndexBuffer())
+	{
+		// Indexed draw, faster
+		mesh->getIndexBuffer()->setActive();
+		glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
+		mesh->getIndexBuffer()->setInactive();
+	}
+	else
+	{
+		// Slowest draw method
+		glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
+	}
+	mesh->getVertexArray()->setInactive();
 }
+
+IResourceManager* ARenderer::getResourceManager() const { return m_resourceManager.get(); }
 
 void ARenderer::initDefaultTextures()
 {
-	// Default diffuse texture is deep pink to signal errors/missing textures
-	m_defaultDiffuseTexture.reset(new CTexture({ 238, 18, 137 }, 1, 1, EColorFormat::RGB24, 0));
+    // Default diffuse texture is deep pink to signal errors/missing textures
+    m_defaultDiffuseTexture.reset(new CTexture({238, 18, 137}, 1, 1, EColorFormat::RGB24, 0));
 
-	// Default normal texture with straight/non-perturbed normals
-	// Discussion here: http://www.gameartisans.org/forums/threads/1985-Normal-Map-RGB-127-127-255-or-128-128-255
-	m_defaultNormalTexture.reset(new CTexture({ 128, 128, 255 }, 1, 1, EColorFormat::RGB24, 0));
+    // Default normal texture with straight/non-perturbed normals
+    // Discussion here:
+    // http://www.gameartisans.org/forums/threads/1985-Normal-Map-RGB-127-127-255-or-128-128-255
+    m_defaultNormalTexture.reset(new CTexture({128, 128, 255}, 1, 1, EColorFormat::RGB24, 0));
 
-	// Default specular texture is black (no specular highlights)
-	m_defaultSpecularTexture.reset(new CTexture({ 0 }, 1, 1, EColorFormat::GreyScale8));
+    // Default specular texture is black (no specular highlights)
+    m_defaultSpecularTexture.reset(new CTexture({0}, 1, 1, EColorFormat::GreyScale8));
 
-	// Default glow texture is black (no glow)
-	m_defaultGlowTexture.reset(new CTexture({ 0 }, 1, 1, EColorFormat::GreyScale8));
+    // Default glow texture is black (no glow)
+    m_defaultGlowTexture.reset(new CTexture({0}, 1, 1, EColorFormat::GreyScale8));
 
-	// Default alpha texture is white (completely opaque)
-	m_defaultAlphaTexture.reset(new CTexture({ 255 }, 1, 1, EColorFormat::GreyScale8));
+    // Default alpha texture is white (completely opaque)
+    m_defaultAlphaTexture.reset(new CTexture({255}, 1, 1, EColorFormat::GreyScale8));
 }
 
 CMesh* ARenderer::getMesh(ResourceId id) const

@@ -52,6 +52,9 @@ protected:
 private:
 	bool initDefaultShaders();
 
+	glm::mat4 m_currentView; /**< Stores the current view matrix. */
+	glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
+
 	std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 	CShaderProgram* m_defaultShader; /**< Default shader for rendering. TODO for testing, remove later. */
 };

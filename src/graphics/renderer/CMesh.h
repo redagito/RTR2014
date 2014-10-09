@@ -36,10 +36,10 @@ class CMesh
               const std::vector<float>& normals, const std::vector<float>& uvs,
               EPrimitiveType type);
 
-	/**
-	* \brief Returns whether or not an index buffer has been set.
-	*/
-	bool hasIndexBuffer() const;
+    /**
+    * \brief Returns whether or not an index buffer has been set.
+    */
+    bool hasIndexBuffer() const;
 
     /**
     * \brief Read access to vertex buffer
@@ -70,6 +70,18 @@ class CMesh
     * \brief Returns vertex array object.
     */
     const std::unique_ptr<CVertexArrayObject>& getVertexArray() const;
+
+    /**
+    * \brief Maps primitive type to GL type.
+    * Example: Maps EPrimitiveType::Triangle to GL_TRIANGLES.
+    */
+    static GLenum toGLPrimitive(EPrimitiveType type);
+
+    /**
+    * \brief Returns primitive size for the type.
+    * Example: Returns value 3 for EPrimitiveType::Triangle.
+    */
+    static unsigned int getPrimitiveSize(EPrimitiveType type);
 
    private:
     std::unique_ptr<CVertexBuffer> m_vertices; /**< Mesh vertices. */

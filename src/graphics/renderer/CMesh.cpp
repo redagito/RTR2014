@@ -118,3 +118,43 @@ const std::unique_ptr<CVertexBuffer>& CMesh::getUVBuffer() const { return m_uvs;
 const EPrimitiveType CMesh::getPrimitiveType() const { return m_type; }
 
 const std::unique_ptr<CVertexArrayObject>& CMesh::getVertexArray() const { return m_vao; }
+
+
+GLenum CMesh::toGLPrimitive(EPrimitiveType type)
+{
+	switch (type)
+	{
+	case EPrimitiveType::Point:
+		return GL_POINTS;
+		break;
+	case EPrimitiveType::Line:
+		return GL_LINE;
+		break;
+	case EPrimitiveType::Triangle:
+		return GL_TRIANGLES;
+		break;
+	default:
+		LOG_ERROR("Invalid or unknown primitive type, default triangle type used.");
+		// Default
+		return GL_TRIANGLES;
+	}
+}
+
+unsigned int CMesh::getPrimitiveSize(EPrimitiveType type)
+{
+	switch (type)
+	{
+	case EPrimitiveType::Point:
+		return 1;
+		break;
+	case EPrimitiveType::Line:
+		return 2;
+		break;
+	case EPrimitiveType::Triangle:
+		return 3;
+		break;
+	default:
+		LOG_ERROR("Invalid or unknown primitive type");
+		return 0;
+	}
+}
