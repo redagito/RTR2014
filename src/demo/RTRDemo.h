@@ -23,6 +23,10 @@ class RTRDemo
     int run();
 
    private:
+    bool initWindow();
+    bool initRenderer();
+    bool initScene();
+
     GLFWwindow* m_glfw_window;
 
     CIniFile m_config;
