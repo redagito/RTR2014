@@ -34,6 +34,12 @@ class ARenderer : public IRenderer, IResourceListener
     virtual ~ARenderer();
 
     /**
+     * \brief Performs initialization.
+     * Implemented in specialized rendering classes.
+     */
+    virtual bool init() = 0;
+
+    /**
     * \brief Draws whole scene.
     * Implemented in specialized rendering classes.
     */

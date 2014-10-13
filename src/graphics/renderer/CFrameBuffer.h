@@ -11,18 +11,22 @@ class CTexture;
 */
 class CFrameBuffer
 {
-public:
-	CFrameBuffer();
-	~CFrameBuffer();
+   public:
+    CFrameBuffer();
+    ~CFrameBuffer();
 
-	bool init();
+    bool init();
 
-	void setActive(GLenum target);
-	void setInactive(GLenum target);
+    bool isValid() const;
 
-	void attach(const std::shared_ptr<CTexture>& texture, GLenum attachment);
+    std::string getState();
 
-private:
-	GLuint m_fboId; /**< Frame buffer id. */
-	bool m_valid; /**< Frame buffer validity. */
+    void setActive(GLenum target);
+    void setInactive(GLenum target);
+
+    void attach(const std::shared_ptr<CTexture>& texture, GLenum attachment);
+
+   private:
+    GLuint m_fboId; /**< Frame buffer id. */
+    bool m_valid;   /**< Frame buffer validity. */
 };

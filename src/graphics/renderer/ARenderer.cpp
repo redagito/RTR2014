@@ -8,10 +8,10 @@
 
 ARenderer::ARenderer(const std::shared_ptr<IResourceManager>& resourceManager)
     : m_resourceManager(resourceManager),
-      m_defaultAlphaTexture(nullptr),
-      m_defaultGlowTexture(nullptr),
       m_defaultNormalTexture(nullptr),
-      m_defaultSpecularTexture(nullptr)
+      m_defaultSpecularTexture(nullptr),
+      m_defaultGlowTexture(nullptr),
+      m_defaultAlphaTexture(nullptr)
 {
     // Register self as resource listener
     m_resourceManager->addResourceListener(this);
@@ -69,26 +69,26 @@ void ARenderer::notify(EResourceType type, ResourceId id, EListenerEvent event,
 
 void ARenderer::draw(CMesh* mesh)
 {
-	mesh->getVertexArray()->setActive();
-	
-	// Set primitive draw mode
-	GLenum mode = CMesh::toGLPrimitive(mesh->getPrimitiveType());
-	unsigned int primitiveSize = CMesh::getPrimitiveSize(mesh->getPrimitiveType());
+    mesh->getVertexArray()->setActive();
 
-	// Decide on draw method based on the stored data
-	if (mesh->hasIndexBuffer())
-	{
-		// Indexed draw, faster
-		mesh->getIndexBuffer()->setActive();
-		glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
-		mesh->getIndexBuffer()->setInactive();
-	}
-	else
-	{
-		// Slowest draw method
-		glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
-	}
-	mesh->getVertexArray()->setInactive();
+    // Set primitive draw mode
+    GLenum mode = CMesh::toGLPrimitive(mesh->getPrimitiveType());
+    unsigned int primitiveSize = CMesh::getPrimitiveSize(mesh->getPrimitiveType());
+
+    // Decide on draw method based on the stored data
+    if (mesh->hasIndexBuffer())
+    {
+        // Indexed draw, faster
+        mesh->getIndexBuffer()->setActive();
+        glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
+        mesh->getIndexBuffer()->setInactive();
+    }
+    else
+    {
+        // Slowest draw method
+        glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
+    }
+    mesh->getVertexArray()->setInactive();
 }
 
 IResourceManager* ARenderer::getResourceManager() const { return m_resourceManager.get(); }

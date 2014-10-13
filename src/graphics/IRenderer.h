@@ -14,9 +14,15 @@ class IRenderer
 {
    public:
     /**
-	* \brief Virtual destructor for interface class.
-	*/
+    * \brief Virtual destructor for interface class.
+    */
     virtual ~IRenderer();
+
+    /**
+     * \brief Initialize renderer.
+     * Perform resource acquisition here.
+     */
+    virtual bool init() = 0;
 
     /**
     * \brief Draw scene viewed from camera into window.

@@ -17,11 +17,11 @@
 #include "debug/Log.h"
 
 CForwardRenderer::CForwardRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-    : ARenderer(resourceManager), m_currentView(1.f), m_currentProjection(1.f)
+    : ARenderer(resourceManager),
+      m_currentView(1.f),
+      m_currentProjection(1.f),
+      m_defaultShader(nullptr)
 {
-    // Init default shaders
-    initDefaultShaders();
-
     // Set clear color
     glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
@@ -48,6 +48,12 @@ CForwardRenderer::CForwardRenderer(const std::shared_ptr<IResourceManager>& reso
 CForwardRenderer::~CForwardRenderer()
 {
     // TODO Cleanup
+}
+
+bool CForwardRenderer::init()
+{
+    // Load and init default shaders
+    return initDefaultShaders();
 }
 
 void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& window)
@@ -116,13 +122,11 @@ void CForwardRenderer::draw(ResourceId meshId, const glm::vec3& position, const 
 
     // Create matrices
     glm::mat4 translationMatrix = glm::translate(position);
-    
-	// TODO Correct but slow?
-    glm::mat4 rotationMatrix =
-        glm::rotate(rotation.x, glm::vec3(1.f, 0.f, 0.f)) *
-        glm::rotate(rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
-        glm::rotate(rotation.z,
-                    glm::vec3(0.f, 0.f, 1.f));
+
+    // TODO Correct but slow?
+    glm::mat4 rotationMatrix = glm::rotate(rotation.x, glm::vec3(1.f, 0.f, 0.f)) *
+                               glm::rotate(rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
+                               glm::rotate(rotation.z, glm::vec3(0.f, 0.f, 1.f));
     glm::mat4 scaleMatrix = glm::scale(scale);
 
     // Forward draw call
@@ -148,8 +152,8 @@ void CForwardRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm
     }
 
     // Transformation matrices
-	shader->setUniform(translationMatrixUniformName, translation);
-	shader->setUniform(rotationMatrixUniformName, rotation);
+    shader->setUniform(translationMatrixUniformName, translation);
+    shader->setUniform(rotationMatrixUniformName, rotation);
     shader->setUniform(scaleMatrixUniformName, scale);
     shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
 
@@ -210,7 +214,7 @@ void CForwardRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
-	ARenderer::draw(mesh);
+    ARenderer::draw(mesh);
 
     // TODO Cleanup?
 }
