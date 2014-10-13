@@ -18,46 +18,46 @@ SceneObjectId CScene::createObject(ResourceId mesh, ResourceId material, const g
 bool CScene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
                        glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const
 {
-	// TODO Needs to be changed for better data structures
-	if (id < 0 || id >= m_objects.size())
-	{
-		return false;
-	}
+    // TODO Needs to be changed for better data structures
+    if (id < 0 || id >= m_objects.size())
+    {
+        return false;
+    }
 
-	// Write data
-	mesh = m_objects.at(id).m_mesh;
-	material = m_objects.at(id).m_material;
-	position = m_objects.at(id).m_position;
-	rotation = m_objects.at(id).m_rotation;
-	scale = m_objects.at(id).m_scale;
-	return true;
+    // Write data
+    mesh = m_objects.at(id).m_mesh;
+    material = m_objects.at(id).m_material;
+    position = m_objects.at(id).m_position;
+    rotation = m_objects.at(id).m_rotation;
+    scale = m_objects.at(id).m_scale;
+    return true;
 }
 
-void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
-	const glm::vec3& rotation, const glm::vec3& scale)
+void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
+                       const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 {
-	// TODO Needs to be changed for better data structures
-	assert(id >= 0 && id < m_objects.size() && "Invalid scene object id");
+    // TODO Needs to be changed for better data structures
+    assert(id >= 0 && id < m_objects.size() && "Invalid scene object id");
 
-	// Write data
-	m_objects[id].m_mesh = mesh;
-	m_objects[id].m_material = material;
-	m_objects[id].m_position = position;
-	m_objects[id].m_rotation = rotation;
-	m_objects[id].m_scale = scale;
-	return;
+    // Write data
+    m_objects[id].m_mesh = mesh;
+    m_objects[id].m_material = material;
+    m_objects[id].m_position = position;
+    m_objects[id].m_rotation = rotation;
+    m_objects[id].m_scale = scale;
+    return;
 }
 
 SceneObjectId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
 {
-	// TODO Implement
-	return -1;
+    // TODO Implement
+    return -1;
 }
 
 bool CScene::getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const
 {
-	// TODO Implement
-	return false;
+    // TODO Implement
+    return false;
 }
 
 ISceneQuery* CScene::createQuery(const ICamera& camera) const

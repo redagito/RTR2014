@@ -5,8 +5,8 @@ SMaterial::SMaterial(ResourceId diffuse, ResourceId normal, ResourceId specular,
     : m_diffuse(diffuse),
       m_normal(normal),
       m_specular(specular),
-	  m_glow(glow),
-	  m_alpha(alpha),
+      m_glow(glow),
+      m_alpha(alpha),
       m_customShader(customShader)
 {
     return;

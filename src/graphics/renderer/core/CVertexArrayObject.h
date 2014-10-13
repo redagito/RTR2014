@@ -8,32 +8,32 @@
 */
 class CVertexArrayObject
 {
-public:
-	/**
-	* \brief Resource allocation.
-	*/
-	CVertexArrayObject();
+   public:
+    /**
+    * \brief Resource allocation.
+    */
+    CVertexArrayObject();
 
-	/**
-	* \brief Cleanup of resources.
-	*/
-	~CVertexArrayObject();
+    /**
+    * \brief Cleanup of resources.
+    */
+    ~CVertexArrayObject();
 
-	/**
-	* \brief Set as active vertex array object.
-	*/
-	void setActive() const;
+    /**
+    * \brief Set as active vertex array object.
+    */
+    void setActive() const;
 
-	/**
-	* \brief Disables vertex array object.
-	*/
-	void setInactive() const;
+    /**
+    * \brief Disables vertex array object.
+    */
+    void setInactive() const;
 
-	/**
-	* \brief Returns GL object id.
-	*/
-	GLuint getId() const;
+    /**
+    * \brief Returns GL object id.
+    */
+    GLuint getId() const;
 
-private:
-	GLuint m_vaoId; /**< GL VAO id. */
+   private:
+    GLuint m_vaoId; /**< GL VAO id. */
 };

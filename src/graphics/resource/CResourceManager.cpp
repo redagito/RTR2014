@@ -344,8 +344,8 @@ bool CResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceI
     diffuse = iter->second.m_diffuse;
     normal = iter->second.m_normal;
     specular = iter->second.m_specular;
-	glow = iter->second.m_glow;
-	alpha = iter->second.m_alpha;
+    glow = iter->second.m_glow;
+    alpha = iter->second.m_alpha;
     customShader = iter->second.m_customShader;
     return true;
 }

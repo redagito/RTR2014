@@ -89,5 +89,5 @@ class CMesh
     std::unique_ptr<CVertexBuffer> m_normals;  /**< Per vertex normals. */
     std::unique_ptr<CVertexBuffer> m_uvs;      /**< Texture coordinates. */
     std::unique_ptr<CVertexArrayObject> m_vao; /**< Vertex array object. */
-    EPrimitiveType m_type;                     /**< Mesh primitoive type. */
+    EPrimitiveType m_type;                     /**< Mesh primitive type. */
 };

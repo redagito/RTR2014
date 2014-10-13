@@ -6,36 +6,36 @@
 #include "debug/Log.h"
 
 CVertexBuffer::CVertexBuffer(const std::vector<float>& data, GLenum usage)
-    : m_bufferId(0), m_valid(false), m_size(data.size())
+    : m_bufferId(0), m_valid(false), m_size((unsigned int)data.size())
 {
-	if (data.empty())
-	{
-		LOG_ERROR("Vertex buffer data is empty.");
-		return;
-	}
+    if (data.empty())
+    {
+        LOG_ERROR("Vertex buffer data is empty.");
+        return;
+    }
     // Create GL buffer resource
-	glGenBuffers(1, &m_bufferId);
-	// Unchecked bind
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
+    glGenBuffers(1, &m_bufferId);
+    // Unchecked bind
+    glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
     // Set data
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), usage);
-	setInactive();
+    setInactive();
     // TODO Check error
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-		return;
-	}
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return;
+    }
     m_valid = true;
 }
 
 CVertexBuffer::~CVertexBuffer() { glDeleteBuffers(1, &m_bufferId); }
 
-void CVertexBuffer::setActive() const 
+void CVertexBuffer::setActive() const
 {
-	assert(isValid()); 
-	glBindBuffer(GL_ARRAY_BUFFER, m_bufferId); 
+    assert(isValid());
+    glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
 }
 
 void CVertexBuffer::setInactive() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }

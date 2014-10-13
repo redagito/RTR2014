@@ -5,6 +5,6 @@
  */
 class IInputListener
 {
-public:
-	virtual ~IInputListener();
+   public:
+    virtual ~IInputListener();
 };

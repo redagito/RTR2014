@@ -9,11 +9,11 @@
 CMesh::CMesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
              const std::vector<float>& normals, const std::vector<float>& uvs, EPrimitiveType type)
     : m_vertices(nullptr),
-	  m_indices(nullptr),
+      m_indices(nullptr),
       m_normals(nullptr),
       m_uvs(nullptr),
-      m_type(EPrimitiveType::Invalid),
-      m_vao(nullptr)
+      m_vao(nullptr),
+      m_type(EPrimitiveType::Invalid)
 {
     init(vertices, indices, normals, uvs, type);
 }
@@ -71,36 +71,36 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
     //  basically we would need a std::vector<glm::vec3> instead of a std::vector<float> to deduce
     //  the size
     // TODO Consider packing all vertex data into a single buffer for better performance
-	m_vertices->setActive();
-	glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(vertexDataShaderLocation);
+    m_vertices->setActive();
+    glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(vertexDataShaderLocation);
 
     // Set normal data attributes
     if (m_normals != nullptr)
     {
-		m_normals->setActive();
-		glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		m_normals->setInactive();
-		glEnableVertexAttribArray(normalDataShaderLocation);
+        m_normals->setActive();
+        glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        m_normals->setInactive();
+        glEnableVertexAttribArray(normalDataShaderLocation);
     }
 
     // Set uv data attributes
     if (m_uvs != nullptr)
     {
-		m_uvs->setActive();
-		glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(uvDataShaderLocation);
+        m_uvs->setActive();
+        glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(uvDataShaderLocation);
     }
 
     // Disable vao
     m_vao->setInactive();
 
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-	}
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
 
     return true;
 }
@@ -119,42 +119,41 @@ const EPrimitiveType CMesh::getPrimitiveType() const { return m_type; }
 
 const std::unique_ptr<CVertexArrayObject>& CMesh::getVertexArray() const { return m_vao; }
 
-
 GLenum CMesh::toGLPrimitive(EPrimitiveType type)
 {
-	switch (type)
-	{
-	case EPrimitiveType::Point:
-		return GL_POINTS;
-		break;
-	case EPrimitiveType::Line:
-		return GL_LINE;
-		break;
-	case EPrimitiveType::Triangle:
-		return GL_TRIANGLES;
-		break;
-	default:
-		LOG_ERROR("Invalid or unknown primitive type, default triangle type used.");
-		// Default
-		return GL_TRIANGLES;
-	}
+    switch (type)
+    {
+    case EPrimitiveType::Point:
+        return GL_POINTS;
+        break;
+    case EPrimitiveType::Line:
+        return GL_LINE;
+        break;
+    case EPrimitiveType::Triangle:
+        return GL_TRIANGLES;
+        break;
+    default:
+        LOG_ERROR("Invalid or unknown primitive type, default triangle type used.");
+        // Default
+        return GL_TRIANGLES;
+    }
 }
 
 unsigned int CMesh::getPrimitiveSize(EPrimitiveType type)
 {
-	switch (type)
-	{
-	case EPrimitiveType::Point:
-		return 1;
-		break;
-	case EPrimitiveType::Line:
-		return 2;
-		break;
-	case EPrimitiveType::Triangle:
-		return 3;
-		break;
-	default:
-		LOG_ERROR("Invalid or unknown primitive type");
-		return 0;
-	}
+    switch (type)
+    {
+    case EPrimitiveType::Point:
+        return 1;
+        break;
+    case EPrimitiveType::Line:
+        return 2;
+        break;
+    case EPrimitiveType::Triangle:
+        return 3;
+        break;
+    default:
+        LOG_ERROR("Invalid or unknown primitive type");
+        return 0;
+    }
 }

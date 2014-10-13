@@ -8,8 +8,8 @@ class IInputListener;
  */
 class IInputProvider
 {
-public:
-	virtual ~IInputProvider();
-	virtual void addInputListener(IInputListener* listener) = 0;
-	virtual void removeInputListener(IInputListener* listener) = 0;
+   public:
+    virtual ~IInputProvider();
+    virtual void addInputListener(IInputListener* listener) = 0;
+    virtual void removeInputListener(IInputListener* listener) = 0;
 };

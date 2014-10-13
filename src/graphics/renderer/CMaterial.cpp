@@ -3,8 +3,7 @@
 #include "debug/Log.h"
 
 CMaterial::CMaterial(const CTexture* diffuse, const CTexture* normal, const CTexture* specular,
-                     const CTexture* glow, const CTexture* alpha,
-                     CShaderProgram* customShader)
+                     const CTexture* glow, const CTexture* alpha, CShaderProgram* customShader)
     : m_diffuseTexture(nullptr),
       m_normalTexture(nullptr),
       m_specularTexture(nullptr),
@@ -16,34 +15,33 @@ CMaterial::CMaterial(const CTexture* diffuse, const CTexture* normal, const CTex
 }
 
 bool CMaterial::init(const CTexture* diffuse, const CTexture* normal, const CTexture* specular,
-                     const CTexture* glow, const CTexture* alpha,
-                     CShaderProgram* customShader)
+                     const CTexture* glow, const CTexture* alpha, CShaderProgram* customShader)
 {
     // Textures must either be nullptr (unused) or valid
     if (diffuse != nullptr && !diffuse->isValid())
     {
-		LOG_ERROR("Diffuse texture is not valid.");
+        LOG_ERROR("Diffuse texture is not valid.");
         return false;
     }
     if (normal != nullptr && !normal->isValid())
     {
-		LOG_ERROR("Normal texture is not valid.");
-		return false;
+        LOG_ERROR("Normal texture is not valid.");
+        return false;
     }
     if (specular != nullptr && !specular->isValid())
     {
-		LOG_ERROR("Specular texture is not valid.");
-		return false;
+        LOG_ERROR("Specular texture is not valid.");
+        return false;
     }
     if (glow != nullptr && !glow->isValid())
     {
-		LOG_ERROR("Glow texture is not valid.");
-		return false;
+        LOG_ERROR("Glow texture is not valid.");
+        return false;
     }
     if (alpha != nullptr && !alpha->isValid())
     {
-		LOG_ERROR("Alpha texture is not valid.");
-		return false;
+        LOG_ERROR("Alpha texture is not valid.");
+        return false;
     }
     // Custom shader must either be nullptr for unused or valid
     if (customShader != nullptr && !customShader->isValid())

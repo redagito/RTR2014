@@ -12,10 +12,10 @@
 */
 class CSceneLoader
 {
-public:
-	CSceneLoader(IResourceManager& resourceManager);
-	bool load(const std::string& file, IScene& scene);
+   public:
+    CSceneLoader(IResourceManager& resourceManager);
+    bool load(const std::string& file, IScene& scene);
 
-private:
-	IResourceManager& m_resourceManager;
+   private:
+    IResourceManager& m_resourceManager;
 };

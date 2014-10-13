@@ -31,7 +31,7 @@ class CVertexBuffer
     * Binds the VBO to GL_ARRAY_BUFFER.
     */
     void setActive() const;
-	void setInactive() const;
+    void setInactive() const;
 
     /**
     * \brief Returns buffer validity.
@@ -44,13 +44,13 @@ class CVertexBuffer
     */
     GLuint getId() const;
 
-	/**
-	* \brief Returns number of elements in the buffer.
-	*/
-	unsigned int getSize() const;
+    /**
+    * \brief Returns number of elements in the buffer.
+    */
+    unsigned int getSize() const;
 
    private:
     GLuint m_bufferId; /**< GL buffer object id. */
     bool m_valid;
-	unsigned int m_size;
+    unsigned int m_size;
 };
