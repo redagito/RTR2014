@@ -11,6 +11,12 @@ endif()
 
 find_package (OpenGL REQUIRED)
 
+# If you want to run flextGL manually, run this:
+#     python <src_dir>/libs/flextGL/flextGLgen.py -D<build_dir>/src/generated -Tglfw3 <src_dir>/profile.txt
+#
+# ... and check the following variable or pass '-DRTR2014_SKIP_FLEXT_GL=ON'.
+option(RTR2014_SKIP_FLEXT_GL "Skip flextGL generation." OFF)
+
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
@@ -76,6 +82,8 @@ include_directories(libs/lodepng)
 # ===
 
 if (NOT APPLE)
+
+if (NOT RTR2014_SKIP_FLEXT_GL)
 set(RUN_FLEXT_GL_ARGS ${PROJECT_SOURCE_DIR}/libs/flextGL/flextGLgen.py -Dsrc/generated -Tglfw3 ${PROJECT_SOURCE_DIR}/profile.txt)
 execute_process(COMMAND ${PYTHON_EXECUTABLE} ${RUN_FLEXT_GL_ARGS})
 add_custom_target(RunFlextGL ALL
@@ -85,6 +93,8 @@ add_custom_target(RunFlextGL ALL
             ${PROJECT_SOURCE_DIR}/libs/flextGL/flext.py
             ${PROJECT_SOURCE_DIR}/libs/flextGL/templates/glfw3/flextGL.h.template
             ${PROJECT_SOURCE_DIR}/libs/flextGL/templates/glfw3/flextGL.c.template)
+endif()
+
 endif()
 
 # ===
