@@ -11,7 +11,7 @@
 #include <GLFW/glfw3.h>
 
 #include "graphics/camera/CFirstPersonCamera.h"
-#include "graphics/camera/CLookAtCamera.h"
+#include "graphics/camera/CFreeCamera.h"
 
 // Renderer types
 #include "graphics/renderer/CForwardRenderer.h"
@@ -21,7 +21,11 @@
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
 
+#include "input/provider/CGlfwInputProvider.h"
+
 #include "io/CSceneLoader.h"
+
+#include "CCameraController.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -55,7 +59,13 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
-    m_camera = std::make_shared<CLookAtCamera>();
+    m_camera = std::make_shared<CFreeCamera>();
+
+    m_cameraController = std::make_shared<CCameraController>();
+    m_cameraController->setCamera(m_camera);
+    m_cameraController->setInputProvider(
+        &CGlfwInputProvider::createInstance(m_window->getGlfwHandle()));
+
     return 0;
 }
 
@@ -63,7 +73,7 @@ int RTRDemo::run()
 {
     // Set camera
     m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
-    m_camera->setView(glm::vec3(3.f, 5.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+    m_camera->lookAt(glm::vec3(3.f, 5.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
     double f1Cooldown = 0.f;
     double timeDiff = 0;
@@ -74,6 +84,8 @@ int RTRDemo::run()
 
         // Cooldowns
         f1Cooldown -= timeDiff;
+        
+        m_cameraController->animate(timeDiff);
 
         // Draw call
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
