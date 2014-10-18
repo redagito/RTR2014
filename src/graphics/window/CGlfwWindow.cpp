@@ -20,16 +20,6 @@ CGlfwWindow::~CGlfwWindow()
     s_windows.erase(m_window);
 }
 
-void CGlfwWindow::addInputListener(IInputListener* listener)
-{
-    // TODO Implement
-}
-
-void CGlfwWindow::removeInputListener(IInputListener* listener)
-{
-    // TODO Implement
-}
-
 bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::string& name)
 {
     if (!glfwInit())

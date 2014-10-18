@@ -2,28 +2,31 @@
 
 #include "glm/glm.hpp"
 
+#include "graphics/ATransformable.h"
 #include "graphics/ICamera.h"
+
+#include "input/IInputListener.h"
 
 /**
 * \brief Implements a look-at based camera.
 */
-class CLookAtCamera : public ICamera
+class CFreeCamera : public ICamera, public ATransformable
 {
    public:
     /**
     * \brief Sets the view matrix.
     */
-    CLookAtCamera();
+    CFreeCamera();
 
     /**
     * \brief Read access to the view matrix.
     */
-    const glm::mat4& getView() const;
+    const glm::mat4& getView() const override;
 
     /**
     * \brief Returns projection matrix
     */
-    const glm::mat4& getProjection() const;
+    const glm::mat4& getProjection() const override;
 
     /**
     * \brief Returns current aspect ratio
@@ -46,24 +49,21 @@ class CLookAtCamera : public ICamera
     float getZFar() const;
 
     /**
-    * \brief Returns the camera position
-    */
-    const glm::vec3& getPosition() const;
-
-    /**
     * \brief Sets view matrix
     */
-    void setView(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
+    void lookAt(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
 
     /**
     * \brief Sets projection matrix
     */
     void setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar);
 
+   protected:
+    void updateModelMatrix() override;
+
    private:
-    glm::vec3 m_position; /**< Camera position. */
-    glm::mat4 m_view;     /**< View matrix. */
-    glm::mat4 m_proj;     /**< Projection matrix. */
+    glm::mat4 m_view;
+    glm::mat4 m_proj; /**< Projection matrix. */
 
     float m_fieldOfView; /**< Current field of view. */
     float m_aspectRatio; /**< Current aspect ratio. */

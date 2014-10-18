@@ -66,7 +66,7 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset viewport
-    glViewport(0, 0, window.getWidth(), window.getHeight());
+    //glViewport(0, 0, window.getWidth(), window.getHeight());
 
     // Set view and projection matrices
     m_currentView = camera.getView();

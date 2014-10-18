@@ -4,24 +4,17 @@
 #include <list>
 
 #include "graphics/IWindow.h"
-#include "input/IInputProvider.h"
 
 struct GLFWwindow;
 
 /**
  * \brief GLFW based implementation of the window interface.
  */
-class CGlfwWindow : public IWindow, IInputProvider
+class CGlfwWindow : public IWindow
 {
    public:
     CGlfwWindow();
     ~CGlfwWindow();
-
-    /**
-    * \brief Input provider interface implementation.
-    */
-    void addInputListener(IInputListener* listener);
-    void removeInputListener(IInputListener* listener);
 
     bool init(unsigned int width, unsigned int height, const std::string& name);
 
