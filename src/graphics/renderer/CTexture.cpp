@@ -92,20 +92,36 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     // Set format
     unsigned int bytePerPixel = 0;
     GLenum externalFormat;
+	GLenum type;
+
+	// Set external format and type, based on texture format
     switch (format)
     {
     case GL_R8:
         externalFormat = GL_RED;
+		type = GL_UNSIGNED_BYTE;
         bytePerPixel = 1;
         break;
     case GL_RGB8:
-        externalFormat = GL_RGB;
+		externalFormat = GL_RGB;
+		type = GL_UNSIGNED_BYTE;
         bytePerPixel = 3;
         break;
     case GL_RGBA8:
-        externalFormat = GL_RGBA;
+		externalFormat = GL_RGBA;
+		type = GL_UNSIGNED_BYTE;
         bytePerPixel = 4;
-        break;
+		break;
+	case GL_RGB16F:
+		externalFormat = GL_RGB;
+		type = GL_FLOAT;
+		bytePerPixel = 6;
+		break;
+	case GL_RGBA16F:
+		externalFormat = GL_RGBA;
+		type = GL_FLOAT;
+		bytePerPixel = 8;
+		break;
     default:
         return false;
         break;
@@ -147,13 +163,13 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     {
         // No image data, only allocate texture space
         // TODO As of OpenGL 4.3, glTexStorage should be used for this.
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE,
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type,
                      nullptr);
     }
     else
     {
         // Load image data
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE,
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type,
                      image.data());
     }
 

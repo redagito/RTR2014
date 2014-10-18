@@ -47,13 +47,15 @@ CDeferredRenderer::~CDeferredRenderer() { return; }
 bool CDeferredRenderer::init()
 {
     m_colorTexture = std::make_shared<CTexture>();
-    m_depthTexture = std::make_shared<CTexture>();
+    m_normalTexture = std::make_shared<CTexture>();
 
-    m_colorTexture->init(800, 600, GL_RGB8);
-    m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT16);
+	// Color texture, half-float (16 bit) for HDR rendering
+    m_colorTexture->init(800, 600, GL_RGB16F);
+	// Normal texture, 2 half-floats store x and y, z can be calculated as the vector is normalized.
+	m_normalTexture->init(800, 600, GL_RG16F);
 
     m_frameBuffer.attach(m_colorTexture, GL_COLOR_ATTACHMENT0);
-    m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
+	m_frameBuffer.attach(m_normalTexture, GL_COLOR_ATTACHMENT1);
 
     LOG_INFO("Framebuffer state: %s.", m_frameBuffer.getState().c_str());
 

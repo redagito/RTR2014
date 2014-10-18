@@ -33,7 +33,7 @@ class CDeferredRenderer : public ARenderer
    private:
     CFrameBuffer m_frameBuffer;
     std::shared_ptr<CTexture> m_colorTexture;
-    std::shared_ptr<CTexture> m_depthTexture;
+    std::shared_ptr<CTexture> m_normalTexture;
 
     glm::mat4 m_currentView;       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
