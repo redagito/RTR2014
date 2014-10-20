@@ -63,8 +63,7 @@ int RTRDemo::init(const std::string& configFile)
 
     m_cameraController = std::make_shared<CCameraController>();
     m_cameraController->setCamera(m_camera);
-    m_cameraController->setInputProvider(
-        &CGlfwInputProvider::createInstance(m_window->getGlfwHandle()));
+    m_cameraController->setInputProvider(new CGlfwInputProvider(m_window->getGlfwHandle()));
 
     return 0;
 }
@@ -85,7 +84,7 @@ int RTRDemo::run()
         // Cooldowns
         f1Cooldown -= timeDiff;
         
-        m_cameraController->animate(timeDiff);
+        m_cameraController->animate((float)timeDiff);
 
         // Draw call
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());

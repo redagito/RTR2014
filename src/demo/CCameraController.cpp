@@ -64,23 +64,33 @@ void CCameraController::animate(float dt)
         {
             if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
             {
-                m_camera->moveUp(dt * 2 * m_speed);
+                m_camera->moveUp(dt * 2.f * m_speed);
             }
 
             if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
             {
-                m_camera->moveUp(-dt * 2 * m_speed);
+                m_camera->moveUp(-dt * 2.f * m_speed);
             }
 
             if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
             {
-                m_camera->moveRight(dt * 2 * m_speed);
+				m_camera->moveRight(dt * 2.f * m_speed);
             }
 
             if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
             {
-                m_camera->moveRight(-dt * 2 * m_speed);
+				m_camera->moveRight(-dt * 2.f * m_speed);
             }
+
+			if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
+			{
+				m_camera->moveForward(dt * 2.f * m_speed);
+			}
+			
+			if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
+			{
+				m_camera->moveForward(-dt * 2.f * m_speed);
+			}
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_SLASH))

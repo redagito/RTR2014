@@ -4,6 +4,7 @@
 #include <list>
 
 #include "graphics/IWindow.h"
+#include "input/IInputProvider.h"
 
 struct GLFWwindow;
 

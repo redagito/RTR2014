@@ -18,9 +18,9 @@ class CCameraController : public IInputListener
 
     void animate(float dt);
 
-    virtual void handleKeyEvent(EKeyEventType type, int keyCode) override;
-    virtual void handleMouseMovementEvent(int x, int y) override;
-    virtual void handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode) override;
+    void handleKeyEvent(EKeyEventType type, int keyCode) override;
+    void handleMouseMovementEvent(int x, int y) override;
+    void handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode) override;
 
    private:
     float m_speed = 1.0f;

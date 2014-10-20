@@ -7,9 +7,10 @@
 #include "debug/Log.h"
 #include "input/IInputListener.h"
 
-std::map<GLFWwindow*, CGlfwInputProvider> s_instances;
+std::unordered_map<GLFWwindow*, CGlfwInputProvider*> CGlfwInputProvider::s_instances;
 
-void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void CGlfwInputProvider::glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action,
+                                         int mods)
 {
     auto it = s_instances.find(window);
     if (it != s_instances.end())
@@ -32,19 +33,19 @@ void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int 
             return;
         }
 
-        for (IInputListener* listener : it->second.m_listeners)
+        for (IInputListener* listener : it->second->m_listeners)
         {
             listener->handleKeyEvent(eventType, key);
         }
     }
 }
 
-void glfwCursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
+void CGlfwInputProvider::glfwCursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
     auto it = s_instances.find(window);
     if (it != s_instances.end())
     {
-        for (IInputListener* listener : it->second.m_listeners)
+        for (IInputListener* listener : it->second->m_listeners)
         {
             listener->handleMouseMovementEvent(xpos, ypos);
         }
@@ -63,7 +64,8 @@ void glfwCursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 //    }
 //}
 
-void glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+void CGlfwInputProvider::glfwMouseButtonCallback(GLFWwindow* window, int button, int action,
+                                                 int mods)
 {
     auto it = s_instances.find(window);
     if (it != s_instances.end())
@@ -83,7 +85,7 @@ void glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mod
             return;
         }
 
-        for (IInputListener* listener : it->second.m_listeners)
+        for (IInputListener* listener : it->second->m_listeners)
         {
             listener->handleMouseButtonEvent(eventType, button);
         }
@@ -106,41 +108,33 @@ void glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mod
 // class CGlfwInputProvider
 // ===
 
-CGlfwInputProvider& CGlfwInputProvider::createInstance(GLFWwindow* window)
-{
-    assert(window != nullptr);
-
-    if (s_instances.empty())
-    {
-        glfwSetKeyCallback(window, glfwKeyCallback);
-        glfwSetCursorPosCallback(window, glfwCursorPositionCallback);
-        glfwSetMouseButtonCallback(window, glfwMouseButtonCallback);
-    }
-
-    if (s_instances.find(window) == s_instances.end())
-    {
-        s_instances.emplace(std::piecewise_construct, std::forward_as_tuple(window),
-                            std::forward_as_tuple(window));
-    }
-
-    return s_instances.at(window);
-}
-
 CGlfwInputProvider::CGlfwInputProvider(GLFWwindow* window) : m_window(window)
 {
     assert(m_window != nullptr);
+	assert(s_instances.find(m_window) == s_instances.end());
+
+	// Set callbacks
+	glfwSetKeyCallback(m_window, CGlfwInputProvider::glfwKeyCallback);
+	glfwSetCursorPosCallback(m_window, CGlfwInputProvider::glfwCursorPositionCallback);
+	glfwSetMouseButtonCallback(m_window, CGlfwInputProvider::glfwMouseButtonCallback);
+	// Create mapping for callbacks
+	s_instances[m_window] = this;
 }
 
-CGlfwInputProvider::~CGlfwInputProvider() {}
+CGlfwInputProvider::~CGlfwInputProvider() 
+{
+	// Remove mapping
+	s_instances.erase(m_window);
+}
 
 void CGlfwInputProvider::addInputListener(IInputListener* listener)
 {
-    m_listeners.insert(listener);
+    m_listeners.push_back(listener);
 }
 
 void CGlfwInputProvider::removeInputListener(IInputListener* listener)
 {
-    m_listeners.erase(m_listeners.find(listener));
+    m_listeners.remove(listener);
 }
 
 bool CGlfwInputProvider::isKeyPressed(int keyCode)
