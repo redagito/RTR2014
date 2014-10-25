@@ -92,36 +92,46 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     // Set format
     unsigned int bytePerPixel = 0;
     GLenum externalFormat;
-	GLenum type;
+    GLenum type;
 
-	// Set external format and type, based on texture format
+    // Set external format and type, based on texture format
     switch (format)
     {
-    case GL_R8:
+    case GL_R8:  // Red component only, used for greyscale
         externalFormat = GL_RED;
-		type = GL_UNSIGNED_BYTE;
+        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 1;
         break;
-    case GL_RGB8:
-		externalFormat = GL_RGB;
-		type = GL_UNSIGNED_BYTE;
+    case GL_RG8:  // Red and green component
+        externalFormat = GL_RG;
+        type = GL_UNSIGNED_BYTE;
+        bytePerPixel = 2;
+        break;
+    case GL_RGB8:  // RGB texture with values from 0-255
+        externalFormat = GL_RGB;
+        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 3;
         break;
-    case GL_RGBA8:
-		externalFormat = GL_RGBA;
-		type = GL_UNSIGNED_BYTE;
+    case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
+        externalFormat = GL_DEPTH_COMPONENT;
+        type = GL_UNSIGNED_BYTE;
+        bytePerPixel = 3;
+        break;
+    case GL_RGBA8:  // RGB texture with alpha channel
+        externalFormat = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 4;
-		break;
-	case GL_RGB16F:
-		externalFormat = GL_RGB;
-		type = GL_FLOAT;
-		bytePerPixel = 6;
-		break;
-	case GL_RGBA16F:
-		externalFormat = GL_RGBA;
-		type = GL_FLOAT;
-		bytePerPixel = 8;
-		break;
+        break;
+    case GL_RGB16F:  // RGB texture with half float precision, for hdr
+        externalFormat = GL_RGB;
+        type = GL_FLOAT;
+        bytePerPixel = 6;
+        break;
+    case GL_RGBA16F:  // RGB texture with alpha channel with half float precision
+        externalFormat = GL_RGBA;
+        type = GL_FLOAT;
+        bytePerPixel = 8;
+        break;
     default:
         return false;
         break;
@@ -163,8 +173,7 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     {
         // No image data, only allocate texture space
         // TODO As of OpenGL 4.3, glTexStorage should be used for this.
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type,
-                     nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type, nullptr);
     }
     else
     {
