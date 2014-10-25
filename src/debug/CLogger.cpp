@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <iostream>
+#include <sstream>
 
 std::ofstream CLogger::s_stream;
 std::set<ILogListener*> CLogger::s_listeners;
@@ -23,16 +24,16 @@ void CLogger::log(const char* level, const char* file, int line, const char* fun
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    char detailedBuffer[5000];
-    snprintf(detailedBuffer, sizeof(detailedBuffer), "%s [%s:%d, %s]: %s", level, file, line,
-             function, buffer);
+    std::stringstream ss;
+    ss << level << " [" << file << ":" << line << ", " << function << "]: " << buffer;
+    std::string detailedMessage = ss.str();
 
     // Print to standard output
-    std::cout << detailedBuffer << std::endl;
+    std::cout << detailedMessage << std::endl;
     // Print to file
     if (s_stream.is_open())
     {
-        s_stream << detailedBuffer << std::endl;
+        s_stream << detailedMessage << std::endl;
     }
 
     // passthrough to listeners
