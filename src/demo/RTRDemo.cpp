@@ -83,6 +83,7 @@ int RTRDemo::run()
     m_camera->lookAt(glm::vec3(3.f, 5.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
     double f1Cooldown = 0.f;
+    double k1Cooldown = 0.f;
     double timeDiff = 0;
 
     double fpsCoolDown = 1.;
@@ -97,6 +98,7 @@ int RTRDemo::run()
 
         // Cooldowns
         f1Cooldown -= timeDiff;
+        k1Cooldown -= timeDiff;
         fpsCoolDown -= timeDiff;
 
         if (fpsCoolDown < 0)
@@ -106,8 +108,9 @@ int RTRDemo::run()
             currentFrameCount = 0;
         }
 
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS)
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
         {
+            k1Cooldown = 0.3f;
             displayDebugInfo = !displayDebugInfo;
         }
 
