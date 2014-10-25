@@ -17,7 +17,7 @@
 #include "debug/Log.h"
 
 CDeferredRenderer::CDeferredRenderer(const std::shared_ptr<IResourceManager>& resourceManager)
-    : ARenderer(resourceManager)
+	: ARenderer(resourceManager), m_fullscreenQuadShader(nullptr)
 {
     // Set clear color
     glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
@@ -46,30 +46,57 @@ CDeferredRenderer::~CDeferredRenderer() { return; }
 
 bool CDeferredRenderer::init()
 {
-    m_colorTexture = std::make_shared<CTexture>();
-    m_normalTexture = std::make_shared<CTexture>();
+	// Init gbuffer
 
-	// Color texture, half-float (16 bit) for HDR rendering
-    m_colorTexture->init(800, 600, GL_RGB16F);
+	// Diffuse texture, stores base color.
+	// Uses 24 bit per pixel
+	m_diffuseTexture = std::make_shared<CTexture>();
+	m_diffuseTexture->init(800, 600, GL_RGB8);
+
 	// Normal texture, 2 half-floats store x and y, z can be calculated as the vector is normalized.
+	// Uses 32 bit per pixel
+	m_normalTexture = std::make_shared<CTexture>();
 	m_normalTexture->init(800, 600, GL_RG16F);
+	
+	// Depth texture with 24 bit precision
+	// Uses 24 bit per pixel
+	m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
+	m_depthTexture = std::make_shared<CTexture>();
 
-    m_frameBuffer.attach(m_colorTexture, GL_COLOR_ATTACHMENT0);
+	// Texture with glow and specular data. Stores 8 bit glow and 8 bit specularity
+	// Uses 16 bit per pixel
+	m_glowSpecularTexture->init(800, 600, GL_RG8);
+	m_glowSpecularTexture = std::make_shared<CTexture>();
+
+	// Total 96 bit per pixel
+	m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
+	m_frameBuffer.attach(m_diffuseTexture, GL_COLOR_ATTACHMENT0);
 	m_frameBuffer.attach(m_normalTexture, GL_COLOR_ATTACHMENT1);
+	m_frameBuffer.attach(m_glowSpecularTexture, GL_COLOR_ATTACHMENT2);
 
     LOG_INFO("Framebuffer state: %s.", m_frameBuffer.getState().c_str());
 
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, drawBuffers);
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, drawBuffers);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Create dummy vbo
+	m_dummy = std::make_shared<CVertexBuffer>(std::vector<float>({0.f, 0.f, 0.f}));
 
     // Error check
     std::string error;
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
     }
+
+	if (!initShaders())
+	{
+		LOG_ERROR("Failed to initialize shaders for deferred renderer.");
+		return false;
+	}
 
     return true;
 }
@@ -96,8 +123,8 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Send view/projection to default shader
-    m_defaultShader->setUniform(viewMatrixUniformName, m_currentView);
-    m_defaultShader->setUniform(projectionMatrixUniformName, m_currentProjection);
+    m_geometryPassShader->setUniform(viewMatrixUniformName, m_currentView);
+	m_geometryPassShader->setUniform(projectionMatrixUniformName, m_currentProjection);
 
     // Traverse visible objects
     while (query->hasNextObject())
@@ -158,7 +185,7 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
                              const glm::mat4& scale, CMaterial* material)
 {
     // Decide which shader program to use
-    CShaderProgram* shader = m_defaultShader;
+    CShaderProgram* shader = m_geometryPassShader;
     if (material->hasCustomShader())
     {
         shader = material->getCustomShader();
@@ -240,20 +267,45 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     // TODO Cleanup?
 }
 
-bool CDeferredRenderer::initDefaultShaders()
+bool CDeferredRenderer::initShaders()
 {
     // TODO Read file name from config?
-    std::string defaultShaderFile("data/shader/shader_test_0.ini");
 
-    ResourceId shaderId = getResourceManager()->loadShader(defaultShaderFile);
-    m_defaultShader = getShaderProgram(shaderId);
-
+	// Screen space quad shader
+    std::string screenQuadShaderFile("data/shader/compose_screenquad.ini");
+	ResourceId shaderId = getResourceManager()->loadShader(screenQuadShaderFile);
+    m_fullscreenQuadShader = getShaderProgram(shaderId);
     // Check if ok
-    if (m_defaultShader == nullptr)
+	if (m_fullscreenQuadShader == nullptr)
     {
-        LOG_ERROR("Failed to initialize the default shader from file %s.",
-                  defaultShaderFile.c_str());
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+			screenQuadShaderFile.c_str());
         return false;
     }
+
+	// Geometry pass shader for filling gbuffer
+	std::string geometryPassShaderFile("data/shader/deferred_geometrypass.ini");
+	shaderId = getResourceManager()->loadShader(geometryPassShaderFile);
+	m_geometryPassShader = getShaderProgram(shaderId);
+	// Check if ok
+	if (m_fullscreenQuadShader == nullptr)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.",
+			geometryPassShaderFile.c_str());
+		return false;
+	}
+
     return true;
+}
+
+void CDeferredRenderer::drawFullscreenQuad(CTexture* texture)
+{
+	m_fullscreenQuadShader->setActive();
+
+	texture->setActive(0);
+	m_fullscreenQuadShader->setUniform("color_texture", 0);
+
+	m_dummy->setActive();
+	glDrawArrays(GL_POINTS, 0, 1);
+
 }
