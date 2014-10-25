@@ -1,5 +1,7 @@
 #include "CCameraController.h"
 
+#include "debug/Log.h"
+
 #include "glfw/glfw3.h"
 
 #include "graphics/camera/CFreeCamera.h"
@@ -74,23 +76,23 @@ void CCameraController::animate(float dt)
 
             if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
             {
-				m_camera->moveRight(dt * 2.f * m_speed);
+                m_camera->moveRight(dt * 2.f * m_speed);
             }
 
             if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
             {
-				m_camera->moveRight(-dt * 2.f * m_speed);
+                m_camera->moveRight(-dt * 2.f * m_speed);
             }
 
-			if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
-			{
-				m_camera->moveForward(dt * 2.f * m_speed);
-			}
-			
-			if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
-			{
-				m_camera->moveForward(-dt * 2.f * m_speed);
-			}
+            if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
+            {
+                m_camera->moveForward(dt * 2.f * m_speed);
+            }
+
+            if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
+            {
+                m_camera->moveForward(-dt * 2.f * m_speed);
+            }
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_SLASH))
@@ -118,4 +120,9 @@ void CCameraController::handleMouseMovementEvent(int x, int y)
 void CCameraController::handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode)
 {
     // TODO
+}
+
+void CCameraController::handleResizeEvent(int width, int height)
+{
+    m_camera->setProjection(45.0f, (float)width / height, 1.f, 1000.0f);
 }

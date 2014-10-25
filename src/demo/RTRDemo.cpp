@@ -72,6 +72,8 @@ int RTRDemo::init(const std::string& configFile)
     m_cameraController->setInputProvider(new CGlfwInputProvider(m_window->getGlfwHandle()));
 
     m_debugInfoDisplay = std::make_shared<CDebugInfoDisplay>(m_resourceManager);
+    
+    m_window->addListener(m_cameraController.get());
 
     return 0;
 }

@@ -42,9 +42,14 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
         glfwTerminate();
         return false;
     }
-
-    m_width = width;
-    m_height = height;
+    
+    int framebufferWidth;
+    int framebufferHeight;
+    
+    glfwGetFramebufferSize(m_window, &framebufferWidth, &framebufferHeight);
+    
+    m_width = framebufferWidth;
+    m_height = framebufferHeight;
 
     glfwMakeContextCurrent(m_window);
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -63,7 +68,7 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
     s_windows[m_window] = this;
 
     // Set window resize callback
-    glfwSetWindowSizeCallback(m_window, &CGlfwWindow::resizeCallback);
+    glfwSetFramebufferSizeCallback(m_window, &CGlfwWindow::resizeCallback);
 
     return true;
 }
@@ -99,6 +104,10 @@ void CGlfwWindow::toggleMouseCapture()
 
 GLFWwindow* CGlfwWindow::getGlfwHandle() const { return m_window; }
 
+void CGlfwWindow::addListener(IGlfwWindowListener* l) { m_listeners.insert(l); }
+
+void CGlfwWindow::removeListener(IGlfwWindowListener* l) { m_listeners.erase(l); }
+
 void CGlfwWindow::resizeCallback(GLFWwindow* window, int width, int height)
 {
     assert(width > 0);
@@ -106,7 +115,17 @@ void CGlfwWindow::resizeCallback(GLFWwindow* window, int width, int height)
     if (s_windows.count(window) != 0)
     {
         CGlfwWindow* win = s_windows.at(window);
-        win->setWidth(width);
-        win->setHeight(height);
+        win->handleResize(width, height);
+    }
+}
+
+void CGlfwWindow::handleResize(int width, int height)
+{
+    setWidth(width);
+    setHeight(height);
+
+    for (auto& l : m_listeners)
+    {
+        l->handleResizeEvent(width, height);
     }
 }

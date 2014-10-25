@@ -6,7 +6,7 @@ CFreeCamera::CFreeCamera()
 {
     // TODO replace with appropriate default values
     lookAt(glm::vec3(0.f, 7.f, -10.f), glm::vec3(0.f, 5.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
-    setProjection(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+    setProjection(45.0f, 4.0f / 3.0f, 1.f, 1000.0f);
 }
 
 const glm::mat4& CFreeCamera::getView() const { return m_view; }

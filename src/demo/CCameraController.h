@@ -2,12 +2,14 @@
 
 #include <memory>
 
+#include "graphics/window/CGlfwWindow.h"
+
 #include "input/IInputListener.h"
 
 class CFreeCamera;
 class IInputProvider;
 
-class CCameraController : public IInputListener
+class CCameraController : public IInputListener, public IGlfwWindowListener
 {
    public:
     CCameraController();
@@ -18,9 +20,11 @@ class CCameraController : public IInputListener
 
     void animate(float dt);
 
-    void handleKeyEvent(EKeyEventType type, int keyCode) override;
-    void handleMouseMovementEvent(int x, int y) override;
-    void handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode) override;
+    virtual void handleKeyEvent(EKeyEventType type, int keyCode) override;
+    virtual void handleMouseMovementEvent(int x, int y) override;
+    virtual void handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode) override;
+    
+    virtual void handleResizeEvent(int width, int height) override;
 
    private:
     float m_speed = 1.0f;
