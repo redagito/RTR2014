@@ -13,7 +13,8 @@
 std::ofstream CLogger::s_stream;
 std::set<ILogListener*> CLogger::s_listeners;
 
-void CLogger::log(const char* format, ...)
+void CLogger::log(const char* level, const char* file, int line, const char* function,
+                  const char* format, ...)
 {
     // Text buffer
     char buffer[5000];
@@ -22,18 +23,22 @@ void CLogger::log(const char* format, ...)
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
+    char detailedBuffer[5000];
+    snprintf(detailedBuffer, sizeof(detailedBuffer), "%s [%s:%d, %s]: %s", level, file, line,
+             function, buffer);
+
     // Print to standard output
-    std::cout << buffer << std::endl;
+    std::cout << detailedBuffer << std::endl;
     // Print to file
     if (s_stream.is_open())
     {
-        s_stream << buffer << std::endl;
+        s_stream << detailedBuffer << std::endl;
     }
 
-    std::string line(buffer);
+    // passthrough to listeners
     for (ILogListener* l : s_listeners)
     {
-        l->handleLog(line);
+        l->handleLog(level, file, line, function, std::string(buffer));
     }
 }
 

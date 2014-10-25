@@ -7,7 +7,8 @@
 class ILogListener
 {
    public:
-    virtual void handleLog(const std::string& text) = 0;
+    virtual void handleLog(const char* level, const char* file, int line, const char* function,
+                           const std::string& text) = 0;
 };
 
 /**
@@ -19,7 +20,8 @@ class CLogger
     /**
     * \brief Logs text.
     */
-    static void log(const char* format, ...);
+    static void log(const char* level, const char* file, int line, const char* function,
+                    const char* format, ...);
 
     /**
     * \brief Sets logging output to specified log file.
@@ -31,8 +33,8 @@ class CLogger
 
    private:
     static std::ofstream s_stream; /**< Log file stream. */
-    
+
     // TODO make access to s_listeners thread safe?
-    
+
     static std::set<ILogListener*> s_listeners;
 };

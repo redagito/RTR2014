@@ -9,7 +9,8 @@
 class CDebugInfo : public ILogListener
 {
    public:
-    void handleLog(const std::string& text);
+    void handleLog(const char* level, const char* file, int line, const char* function,
+                   const std::string& text);
     const std::list<const std::string>& getLog() const;
 
     void setLogBufferSize(size_t size);

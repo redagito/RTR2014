@@ -93,7 +93,7 @@ void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsi
 {
     size_t length = text.size();
 
-    unsigned int hSize = size * 0.7;
+    unsigned int hSize = size * 0.6;
     unsigned int vSize = size;
 
     for (size_t i = 0; i < length; i++)
@@ -254,6 +254,7 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     // ===
 
     glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 
     m_VAO->setInactive();
 }
