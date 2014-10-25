@@ -14,6 +14,9 @@ class IScene;
 class CFreeCamera;
 class CCameraController;
 
+class CDebugInfo;
+class CDebugInfoDisplay;
+
 class RTRDemo
 {
    public:
@@ -36,4 +39,7 @@ class RTRDemo
     std::shared_ptr<IScene> m_scene = nullptr;
     std::shared_ptr<CFreeCamera> m_camera = nullptr;
     std::shared_ptr<CCameraController> m_cameraController = nullptr;
+    
+    std::shared_ptr<CDebugInfo> m_debugInfo = nullptr;
+    std::shared_ptr<CDebugInfoDisplay> m_debugInfoDisplay = nullptr;
 };

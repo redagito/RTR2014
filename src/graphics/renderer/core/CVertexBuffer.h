@@ -48,9 +48,15 @@ class CVertexBuffer
     * \brief Returns number of elements in the buffer.
     */
     unsigned int getSize() const;
+    
+    // TODO we might want to have a CMutableVertexBuffer or something similar
+    CVertexBuffer(GLenum usage = GL_STATIC_DRAW);
+    
+    void setData(const std::vector<float>& data);
 
    private:
     GLuint m_bufferId; /**< GL buffer object id. */
     bool m_valid;
     unsigned int m_size;
+    GLenum m_usage;
 };

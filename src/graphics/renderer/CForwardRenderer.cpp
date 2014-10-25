@@ -64,6 +64,7 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Initializiation
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
     // Reset viewport
     //glViewport(0, 0, window.getWidth(), window.getHeight());
