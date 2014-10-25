@@ -67,7 +67,7 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     glEnable(GL_DEPTH_TEST);
 
     // Reset viewport
-    //glViewport(0, 0, window.getWidth(), window.getHeight());
+    glViewport(0, 0, window.getWidth(), window.getHeight());
 
     // Set view and projection matrices
     m_currentView = camera.getView();
@@ -223,7 +223,7 @@ void CForwardRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm
 bool CForwardRenderer::initDefaultShaders()
 {
     // TODO Read file name from config?
-    std::string defaultShaderFile("data/shader/shader_test_0.ini");
+    std::string defaultShaderFile("data/shader/forward_test_0.ini");
 
     ResourceId shaderId = getResourceManager()->loadShader(defaultShaderFile);
     m_defaultShader = getShaderProgram(shaderId);
