@@ -254,6 +254,7 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     // ===
 
     glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 
     m_VAO->setInactive();
 }
