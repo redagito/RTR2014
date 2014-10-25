@@ -11,6 +11,7 @@
 #include <iostream>
 
 std::ofstream CLogger::s_stream;
+std::set<ILogListener*> CLogger::s_listeners;
 
 void CLogger::log(const char* format, ...)
 {
@@ -27,6 +28,12 @@ void CLogger::log(const char* format, ...)
     if (s_stream.is_open())
     {
         s_stream << buffer << std::endl;
+    }
+
+    std::string line(buffer);
+    for (ILogListener* l : s_listeners)
+    {
+        l->handleLog(line);
     }
 }
 
@@ -45,3 +52,7 @@ bool CLogger::initLogFile(const std::string& logFile)
     LOG_WARNING("Multiple logger initialization calls are invalid and will be ignored.");
     return false;
 }
+
+void CLogger::addListener(ILogListener* l) { s_listeners.insert(l); }
+
+void CLogger::removeListener(ILogListener* l) { s_listeners.erase(l); }

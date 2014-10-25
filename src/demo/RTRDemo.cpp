@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "debug/CDebugInfo.h"
 #include "debug/Log.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
@@ -21,6 +22,8 @@
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
 
+#include "graphics/CDebugInfoDisplay.h"
+
 #include "input/provider/CGlfwInputProvider.h"
 
 #include "io/CSceneLoader.h"
@@ -33,6 +36,9 @@ RTRDemo::~RTRDemo() {}
 
 int RTRDemo::init(const std::string& configFile)
 {
+    m_debugInfo = std::make_shared<CDebugInfo>();
+    CLogger::addListener(m_debugInfo.get());
+
     if (!m_config.load(configFile))
     {
         LOG_WARNING("Failed to load config file %s, starting with default settings.",
@@ -65,6 +71,8 @@ int RTRDemo::init(const std::string& configFile)
     m_cameraController->setCamera(m_camera);
     m_cameraController->setInputProvider(new CGlfwInputProvider(m_window->getGlfwHandle()));
 
+    m_debugInfoDisplay = std::make_shared<CDebugInfoDisplay>(m_resourceManager);
+
     return 0;
 }
 
@@ -77,19 +85,47 @@ int RTRDemo::run()
     double f1Cooldown = 0.f;
     double timeDiff = 0;
 
+    double fpsCoolDown = 1.;
+    int lastFrameCount = 0;
+    int currentFrameCount = 0;
+
+    bool displayDebugInfo = false;
+
     do
     {
         double startTime = glfwGetTime();
 
         // Cooldowns
         f1Cooldown -= timeDiff;
-        
+        fpsCoolDown -= timeDiff;
+
+        if (fpsCoolDown < 0)
+        {
+            fpsCoolDown += 1;
+            lastFrameCount = currentFrameCount;
+            currentFrameCount = 0;
+        }
+
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS)
+        {
+            displayDebugInfo = !displayDebugInfo;
+        }
+
         m_cameraController->animate((float)timeDiff);
 
-        // Draw call
         m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
 
-        // Buffer swap
+        if (displayDebugInfo)
+        {
+            m_debugInfo->setValue("TimeDiff", std::to_string(timeDiff));
+            m_debugInfo->setValue("Camera x", std::to_string(m_camera->getPosition().x));
+            m_debugInfo->setValue("Camera y", std::to_string(m_camera->getPosition().y));
+            m_debugInfo->setValue("Camera z", std::to_string(m_camera->getPosition().z));
+            m_debugInfo->setValue("FPS", std::to_string(lastFrameCount));
+
+            m_debugInfoDisplay->draw(*m_debugInfo.get());
+        }
+
         m_window->swapBuffer();
 
         // Update input
@@ -104,9 +140,10 @@ int RTRDemo::run()
         }
 
         timeDiff = glfwGetTime() - startTime;
-    }  // Check if the ESC key was pressed or the window was closed
-    while (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-           glfwWindowShouldClose(m_window->getGlfwHandle()) == 0);
+        ++currentFrameCount;
+
+    } while (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+             glfwWindowShouldClose(m_window->getGlfwHandle()) == 0);
 
     glfwTerminate();
 
