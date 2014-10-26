@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "graphics/ResourceConfig.h"
+#include "resource/ResourceConfig.h"
 
 /**
  * \brief Image data.

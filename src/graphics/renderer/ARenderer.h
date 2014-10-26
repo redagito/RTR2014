@@ -5,7 +5,7 @@
 
 // Required for inheritance
 #include "graphics/IRenderer.h"
-#include "graphics/IResourceListener.h"
+#include "resource/IResourceListener.h"
 
 // Resource classes
 #include "CMesh.h"

@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "core/RendererCoreConfig.h"
-#include "graphics/ResourceConfig.h"
+#include "resource/ResourceConfig.h"
 
 /**
  * \brief Texture class.

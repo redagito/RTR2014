@@ -3,7 +3,7 @@
 #include <string>
 
 #include "graphics/IScene.h"
-#include "graphics/IResourceManager.h"
+#include "resource/IResourceManager.h"
 
 /**
 * \brief Scene loader utility class.

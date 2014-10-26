@@ -3,7 +3,7 @@
 #include <cassert>
 #include <string>
 
-#include "graphics/IResourceManager.h"
+#include "resource/IResourceManager.h"
 #include "debug/Log.h"
 
 ARenderer::ARenderer(const std::shared_ptr<IResourceManager>& resourceManager)

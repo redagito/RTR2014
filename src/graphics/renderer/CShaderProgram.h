@@ -51,7 +51,12 @@ class CShaderProgram
     /**
     * \brief Sets the shader program as active program for vertex processing.
     */
-    void setActive();
+	void setActive();
+	
+	/**
+	* \brief Sets shader program inactive.
+	*/
+	void setInactive();
 
     /**
     * \brief Returns the error string.

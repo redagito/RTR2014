@@ -8,7 +8,7 @@
 #include "renderer/CShaderProgram.h"
 #include "renderer/CTexture.h"
 
-#include "IResourceManager.h"
+#include "resource/IResourceManager.h"
 
 bool loadShader(const std::string &path, std::shared_ptr<IResourceManager> &resourceManager,
                 std::unique_ptr<CShaderProgram> &resultShader)

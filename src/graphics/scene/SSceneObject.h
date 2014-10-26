@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "graphics/ResourceConfig.h"
+#include "resource/ResourceConfig.h"
 
 /**
 * \brief Scene object data struct.

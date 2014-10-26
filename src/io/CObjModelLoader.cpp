@@ -1,11 +1,13 @@
 #include "CObjModelLoader.h"
 
-#include "debug/Log.h"
-
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <stdexcept>
+
+#include <glm/glm.hpp>
+
+#include "debug/Log.h"
 
 // Parse obj file
 CObjModelLoader::CObjModelLoader() {}

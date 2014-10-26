@@ -6,7 +6,7 @@
 #include <list>
 #include <string>
 
-#include "graphics/IResourceManager.h"
+#include "resource/IResourceManager.h"
 
 #include "SImage.h"
 #include "SMaterial.h"

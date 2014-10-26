@@ -1,0 +1,11 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/duck.obj",
+            "material" : "data/material/duck_1_diffuse.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 2, 2, 2 ]
+        }
+    ]
+}

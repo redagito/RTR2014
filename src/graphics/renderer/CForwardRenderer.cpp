@@ -9,7 +9,7 @@
 #include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IResourceManager.h"
+#include "resource/IResourceManager.h"
 
 #include "core/RendererCoreConfig.h"
 

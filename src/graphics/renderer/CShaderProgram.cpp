@@ -127,12 +127,22 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
 
 void CShaderProgram::setActive()
 {
-    assert(isValid());
-    if (s_activeShaderProgram != m_programId)
-    {
-        glUseProgram(m_programId);
-        s_activeShaderProgram = m_programId;
-    }
+	assert(isValid());
+	if (s_activeShaderProgram != m_programId)
+	{
+		glUseProgram(m_programId);
+		s_activeShaderProgram = m_programId;
+	}
+}
+
+void CShaderProgram::setInactive()
+{
+	assert(isValid());
+	if (s_activeShaderProgram == m_programId)
+	{
+		glUseProgram(0);
+		s_activeShaderProgram = 0;
+	}
 }
 
 const std::string& CShaderProgram::getErrorString() const { return m_infoLog; }

@@ -33,19 +33,20 @@ class CDeferredRenderer : public ARenderer
 	void drawFullscreenQuad(CTexture* texture);
 
    private:
+	// Geometry pass
 	CFrameBuffer m_frameBuffer;
 	std::shared_ptr<CTexture> m_depthTexture;
 	std::shared_ptr<CTexture> m_diffuseTexture;
 	std::shared_ptr<CTexture> m_normalTexture;
 	std::shared_ptr<CTexture> m_glowSpecularTexture;
+	GLenum m_drawBuffers[3];
+	CShaderProgram* m_geometryPassShader;
 
     glm::mat4 m_currentView;       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
 
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
-
-	CShaderProgram* m_geometryPassShader;
-
+	
 	CShaderProgram* m_fullscreenQuadShader; /**< Renders screen space quad with texture. */
 	std::shared_ptr<CVertexBuffer> m_dummy;
 };

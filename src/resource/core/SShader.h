@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/ResourceConfig.h"
+#include "resource/ResourceConfig.h"
 
 struct SShader
 {

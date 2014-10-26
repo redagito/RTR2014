@@ -18,7 +18,9 @@
 #include "graphics/renderer/CForwardRenderer.h"
 #include "graphics/renderer/CDeferredRenderer.h"
 
-#include "graphics/resource/CResourceManager.h"
+// Resource system
+#include "resource/Resource.h"
+
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
 
@@ -45,14 +47,22 @@ int RTRDemo::init(const std::string& configFile)
                     configFile.c_str());
     }
 
+	// Create window for rendering
     if (!initWindow())
     {
         LOG_ERROR("Failed to initialize window.");
         return 1;
     }
 
-    m_resourceManager = std::make_shared<CResourceManager>();
+	// Create resource manager
+	m_resourceManager.reset(createResourceManager());
+	if (m_resourceManager == nullptr)
+	{
+		LOG_ERROR("Failed to initialize resource manager.");
+		return 1;
+	}
 
+	// Create renderer
     if (!initRenderer())
     {
         LOG_ERROR("Failed to initialize renderer.");
@@ -88,9 +98,9 @@ int RTRDemo::run()
     double k1Cooldown = 0.f;
     double timeDiff = 0;
 
-    double fpsCoolDown = 1.;
-    int lastFrameCount = 0;
-    int currentFrameCount = 0;
+    double fpsCoolDown = 1.f;
+    unsigned int lastFrameCount = 0;
+    unsigned int currentFrameCount = 0;
 
     bool displayDebugInfo = false;
 
@@ -105,9 +115,10 @@ int RTRDemo::run()
 
         if (fpsCoolDown < 0)
         {
-            fpsCoolDown += 1;
+            fpsCoolDown += 1.f;
             lastFrameCount = currentFrameCount;
             currentFrameCount = 0;
+
         }
 
         if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
@@ -163,12 +174,16 @@ bool RTRDemo::initWindow()
         return true;
     }
 
+	LOG_INFO("Initializing application window.");
+
     // Read config values
     unsigned int width = m_config.getValue("window", "width", 800);
     unsigned int height = m_config.getValue("window", "height", 600);
     std::string title = m_config.getValue("window", "title", "Demo");
-    LOG_INFO("Creating window with width %u, height %u and title %s.", width, height,
-             title.c_str());
+
+	LOG_INFO("Window width: %u.", width);
+	LOG_INFO("Window height: %u.", height);
+	LOG_INFO("Window title: %s.", title.c_str());
 
     // Create window
     CGlfwWindow* window = new CGlfwWindow;

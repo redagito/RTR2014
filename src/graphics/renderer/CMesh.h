@@ -3,7 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "graphics/ResourceConfig.h"
+#include "resource/ResourceConfig.h"
+
 #include "core/CVertexBuffer.h"
 #include "core/CIndexBuffer.h"
 #include "core/CVertexArrayObject.h"

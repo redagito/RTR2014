@@ -9,7 +9,7 @@
 #include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IResourceManager.h"
+#include "resource/IResourceManager.h"
 
 #include "core/RendererCoreConfig.h"
 
@@ -46,6 +46,8 @@ CDeferredRenderer::~CDeferredRenderer() { return; }
 
 bool CDeferredRenderer::init()
 {
+	LOG_INFO("Initializing deferred renderer.");
+
 	// Init gbuffer
 
 	// Diffuse texture, stores base color.
@@ -76,10 +78,14 @@ bool CDeferredRenderer::init()
 
     LOG_INFO("Framebuffer state: %s.", m_frameBuffer.getState().c_str());
 
-	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, drawBuffers);
+	// Set color attachments for geometry pass fbo
+	m_drawBuffers[0] = GL_COLOR_ATTACHMENT0;
+	m_drawBuffers[1] = GL_COLOR_ATTACHMENT1;
+	m_drawBuffers[2] = GL_COLOR_ATTACHMENT2;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Screen space quad pass
 
 	// Create dummy vbo
 	m_dummy = std::make_shared<CVertexBuffer>(std::vector<float>({0.f, 0.f, 0.f}));
@@ -106,8 +112,12 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Draw init
     window.setActive();
 
+	// Geometry pass, uses gbuffer fbo
+
     // Set framebuffer
     m_frameBuffer.setActive(GL_FRAMEBUFFER);
+	// Set render targets
+	glDrawBuffers(3, m_drawBuffers);
 
     // Clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -152,6 +162,18 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         }
     }
 
+	// Geometry pass end, gbuffer populated
+
+	// Postprocessing done here
+
+	// Draw fullscreen quad
+	m_fullscreenQuadShader->setActive();
+	// Bind texture
+	m_diffuseTexture->setActive(0);
+	m_fullscreenQuadShader->setUniform("colorTexture", 0);
+	m_dummy->setActive();
+	glDrawArrays(GL_POINTS, 0, 1);
+
     // Post draw error check
     std::string error;
     if (hasGLError(error))
@@ -176,6 +198,13 @@ void CDeferredRenderer::draw(ResourceId meshId, const glm::vec3& position,
                                glm::rotate(rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
                                glm::rotate(rotation.z, glm::vec3(0.f, 0.f, 1.f));
     glm::mat4 scaleMatrix = glm::scale(scale);
+
+	if (material->hasCustomShader())
+	{
+		// Custom shaders not supported
+		LOG_WARNING("Deferred renderer does not support custom material shaders.");
+		return;
+	}
 
     // Forward draw call
     draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material);
