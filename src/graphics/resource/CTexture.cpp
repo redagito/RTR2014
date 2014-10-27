@@ -4,6 +4,7 @@
 #include <string>
 
 #include "graphics/renderer/debug/RendererDebug.h"
+#include <lodepng.h>
 #include "debug/Log.h"
 
 CTexture::CTexture()
@@ -78,6 +79,15 @@ void CTexture::setActive(GLint textureUnit) const
     assert(isValid());
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
+}
+
+void CTexture::saveAsPng(const std::string& file)
+{
+	std::vector<unsigned char> image;
+	image.resize(m_width * m_height * 3);
+	glBindTexture(GL_TEXTURE_2D, m_textureId);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+	lodepng::encode(file, image, m_width, m_height, LCT_RGB);
 }
 
 bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,

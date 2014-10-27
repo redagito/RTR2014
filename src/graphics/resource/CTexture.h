@@ -50,6 +50,11 @@ class CTexture
     */
     void setActive(GLint textureUnit) const;
 
+	/**
+	* \brief Saves texture data as png.
+	*/
+	void saveAsPng(const std::string& file);
+
    protected:
     bool init(const std::vector<unsigned char>& imageData, unsigned int width, unsigned int height,
               GLint format, bool createMipmaps);
