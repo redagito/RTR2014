@@ -34,17 +34,6 @@ bool CDeferredRenderer::init(IResourceManager* manager)
     // Set clear color
     glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
-    // Depth
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    // Backface culling disabled for debugging
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    // Winding order, standard is counter-clockwise
-    glFrontFace(GL_CCW);
-
     // Error check
     std::string error;
     if (hasGLError(error))
@@ -67,13 +56,13 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 
     // Depth texture with 24 bit precision
     // Uses 24 bit per pixel
+	m_depthTexture = std::make_shared<CTexture>();
     m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
-    m_depthTexture = std::make_shared<CTexture>();
 
     // Texture with glow and specular data. Stores 8 bit glow and 8 bit specularity
     // Uses 16 bit per pixel
+	m_glowSpecularTexture = std::make_shared<CTexture>();
     m_glowSpecularTexture->init(800, 600, GL_RG8);
-    m_glowSpecularTexture = std::make_shared<CTexture>();
 
     // Total 96 bit per pixel
     m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
@@ -103,6 +92,11 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+	if (!m_screenQuadPass.init(manager))
+	{
+		LOG_ERROR("Failed to initialize screen quad pass.");
+		return false;
+	}
     return true;
 }
 
@@ -113,6 +107,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     window.setActive();
 
     // Geometry pass, uses gbuffer fbo
+	m_geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
 
     // Set framebuffer
     m_frameBuffer.setActive(GL_FRAMEBUFFER);
@@ -121,6 +116,17 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Depth
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	// Backface culling disabled for debugging
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	// Winding order, standard is counter-clockwise
+	glFrontFace(GL_CCW);
 
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -182,6 +188,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     }
 
     // Geometry pass end, gbuffer populated
+	//m_screenQuadPass.draw(m_diffuseTexture.get(), nullptr, &manager);
 
     // Post draw error check
     std::string error;

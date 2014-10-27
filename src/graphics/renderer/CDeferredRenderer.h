@@ -10,6 +10,8 @@
 #include "SRenderRequest.h"
 #include "resource/ResourceConfig.h"
 
+#include "pass/CScreenQuadPass.h"
+
 class CShaderProgram;
 class IResourceManager;
 
@@ -49,5 +51,6 @@ class CDeferredRenderer : public ARenderer
     glm::mat4 m_currentView;       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
 
+	CScreenQuadPass m_screenQuadPass;
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 };
