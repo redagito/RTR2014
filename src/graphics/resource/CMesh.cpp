@@ -1,8 +1,8 @@
 #include "CMesh.h"
 #include "debug/Log.h"
 
-#include "core/RendererCoreConfig.h"
-#include "debug/RendererDebug.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "graphics/renderer/debug/RendererDebug.h"
 
 #include <cassert>
 

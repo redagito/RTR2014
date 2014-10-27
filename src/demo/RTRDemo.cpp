@@ -23,6 +23,7 @@
 
 #include "graphics/scene/CScene.h"
 #include "graphics/window/CGlfwWindow.h"
+#include "graphics/resource/CGraphicsResourceManager.h"
 
 #include "graphics/CDebugInfoDisplay.h"
 
@@ -47,22 +48,27 @@ int RTRDemo::init(const std::string& configFile)
                     configFile.c_str());
     }
 
-	// Create window for rendering
+    // Create window for rendering
     if (!initWindow())
     {
         LOG_ERROR("Failed to initialize window.");
         return 1;
     }
 
-	// Create resource manager
-	m_resourceManager.reset(createResourceManager());
-	if (m_resourceManager == nullptr)
-	{
-		LOG_ERROR("Failed to initialize resource manager.");
-		return 1;
-	}
+    // Create resource manager
+    m_resourceManager.reset(createResourceManager());
+    if (m_resourceManager == nullptr)
+    {
+        LOG_ERROR("Failed to initialize resource manager.");
+        return 1;
+    }
 
-	// Create renderer
+	// Graphics resource manager, listens to resource manager
+	CGraphicsResourceManager* manager = new	CGraphicsResourceManager;
+	m_resourceManager->addResourceListener(manager);
+	m_graphicsResourceManager.reset(manager);
+
+    // Create renderer
     if (!initRenderer())
     {
         LOG_ERROR("Failed to initialize renderer.");
@@ -82,7 +88,7 @@ int RTRDemo::init(const std::string& configFile)
     m_cameraController->setInputProvider(new CGlfwInputProvider(m_window->getGlfwHandle()));
 
     m_debugInfoDisplay = std::make_shared<CDebugInfoDisplay>(m_resourceManager);
-    
+
     m_window->addListener(m_cameraController.get());
 
     return 0;
@@ -118,7 +124,6 @@ int RTRDemo::run()
             fpsCoolDown += 1.f;
             lastFrameCount = currentFrameCount;
             currentFrameCount = 0;
-
         }
 
         if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
@@ -129,7 +134,7 @@ int RTRDemo::run()
 
         m_cameraController->animate((float)timeDiff);
 
-        m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get());
+        m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get(), *m_graphicsResourceManager.get());
 
         if (displayDebugInfo)
         {
@@ -174,16 +179,16 @@ bool RTRDemo::initWindow()
         return true;
     }
 
-	LOG_INFO("Initializing application window.");
+    LOG_INFO("Initializing application window.");
 
     // Read config values
     unsigned int width = m_config.getValue("window", "width", 800);
     unsigned int height = m_config.getValue("window", "height", 600);
     std::string title = m_config.getValue("window", "title", "Demo");
 
-	LOG_INFO("Window width: %u.", width);
-	LOG_INFO("Window height: %u.", height);
-	LOG_INFO("Window title: %s.", title.c_str());
+    LOG_INFO("Window width: %u.", width);
+    LOG_INFO("Window height: %u.", height);
+    LOG_INFO("Window title: %s.", title.c_str());
 
     // Create window
     CGlfwWindow* window = new CGlfwWindow;
@@ -214,28 +219,26 @@ bool RTRDemo::initRenderer()
     // Set renderer object
     if (rendererType == "forward")
     {
-        m_renderer = std::make_shared<CForwardRenderer>(m_resourceManager);
+        m_renderer.reset(CForwardRenderer::create(m_resourceManager.get()));
     }
     else if (rendererType == "deferred")
     {
-        m_renderer = std::make_shared<CDeferredRenderer>(m_resourceManager);
+        m_renderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
     }
     else
     {
         // Should not happen as default renderer is set to forward in config call
         LOG_WARNING("Invalid renderer type %s specified. Fallback to forward renderer.",
                     rendererType.c_str());
-        m_renderer = std::make_shared<CForwardRenderer>(m_resourceManager);
+        m_renderer.reset(CForwardRenderer::create(m_resourceManager.get()));
     }
 
     // Initialize renderer resources
-    if (!m_renderer->init())
+    if (m_renderer == nullptr)
     {
         LOG_ERROR("Failed to initialize renderer.");
-        m_renderer = nullptr;
         return false;
     }
-
     return true;
 }
 

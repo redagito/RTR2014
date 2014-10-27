@@ -2,10 +2,10 @@
 
 #include <memory>
 
-#include "graphics/renderer/CTexture.h"
+#include "graphics/resource/CTexture.h"
+#include "graphics/resource/CMesh.h"
+#include "graphics/resource/CShaderProgram.h"
 #include "graphics/renderer/CFrameBuffer.h"
-#include "graphics/renderer/CMesh.h"
-#include "graphics/renderer/CShaderProgram.h"
 
 #include "resource/IResourceManager.h"
 

@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include "core/RendererCoreConfig.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
 
 #include "TShaderObject.h"
 

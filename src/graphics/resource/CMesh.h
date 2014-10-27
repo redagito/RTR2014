@@ -5,9 +5,9 @@
 
 #include "resource/ResourceConfig.h"
 
-#include "core/CVertexBuffer.h"
-#include "core/CIndexBuffer.h"
-#include "core/CVertexArrayObject.h"
+#include "graphics/renderer/core/CVertexBuffer.h"
+#include "graphics/renderer/core/CIndexBuffer.h"
+#include "graphics/renderer/core/CVertexArrayObject.h"
 
 /**
 * \brief Contains mesh data (vertices, faces, normals and uv data).

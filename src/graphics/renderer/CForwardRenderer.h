@@ -1,12 +1,15 @@
 #pragma once
 
-#include <memory>
 #include <list>
 
 // Required by inheritance
 #include "ARenderer.h"
 
+#include "resource/ResourceConfig.h"
 #include "SRenderRequest.h"
+
+class CShaderProgram;
+class IResourceManager;
 
 /**
 * \brief Forward renderer.
@@ -15,9 +18,9 @@ class CForwardRenderer : public ARenderer
 {
    public:
     /**
-    * \brief Forwards resource manager to base class.
+    * \brief Default constructor.
     */
-    CForwardRenderer(const std::shared_ptr<IResourceManager>& resourceManager);
+    CForwardRenderer();
 
     /**
     * \brief Internal resource cleanup.
@@ -25,42 +28,39 @@ class CForwardRenderer : public ARenderer
     ~CForwardRenderer();
 
     /**
-     * \brief Loads resources.
-     */
-    bool init();
-
-    /**
     * \brief Draws whole scene.
     * Implements the draw call as specified by the renderer interface.
     * This function implements the highlevel drawing logic for the scene,
     * selects rendering targets and manages render passes.
     */
-    void draw(const IScene& scene, const ICamera& camera, const IWindow& window);
+	void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager);
+
+    /**
+    * \brief Performs resource aqucisition and initialization.
+    */
+    bool init(IResourceManager* manager);
+
+    /**
+    * \brief Creates and initializes forward renderer.
+    */
+    static CForwardRenderer* create(IResourceManager* manager);
 
    protected:
-    /**
-    * \brief Utility draw function.
-    * Resolves the resource ids to internal objects, constructs
-    * the transformation matrices and forwards call.
-    */
-    void draw(ResourceId mesh, const glm::vec3& position, const glm::vec3& rotation,
-              const glm::vec3& scale, ResourceId);
-
     /**
     * \brief Draws mesh to current rendering target.
     * Selects the rendering method (indexed, direct, etc.) based on the available mesh data
     * and performs actual draw call.
     */
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
-              const glm::mat4& scale, CMaterial* material);
+              const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager);
 
    private:
-    bool initDefaultShaders();
+    bool initDefaultShaders(IResourceManager* manager);
 
-    glm::mat4 m_currentView;       /**< Stores the current view matrix. */
-    glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
+    glm::mat4 m_currentView = glm::mat4(1.f);       /**< Stores the current view matrix. */
+    glm::mat4 m_currentProjection = glm::mat4(1.f); /**< Stores the current projection matrix. */
 
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
-    CShaderProgram*
-        m_defaultShader; /**< Default shader for rendering. TODO for testing, remove later. */
+    ResourceId m_forwardShader;                     /**< Forward shader resource id. */
+    CShaderProgram* m_currentShader = nullptr;      /**< Currently active shader object. */
 };

@@ -1,11 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
 class IScene;
 class IWindow;
 class ICamera;
+class IGraphicsResourceManager;
 
 /**
 * \brief Renderer interface class.
@@ -19,13 +17,7 @@ class IRenderer
     virtual ~IRenderer();
 
     /**
-     * \brief Initialize renderer.
-     * Perform resource acquisition here.
-     */
-    virtual bool init() = 0;
-
-    /**
     * \brief Draw scene viewed from camera into window.
     */
-    virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window) = 0;
+    virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) = 0;
 };

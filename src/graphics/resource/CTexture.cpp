@@ -3,7 +3,7 @@
 #include <cassert>
 #include <string>
 
-#include "debug/RendererDebug.h"
+#include "graphics/renderer/debug/RendererDebug.h"
 #include "debug/Log.h"
 
 CTexture::CTexture()

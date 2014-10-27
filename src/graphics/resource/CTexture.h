@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "core/RendererCoreConfig.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/ResourceConfig.h"
 
 /**

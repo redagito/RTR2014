@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "CTexture.h"
+#include "graphics/resource/CTexture.h"
 
 CFrameBuffer::CFrameBuffer() : m_fboId(0), m_valid(false) { init(); }
 

@@ -8,6 +8,10 @@
 
 #include "CFrameBuffer.h"
 #include "SRenderRequest.h"
+#include "resource/ResourceConfig.h"
+
+class CShaderProgram;
+class IResourceManager;
 
 /**
 * \brief Deferred renderer implementation.
@@ -15,38 +19,35 @@
 class CDeferredRenderer : public ARenderer
 {
    public:
-    CDeferredRenderer(const std::shared_ptr<IResourceManager>& resourceManager);
+    CDeferredRenderer();
     ~CDeferredRenderer();
 
-    bool init();
+    bool init(IResourceManager* manager);
 
-    void draw(const IScene& scene, const ICamera& camera, const IWindow& window);
+    void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
+              const IGraphicsResourceManager& manager);
+
+	static CDeferredRenderer* create(IResourceManager* manager);
 
    protected:
-    bool initShaders();
+	bool initShaders(IResourceManager* manager);
 
-    void draw(ResourceId meshId, const glm::vec3& position, const glm::vec3& rotation,
-              const glm::vec3& scale, ResourceId materialId);
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
-              const glm::mat4& scale, CMaterial* material);
-
-	void drawFullscreenQuad(CTexture* texture);
+              const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager);
 
    private:
-	// Geometry pass
-	CFrameBuffer m_frameBuffer;
-	std::shared_ptr<CTexture> m_depthTexture;
-	std::shared_ptr<CTexture> m_diffuseTexture;
-	std::shared_ptr<CTexture> m_normalTexture;
-	std::shared_ptr<CTexture> m_glowSpecularTexture;
-	GLenum m_drawBuffers[3];
-	CShaderProgram* m_geometryPassShader;
+    // Geometry pass
+    CFrameBuffer m_frameBuffer;
+    std::shared_ptr<CTexture> m_depthTexture;
+    std::shared_ptr<CTexture> m_diffuseTexture;
+    std::shared_ptr<CTexture> m_normalTexture;
+    std::shared_ptr<CTexture> m_glowSpecularTexture;
+    GLenum m_drawBuffers[3];
+	ResourceId m_geometryPassShaderId = -1;
+    CShaderProgram* m_geometryPassShader = nullptr;
 
     glm::mat4 m_currentView;       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
 
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
-	
-	CShaderProgram* m_fullscreenQuadShader; /**< Renders screen space quad with texture. */
-	std::shared_ptr<CVertexBuffer> m_dummy;
 };

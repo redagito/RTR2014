@@ -5,8 +5,9 @@
 
 #include "renderer/core/CVertexArrayObject.h"
 #include "renderer/core/CVertexBuffer.h"
-#include "renderer/CShaderProgram.h"
-#include "renderer/CTexture.h"
+
+#include "resource/CShaderProgram.h"
+#include "resource/CTexture.h"
 
 #include "resource/IResourceManager.h"
 

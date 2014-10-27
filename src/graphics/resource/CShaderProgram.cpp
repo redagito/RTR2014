@@ -1,6 +1,6 @@
 #include "CShaderProgram.h"
 
-#include "debug/RendererDebug.h"
+#include "graphics/renderer/debug/RendererDebug.h"
 #include "debug/Log.h"
 
 #include <cassert>
