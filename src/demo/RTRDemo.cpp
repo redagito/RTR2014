@@ -100,9 +100,11 @@ int RTRDemo::run()
     m_camera->setProjection(45.f, 4.f / 3.f, 1.f, 1000.f);
     m_camera->lookAt(glm::vec3(3.f, 5.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
-    double f1Cooldown = 0.f;
-    double k1Cooldown = 0.f;
-    double timeDiff = 0;
+	double f1Cooldown = 0.0;
+	double f2Cooldown = 0.0;
+	double f3Cooldown = 0.0;
+    double k1Cooldown = 0.0;
+    double timeDiff = 0.0;
 
     double fpsCoolDown = 1.f;
     unsigned int lastFrameCount = 0;
@@ -115,7 +117,9 @@ int RTRDemo::run()
         double startTime = glfwGetTime();
 
         // Cooldowns
-        f1Cooldown -= timeDiff;
+		f1Cooldown -= timeDiff;
+		f2Cooldown -= timeDiff;
+		f3Cooldown -= timeDiff;
         k1Cooldown -= timeDiff;
         fpsCoolDown -= timeDiff;
 
@@ -126,11 +130,23 @@ int RTRDemo::run()
             currentFrameCount = 0;
         }
 
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
-        {
-            k1Cooldown = 0.3f;
-            displayDebugInfo = !displayDebugInfo;
-        }
+		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
+		{
+			k1Cooldown = 0.3f;
+			displayDebugInfo = !displayDebugInfo;
+		}
+
+		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F2) == GLFW_PRESS && f2Cooldown <= 0.f)
+		{
+			f2Cooldown = 0.3f;
+			m_renderer = m_deferredRenderer;
+		}
+
+		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F3) == GLFW_PRESS && f3Cooldown <= 0.f)
+		{
+			f3Cooldown = 0.3f;
+			m_renderer = m_forwardRenderer;
+		}
 
         m_cameraController->animate((float)timeDiff);
 
@@ -206,31 +222,47 @@ bool RTRDemo::initWindow()
 
 bool RTRDemo::initRenderer()
 {
-    if (m_renderer != nullptr)
+    if (m_renderer != nullptr || m_deferredRenderer != nullptr || m_forwardRenderer != nullptr)
     {
         LOG_INFO("Renderer already initialized and re-initialization is not supported.");
         return true;
-    }
+	}
 
-    // Create renderer
+	// Initialize deferred renderer
+	m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
+	if (m_deferredRenderer == nullptr)
+	{
+		LOG_ERROR("Failed to initialize deferred renderer.");
+		return false;
+	}
+
+	// Initialize forward renderer
+	m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
+	if (m_forwardRenderer == nullptr)
+	{
+		LOG_ERROR("Failed to initialize forward renderer.");
+		return false;
+	}
+
+    // Set renderer
     std::string rendererType = m_config.getValue("renderer", "type", "forward");
     LOG_INFO("Renderer type set to %s.", rendererType.c_str());
 
     // Set renderer object
     if (rendererType == "forward")
     {
-        m_renderer.reset(CForwardRenderer::create(m_resourceManager.get()));
+		m_renderer = m_forwardRenderer;
     }
     else if (rendererType == "deferred")
     {
-        m_renderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
+		m_renderer = m_deferredRenderer;
     }
     else
     {
         // Should not happen as default renderer is set to forward in config call
         LOG_WARNING("Invalid renderer type %s specified. Fallback to forward renderer.",
                     rendererType.c_str());
-        m_renderer.reset(CForwardRenderer::create(m_resourceManager.get()));
+		m_renderer = m_forwardRenderer;
     }
 
     // Initialize renderer resources
