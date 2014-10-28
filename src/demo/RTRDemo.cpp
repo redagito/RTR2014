@@ -228,7 +228,9 @@ bool RTRDemo::initRenderer()
         return true;
 	}
 
+
 	// Initialize deferred renderer
+	LOG_INFO("Initializing deferred renderer.");
 	m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
 	if (m_deferredRenderer == nullptr)
 	{
@@ -237,6 +239,7 @@ bool RTRDemo::initRenderer()
 	}
 
 	// Initialize forward renderer
+	LOG_INFO("Initializing forward renderer.");
 	m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
 	if (m_forwardRenderer == nullptr)
 	{
@@ -246,7 +249,7 @@ bool RTRDemo::initRenderer()
 
     // Set renderer
     std::string rendererType = m_config.getValue("renderer", "type", "forward");
-    LOG_INFO("Renderer type set to %s.", rendererType.c_str());
+    LOG_INFO("Initial renderer type set to %s.", rendererType.c_str());
 
     // Set renderer object
     if (rendererType == "forward")

@@ -9,5 +9,4 @@ out vec3 fragmentColor;
 void main(void)
 {
 	fragmentColor = texture(color_texture, uv).rgb;
-	fragmentColor.r = 0.5f;
 }
