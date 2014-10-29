@@ -10,7 +10,7 @@ void CDebugInfo::handleLog(const char* level, const char* file, int line, const 
     }
 }
 
-const std::list<const std::string>& CDebugInfo::getLog() const { return m_logBuffer; }
+const std::list<std::string>& CDebugInfo::getLog() const { return m_logBuffer; }
 
 void CDebugInfo::setLogBufferSize(size_t size)
 {
@@ -28,4 +28,4 @@ void CDebugInfo::setValue(const std::string& key, const std::string& value)
     m_values[key] = value;
 }
 
-const std::map<const std::string, std::string>& CDebugInfo::getValues() const { return m_values; }
+const std::map<std::string, std::string>& CDebugInfo::getValues() const { return m_values; }

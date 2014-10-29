@@ -11,6 +11,11 @@
 #include <iostream>
 #include <sstream>
 
+ILogListener::~ILogListener()
+{
+
+}
+
 std::ofstream CLogger::s_stream;
 std::set<ILogListener*> CLogger::s_listeners;
 

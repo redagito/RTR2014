@@ -11,16 +11,17 @@ class CDebugInfo : public ILogListener
    public:
     void handleLog(const char* level, const char* file, int line, const char* function,
                    const std::string& text);
-    const std::list<const std::string>& getLog() const;
+
+    const std::list<std::string>& getLog() const;
 
     void setLogBufferSize(size_t size);
     size_t getLogBufferSize() const;
 
     void setValue(const std::string& key, const std::string& value);
-    const std::map<const std::string, std::string>& getValues() const;
+    const std::map<std::string, std::string>& getValues() const;
 
    private:
     size_t m_logBufferSize = 10;
-    std::list<const std::string> m_logBuffer;
-    std::map<const std::string, std::string> m_values;
+    std::list<std::string> m_logBuffer;
+    std::map<std::string, std::string> m_values;
 };

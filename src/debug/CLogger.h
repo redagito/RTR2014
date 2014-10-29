@@ -9,6 +9,7 @@ class ILogListener
    public:
     virtual void handleLog(const char* level, const char* file, int line, const char* function,
                            const std::string& text) = 0;
+    virtual ~ILogListener();
 };
 
 /**

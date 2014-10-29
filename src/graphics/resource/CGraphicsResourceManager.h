@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <list>
 #include <unordered_map>
 
 #include "resource/IResourceListener.h"
