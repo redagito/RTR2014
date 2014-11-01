@@ -9,10 +9,8 @@ uniform sampler2D specular_texture;
 uniform sampler2D glow_texture;
 uniform sampler2D alpha_texture;
 
-layout(location = 0) out vec3 diffuse;
-layout(location = 1) out vec2 normal;
-layout(location = 2) out vec2 glowSpecular;
-
+layout(location = 0) out vec4 diffuse;
+layout(location = 1) out vec4 normal;
 
 void main(void)
 {
@@ -22,10 +20,10 @@ void main(void)
 	float specular = texture(specular_texture, uv).r;
 	float glow = texture(glow_texture, uv).r;
 	float alpha = texture(alpha_texture, uv).r;
-	
-	float ambient = 0.3f;
 
-	diffuse = diffuseColor;
-	normal = textureNormal.xy;
-	glowSpecular = vec2(glow, specular);
+	diffuse.rgb = diffuseColor;
+	diffuse.a = specular;
+	
+	normal.rgb = textureNormal;
+	normal.a = glow;
 }

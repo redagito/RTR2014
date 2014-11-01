@@ -44,38 +44,28 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 
     // Init gbuffer
 
-    // Diffuse texture, stores base color.
-    // Uses 24 bit per pixel
+    // Diffuse texture, stores base color and specularity.
     m_diffuseTexture = std::make_shared<CTexture>();
-    m_diffuseTexture->init(800, 600, GL_RGB8);
+    m_diffuseTexture->init(800, 600, GL_RGBA);
 
-    // Normal texture, 2 half-floats store x and y, z can be calculated as the vector is normalized.
-    // Uses 32 bit per pixel
+    // Normal texture, store x and y, z normals and glow.
     m_normalTexture = std::make_shared<CTexture>();
-    m_normalTexture->init(800, 600, GL_RG16F);
+    m_normalTexture->init(800, 600, GL_RGBA);
 
-    // Depth texture with 24 bit precision
-    // Uses 24 bit per pixel
+    // Depth texture
 	m_depthTexture = std::make_shared<CTexture>();
     m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
-
-    // Texture with glow and specular data. Stores 8 bit glow and 8 bit specularity
-    // Uses 16 bit per pixel
-	m_glowSpecularTexture = std::make_shared<CTexture>();
-    m_glowSpecularTexture->init(800, 600, GL_RG8);
 
     // Total 96 bit per pixel
     m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
     m_frameBuffer.attach(m_diffuseTexture, GL_COLOR_ATTACHMENT0);
     m_frameBuffer.attach(m_normalTexture, GL_COLOR_ATTACHMENT1);
-    m_frameBuffer.attach(m_glowSpecularTexture, GL_COLOR_ATTACHMENT2);
 
     LOG_INFO("GBuffer state: %s.", m_frameBuffer.getState().c_str());
 
     // Set color attachments for geometry pass fbo
     m_drawBuffers[0] = GL_COLOR_ATTACHMENT0;
     m_drawBuffers[1] = GL_COLOR_ATTACHMENT1;
-    m_drawBuffers[2] = GL_COLOR_ATTACHMENT2;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -112,7 +102,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Set framebuffer
     m_frameBuffer.setActive(GL_FRAMEBUFFER);
     // Set render targets
-    glDrawBuffers(3, m_drawBuffers);
+    glDrawBuffers(2, m_drawBuffers);
 
     // Clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -187,11 +177,17 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         }
     }
 
+	// Post draw error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     // Geometry pass end, gbuffer populated
 	m_screenQuadPass.draw(m_diffuseTexture.get(), nullptr, &manager);
 	
     // Post draw error check
-    std::string error;
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
@@ -214,6 +210,12 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
                              const glm::mat4& scale, CMaterial* material,
                              const IGraphicsResourceManager& manager)
 {
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     // Decide which shader program to use
     CShaderProgram* shader = m_geometryPassShader;
     if (material->hasCustomShader())
@@ -222,6 +224,11 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     }
     shader->setActive();
 
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     // Custom shader needs access to view/projection matrices
     if (material->hasCustomShader())
     {
@@ -229,11 +236,21 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
         shader->setUniform(projectionMatrixUniformName, m_currentProjection);
     }
 
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     // Transformation matrices
     shader->setUniform(translationMatrixUniformName, translation);
     shader->setUniform(rotationMatrixUniformName, rotation);
     shader->setUniform(scaleMatrixUniformName, scale);
     shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
+
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
 
     // Send material textures to shader
     if (material->hasDiffuse())
@@ -291,10 +308,19 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     }
     shader->setUniform(alphaTextureUniformName, alphaTextureUnit);
 
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
+
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
     ARenderer::draw(mesh);
 
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+	}
     // TODO Cleanup?
 }
 

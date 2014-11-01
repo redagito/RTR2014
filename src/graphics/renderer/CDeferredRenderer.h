@@ -43,8 +43,7 @@ class CDeferredRenderer : public ARenderer
     std::shared_ptr<CTexture> m_depthTexture;
     std::shared_ptr<CTexture> m_diffuseTexture;
     std::shared_ptr<CTexture> m_normalTexture;
-    std::shared_ptr<CTexture> m_glowSpecularTexture;
-    GLenum m_drawBuffers[3];
+    GLenum m_drawBuffers[2];
 	ResourceId m_geometryPassShaderId = -1;
     CShaderProgram* m_geometryPassShader = nullptr;
 

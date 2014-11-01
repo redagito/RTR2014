@@ -102,44 +102,42 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     // Set format
     unsigned int bytePerPixel = 0;
     GLenum externalFormat;
-    GLenum type;
+	// External data type
+	GLenum type = GL_UNSIGNED_BYTE;
 
     // Set external format and type, based on texture format
     switch (format)
     {
     case GL_R8:  // Red component only, used for greyscale
         externalFormat = GL_RED;
-        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 1;
         break;
     case GL_RG8:  // Red and green component
         externalFormat = GL_RG;
-        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 2;
         break;
     case GL_RGB8:  // RGB texture with values from 0-255
         externalFormat = GL_RGB;
-        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 3;
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
         externalFormat = GL_DEPTH_COMPONENT;
-        type = GL_UNSIGNED_BYTE;
         bytePerPixel = 3;
-        break;
-    case GL_RGBA8:  // RGB texture with alpha channel
-        externalFormat = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        bytePerPixel = 4;
-        break;
+		break;
+	case GL_RGBA:  // RGB texture with alpha channel
+		externalFormat = GL_RGBA;
+		bytePerPixel = 4;
+		break;
+	case GL_RGBA8:
+		externalFormat = GL_RGBA;
+		bytePerPixel = 4;
+		break;
     case GL_RGB16F:  // RGB texture with half float precision, for hdr
         externalFormat = GL_RGB;
-        type = GL_FLOAT;
         bytePerPixel = 6;
         break;
     case GL_RGBA16F:  // RGB texture with alpha channel with half float precision
         externalFormat = GL_RGBA;
-        type = GL_FLOAT;
         bytePerPixel = 8;
         break;
     default:

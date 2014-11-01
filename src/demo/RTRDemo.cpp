@@ -25,6 +25,8 @@
 #include "graphics/window/CGlfwWindow.h"
 #include "graphics/resource/CGraphicsResourceManager.h"
 
+#include "util/TimeStamp.h"
+
 #include "graphics/CDebugInfoDisplay.h"
 
 #include "input/provider/CGlfwInputProvider.h"
@@ -39,7 +41,14 @@ RTRDemo::~RTRDemo() {}
 
 int RTRDemo::init(const std::string& configFile)
 {
-    m_debugInfo = std::make_shared<CDebugInfo>();
+    // Init log file
+	std::string logFile = "log/" + createTimeStamp() + ".log";
+	if (!CLogger::initLogFile(logFile))
+	{
+		LOG_WARNING("Failed to create log file at %s.", logFile.c_str());
+	}
+	
+	m_debugInfo = std::make_shared<CDebugInfo>();
     CLogger::addListener(m_debugInfo.get());
 
     if (!m_config.load(configFile))
