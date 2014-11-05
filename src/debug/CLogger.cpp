@@ -1,7 +1,5 @@
 #include "CLogger.h"
 
-#include "Log.h"
-
 #include <cstring>
 #include <ctime>
 #include <string>
@@ -11,13 +9,11 @@
 #include <iostream>
 #include <sstream>
 
-ILogListener::~ILogListener()
-{
-
-}
+#include "Log.h"
+#include "ILogListener.h"
 
 std::ofstream CLogger::s_stream;
-std::set<ILogListener*> CLogger::s_listeners;
+std::list<ILogListener*> CLogger::s_listeners;
 
 void CLogger::log(const char* level, const char* file, int line, const char* function,
                   const char* format, ...)
@@ -44,7 +40,7 @@ void CLogger::log(const char* level, const char* file, int line, const char* fun
     // passthrough to listeners
     for (ILogListener* l : s_listeners)
     {
-        l->handleLog(level, file, line, function, std::string(buffer));
+        l->notify(level, file, line, function, std::string(buffer));
     }
 }
 
@@ -64,6 +60,6 @@ bool CLogger::initLogFile(const std::string& logFile)
     return false;
 }
 
-void CLogger::addListener(ILogListener* l) { s_listeners.insert(l); }
+void CLogger::addListener(ILogListener* l) { s_listeners.push_back(l); }
 
-void CLogger::removeListener(ILogListener* l) { s_listeners.erase(l); }
+void CLogger::removeListener(ILogListener* l) { s_listeners.remove(l); }

@@ -3,7 +3,7 @@
 /**
 * \brief Simple logging macros.
 */
-#if defined(_DEBUG) || defined(DEBUG)
+#if defined(_DEBUG) || defined(DEBUG) || defined(NDEBUG)
 #include "CLogger.h"
 #include <cstring>
 
