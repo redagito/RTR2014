@@ -11,8 +11,12 @@ uniform mat4 inverse_view_proj;
 out vec3 fragmentColor;
 
 vec3 getWorldPosition() {
+    float n = 0.1f;
+    float f = 1000.0f;
+    
     float z = texture(depth_texture, uv).x;
-    z = 0.1 / (1000.0 - z * (1000.0 - 0.1)) * 1000.0;
+    z = f * z + n - z * n;
+
     vec4 sPos = vec4(uv * 2.0 - 1.0, z, 1.0);
     sPos = inverse_view_proj * sPos;
     
@@ -35,12 +39,8 @@ void main(void)
     
     fragmentColor = surfaceColor * 0.1;
     
-    //fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0,  3), vec3(1,0,0), 10.0) * 0.45;
-    //fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0, -3), vec3(0,1,0), 10.0) * 0.45;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0,  3), vec3(1,0,0), 10.0) * 0.45;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0, -3), vec3(0,1,0), 10.0) * 0.45;
     
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-3,-3,0), vec3(1,1,1), 100.0) * 0.9;
-    
-    
-    //fragmentColor = vec3(texture(depth_texture, uv).x,texture(depth_texture, uv).x,texture(depth_texture, uv).x);
-    //fragmentColor = texture(normal_texture, uv).rgb;
+    //fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-3,-3,0), vec3(1,1,1), 100.0) * 0.9;
 }
