@@ -39,71 +39,117 @@ void CCameraController::animate(float dt)
 {
     if (m_inputProvider != nullptr && m_camera != nullptr)
     {
-        if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT_ALT) ||
-            m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_ALT))
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
         {
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
-            {
-                m_camera->pitch(dt * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
-            {
-                m_camera->pitch(-dt * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
-            {
-                m_camera->yaw(-dt * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
-            {
-                m_camera->yaw(dt * m_speed);
-            }
+            m_camera->moveForward(dt * 2.f * m_speed);
         }
-        else
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
         {
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
-            {
-                m_camera->moveUp(dt * 2.f * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
-            {
-                m_camera->moveUp(-dt * 2.f * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
-            {
-                m_camera->moveRight(dt * 2.f * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
-            {
-                m_camera->moveRight(-dt * 2.f * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
-            {
-                m_camera->moveForward(dt * 2.f * m_speed);
-            }
-
-            if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
-            {
-                m_camera->moveForward(-dt * 2.f * m_speed);
-            }
+            m_camera->moveForward(dt * -2.f * m_speed);
+        }
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_A))
+        {
+            m_camera->moveRight(dt * 2.f * m_speed);
+        }
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_D))
+        {
+            m_camera->moveRight(dt * -2.f * m_speed);
         }
 
-        if (m_inputProvider->isKeyPressed(GLFW_KEY_SLASH))
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_Q))
         {
-            m_speed -= dt * 2;
+            m_camera->moveUp(dt * -2.f * m_speed);
+        }
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_E))
+        {
+            m_camera->moveUp(dt * 2.f * m_speed);
         }
 
-        if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_BRACKET))
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
         {
-            m_speed += dt * 2;
+            m_camera->pitch(dt * m_speed);
         }
+
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
+        {
+            m_camera->pitch(-dt * m_speed);
+        }
+
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
+        {
+            m_camera->yaw(-dt * m_speed);
+        }
+
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
+        {
+            m_camera->yaw(dt * m_speed);
+        }
+
+        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT_ALT) ||
+        //            m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_ALT))
+        //        {
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
+        //            {
+        //                m_camera->pitch(dt * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
+        //            {
+        //                m_camera->pitch(-dt * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
+        //            {
+        //                m_camera->yaw(-dt * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
+        //            {
+        //                m_camera->yaw(dt * m_speed);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
+        //            {
+        //                m_camera->moveUp(dt * 2.f * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
+        //            {
+        //                m_camera->moveUp(-dt * 2.f * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
+        //            {
+        //                m_camera->moveRight(dt * 2.f * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
+        //            {
+        //                m_camera->moveRight(-dt * 2.f * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
+        //            {
+        //                m_camera->moveForward(dt * 2.f * m_speed);
+        //            }
+        //
+        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
+        //            {
+        //                m_camera->moveForward(-dt * 2.f * m_speed);
+        //            }
+        //        }
+
+        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_SLASH))
+        //        {
+        //            m_speed -= dt * 2;
+        //        }
+        //
+        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_BRACKET))
+        //        {
+        //            m_speed += dt * 2;
+        //        }
     }
 }
 
