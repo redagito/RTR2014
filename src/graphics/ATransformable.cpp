@@ -46,7 +46,13 @@ void ATransformable::moveForward(float amount)
 
 void ATransformable::moveRight(float amount)
 {
-    m_position += amount * m_right;
+    // TODO
+    // I experienced, that camera moves in the wrong direction, when calling this method.
+    // So -= is used instead of += here.
+    // This is either a problem of the camera or of the right-vector.
+    // Investigate with scene objects!
+
+    m_position -= amount * m_right;
     updateModelMatrix();
 }
 
