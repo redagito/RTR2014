@@ -11,15 +11,9 @@ uniform mat4 inverse_view_proj;
 out vec3 fragmentColor;
 
 vec3 getWorldPosition() {
-    float n = 0.1f;
-    float f = 1000.0f;
-    
     float z = texture(depth_texture, uv).x;
-    z = f * z + n - z * n;
-
-    vec4 sPos = vec4(uv * 2.0 - 1.0, z, 1.0);
+    vec4 sPos = vec4(uv * 2 - 1, z * 2 - 1, 1.0);
     sPos = inverse_view_proj * sPos;
-    
     return (sPos.xyz / sPos.w);
 }
 

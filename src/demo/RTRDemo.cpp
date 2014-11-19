@@ -106,7 +106,7 @@ int RTRDemo::init(const std::string& configFile)
 int RTRDemo::run()
 {
     // Set camera
-    m_camera->setProjection(45.f, 4.f / 3.f, 0.1f, 1000.f);
+    m_camera->setProjection(45.f, 4.f / 3.f, 0.1f, 100.f);
     m_camera->lookAt(glm::vec3(0.f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
 
 	double f1Cooldown = 0.0;

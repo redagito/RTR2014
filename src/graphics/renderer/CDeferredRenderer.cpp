@@ -184,7 +184,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 		LOG_ERROR("GL Error: %s", error.c_str());
 	}
 
-    glm::mat4 inverseViewProj = glm::inverse(camera.getView() * camera.getProjection());
+    glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
 
     // Geometry pass end, gbuffer populated
     m_screenQuadPass.draw(m_diffuseTexture.get(), m_normalTexture.get(), m_depthTexture.get(),
