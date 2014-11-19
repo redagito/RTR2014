@@ -26,6 +26,6 @@ void main(void)
 	diffuse.a = specular;
 	
 	//normal.rgb = textureNormal;
-    normal.rgb = normalVectorWorldSpace;
+    normal.rgb = (normalVectorWorldSpace + 1) / 2;
 	normal.a = glow;
 }
