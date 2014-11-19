@@ -2,6 +2,7 @@
 
 in vec2 uv;
 smooth in vec3 normalVectorCameraSpace;
+in vec3 normalVectorWorldSpace;
 
 uniform sampler2D diffuse_texture;
 uniform sampler2D normal_texture;
@@ -24,6 +25,7 @@ void main(void)
 	diffuse.rgb = diffuseColor;
 	diffuse.a = specular;
 	
-	normal.rgb = textureNormal;
+	//normal.rgb = textureNormal;
+    normal.rgb = normalVectorWorldSpace;
 	normal.a = glow;
 }

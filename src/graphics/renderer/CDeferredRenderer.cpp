@@ -185,7 +185,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 	}
 
     // Geometry pass end, gbuffer populated
-	m_screenQuadPass.draw(m_diffuseTexture.get(), nullptr, &manager);
+	m_screenQuadPass.draw(m_diffuseTexture.get(), m_normalTexture.get(), nullptr, &manager);
 	
     // Post draw error check
     if (hasGLError(error))

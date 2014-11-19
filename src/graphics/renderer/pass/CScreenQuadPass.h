@@ -20,10 +20,11 @@ public:
 
 	bool init(IResourceManager* manager);
 
-	/**
-	* \brief Draws screen space quad with specified texture to specified frame buffer.
-	*/
-	void draw(CTexture* texture, CFrameBuffer* fbo, const IGraphicsResourceManager* manager);
+    /**
+    * \brief Draws screen space quad with specified texture to specified frame buffer.
+    */
+    void draw(CTexture* colorTexture, CTexture* normalTexture, CFrameBuffer* fbo,
+              const IGraphicsResourceManager* manager);
 
 private:
 	std::unique_ptr<CMesh> m_quad = nullptr;

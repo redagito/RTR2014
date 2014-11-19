@@ -20,6 +20,8 @@ out vec2 uv;
 // Nornal vector
 smooth out vec3 normalVectorCameraSpace;
 
+out vec3 normalVectorWorldSpace;
+
 void main(void)
 {
 	// Calculate vertex position in camera space
@@ -27,7 +29,9 @@ void main(void)
 	
 	// Forward texture coordinates
 	uv = vertexUV;
-	
-	// Calculate transformed normal vector, assumes uniform scale
-	normalVectorCameraSpace = (view * translation * rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
+    
+    normalVectorWorldSpace = normalize((translation * rotation * vec4(vertexNormalModelSpace, 0.f)).xyz);
+    
+    // Calculate transformed normal vector, assumes uniform scale
+    normalVectorCameraSpace = normalize((view * vec4(normalVectorWorldSpace, 0.f)).xyz);
 }
