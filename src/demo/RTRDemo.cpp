@@ -95,7 +95,7 @@ int RTRDemo::init(const std::string& configFile)
     //                                      glm::vec3(0.f, 1.f, 0.f), 45.f, 4.f / 3.f, 0.1f, 100.f);
 
     m_camera = std::make_shared<CFirstPersonCamera>(
-        glm::vec3(0.f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
+        glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
         4.f / 3.f, 0.1f, 100.f);
 
     m_cameraController = std::make_shared<CCameraController>();
