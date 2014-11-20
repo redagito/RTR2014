@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "graphics/camera/CFreeCamera.h"
+#include "graphics/camera/IControllableCamera.h"
 
 #include "input/IInputProvider.h"
 
@@ -18,7 +18,10 @@ CCameraController::~CCameraController()
     }
 }
 
-void CCameraController::setCamera(std::shared_ptr<CFreeCamera> camera) { m_camera = camera; }
+void CCameraController::setCamera(std::shared_ptr<IControllableCamera> camera)
+{
+    m_camera = camera;
+}
 
 void CCameraController::setInputProvider(IInputProvider* provider)
 {
@@ -67,12 +70,12 @@ void CCameraController::animate(float dt)
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
         {
-            m_camera->pitch(dt * m_speed);
+            m_camera->pitch(-dt * m_speed);
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
         {
-            m_camera->pitch(-dt * m_speed);
+            m_camera->pitch(dt * m_speed);
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
@@ -84,72 +87,6 @@ void CCameraController::animate(float dt)
         {
             m_camera->yaw(dt * m_speed);
         }
-
-        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT_ALT) ||
-        //            m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_ALT))
-        //        {
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
-        //            {
-        //                m_camera->pitch(dt * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
-        //            {
-        //                m_camera->pitch(-dt * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
-        //            {
-        //                m_camera->yaw(-dt * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
-        //            {
-        //                m_camera->yaw(dt * m_speed);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
-        //            {
-        //                m_camera->moveUp(dt * 2.f * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
-        //            {
-        //                m_camera->moveUp(-dt * 2.f * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
-        //            {
-        //                m_camera->moveRight(dt * 2.f * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
-        //            {
-        //                m_camera->moveRight(-dt * 2.f * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
-        //            {
-        //                m_camera->moveForward(dt * 2.f * m_speed);
-        //            }
-        //
-        //            if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
-        //            {
-        //                m_camera->moveForward(-dt * 2.f * m_speed);
-        //            }
-        //        }
-
-        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_SLASH))
-        //        {
-        //            m_speed -= dt * 2;
-        //        }
-        //
-        //        if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT_BRACKET))
-        //        {
-        //            m_speed += dt * 2;
-        //        }
     }
 }
 
@@ -160,7 +97,11 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
 
 void CCameraController::handleMouseMovementEvent(int x, int y)
 {
-    // TODO
+    m_camera->pitch((y - m_lastY) * m_speed / 1000);
+    m_camera->yaw(-(x - m_lastX) * m_speed / 1000);
+    
+    m_lastX = x;
+    m_lastY = y;
 }
 
 void CCameraController::handleMouseButtonEvent(EMouseButtonEventType type, int buttonCode)

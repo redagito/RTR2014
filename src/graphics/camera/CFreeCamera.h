@@ -2,66 +2,41 @@
 
 #include "glm/glm.hpp"
 
-#include "graphics/ATransformable.h"
-#include "graphics/ICamera.h"
+#include "IControllableCamera.h"
+#include "TransformUtils.h"
 
-#include "input/IInputListener.h"
-
-/**
-* \brief Implements a look-at based camera.
-*/
-class CFreeCamera : public ICamera, public ATransformable
+class CFreeCamera : public IControllableCamera
 {
    public:
-    /**
-    * \brief Sets the view matrix.
-    */
-    CFreeCamera();
+    CFreeCamera(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up,
+                float fieldOfView, float aspectRatio, float zNear, float zFar);
 
-    /**
-    * \brief Read access to the view matrix.
-    */
-    const glm::mat4& getView() const override;
+    virtual const glm::mat4& getView() const override;
+    virtual const glm::mat4& getProjection() const override;
 
-    /**
-    * \brief Returns projection matrix
-    */
-    const glm::mat4& getProjection() const override;
+    virtual glm::vec3 getPosition() const override;
+    virtual void setPosition(const glm::vec3& position) override;
 
-    /**
-    * \brief Returns current aspect ratio
-    */
-    float getAspectRatio() const;
+    virtual void move(const glm::vec3& direction) override;
+    virtual void moveForward(float amount) override;
+    virtual void moveRight(float amount) override;
+    virtual void moveUp(float amount) override;
 
-    /**
-    * \brief Returns current field of view in degree
-    */
-    float getFieldOfView() const;
+    virtual void rotate(const glm::vec3& axis, float amount) override;
+    virtual void pitch(float amount) override;
+    virtual void roll(float amount) override;
+    virtual void yaw(float amount) override;
 
-    /**
-    * \brief Returns current z near
-    */
-    float getZNear() const;
+    virtual void lookAt(const glm::vec3& target, const glm::vec3& up) override;
+    virtual void lookAt(const glm::vec3& position, const glm::vec3& target,
+                        const glm::vec3& up) override;
 
-    /**
-    * \brief Returns current z far
-    */
-    float getZFar() const;
-
-    /**
-    * \brief Sets view matrix
-    */
-    void lookAt(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
-
-    /**
-    * \brief Sets projection matrix
-    */
-    void setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar);
-
-   protected:
-    void updateModelMatrix() override;
+    virtual void setProjection(float fieldOfView, float aspectRatio, float zNear,
+                               float zFar) override;
 
    private:
+    void updateView();
+    
     glm::mat4 m_view;
     glm::mat4 m_proj; /**< Projection matrix. */
 
@@ -69,4 +44,9 @@ class CFreeCamera : public ICamera, public ATransformable
     float m_aspectRatio; /**< Current aspect ratio. */
     float m_zNear;       /**< Current z near. */
     float m_zFar;        /**< Current z far. */
+
+    glm::vec3 m_position;
+    glm::vec3 m_up;
+    glm::vec3 m_right;
+    glm::vec3 m_forward;
 };

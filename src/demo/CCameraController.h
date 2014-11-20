@@ -6,7 +6,7 @@
 
 #include "input/IInputListener.h"
 
-class CFreeCamera;
+class IControllableCamera;
 class IInputProvider;
 
 class CCameraController : public IInputListener, public IGlfwWindowListener
@@ -15,7 +15,7 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
     CCameraController();
     ~CCameraController();
 
-    void setCamera(std::shared_ptr<CFreeCamera> camera);
+    void setCamera(std::shared_ptr<IControllableCamera> camera);
     void setInputProvider(IInputProvider* provider);
 
     void animate(float dt);
@@ -29,6 +29,9 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
    private:
     float m_speed = 1.0f;
    
-    std::shared_ptr<CFreeCamera> m_camera = nullptr;
+    std::shared_ptr<IControllableCamera> m_camera = nullptr;
     IInputProvider* m_inputProvider = nullptr;
+    
+    int m_lastX = 0;
+    int m_lastY = 0;
 };

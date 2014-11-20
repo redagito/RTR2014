@@ -42,13 +42,13 @@ RTRDemo::~RTRDemo() {}
 int RTRDemo::init(const std::string& configFile)
 {
     // Init log file
-	std::string logFile = "log/" + createTimeStamp() + ".log";
-	if (!CLogger::initLogFile(logFile))
-	{
-		LOG_WARNING("Failed to create log file at %s.", logFile.c_str());
-	}
-	
-	m_debugInfo = std::make_shared<CDebugInfo>();
+    std::string logFile = "log/" + createTimeStamp() + ".log";
+    if (!CLogger::initLogFile(logFile))
+    {
+        LOG_WARNING("Failed to create log file at %s.", logFile.c_str());
+    }
+
+    m_debugInfo = std::make_shared<CDebugInfo>();
     CLogger::addListener(m_debugInfo.get());
 
     if (!m_config.load(configFile))
@@ -72,10 +72,10 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
-	// Graphics resource manager, listens to resource manager
-	CGraphicsResourceManager* manager = new	CGraphicsResourceManager;
-	m_resourceManager->addResourceListener(manager);
-	m_graphicsResourceManager.reset(manager);
+    // Graphics resource manager, listens to resource manager
+    CGraphicsResourceManager* manager = new CGraphicsResourceManager;
+    m_resourceManager->addResourceListener(manager);
+    m_graphicsResourceManager.reset(manager);
 
     // Create renderer
     if (!initRenderer())
@@ -90,7 +90,13 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
-    m_camera = std::make_shared<CFreeCamera>();
+    //    m_camera =
+    //        std::make_shared<CFreeCamera>(glm::vec3(0.f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f),
+    //                                      glm::vec3(0.f, 1.f, 0.f), 45.f, 4.f / 3.f, 0.1f, 100.f);
+
+    m_camera = std::make_shared<CFirstPersonCamera>(
+        glm::vec3(0.f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
+        4.f / 3.f, 0.1f, 100.f);
 
     m_cameraController = std::make_shared<CCameraController>();
     m_cameraController->setCamera(m_camera);
@@ -105,13 +111,9 @@ int RTRDemo::init(const std::string& configFile)
 
 int RTRDemo::run()
 {
-    // Set camera
-    m_camera->setProjection(45.f, 4.f / 3.f, 0.1f, 100.f);
-    m_camera->lookAt(glm::vec3(0.f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
-
-	double f1Cooldown = 0.0;
-	double f2Cooldown = 0.0;
-	double f3Cooldown = 0.0;
+    double f1Cooldown = 0.0;
+    double f2Cooldown = 0.0;
+    double f3Cooldown = 0.0;
     double k1Cooldown = 0.0;
     double timeDiff = 0.0;
 
@@ -126,9 +128,9 @@ int RTRDemo::run()
         double startTime = glfwGetTime();
 
         // Cooldowns
-		f1Cooldown -= timeDiff;
-		f2Cooldown -= timeDiff;
-		f3Cooldown -= timeDiff;
+        f1Cooldown -= timeDiff;
+        f2Cooldown -= timeDiff;
+        f3Cooldown -= timeDiff;
         k1Cooldown -= timeDiff;
         fpsCoolDown -= timeDiff;
 
@@ -139,27 +141,28 @@ int RTRDemo::run()
             currentFrameCount = 0;
         }
 
-		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
-		{
-			k1Cooldown = 0.3f;
-			displayDebugInfo = !displayDebugInfo;
-		}
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
+        {
+            k1Cooldown = 0.3f;
+            displayDebugInfo = !displayDebugInfo;
+        }
 
-		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F2) == GLFW_PRESS && f2Cooldown <= 0.f)
-		{
-			f2Cooldown = 0.3f;
-			m_renderer = m_deferredRenderer;
-		}
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F2) == GLFW_PRESS && f2Cooldown <= 0.f)
+        {
+            f2Cooldown = 0.3f;
+            m_renderer = m_deferredRenderer;
+        }
 
-		if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F3) == GLFW_PRESS && f3Cooldown <= 0.f)
-		{
-			f3Cooldown = 0.3f;
-			m_renderer = m_forwardRenderer;
-		}
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F3) == GLFW_PRESS && f3Cooldown <= 0.f)
+        {
+            f3Cooldown = 0.3f;
+            m_renderer = m_forwardRenderer;
+        }
 
         m_cameraController->animate((float)timeDiff);
 
-        m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get(), *m_graphicsResourceManager.get());
+        m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get(),
+                         *m_graphicsResourceManager.get());
 
         if (displayDebugInfo)
         {
@@ -235,26 +238,25 @@ bool RTRDemo::initRenderer()
     {
         LOG_INFO("Renderer already initialized and re-initialization is not supported.");
         return true;
-	}
+    }
 
+    // Initialize deferred renderer
+    LOG_INFO("Initializing deferred renderer.");
+    m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
+    if (m_deferredRenderer == nullptr)
+    {
+        LOG_ERROR("Failed to initialize deferred renderer.");
+        return false;
+    }
 
-	// Initialize deferred renderer
-	LOG_INFO("Initializing deferred renderer.");
-	m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
-	if (m_deferredRenderer == nullptr)
-	{
-		LOG_ERROR("Failed to initialize deferred renderer.");
-		return false;
-	}
-
-	// Initialize forward renderer
-	LOG_INFO("Initializing forward renderer.");
-	m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
-	if (m_forwardRenderer == nullptr)
-	{
-		LOG_ERROR("Failed to initialize forward renderer.");
-		return false;
-	}
+    // Initialize forward renderer
+    LOG_INFO("Initializing forward renderer.");
+    m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
+    if (m_forwardRenderer == nullptr)
+    {
+        LOG_ERROR("Failed to initialize forward renderer.");
+        return false;
+    }
 
     // Set renderer
     std::string rendererType = m_config.getValue("renderer", "type", "forward");
@@ -263,18 +265,18 @@ bool RTRDemo::initRenderer()
     // Set renderer object
     if (rendererType == "forward")
     {
-		m_renderer = m_forwardRenderer;
+        m_renderer = m_forwardRenderer;
     }
     else if (rendererType == "deferred")
     {
-		m_renderer = m_deferredRenderer;
+        m_renderer = m_deferredRenderer;
     }
     else
     {
         // Should not happen as default renderer is set to forward in config call
         LOG_WARNING("Invalid renderer type %s specified. Fallback to forward renderer.",
                     rendererType.c_str());
-		m_renderer = m_forwardRenderer;
+        m_renderer = m_forwardRenderer;
     }
 
     // Initialize renderer resources

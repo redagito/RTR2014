@@ -13,7 +13,7 @@ class IRenderer;
 class CForwardRenderer;
 class CDeferredRenderer;
 class IScene;
-class CFreeCamera;
+class IControllableCamera;
 class CCameraController;
 class IGraphicsResourceManager;
 
@@ -43,7 +43,7 @@ class RTRDemo
 	std::shared_ptr<IRenderer> m_deferredRenderer = nullptr;
 	std::shared_ptr<IRenderer> m_forwardRenderer = nullptr;
     std::shared_ptr<IScene> m_scene = nullptr;
-    std::shared_ptr<CFreeCamera> m_camera = nullptr;
+    std::shared_ptr<IControllableCamera> m_camera = nullptr;
     std::shared_ptr<CCameraController> m_cameraController = nullptr;
     
 
