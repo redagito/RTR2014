@@ -52,8 +52,8 @@ void CFirstPersonCamera::rotate(const glm::vec3& axis, float amount)
 void CFirstPersonCamera::pitch(float amount)
 {
     m_pitch += amount;
-    m_pitch = fmin(m_pitch, M_PI/4);
-    m_pitch = fmax(m_pitch, -M_PI/4);
+    m_pitch = fmin(m_pitch, glm::pi<float>() / 4);
+	m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
     
     updateView();
 }
@@ -80,8 +80,8 @@ void CFirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up 
     glm::vec3 up = glm::cross(forward, right);
     
     m_pitch = asin(abs(up.x + up.z) / sqrt(2));
-    m_pitch = fmin(m_pitch, M_PI/4);
-    m_pitch = fmax(m_pitch, -M_PI/4);
+	m_pitch = fmin(m_pitch, glm::pi<float>() / 4);
+	m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
     
     m_forward.x = forward.x;
     m_forward.y = forward.z;

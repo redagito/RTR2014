@@ -19,6 +19,10 @@ class CSceneQuery : public ISceneQuery
 
     SceneObjectId getNextObject();
 
+    bool hasNextPointLight() const;
+
+    SceneObjectId getNextPointLight();
+
     /**
      * \brief Adds object id.
      */
@@ -27,10 +31,11 @@ class CSceneQuery : public ISceneQuery
     /**
      * \brief Adds light id.
      */
-    void addLight(SceneObjectId id);
+    void addPointLight(SceneObjectId id);
 
    private:
-    unsigned int m_nextObjectIndex;
-    std::vector<SceneObjectId> m_visibleObjects; /**< Visible objects. */
-    std::vector<SceneObjectId> m_visibleLights;  /**< Visible lights. */
+    unsigned int m_nextObjectIndex = 0;
+    unsigned int m_nextPointLightIndex = 0;
+    std::vector<SceneObjectId> m_visibleObjects;     /**< Visible objects. */
+    std::vector<SceneObjectId> m_visiblePointLights; /**< Visible lights. */
 };

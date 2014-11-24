@@ -2,7 +2,7 @@
 
 #include "CSceneQuery.h"
 #include "SSceneObject.h"
-#include "SSceneLight.h"
+#include "SScenePointLight.h"
 
 CScene::CScene() {}
 
@@ -48,16 +48,37 @@ void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
     return;
 }
 
-SceneObjectId CScene::createLight(const glm::vec3& position, float radius, const glm::vec3& color)
+SceneObjectId CScene::createPointLight(const glm::vec3& position, float radius, const glm::vec3& color)
 {
-    // TODO Implement
-    return -1;
+	m_pointLights.push_back(SScenePointLight(position, radius, color));
+	return m_pointLights.size() - 1;
 }
 
-bool CScene::getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const
+bool CScene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const
 {
-    // TODO Implement
-    return false;
+	// TODO Needs to be changed for better data structures
+	if (id < 0 || ((unsigned int)id) >= m_objects.size())
+	{
+		return false;
+	}
+
+	// Write data
+	position = m_pointLights.at(id).m_position;
+	radius = m_pointLights.at(id).m_radius;
+	color = m_pointLights.at(id).m_color;
+	return true;
+}
+
+void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float radius, const glm::vec3& color)
+{
+	// TODO Needs to be changed for better data structures
+	assert(id >= 0 && ((unsigned int)id) < m_objects.size() && "Invalid scene object id");
+
+	// Write data
+	m_pointLights[id].m_position = position;
+	m_pointLights[id].m_radius = radius;
+	m_pointLights[id].m_color = color;
+	return;
 }
 
 ISceneQuery* CScene::createQuery(const ICamera& camera) const
@@ -66,7 +87,7 @@ ISceneQuery* CScene::createQuery(const ICamera& camera) const
 
     // New query with max storage
     // TODO Allocate less storage, needs experiments on how much is actually needed
-    CSceneQuery* query = new CSceneQuery(m_objects.size(), m_lights.size());
+	CSceneQuery* query = new CSceneQuery((unsigned int)m_objects.size(), (unsigned int)m_pointLights.size());
 
     // TODO Frustum culling, occlusion culling, better data structure for objects
     // For now add all objects
@@ -78,10 +99,10 @@ ISceneQuery* CScene::createQuery(const ICamera& camera) const
 
     // TODO Light culling
     // For now add all lights
-    for (unsigned int i = 0; i < m_lights.size(); ++i)
+	for (unsigned int i = 0; i < m_pointLights.size(); ++i)
     {
         // Counter variable is light id
-        query->addLight(i);
+        query->addPointLight(i);
     }
 
     // Return query

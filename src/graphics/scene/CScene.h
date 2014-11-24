@@ -8,7 +8,7 @@
 #include "graphics/IScene.h"
 
 struct SSceneObject;
-struct SSceneLight;
+struct SScenePointLight;
 
 class CScene : public IScene
 {
@@ -25,13 +25,15 @@ class CScene : public IScene
     void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
                    const glm::vec3& rotation, const glm::vec3& scale);
 
-    SceneObjectId createLight(const glm::vec3& position, float radius, const glm::vec3& color);
+    SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color);
 
-    bool getLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const;
+	bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const;
+
+	void setPointLight(SceneObjectId id, const glm::vec3& position, float radius, const glm::vec3& color);
 
     ISceneQuery* createQuery(const ICamera& camera) const;
 
    private:
     std::vector<SSceneObject> m_objects;
-    std::vector<SSceneLight> m_lights;
+    std::vector<SScenePointLight> m_pointLights;
 };

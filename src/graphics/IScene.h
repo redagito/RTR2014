@@ -34,23 +34,29 @@ class IScene
                            glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const = 0;
 
     /**
-    * \brief Set object parameters.
+    * \brief Set scene object parameters.
     */
-    virtual void setObject(ResourceId id, ResourceId mesh, ResourceId material,
+    virtual void setObject(SceneObjectId id, ResourceId mesh, ResourceId material,
                            const glm::vec3& position, const glm::vec3& rotation,
                            const glm::vec3& scale) = 0;
 
     /**
-     * \brief Creates light in scene and returns id.
+     * \brief Creates point light in scene and returns id.
      */
-    virtual SceneObjectId createLight(const glm::vec3& position, float radius,
-                                      const glm::vec3& color) = 0;
+    virtual SceneObjectId createPointLight(const glm::vec3& position, float radius,
+                                           const glm::vec3& color) = 0;
 
     /**
-     * \brief Returns light color in RGB format.
+     * \brief Returns point light data.
      */
-    virtual bool getLight(SceneObjectId id, glm::vec3& position, float& radius,
-                          glm::vec3& color) const = 0;
+    virtual bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius,
+                               glm::vec3& color) const = 0;
+
+    /**
+    * \brief Sets point light parameters.
+    */
+    virtual void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
+                               const glm::vec3& color) = 0;
 
     /**
      * \brief Creates scene query for specified camera.
