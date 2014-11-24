@@ -67,19 +67,24 @@ vec3 filmicTonemap(vec3 color)
 
 void main(void)
 {
+    
     vec3 worldPos = getWorldPosition();
     vec3 surfaceColor = texture(color_texture, uv).rgb;
     vec3 surfaceNormal = texture(normal_texture, uv).rgb * 2 - 1;
     
     fragmentColor = surfaceColor * 0.01;
-    
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-2, 0,  6), vec3(1,1,1), 8.0); // * 0.45;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0,  3), vec3(1,0,0), 6.0); // * 0.45;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 0, -3), vec3(0,1,0), 5.0); // * 0.45;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(0, 1, -6), vec3(0,0,1), 7.0); // * 0.45;
-    
+        
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5,  1), vec3(1.0, 0.2, 0.2), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.4, 0.5,  6), vec3(0.2, 1.0, 0.2), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5, 11), vec3(0.2, 0.2, 1.0), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.6, 0.5, 16), vec3(0.5, 0.8, 0.8), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -2.0, 0.5, 21), vec3(1.0, 0.2, 0.2), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -4.3, 0.5, 26), vec3(0.5, 0.8, 0.8), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -9.2, 0.5, 31), vec3(1.0, 0.2, 0.2), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-15.0, 0.5, 36), vec3(0.2, 1.0, 0.2), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.7, 0.5, 36), vec3(0.2, 0.2, 1.0), 10.0) * 0.5;
+    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.6, 0.5, 41), vec3(0.5, 0.8, 0.8), 10.0) * 0.5;
+	
 	// Tone mapping and gamma correction
 	fragmentColor = filmicTonemap(fragmentColor);
-	
-    //fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-3,-3,0), vec3(1,1,1), 100.0) * 0.9;
 }
