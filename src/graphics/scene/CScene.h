@@ -25,11 +25,11 @@ class CScene : public IScene
     void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
                    const glm::vec3& rotation, const glm::vec3& scale);
 
-    SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color);
+    SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color, float intensity);
 
-	bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color) const;
+	bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color, float& intensity) const;
 
-	void setPointLight(SceneObjectId id, const glm::vec3& position, float radius, const glm::vec3& color);
+	void setPointLight(SceneObjectId id, const glm::vec3& position, float radius, const glm::vec3& color, float intensity);
 
     ISceneQuery* createQuery(const ICamera& camera) const;
 

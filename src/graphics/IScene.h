@@ -44,19 +44,19 @@ class IScene
      * \brief Creates point light in scene and returns id.
      */
     virtual SceneObjectId createPointLight(const glm::vec3& position, float radius,
-                                           const glm::vec3& color) = 0;
+                                           const glm::vec3& color, float intensity) = 0;
 
     /**
      * \brief Returns point light data.
      */
     virtual bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius,
-                               glm::vec3& color) const = 0;
+                               glm::vec3& color, float& intensity) const = 0;
 
     /**
     * \brief Sets point light parameters.
     */
     virtual void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
-                               const glm::vec3& color) = 0;
+                               const glm::vec3& color, float intensity) = 0;
 
     /**
      * \brief Creates scene query for specified camera.

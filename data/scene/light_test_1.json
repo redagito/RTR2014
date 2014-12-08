@@ -1,0 +1,19 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        }
+    ],
+    "scene_point_lights" :  [
+        {
+            "position" :  [ 0, 5, 0 ],
+            "color" : [ 1, 1, 1 ],
+            "radius" :  5,
+            "intensity" : 1
+        }
+    ]
+}
