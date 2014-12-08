@@ -44,13 +44,13 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 
     // Init gbuffer
 
-    // Diffuse texture, stores base color and specularity.
-    m_diffuseTexture = std::make_shared<CTexture>();
-    m_diffuseTexture->init(800, 600, GL_RGBA);
+    // Diffuse texture, stores base color and glow mask.
+    m_diffuseGlowTexture = std::make_shared<CTexture>();
+    m_diffuseGlowTexture->init(800, 600, GL_RGBA);
 
-    // Normal texture, store x and y, z normals and glow.
-    m_normalTexture = std::make_shared<CTexture>();
-    m_normalTexture->init(800, 600, GL_RGBA);
+    // Normal texture, store x and y, z normals and specularity.
+    m_normalSpecularTexture = std::make_shared<CTexture>();
+    m_normalSpecularTexture->init(800, 600, GL_RGBA16F);
 
     // Depth texture
 	m_depthTexture = std::make_shared<CTexture>();
@@ -58,8 +58,8 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 
     // Total 96 bit per pixel
     m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
-    m_frameBuffer.attach(m_diffuseTexture, GL_COLOR_ATTACHMENT0);
-    m_frameBuffer.attach(m_normalTexture, GL_COLOR_ATTACHMENT1);
+    m_frameBuffer.attach(m_diffuseGlowTexture, GL_COLOR_ATTACHMENT0);
+    m_frameBuffer.attach(m_normalSpecularTexture, GL_COLOR_ATTACHMENT1);
 
     LOG_INFO("GBuffer state: %s.", m_frameBuffer.getState().c_str());
 
@@ -187,7 +187,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
 
     // Geometry pass end, gbuffer populated
-    m_screenQuadPass.draw(m_diffuseTexture.get(), m_normalTexture.get(), m_depthTexture.get(),
+    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_normalSpecularTexture.get(), m_depthTexture.get(),
                           inverseViewProj, nullptr, &manager);
 
     // Post draw error check

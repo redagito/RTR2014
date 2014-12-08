@@ -35,7 +35,7 @@ class CMaterial
 
    private:
     const CTexture* m_diffuseTexture;  /**< Base color. */
-    const CTexture* m_normalTexture;   /**< Normal map for the diffuse texture. */
+    const CTexture* m_normalTexture;   /**< Normal map. */
     const CTexture* m_specularTexture; /**< Specular highlights. */
     const CTexture* m_glowTexture;     /**< Glow map. */
     const CTexture* m_alphaTexture;    /**< Alpha map. */
