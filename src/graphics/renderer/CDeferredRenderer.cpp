@@ -42,45 +42,19 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 		return false;
     }
 
-    // Init gbuffer
+	// Init geometry pass resources
+	if (!initGeometryPass(manager))
+	{
+		LOG_ERROR("Failed to intialize geometry pass.");
+		return false;
+	}
 
-    // Diffuse texture, stores base color and glow mask.
-    m_diffuseGlowTexture = std::make_shared<CTexture>();
-    m_diffuseGlowTexture->init(800, 600, GL_RGBA);
-
-    // Normal texture, store x and y, z normals and specularity.
-    m_normalSpecularTexture = std::make_shared<CTexture>();
-    m_normalSpecularTexture->init(800, 600, GL_RGBA16F);
-
-    // Depth texture
-	m_depthTexture = std::make_shared<CTexture>();
-    m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
-
-    // Total 96 bit per pixel
-    m_frameBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
-    m_frameBuffer.attach(m_diffuseGlowTexture, GL_COLOR_ATTACHMENT0);
-    m_frameBuffer.attach(m_normalSpecularTexture, GL_COLOR_ATTACHMENT1);
-
-    LOG_INFO("GBuffer state: %s.", m_frameBuffer.getState().c_str());
-
-    // Set color attachments for geometry pass fbo
-    m_drawBuffers[0] = GL_COLOR_ATTACHMENT0;
-    m_drawBuffers[1] = GL_COLOR_ATTACHMENT1;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // Error check
-    if (hasGLError(error))
-    {
-        LOG_ERROR("GL Error: %s", error.c_str());
-        return false;
-    }
-
-    if (!initShaders(manager))
-    {
-        LOG_ERROR("Failed to initialize shaders for deferred renderer.");
-        return false;
-    }
+	// Init light pass resources
+	if (!initPointLightPass(manager))
+	{
+		LOG_ERROR("Failed to initialize point light pass.");
+		return false;
+	}
 
 	if (!m_screenQuadPass.init(manager))
 	{
@@ -100,9 +74,9 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 	m_geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
 
     // Set framebuffer
-    m_frameBuffer.setActive(GL_FRAMEBUFFER);
+	m_geometryBuffer.setActive(GL_FRAMEBUFFER);
     // Set render targets
-    glDrawBuffers(2, m_drawBuffers);
+    //glDrawBuffers(2, m_geometryDrawBuffers);
 
     // Clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -183,6 +157,8 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 	{
 		LOG_ERROR("GL Error: %s", error.c_str());
 	}
+
+	m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 
     glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
 
@@ -327,20 +303,97 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     // TODO Cleanup?
 }
 
-bool CDeferredRenderer::initShaders(IResourceManager* manager)
+bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
 {
-    // TODO Read file name from config?
-
-    // Geometry pass shader for filling gbuffer
-    std::string geometryPassShaderFile("data/shader/deferred_geometrypass.ini");
+	// Init geometry pass shader
+	// TODO Read file name from config?
+	// Geometry pass shader for filling gbuffer
+	std::string geometryPassShaderFile("data/shader/deferred_geometry_pass.ini");
 	m_geometryPassShaderId = manager->loadShader(geometryPassShaderFile);
 
-    // Check if ok
+	// Check if ok
 	if (m_geometryPassShaderId == invalidResource)
-    {
-        LOG_ERROR("Failed to initialize the shader from file %s.", geometryPassShaderFile.c_str());
-        return false;
-    }
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", geometryPassShaderFile.c_str());
+		return false;
+	}
 
-    return true;
+	// Init gbuffer
+	// Diffuse texture, stores base color and glow mask.
+	m_diffuseGlowTexture = std::make_shared<CTexture>();
+	m_diffuseGlowTexture->init(800, 600, GL_RGBA);
+
+	// Normal texture, store x and y, z normals and specularity.
+	m_normalSpecularTexture = std::make_shared<CTexture>();
+	m_normalSpecularTexture->init(800, 600, GL_RGBA16F);
+
+	// Depth texture
+	m_depthTexture = std::make_shared<CTexture>();
+	m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
+
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
+
+	// Total 96 bit per pixel
+	m_geometryBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
+	m_geometryBuffer.attach(m_diffuseGlowTexture, GL_COLOR_ATTACHMENT0);
+	m_geometryBuffer.attach(m_normalSpecularTexture, GL_COLOR_ATTACHMENT1);
+
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
+
+	LOG_INFO("GBuffer state: %s.", m_geometryBuffer.getState().c_str());
+
+	// Set color attachments for geometry pass fbo
+	// m_geometryDrawBuffers[0] = GL_COLOR_ATTACHMENT0;
+	// m_geometryDrawBuffers[1] = GL_COLOR_ATTACHMENT1;
+
+	// Reset framebuffer
+	m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
+
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
+{
+	// Point light shader
+	std::string pointLightPassShaderFile("data/shader/deferred_point_light_pass.ini");
+	m_pointLightPassShaderId = manager->loadShader(pointLightPassShaderFile);
+
+	// Check if ok
+	if (m_pointLightPassShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", pointLightPassShaderFile.c_str());
+		return false;
+	}
+
+	// Load sphere mesh for point light representation
+	std::string sphereMesh = "data/mesh/sphere.obj";
+	m_pointLightSphereId = manager->loadMesh(sphereMesh);
+	if (m_pointLightSphereId == invalidResource)
+	{
+		LOG_ERROR("Failed to load point light volume mesh %s.", sphereMesh.c_str());
+		return false;
+	}
+
+	m_colorTexture = std::make_shared<CTexture>();
+	m_colorTexture->init(800, 600, GL_RGBA16F);
+	m_lightPassFrameBuffer.attach(m_colorTexture, GL_COLOR_ATTACHMENT0);
+
+	return true;
 }

@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "graphics/resource/CTexture.h"
+#include "graphics/renderer/CRenderBuffer.h"
 
 CFrameBuffer::CFrameBuffer() : m_fboId(0), m_valid(false) { init(); }
 
@@ -29,7 +30,8 @@ bool CFrameBuffer::isValid() const { return m_valid; }
 
 std::string CFrameBuffer::getState()
 {
-    setActive(GL_FRAMEBUFFER);
+	assert(m_valid);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     switch (state)
@@ -70,13 +72,41 @@ void CFrameBuffer::setActive(GLenum target)
 {
     assert(m_valid);
     glBindFramebuffer(target, m_fboId);
+	// Set draw buffers
+	if (!m_drawBuffers.empty())
+	{
+		glDrawBuffers((GLsizei) m_drawBuffers.size(), m_drawBuffers.data());
+	}
 }
 
 void CFrameBuffer::setInactive(GLenum target) { glBindFramebuffer(target, 0); }
 
 void CFrameBuffer::attach(const std::shared_ptr<CTexture>& texture, GLenum attachment)
 {
-    setActive(GL_FRAMEBUFFER);
-    glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
+	// Bind
+	assert(m_valid);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+    // Attach
+	glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
+	// Add color attachments to draw buffers
+	if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT && attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+	{
+		m_drawBuffers.push_back(attachment);
+	}
     setInactive(GL_FRAMEBUFFER);
+}
+
+void CFrameBuffer::attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment)
+{
+	// Bind
+	assert(m_valid);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+	// Attach
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->getId());
+	// Add color attachments to draw buffers
+	if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT && attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+	{
+		m_drawBuffers.push_back(attachment);
+	}
+	setInactive(GL_FRAMEBUFFER);
 }

@@ -1,6 +1,6 @@
 #include "Interpolation.h"
 
-float QuadricInterpolation(float x0, float y0, float x1, float y1, float x2, float y2, float x)
+float quadricInterpolation(float x0, float y0, float x1, float y1, float x2, float y2, float x)
 {
     assert(x0 - x1 != 0.f);
     assert(x0 - x2 != 0.f);

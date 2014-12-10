@@ -81,20 +81,19 @@ void main(void)
     vec3 surfaceColor = texture(color_texture, uv).rgb;
     vec3 surfaceNormal = texture(normal_texture, uv).rgb * 2 - 1;
     
-    fragmentColor = surfaceColor * 0.01;
+    fragmentColor = surfaceColor * 0.1;
         
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5,  1), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.4, 0.5,  6), vec3(0.2, 1.0, 0.2), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5, 11), vec3(0.2, 0.2, 1.0), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.6, 0.5, 16), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -2.0, 0.5, 21), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -4.3, 0.5, 26), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -9.2, 0.5, 31), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-15.0, 0.5, 36), vec3(0.2, 1.0, 0.2), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.7, 0.5, 36), vec3(0.2, 0.2, 1.0), 5.0);// * 0.5;
-    fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.6, 0.5, 41), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5,  1), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.4, 0.5,  6), vec3(0.2, 1.0, 0.2), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5, 11), vec3(0.2, 0.2, 1.0), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.6, 0.5, 16), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -2.0, 0.5, 21), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -4.3, 0.5, 26), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -9.2, 0.5, 31), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(-15.0, 0.5, 36), vec3(0.2, 1.0, 0.2), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.7, 0.5, 36), vec3(0.2, 0.2, 1.0), 5.0);// * 0.5;
+    // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.6, 0.5, 41), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
 	
 	// Tone mapping and gamma correction
 	fragmentColor = gammaCorrection(filmicTonemap(fragmentColor));
-	
 }

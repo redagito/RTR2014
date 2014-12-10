@@ -79,9 +79,9 @@ void CFirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up 
     glm::vec3 right = -glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
     glm::vec3 up = glm::cross(forward, right);
     
-    m_pitch = asin(abs(up.x + up.z) / sqrt(2));
-	m_pitch = fmin(m_pitch, glm::pi<float>() / 4);
-	m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
+    m_pitch = std::asinf(std::abs(up.x + up.z) / std::sqrtf(2.f));
+	m_pitch = std::fminf(m_pitch, glm::pi<float>() / 4.f);
+	m_pitch = std::fmaxf(m_pitch, -glm::pi<float>() / 4.f);
     
     m_forward.x = forward.x;
     m_forward.y = forward.z;

@@ -94,7 +94,7 @@ void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsi
 {
     size_t length = text.size();
 
-    unsigned int hSize = size * 0.6;
+    unsigned int hSize = (unsigned int) (size * 0.6f);
     unsigned int vSize = size;
 
     for (size_t i = 0; i < length; i++)
@@ -152,7 +152,7 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     glDisable(GL_DEPTH_TEST);
 
     int hOffsetLog = 0;
-    int vOffsetLog = info.getLogBufferSize() * m_fontSize;
+    int vOffsetLog = (int) info.getLogBufferSize() * m_fontSize;
     int hOffsetKeys = 500;
     int hOffsetValues = 650;
     int vOffsetKeyValues = 600;
@@ -163,33 +163,33 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     
     std::vector<float> overlayVertices;
     
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(vOffsetLog);
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(vOffsetLog);
+    overlayVertices.push_back(0.f);
+    overlayVertices.push_back(0.f);
+    overlayVertices.push_back(800.f);
+    overlayVertices.push_back((float) vOffsetLog);
+    overlayVertices.push_back(0.f);
+	overlayVertices.push_back((float) vOffsetLog);
     
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(0);
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(vOffsetLog);
+    overlayVertices.push_back(0.f);
+    overlayVertices.push_back(0.f);
+    overlayVertices.push_back(800.f);
+    overlayVertices.push_back(0.f);
+    overlayVertices.push_back(800.f);
+	overlayVertices.push_back((float) vOffsetLog);
     
-    overlayVertices.push_back(hOffsetKeys);
-    overlayVertices.push_back(vOffsetKeyValues);
-    overlayVertices.push_back(hOffsetKeys);
-    overlayVertices.push_back(vOffsetKeyValues - m_fontSize * info.getValues().size());
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(vOffsetKeyValues);
+	overlayVertices.push_back((float) hOffsetKeys);
+	overlayVertices.push_back((float) vOffsetKeyValues);
+	overlayVertices.push_back((float) hOffsetKeys);
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
+	overlayVertices.push_back(800.f);
+	overlayVertices.push_back((float) vOffsetKeyValues);
     
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(vOffsetKeyValues);
-    overlayVertices.push_back(hOffsetKeys);
-    overlayVertices.push_back(vOffsetKeyValues - m_fontSize * info.getValues().size());
-    overlayVertices.push_back(800);
-    overlayVertices.push_back(vOffsetKeyValues - m_fontSize * info.getValues().size());
+    overlayVertices.push_back(800.f);
+	overlayVertices.push_back((float) vOffsetKeyValues);
+	overlayVertices.push_back((float) hOffsetKeys);
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
+    overlayVertices.push_back(800.f);
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
     
     m_overlaysBuffer->setData(overlayVertices);
     
@@ -200,7 +200,7 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     glBindBuffer(GL_ARRAY_BUFFER, m_overlaysBuffer->getId());
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     
-    glDrawArrays(GL_TRIANGLES, 0, overlayVertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) overlayVertices.size());
     
     glDisableVertexAttribArray(0);
 
@@ -245,7 +245,7 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
     glBindBuffer(GL_ARRAY_BUFFER, m_uvsBuffer->getId());
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) vertices.size());
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);

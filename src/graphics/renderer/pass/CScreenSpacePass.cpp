@@ -96,5 +96,9 @@ void CScreenSpacePass::draw(const IGraphicsResourceManager* manager, CFrameBuffe
 	m_quad->getVertexArray()->setInactive();
 	shader->setInactive();
 
+	if (fbo != nullptr)
+	{
+		fbo->setInactive(GL_FRAMEBUFFER);
+	}
 	glEnable(GL_DEPTH_TEST);
 }
