@@ -64,8 +64,8 @@ class CDeferredRenderer : public ARenderer
     std::shared_ptr<CTexture> m_colorTexture;
     GLenum m_pointLightDrawBuffers[1];
     ResourceId m_pointLightPassShaderId = -1;
-	CShaderProgram* m_pointLightPassShader = nullptr;
-	ResourceId m_pointLightSphereId = -1;
+    CShaderProgram* m_pointLightPassShader = nullptr;
+    ResourceId m_pointLightSphereId = -1;
 
     CScreenQuadPass m_screenQuadPass;
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */

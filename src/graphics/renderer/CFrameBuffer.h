@@ -26,11 +26,18 @@ class CFrameBuffer
     void setActive(GLenum target);
     void setInactive(GLenum target);
 
+    void resize(unsigned int width, unsigned int height);
+
     void attach(const std::shared_ptr<CTexture>& texture, GLenum attachment);
     void attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment);
 
    private:
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */
-    GLuint m_fboId;                    /**< Frame buffer id. */
-    bool m_valid;                      /**< Frame buffer validity. */
+
+    std::vector<std::shared_ptr<CTexture>> m_textures; /**< Stores attached textures. */
+    std::vector<std::shared_ptr<CRenderBuffer>>
+        m_renderBuffers; /**< Stores attached render buffers. */
+
+    GLuint m_fboId; /**< Frame buffer id. */
+    bool m_valid;   /**< Frame buffer validity. */
 };

@@ -24,6 +24,11 @@ class CRenderBuffer
     bool init(unsigned int width, unsigned int height, GLenum format);
 
     /**
+    * \brief Resizes buffer storage.
+    */
+    void resize(unsigned int width, unsigned int height);
+
+    /**
     * \brief Returns internal resource id.
     */
     GLuint getId() const;
@@ -35,6 +40,7 @@ class CRenderBuffer
 
    private:
     GLuint m_bufferId = 0;     /**< Render buffer id. */
+    GLenum m_format;           /**< Buffer format. */
     unsigned int m_width = 0;  /**< Buffer width. */
     unsigned int m_height = 0; /**< Buffer height. */
 };

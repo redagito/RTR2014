@@ -30,8 +30,8 @@ bool CFrameBuffer::isValid() const { return m_valid; }
 
 std::string CFrameBuffer::getState()
 {
-	assert(m_valid);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+    assert(m_valid);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     switch (state)
@@ -72,41 +72,57 @@ void CFrameBuffer::setActive(GLenum target)
 {
     assert(m_valid);
     glBindFramebuffer(target, m_fboId);
-	// Set draw buffers
-	if (!m_drawBuffers.empty())
-	{
-		glDrawBuffers((GLsizei) m_drawBuffers.size(), m_drawBuffers.data());
-	}
+    // Set draw buffers
+    if (!m_drawBuffers.empty())
+    {
+        glDrawBuffers((GLsizei)m_drawBuffers.size(), m_drawBuffers.data());
+    }
 }
 
 void CFrameBuffer::setInactive(GLenum target) { glBindFramebuffer(target, 0); }
 
+void CFrameBuffer::resize(unsigned int width, unsigned int height)
+{
+    for (auto& texture : m_textures)
+    {
+        texture->resize(width, height);
+    }
+    for (auto& renderBuffer : m_renderBuffers)
+    {
+        renderBuffer->resize(width, height);
+    }
+}
+
 void CFrameBuffer::attach(const std::shared_ptr<CTexture>& texture, GLenum attachment)
 {
-	// Bind
-	assert(m_valid);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+    // Bind
+    assert(m_valid);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     // Attach
-	glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
-	// Add color attachments to draw buffers
-	if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT && attachment != GL_DEPTH_STENCIL_ATTACHMENT)
-	{
-		m_drawBuffers.push_back(attachment);
-	}
+    glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
+    // Add color attachments to draw buffers
+    if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
+        attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+    {
+        m_drawBuffers.push_back(attachment);
+    }
+    m_textures.push_back(texture);
     setInactive(GL_FRAMEBUFFER);
 }
 
 void CFrameBuffer::attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment)
 {
-	// Bind
-	assert(m_valid);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
-	// Attach
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->getId());
-	// Add color attachments to draw buffers
-	if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT && attachment != GL_DEPTH_STENCIL_ATTACHMENT)
-	{
-		m_drawBuffers.push_back(attachment);
-	}
-	setInactive(GL_FRAMEBUFFER);
+    // Bind
+    assert(m_valid);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+    // Attach
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->getId());
+    // Add color attachments to draw buffers
+    if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
+        attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+    {
+        m_drawBuffers.push_back(attachment);
+    }
+    m_renderBuffers.push_back(renderBuffer);
+    setInactive(GL_FRAMEBUFFER);
 }

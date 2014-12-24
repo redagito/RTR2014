@@ -36,6 +36,11 @@ class CTexture
     bool init(unsigned int width, unsigned int height, GLint format);
 
     /**
+    * \brief Resizes texture.
+    */
+    void resize(unsigned int width, unsigned int height);
+
+    /**
     * \brief Returns texture id.
     */
     GLuint getId() const;
@@ -50,10 +55,10 @@ class CTexture
     */
     void setActive(GLint textureUnit) const;
 
-	/**
-	* \brief Saves texture data as png.
-	*/
-	void saveAsPng(const std::string& file);
+    /**
+    * \brief Saves texture data as png.
+    */
+    void saveAsPng(const std::string& file);
 
    protected:
     bool init(const std::vector<unsigned char>& imageData, unsigned int width, unsigned int height,
@@ -61,8 +66,10 @@ class CTexture
 
    private:
     bool m_valid;
+    bool m_hasMipmaps = false;
     GLuint m_textureId;
     unsigned int m_width;
     unsigned int m_height;
-    EColorFormat m_format;
+    GLint m_format;
+    GLenum m_externalFormat;
 };

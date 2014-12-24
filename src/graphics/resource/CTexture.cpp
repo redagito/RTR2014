@@ -7,15 +7,14 @@
 #include <lodepng.h>
 #include "debug/Log.h"
 
-CTexture::CTexture()
-    : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(EColorFormat::Invalid)
+CTexture::CTexture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // empty
 }
 
 CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
                    EColorFormat format, bool createMipmaps)
-    : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(format)
+    : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // Init texture with data
     if (!init(image, width, height, format, createMipmaps))
@@ -25,7 +24,7 @@ CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, 
 }
 
 CTexture::CTexture(unsigned int width, unsigned int height, EColorFormat format, bool createMipmaps)
-    : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(format)
+    : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // Init texture with data
     if (!init({}, width, height, format, createMipmaps))
@@ -70,6 +69,17 @@ bool CTexture::init(unsigned int width, unsigned int height, GLint format)
     return init({}, width, height, format, false);
 }
 
+void CTexture::resize(unsigned int width, unsigned int height)
+{
+    if (m_width == width && m_height == height)
+    {
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, GL_UNSIGNED_BYTE,
+                 nullptr);
+}
+
 GLuint CTexture::getId() const { return m_textureId; }
 
 bool CTexture::isValid() const { return m_valid; }
@@ -83,11 +93,11 @@ void CTexture::setActive(GLint textureUnit) const
 
 void CTexture::saveAsPng(const std::string& file)
 {
-	std::vector<unsigned char> image;
-	image.resize(m_width * m_height * 3);
-	glBindTexture(GL_TEXTURE_2D, m_textureId);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
-	lodepng::encode(file, image, m_width, m_height, LCT_RGB);
+    std::vector<unsigned char> image;
+    image.resize(m_width * m_height * 3);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+    lodepng::encode(file, image, m_width, m_height, LCT_RGB);
 }
 
 bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
@@ -100,44 +110,45 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     }
 
     // Set format
+    m_format = format;
     unsigned int bytePerPixel = 0;
-    GLenum externalFormat;
-	// External data type
-	GLenum type = GL_UNSIGNED_BYTE;
+    m_hasMipmaps = createMipmaps;
+    // External data type
+    GLenum type = GL_UNSIGNED_BYTE;
 
     // Set external format and type, based on texture format
     switch (format)
     {
     case GL_R8:  // Red component only, used for greyscale
-        externalFormat = GL_RED;
+        m_externalFormat = GL_RED;
         bytePerPixel = 1;
         break;
     case GL_RG8:  // Red and green component
-        externalFormat = GL_RG;
+        m_externalFormat = GL_RG;
         bytePerPixel = 2;
         break;
     case GL_RGB8:  // RGB texture with values from 0-255
-        externalFormat = GL_RGB;
+        m_externalFormat = GL_RGB;
         bytePerPixel = 3;
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
-        externalFormat = GL_DEPTH_COMPONENT;
+        m_externalFormat = GL_DEPTH_COMPONENT;
         bytePerPixel = 3;
-		break;
-	case GL_RGBA:  // RGB texture with alpha channel
-		externalFormat = GL_RGBA;
-		bytePerPixel = 4;
-		break;
-	case GL_RGBA8:
-		externalFormat = GL_RGBA;
-		bytePerPixel = 4;
-		break;
+        break;
+    case GL_RGBA:  // RGB texture with alpha channel
+        m_externalFormat = GL_RGBA;
+        bytePerPixel = 4;
+        break;
+    case GL_RGBA8:
+        m_externalFormat = GL_RGBA;
+        bytePerPixel = 4;
+        break;
     case GL_RGB16F:  // RGB texture with half float precision, for hdr
-        externalFormat = GL_RGB;
+        m_externalFormat = GL_RGB;
         bytePerPixel = 6;
         break;
     case GL_RGBA16F:  // RGB texture with alpha channel with half float precision
-        externalFormat = GL_RGBA;
+        m_externalFormat = GL_RGBA;
         bytePerPixel = 8;
         break;
     default:
@@ -181,12 +192,12 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     {
         // No image data, only allocate texture space
         // TODO As of OpenGL 4.3, glTexStorage should be used for this.
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type, nullptr);
     }
     else
     {
         // Load image data
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, externalFormat, type,
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type,
                      image.data());
     }
 
