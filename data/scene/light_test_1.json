@@ -29,12 +29,16 @@
             "scale" :  [ 1, 1, 1 ]
         }
     ],
-    "scene_point_lights" :  [
+    "point_lights" :  [
         {
             "position" :  [ 0, 0, 0 ],
             "color" : [ 1, 1, 1 ],
             "radius" :  5,
             "intensity" : 1
         }
-    ]
+    ],
+    "ambient_light" : {
+        "color" :  [ 1, 1, 1 ],
+        "intensity" : 0.1
+    }
 }

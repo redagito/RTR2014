@@ -13,8 +13,8 @@
 class CDebugInfo : public ILogListener
 {
    public:
-    void notify(const std::string& level, const std::string& file, unsigned int line, const std::string& function,
-                   const std::string& text);
+    void notify(const std::string& level, const std::string& file, unsigned int line,
+                const std::string& function, const std::string& text);
 
     const std::list<std::string>& getLog() const;
 
@@ -25,7 +25,7 @@ class CDebugInfo : public ILogListener
     const std::unordered_map<std::string, std::string>& getValues() const;
 
    private:
-    size_t m_logBufferSize = 10; /**< Maximum number of log events stored. */
+    size_t m_logBufferSize = 10;        /**< Maximum number of log events stored. */
     std::list<std::string> m_logBuffer; /**< Log buffer with latest log events. */
     std::unordered_map<std::string, std::string> m_values; /**< Stores debug key/value pairs. */
 };

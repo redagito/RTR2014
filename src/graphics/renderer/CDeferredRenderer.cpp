@@ -17,6 +17,7 @@
 #include "graphics/resource/CMesh.h"
 #include "graphics/resource/CTexture.h"
 #include "graphics/resource/CShaderProgram.h"
+#include "graphics/renderer/CRenderBuffer.h"
 
 #include "core/RendererCoreConfig.h"
 
@@ -160,6 +161,30 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     }
 
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // Point light pass
+    m_pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
+    m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+    while (query->hasNextPointLight())
+    {
+        // Retrieve light id
+        SceneObjectId pointLightId = query->getNextPointLight();
+        // Retrieve light parameters
+        glm::vec3 position;
+        glm::vec3 color;
+        float intensity;
+        float radius;
+
+        if (!scene.getPointLight(pointLightId, position, radius, color, intensity))
+        {
+            LOG_ERROR("Failed to retrieve point light data from point light id %i.", pointLightId);
+        }
+        else
+        {
+			// Not implemented
+        }
+    }
+	m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
 
     glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
 
@@ -393,9 +418,23 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
         return false;
     }
 
+    // Attach texture for lit scene
     m_colorTexture = std::make_shared<CTexture>();
-    m_colorTexture->init(800, 600, GL_RGBA16F);
+    if (!m_colorTexture->init(800, 600, GL_RGBA16F))
+    {
+        LOG_ERROR("Failed to create color texture for light pass frame buffer.");
+        return false;
+    }
     m_lightPassFrameBuffer.attach(m_colorTexture, GL_COLOR_ATTACHMENT0);
 
+    // Attach depth buffer
+    // Depth gets discarded, depth values from geometry pass are used
+    std::shared_ptr<CRenderBuffer> depthBuffer = std::make_shared<CRenderBuffer>();
+    if (!depthBuffer->init(800, 600, GL_DEPTH_COMPONENT))
+    {
+        LOG_ERROR("Failed to create depth buffer for light pass frame buffer.");
+        return false;
+    }
+    m_lightPassFrameBuffer.attach(depthBuffer, GL_DEPTH_ATTACHMENT);
     return true;
 }

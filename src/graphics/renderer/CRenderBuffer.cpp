@@ -24,6 +24,7 @@ void CRenderBuffer::resize(unsigned int width, unsigned int height)
     {
         return;
     }
+	// No resize for render buffers
     // init(width, height, m_format);
 }
 

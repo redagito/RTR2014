@@ -10,6 +10,9 @@
 struct SSceneObject;
 struct SScenePointLight;
 
+/**
+* \brief Simple scene implementation.
+*/
 class CScene : public IScene
 {
    public:
@@ -25,15 +28,25 @@ class CScene : public IScene
     void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
                    const glm::vec3& rotation, const glm::vec3& scale);
 
-    SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color, float intensity);
+    SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color,
+                                   float intensity);
 
-	bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color, float& intensity) const;
+    bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color,
+                       float& intensity) const;
 
-	void setPointLight(SceneObjectId id, const glm::vec3& position, float radius, const glm::vec3& color, float intensity);
+    void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
+                       const glm::vec3& color, float intensity);
+
+    void setAmbientLight(const glm::vec3& color, float intensity);
+
+    bool getAmbientLight(glm::vec3& color, float& intensity) const;
 
     ISceneQuery* createQuery(const ICamera& camera) const;
 
    private:
-    std::vector<SSceneObject> m_objects;
-    std::vector<SScenePointLight> m_pointLights;
+    glm::vec3 m_ambientColor; /**< Global ambient light color. */
+    float m_ambientIntensity; /**< Global ambient light intensity. */
+
+    std::vector<SSceneObject> m_objects;         /**< Drawable scene objects. */
+    std::vector<SScenePointLight> m_pointLights; /**< Point lights. */
 };

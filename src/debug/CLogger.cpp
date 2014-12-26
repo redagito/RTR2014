@@ -25,16 +25,14 @@ void CLogger::log(const char* level, const char* file, int line, const char* fun
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    std::stringstream ss;
-    ss << level << " [" << file << ":" << line << ", " << function << "]: " << buffer;
-    std::string detailedMessage = ss.str();
-
     // Print to standard output
-    std::cout << detailedMessage << std::endl;
+    std::cout << level << ": " << buffer << std::endl;
     // Print to file
     if (s_stream.is_open())
     {
-        s_stream << detailedMessage << std::endl;
+        // Write detailed error message to log file
+        s_stream << level << " [" << file << ":" << line << ", " << function << "]: " << buffer
+                 << std::endl << std::flush;
     }
 
     // passthrough to listeners

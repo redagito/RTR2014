@@ -37,35 +37,35 @@ std::string CFrameBuffer::getState()
     switch (state)
     {
     case GL_FRAMEBUFFER_UNDEFINED:
-        return "The current FBO binding is 0, but no default framebuffer exists.";
+        return "The current FBO binding is 0, but no default framebuffer exists";
         break;
     case GL_FRAMEBUFFER_COMPLETE:
-        return "A user-defined FBO is bound and is complete. OK to render.";
+        return "A user-defined FBO is bound and is complete. OK to render";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        return "One of the buffers enabled for rendering is incomplete.";
+        return "One of the buffers enabled for rendering is incomplete";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
         return "No buffers are attached to the FBO.";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
         return "One of the buffer attachments enabled for rendering does not have a buffer "
-               "attached.";
+               "attached";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-        return "One of the buffer attachments enabled for reading does not have a buffer attached.";
+        return "One of the buffer attachments enabled for reading does not have a buffer attached";
         break;
     case GL_FRAMEBUFFER_UNSUPPORTED:
-        return "The combination of internal buffer formats is not supported.";
+        return "The combination of internal buffer formats is not supported";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
         return "The number of samples or the value for TEXTURE_FIXED_SAMPLE_LOCATIONS for all "
-               "buffers does not match.";
+               "buffers does not match";
         break;
     case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-        return "Not all color attachments are layered textures or bound to the same target.";
+        return "Not all color attachments are layered textures or bound to the same target";
     }
-    return "Invalid state encountered.";
+    return "Invalid state encountered";
 }
 
 void CFrameBuffer::setActive(GLenum target)

@@ -58,6 +58,16 @@ class IScene
     virtual void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
                                const glm::vec3& color, float intensity) = 0;
 
+	/**
+	* \brief Sets the ambient light for the scene.
+	*/
+	virtual void setAmbientLight(const glm::vec3& color, float intensity) = 0;
+
+	/**
+	* \brief Returns the ambient light of the scene.
+	*/
+	virtual bool getAmbientLight(glm::vec3& color, float& intensity) const = 0;
+
     /**
      * \brief Creates scene query for specified camera.
      * Returns heap allocated query object. Control is transfered to the calling function.

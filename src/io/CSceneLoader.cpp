@@ -48,11 +48,17 @@ bool CSceneLoader::load(const std::string& file, IScene& scene)
     }
 
     // Load point lights
-    if (!loadPointLights(root["scene_point_lights"], scene))
+    if (!loadPointLights(root["point_lights"], scene))
     {
         LOG_ERROR("Error while loading point lights from scene file %s.", file.c_str());
         return false;
     }
+
+	if (!loadAmbientLight(root["ambient_light"], scene))
+	{
+		LOG_ERROR("Error while loading ambient light from scene file &s.", file.c_str());
+		return false;
+	}
     return true;
 }
 
@@ -142,14 +148,14 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene)
     // Node empty?
     if (node.empty())
     {
-        LOG_ERROR("Missing or empty 'scene_point_lights' node. No point lights are loaded.");
+        LOG_ERROR("Missing or empty 'point_lights' node. No point lights are loaded.");
         return true;
     }
 
     // Node is array type
     if (!node.isArray())
     {
-        LOG_ERROR("The node 'scene_point_lights' must be array type.");
+        LOG_ERROR("The node 'point_lights' must be array type.");
         return false;
     }
 
@@ -194,6 +200,25 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene)
     // Create object in scene
     scene.createPointLight(position, radius, color, intensity);
     return true;
+}
+
+bool CSceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
+{
+	glm::vec3 color;
+	float intensity;
+
+	if (!load(node, "color", color))
+	{
+		return false;
+	}
+
+	if (!load(node, "intensity", intensity))
+	{
+		return false;
+	}
+
+	scene.setAmbientLight(color, intensity);
+	return true;
 }
 
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, float& f)

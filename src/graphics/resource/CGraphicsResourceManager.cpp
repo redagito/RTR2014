@@ -137,7 +137,7 @@ CTexture* CGraphicsResourceManager::getTexture(ResourceId id) const
 CShaderProgram* CGraphicsResourceManager::getShaderProgram(ResourceId id) const
 {
 	// Invalid id
-	if (id == -1)
+	if (id == invalidResource)
 	{
 		return nullptr;
 	}
@@ -146,7 +146,11 @@ CShaderProgram* CGraphicsResourceManager::getShaderProgram(ResourceId id) const
 
 	// Id must exist
 	// TODO Allow shader loading if not found?
-	assert(iter != m_shaderPrograms.end());
+	if (iter == m_shaderPrograms.end())
+	{
+		LOG_ERROR("The requested shader program id %i has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 

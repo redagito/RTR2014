@@ -86,6 +86,20 @@ void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float ra
     return;
 }
 
+
+void CScene::setAmbientLight(const glm::vec3& color, float intensity)
+{
+	m_ambientColor = color;
+	m_ambientIntensity = intensity;
+}
+
+bool CScene::getAmbientLight(glm::vec3& color, float& intensity) const
+{
+	color = m_ambientColor;
+	intensity = m_ambientIntensity;
+	return true;
+}
+
 ISceneQuery* CScene::createQuery(const ICamera& camera) const
 {
     // TODO Extract frustum planes from camera
