@@ -20,9 +20,14 @@ const GLuint vertexDataShaderLocation = 0;
 const GLuint normalDataShaderLocation = 1;
 const GLuint uvDataShaderLocation = 2;
 
-// Screen parameters uniform names
+// Screen parameters
 const std::string screenWidthUniformName = "screen_width";
 const std::string screenHeightUniformName = "screen_height";
+
+// Camera parameters
+const std::string cameraPositionUniformName = "camera_position";
+const std::string cameraDirectionUniformName = "camera_direction";
+const std::string viewDistanceUniformName = "view_distance";
 
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
@@ -35,7 +40,6 @@ const std::string rotationMatrixUniformName = "rotation";
 const std::string translationMatrixUniformName = "translation";
 const std::string scaleMatrixUniformName = "scale";
 const std::string modelMatrixUniformName = "model";
-
 const std::string modelViewProjectionMatrixUniformName = "model_view_projection";
 
 // Light parameter uniform names

@@ -181,12 +181,11 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         return;
     }
 
-	// Resize
-	m_lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
-	// Enable light buffer
-	m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+    // Resize
+    m_lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
+    // Enable light buffer
+    m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
 
-	
     // Retrieve ambient light
     glm::vec3 ambientColor;
     float ambientIntensity;
@@ -200,9 +199,9 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Additive blending for light accumulation
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
-	// No culling
-	// glDisable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+    // No culling
+    // glDisable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
 
     // Set textures for point light pass
     // Set depth texture
@@ -241,7 +240,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         {
             transformer.setPosition(position);
             // Scale is calculated from light radius
-			// Sphere model has radius 1.f
+            // Sphere model has radius 1.f
             transformer.setScale(glm::vec3(radius));
             // Point lights do not have rotation
             transformer.setRotation(glm::vec3(0.f));
@@ -257,16 +256,16 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
             m_pointLightPassShader->setUniform(lightIntensityUniformName, intensity);
             ARenderer::draw(pointLightMesh);
         }
-	}
-	glDisable(GL_BLEND);
-	m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
-	glCullFace(GL_BACK);
+    }
+    glDisable(GL_BLEND);
+    m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
+    glCullFace(GL_BACK);
 
     // Geometry pass end, gbuffer populated
     m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
                           m_depthTexture.get(), transformer.getInverseViewProjectionMatrix(),
                           nullptr, &manager);
-						  
+
     // Post draw error check
     if (hasGLError(error))
     {

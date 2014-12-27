@@ -59,7 +59,7 @@ bool CScene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius,
                            float& intensity) const
 {
     // TODO Needs to be changed for better data structures
-    if (id < 0 || ((unsigned int)id) >= m_objects.size())
+	if (id < 0 || ((unsigned int)id) >= m_pointLights.size())
     {
         return false;
     }

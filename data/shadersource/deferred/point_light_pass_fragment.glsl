@@ -37,7 +37,7 @@ void main(void)
 	vec4 temp = texture(normal_specular_texture, normalized_screen_coordinates);
 		
 	// Store world space normal vector
-	vec3 fragment_normal_world = temp.xyz;
+	vec3 surface_normal_world = temp.xyz;
 	// Specularity
 	float specular = temp.w;
 	
@@ -45,6 +45,8 @@ void main(void)
 	if (fragment_light_distance < light_radius)
 	{
 		float falloff = (light_radius - fragment_light_distance) / light_radius;
+		
+		//vec3 diffuse_light = dot()
 		light_data = vec4(light_color * light_intensity * falloff, 0.f);
 	}
 	else

@@ -237,6 +237,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         return entry->second;
     }
 
+	LOG_DEBUG("Loading material from file %s.", file.c_str());
     CIniFile ini;
     if (!ini.load(file))
     {
@@ -372,6 +373,7 @@ ResourceId CResourceManager::loadString(const std::string& file)
         return iter->second;
     }
 
+	LOG_DEBUG("Loading text from file %s.", file.c_str());
     std::ifstream ifs(file);
     if (!ifs.is_open())
     {
@@ -453,6 +455,8 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     {
         return entry->second;
     }
+
+	LOG_DEBUG("Loading shader from file %s.", file.c_str());
 
     // Load shader ini
     CIniFile ini;
