@@ -23,7 +23,7 @@ public:
     /**
     * \brief Draws screen space quad with specified texture to specified frame buffer.
     */
-    void draw(CTexture* colorTexture, CTexture* normalTexture, CTexture* depthTexture,
+    void draw(CTexture* diffuseGlowTexture, CTexture* lightTexture, CTexture* depthTexture,
               const glm::mat4& inverseViewProj, CFrameBuffer* fbo,
               const IGraphicsResourceManager* manager);
 

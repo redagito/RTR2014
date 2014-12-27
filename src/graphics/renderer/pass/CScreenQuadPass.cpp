@@ -23,7 +23,7 @@ bool CScreenQuadPass::init(IResourceManager* manager)
 	return true;
 }
 
-void CScreenQuadPass::draw(CTexture* colorTexture, CTexture* normalTexture, CTexture* depthTexture,
+void CScreenQuadPass::draw(CTexture* diffuseGlow, CTexture* lightTexture, CTexture* depthTexture,
                            const glm::mat4& inverseViewProj, CFrameBuffer* fbo,
                            const IGraphicsResourceManager* manager)
 {
@@ -40,14 +40,16 @@ void CScreenQuadPass::draw(CTexture* colorTexture, CTexture* normalTexture, CTex
 	glDisable(GL_DEPTH_TEST);
 
     m_shader->setActive();
-    colorTexture->setActive(0);
-    m_shader->setUniform("color_texture", 0);
-    normalTexture->setActive(1);
-    m_shader->setUniform("normal_texture", 1);
-    depthTexture->setActive(2);
-    m_shader->setUniform("depth_texture", 2);
+    diffuseGlow->setActive(0);
+    m_shader->setUniform(diffuseGlowTextureUniformName, 0);
 
-    m_shader->setUniform("inverse_view_proj", inverseViewProj);
+    lightTexture->setActive(1);
+    m_shader->setUniform(lightTextureUniformName, 1);
+
+    depthTexture->setActive(2);
+    m_shader->setUniform(depthTextureUniformName, 2);
+
+    m_shader->setUniform(inverseViewProjectionMatrixUniformName, inverseViewProj);
 
     m_quad->getVertexArray()->setActive();
     glDrawArrays(GL_POINTS, 0, 1);

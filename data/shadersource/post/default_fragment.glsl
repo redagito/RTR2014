@@ -2,22 +2,24 @@
 
 in vec2 uv;
 
-uniform sampler2D color_texture;
-uniform sampler2D normal_texture;
+uniform sampler2D diffuse_glow_texture;
+uniform sampler2D light_texture;
 uniform sampler2D depth_texture;
 
-uniform mat4 inverse_view_proj;
+uniform mat4 inverse_view_projection;
 
 out vec3 fragmentColor;
 
-vec3 getWorldPosition() {
+vec3 getWorldPosition() 
+{
     float z = texture(depth_texture, uv).x;
     vec4 sPos = vec4(uv * 2 - 1, z * 2 - 1, 1.0);
-    sPos = inverse_view_proj * sPos;
+    sPos = inverse_view_projection * sPos;
     return (sPos.xyz / sPos.w);
 }
 
-vec3 illuminate(vec3 worldPos, vec3 surfaceColor, vec3 surfaceNormal, vec3 lightPosition, vec3 lightColor, float intensity) {
+vec3 illuminate(vec3 worldPos, vec3 surfaceColor, vec3 surfaceNormal, vec3 lightPosition, vec3 lightColor, float intensity) 
+{
     vec3 lightDirection = lightPosition - worldPos;
     float distance = length(lightDirection);
     lightDirection = lightDirection / distance;
@@ -78,10 +80,10 @@ void main(void)
 {
     
     vec3 worldPos = getWorldPosition();
-    vec3 surfaceColor = texture(color_texture, uv).rgb;
-    vec3 surfaceNormal = texture(normal_texture, uv).rgb * 2 - 1;
+    vec3 diffuseColor = texture(diffuse_glow_texture, uv).rgb;
+    vec3 light = texture(light_texture, uv).rgb;
     
-    fragmentColor = surfaceColor * 0.1;
+    fragmentColor = diffuseColor * light;
         
     // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3(    0, 0.5,  1), vec3(1.0, 0.2, 0.2), 5.0);// * 0.5;
     // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -0.4, 0.5,  6), vec3(0.2, 1.0, 0.2), 5.0);// * 0.5;
@@ -95,5 +97,5 @@ void main(void)
     // fragmentColor = fragmentColor + illuminate(worldPos, surfaceColor, surfaceNormal, vec3( -3.6, 0.5, 41), vec3(0.5, 0.8, 0.8), 5.0);// * 0.5;
 	
 	// Tone mapping and gamma correction
-	fragmentColor = gammaCorrection(filmicTonemap(fragmentColor));
+	// fragmentColor = gammaCorrection(filmicTonemap(fragmentColor));
 }

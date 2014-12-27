@@ -32,9 +32,6 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 {
     LOG_INFO("Initializing deferred renderer.");
 
-    // Set clear color
-    glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
-
     // Error check
     std::string error;
     if (hasGLError(error))
@@ -76,9 +73,10 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Set framebuffer
     m_geometryBuffer.setActive(GL_FRAMEBUFFER);
-    // Set render targets
-    // glDrawBuffers(2, m_geometryDrawBuffers);
 
+    // Set clear color
+    // TODO Retrieve as scene parameter
+    glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
     // Clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -97,16 +95,20 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     glViewport(0, 0, window.getWidth(), window.getHeight());
     m_geometryBuffer.resize(window.getWidth(), window.getHeight());
 
+    // Stores active transformations
+    CTransformer transformer;
+
     // Set view and projection matrices
-    m_currentView = camera.getView();
-    m_currentProjection = camera.getProjection();
+    transformer.setViewMatrix(camera.getView());
+    transformer.setProjectionMatrix(camera.getProjection());
 
     // Query visible scene objects
     std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Send view/projection to default shader
-    m_geometryPassShader->setUniform(viewMatrixUniformName, m_currentView);
-    m_geometryPassShader->setUniform(projectionMatrixUniformName, m_currentProjection);
+    m_geometryPassShader->setUniform(viewMatrixUniformName, transformer.getViewMatrix());
+    m_geometryPassShader->setUniform(projectionMatrixUniformName,
+                                     transformer.getProjectionMatrix());
 
     // Traverse visible objects
     while (query->hasNextObject())
@@ -133,14 +135,10 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
             CMesh* mesh = manager.getMesh(meshId);
             CMaterial* material = manager.getMaterial(materialId);
 
-            // Create matrices
-            glm::mat4 translationMatrix = glm::translate(position);
-
-            // TODO Correct but slow?
-            glm::mat4 rotationMatrix = glm::rotate(rotation.x, glm::vec3(1.f, 0.f, 0.f)) *
-                                       glm::rotate(rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
-                                       glm::rotate(rotation.z, glm::vec3(0.f, 0.f, 1.f));
-            glm::mat4 scaleMatrix = glm::scale(scale);
+            // Set transformations
+            transformer.setPosition(position);
+            transformer.setRotation(rotation);
+            transformer.setScale(scale);
 
             if (material->hasCustomShader())
             {
@@ -148,8 +146,12 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
                 LOG_WARNING("Deferred renderer does not support custom material shaders.");
                 // return;
             }
-            // Forward draw call
-            draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material, manager);
+            else
+            {
+                // Forward draw call
+                draw(mesh, transformer.getTranslationMatrix(), transformer.getRotationMatrix(),
+                     transformer.getScaleMatrix(), material, manager);
+            }
         }
     }
 
@@ -160,10 +162,11 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         LOG_ERROR("GL Error: %s", error.c_str());
     }
 
+    // Disable geometry buffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 
+    // Perform light pass
     // Point light pass
-
     m_pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
     if (m_pointLightPassShader == nullptr)
     {
@@ -177,10 +180,31 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         LOG_ERROR("Mesh object for point light pass could not be retrieved.");
         return;
     }
-    m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+	// Resize
+	m_lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
+	// Enable light buffer
+	m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+	
+    // Retrieve ambient light
+    glm::vec3 ambientColor;
+    float ambientIntensity;
+    scene.getAmbientLight(ambientColor, ambientIntensity);
+    glClearColor(ambientColor.x * ambientIntensity, ambientColor.y * ambientIntensity,
+                 ambientColor.z * ambientIntensity, 1.f);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // No depth testing for light volumes
+    glDisable(GL_DEPTH_TEST);
+    // Additive blending for light accumulation
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+	// No culling
+	// glDisable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 
     // Set textures for point light pass
-
     // Set depth texture
     m_depthTexture->setActive(lightPassDepthTextureUnit);
     m_pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
@@ -193,6 +217,10 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Set screen size
     m_pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     m_pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+    // Inverse view-projection
+    m_pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                       transformer.getInverseViewProjectionMatrix());
 
     // Render point light volumes into light buffer
     while (query->hasNextPointLight())
@@ -211,22 +239,34 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         }
         else
         {
-            // Set point light parameters
+            transformer.setPosition(position);
+            // Scale is calculated from light radius
+			// Sphere model has radius 1.f
+            transformer.setScale(glm::vec3(radius));
+            // Point lights do not have rotation
+            transformer.setRotation(glm::vec3(0.f));
+
+            // Light volume transformation for vertex shader
+            m_pointLightPassShader->setUniform(modelViewProjectionMatrixUniformName,
+                                               transformer.getModelViewProjectionMatrix());
+
+            // Set point light parameters for fragment shader
             m_pointLightPassShader->setUniform(lightPositionUniformName, position);
             m_pointLightPassShader->setUniform(lightRadiusUniformName, radius);
             m_pointLightPassShader->setUniform(lightColorUniformName, color);
             m_pointLightPassShader->setUniform(lightIntensityUniformName, intensity);
             ARenderer::draw(pointLightMesh);
         }
-    }
-    m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
-
-    glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
+	}
+	glDisable(GL_BLEND);
+	m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
+	glCullFace(GL_BACK);
 
     // Geometry pass end, gbuffer populated
-    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_normalSpecularTexture.get(),
-                          m_depthTexture.get(), inverseViewProj, nullptr, &manager);
-
+    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
+                          m_depthTexture.get(), transformer.getInverseViewProjectionMatrix(),
+                          nullptr, &manager);
+						  
     // Post draw error check
     if (hasGLError(error))
     {
@@ -256,24 +296,12 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
         LOG_ERROR("GL Error: %s", error.c_str());
     }
 
-    // Decide which shader program to use
     CShaderProgram* shader = m_geometryPassShader;
-    if (material->hasCustomShader())
-    {
-        shader = material->getCustomShader();
-    }
     shader->setActive();
 
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
-    }
-
-    // Custom shader needs access to view/projection matrices
-    if (material->hasCustomShader())
-    {
-        shader->setUniform(viewMatrixUniformName, m_currentView);
-        shader->setUniform(projectionMatrixUniformName, m_currentProjection);
     }
 
     if (hasGLError(error))

@@ -8,6 +8,8 @@
 
 #include "CFrameBuffer.h"
 #include "SRenderRequest.h"
+#include "CTransformer.h"
+
 #include "resource/ResourceConfig.h"
 
 #include "pass/CScreenQuadPass.h"
@@ -46,25 +48,27 @@ class CDeferredRenderer : public ARenderer
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager);
 
    private:
-    glm::mat4 m_currentView;       /**< Stores the current view matrix. */
-    glm::mat4 m_currentProjection; /**< Stores the current projection matrix. */
 
     // Geometry pass
-    CFrameBuffer m_geometryBuffer;                  /**< GBuffer. */
-	std::shared_ptr<CTexture> m_depthTexture = nullptr;      /**< Depth texture attachment. */
-	std::shared_ptr<CTexture> m_diffuseGlowTexture = nullptr; /**< Diffuse texture with glow as alpha. */
+	// TODO Put into geometry pass class
+    CFrameBuffer m_geometryBuffer;                      /**< GBuffer. */
+    std::shared_ptr<CTexture> m_depthTexture = nullptr; /**< Depth texture attachment. */
+    std::shared_ptr<CTexture> m_diffuseGlowTexture =
+        nullptr; /**< Diffuse texture with glow as alpha. */
     std::shared_ptr<CTexture>
         m_normalSpecularTexture; /**< Normal texture with specularity as alpha. */
     ResourceId m_geometryPassShaderId = -1;
-    CShaderProgram* m_geometryPassShader = nullptr;
+    CShaderProgram* m_geometryPassShader = nullptr; // TODO Remove?
 
     // Light pass
+	// TODO Put into light pass class
     CFrameBuffer m_lightPassFrameBuffer; /**< Stores lit scene and depth. */
     std::shared_ptr<CTexture> m_lightPassTexture = nullptr;
     ResourceId m_pointLightPassShaderId = -1;
-    CShaderProgram* m_pointLightPassShader = nullptr;
+    CShaderProgram* m_pointLightPassShader = nullptr; // TODO Remove?
     ResourceId m_pointLightSphereId = -1;
 
+	// Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;
     std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 };

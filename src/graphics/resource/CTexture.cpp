@@ -75,9 +75,12 @@ void CTexture::resize(unsigned int width, unsigned int height)
     {
         return;
     }
+	LOG_DEBUG("Texture resize from %u, %u to %u, %u.", m_width, m_height, width, height);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, GL_UNSIGNED_BYTE,
                  nullptr);
+	m_width = width;
+	m_height = height;
 }
 
 GLuint CTexture::getId() const { return m_textureId; }

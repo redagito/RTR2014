@@ -27,12 +27,16 @@ const std::string screenHeightUniformName = "screen_height";
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";
+const std::string viewProjectionMatrixUniformName = "view_projection";
+const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
 
 // Transformation matrix uniform names
 const std::string rotationMatrixUniformName = "rotation";
 const std::string translationMatrixUniformName = "translation";
 const std::string scaleMatrixUniformName = "scale";
 const std::string modelMatrixUniformName = "model";
+
+const std::string modelViewProjectionMatrixUniformName = "model_view_projection";
 
 // Light parameter uniform names
 const std::string lightPositionUniformName = "light_position";
@@ -59,3 +63,19 @@ const std::string glowTextureUniformName = "glow_texture";
 const std::string alphaTextureUniformName = "alpha_texture";
 const std::string depthTextureUniformName = "depth_texture";
 const std::string normalSpecularTextureUniformName = "normal_specular_texture";
+const std::string diffuseGlowTextureUniformName = "diffuse_glow_texture";
+const std::string lightTextureUniformName = "light_texture";
+
+// Generic texture names
+const std::string texture0UniformName = "texture0";
+const std::string texture1UniformName = "texture1";
+const std::string texture2UniformName = "texture2";
+const std::string texture3UniformName = "texture3";
+const std::string texture4UniformName = "texture4";
+
+// Generic texture units
+const GLint texture0TextureUnit = 0;
+const GLint texture1TextureUnit = 1;
+const GLint texture2TextureUnit = 2;
+const GLint texture3TextureUnit = 3;
+const GLint texture4TextureUnit = 4;
