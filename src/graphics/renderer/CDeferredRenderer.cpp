@@ -163,8 +163,38 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 
     // Point light pass
+
     m_pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
+    if (m_pointLightPassShader == nullptr)
+    {
+        LOG_ERROR("Shader program for point light pass could not be retrieved.");
+        return;
+    }
+
+    CMesh* pointLightMesh = manager.getMesh(m_pointLightSphereId);
+    if (pointLightMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for point light pass could not be retrieved.");
+        return;
+    }
     m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+    // Set textures for point light pass
+
+    // Set depth texture
+    m_depthTexture->setActive(lightPassDepthTextureUnit);
+    m_pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+
+    // Set texture with world space normal and specular power
+    m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+    m_pointLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                       lightPassNormalSpecularTextureUnit);
+
+    // Set screen size
+    m_pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    m_pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+    // Render point light volumes into light buffer
     while (query->hasNextPointLight())
     {
         // Retrieve light id
@@ -181,10 +211,15 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         }
         else
         {
-			// Not implemented
+            // Set point light parameters
+            m_pointLightPassShader->setUniform(lightPositionUniformName, position);
+            m_pointLightPassShader->setUniform(lightRadiusUniformName, radius);
+            m_pointLightPassShader->setUniform(lightColorUniformName, color);
+            m_pointLightPassShader->setUniform(lightIntensityUniformName, intensity);
+            ARenderer::draw(pointLightMesh);
         }
     }
-	m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
+    m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
 
     glm::mat4 inverseViewProj = glm::inverse(camera.getProjection() * camera.getView());
 
@@ -379,10 +414,6 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
 
     LOG_INFO("GBuffer state: %s.", m_geometryBuffer.getState().c_str());
 
-    // Set color attachments for geometry pass fbo
-    // m_geometryDrawBuffers[0] = GL_COLOR_ATTACHMENT0;
-    // m_geometryDrawBuffers[1] = GL_COLOR_ATTACHMENT1;
-
     // Reset framebuffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 
@@ -418,14 +449,14 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
         return false;
     }
 
-    // Attach texture for lit scene
-    m_colorTexture = std::make_shared<CTexture>();
-    if (!m_colorTexture->init(800, 600, GL_RGBA16F))
+    // Attach texture for light data
+    m_lightPassTexture = std::make_shared<CTexture>();
+    if (!m_lightPassTexture->init(800, 600, GL_RGBA16F))
     {
         LOG_ERROR("Failed to create color texture for light pass frame buffer.");
         return false;
     }
-    m_lightPassFrameBuffer.attach(m_colorTexture, GL_COLOR_ATTACHMENT0);
+    m_lightPassFrameBuffer.attach(m_lightPassTexture, GL_COLOR_ATTACHMENT0);
 
     // Attach depth buffer
     // Depth gets discarded, depth values from geometry pass are used
