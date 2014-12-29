@@ -1,8 +1,7 @@
 #version 330 core
 
 in vec2 uv;
-smooth in vec3 normalVectorCameraSpace;
-in vec3 normalVectorWorldSpace;
+smooth in vec3 normalVectorWorldSpace;
 
 // Material textures
 uniform sampler2D diffuse_texture;
@@ -32,6 +31,6 @@ void main(void)
 	diffuse_glow.a = glow;
 	
 	// normal.rgb = textureNormal;
-    normal_specular.rgb = (normalVectorWorldSpace + 1) / 2;
+    normal_specular.rgb = normalVectorWorldSpace;
 	normal_specular.a = specular;
 }

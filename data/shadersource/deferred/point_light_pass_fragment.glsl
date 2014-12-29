@@ -12,7 +12,7 @@ uniform float light_intensity;
 uniform float screen_width;
 uniform float screen_height;
 
-//
+// Transforms to world coords
 uniform mat4 inverse_view_projection;
 
 // Depth, normal and specularity
@@ -38,19 +38,27 @@ void main(void)
 		
 	// Store world space normal vector
 	vec3 surface_normal_world = temp.xyz;
-	// Specularity
+	// Specularity value
 	float specular = temp.w;
 	
-	float fragment_light_distance = distance(fragment_world_position, light_position);
-	if (fragment_light_distance < light_radius)
-	{
-		float falloff = (light_radius - fragment_light_distance) / light_radius;
-		
-		//vec3 diffuse_light = dot()
-		light_data = vec4(light_color * light_intensity * falloff, 0.f);
-	}
-	else
-	{
-		light_data = vec4(0.f);
-	}
+	// Light direction vector from light to fragment
+	vec3 light_direction = light_position - fragment_world_position;
+	// Store distance
+	float fragment_light_distance = length(light_direction);
+	// Normalize
+	light_direction /= fragment_light_distance;
+	
+	// Calculate distance-based light attenuation
+	// Linear for now
+	// TODO Needs better model?
+	float light_attenuation = max(0.0, (light_radius - fragment_light_distance) / light_radius);
+	// Calculate intensity with attenuation
+	float attenuated_intensity = light_intensity * light_attenuation;
+	
+	// Lambertian factor based on surface normal
+	float lambert_factor = max(0.0, dot(surface_normal_world, light_direction));
+	
+	// Calculate diffuse light contribution
+	vec3 diffuse_light = lambert_factor * light_color;
+	light_data = vec4(diffuse_light * attenuated_intensity, 0.0);
 }
