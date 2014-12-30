@@ -12,7 +12,7 @@ class CRenderBuffer
     * \brief Creates render buffer resource.
     */
     CRenderBuffer();
-	CRenderBuffer(unsigned int width, unsigned int height, GLenum format);
+    CRenderBuffer(unsigned int width, unsigned int height, GLenum format);
 
     /**
     * \brief Deletes render buffer resource.
@@ -25,14 +25,20 @@ class CRenderBuffer
     bool init(unsigned int width, unsigned int height, GLenum format);
 
     /**
-    * \brief Resizes buffer storage.
+    * \brief Resizes render buffer.
+    * Wrapps init, render buffer is destroyed and recreated. FBO attachments need to be updated.
     */
-    void resize(unsigned int width, unsigned int height);
+    bool resize(unsigned int width, unsigned int height);
 
     /**
     * \brief Returns internal resource id.
     */
     GLuint getId() const;
+
+    /**
+    * \brief Returns renderbuffer format.
+    */
+    GLenum getFormat() const;
 
     /**
     * \brief Sets the render buffer active.
@@ -44,4 +50,5 @@ class CRenderBuffer
     GLenum m_format;           /**< Buffer format. */
     unsigned int m_width = 0;  /**< Buffer width. */
     unsigned int m_height = 0; /**< Buffer height. */
+    bool m_init = false;
 };

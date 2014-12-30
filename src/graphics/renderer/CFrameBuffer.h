@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include "core/RendererCoreConfig.h"
 
@@ -34,8 +35,8 @@ class CFrameBuffer
    private:
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */
 
-    std::vector<std::shared_ptr<CTexture>> m_textures; /**< Stores attached textures. */
-    std::vector<std::shared_ptr<CRenderBuffer>>
+	std::unordered_map<GLenum, std::shared_ptr<CTexture>> m_textures; /**< Stores attached textures. */
+	std::unordered_map<GLenum, std::shared_ptr<CRenderBuffer>>
         m_renderBuffers; /**< Stores attached render buffers. */
 
     GLuint m_fboId; /**< Frame buffer id. */

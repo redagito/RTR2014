@@ -83,13 +83,18 @@ void CFrameBuffer::setInactive(GLenum target) { glBindFramebuffer(target, 0); }
 
 void CFrameBuffer::resize(unsigned int width, unsigned int height)
 {
-    for (auto& texture : m_textures)
+    for (auto& entry : m_textures)
     {
-        texture->resize(width, height);
+        entry.second->resize(width, height);
     }
-    for (auto& renderBuffer : m_renderBuffers)
+    for (auto& entry : m_renderBuffers)
     {
-        renderBuffer->resize(width, height);
+		// Need renderbuffer connot be resized
+		// Instead they are recreated and reattached
+		if (entry.second->resize(width, height))
+		{
+			attach(entry.second, entry.first);
+		}
     }
 }
 
@@ -106,7 +111,7 @@ void CFrameBuffer::attach(const std::shared_ptr<CTexture>& texture, GLenum attac
     {
         m_drawBuffers.push_back(attachment);
     }
-    m_textures.push_back(texture);
+    m_textures[attachment] = texture;
     setInactive(GL_FRAMEBUFFER);
 }
 
@@ -123,6 +128,6 @@ void CFrameBuffer::attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GL
     {
         m_drawBuffers.push_back(attachment);
     }
-    m_renderBuffers.push_back(renderBuffer);
+    m_renderBuffers[attachment] = renderBuffer;
     setInactive(GL_FRAMEBUFFER);
 }

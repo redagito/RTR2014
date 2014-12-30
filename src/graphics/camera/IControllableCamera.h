@@ -24,5 +24,9 @@ class IControllableCamera : public ICamera
     virtual void lookAt(const glm::vec3& position, const glm::vec3& target,
                         const glm::vec3& up) = 0;
 
+	virtual float getFieldOfView() const = 0;
+	virtual float getZNear() const = 0;
+	virtual float getZFar() const = 0;
+
     virtual void setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar) = 0;
 };

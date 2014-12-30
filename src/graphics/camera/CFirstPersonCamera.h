@@ -11,27 +11,31 @@ public:
     CFirstPersonCamera(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up,
                 float fieldOfView, float aspectRatio, float zNear, float zFar);
     
-    virtual const glm::mat4& getView() const override;
-    virtual const glm::mat4& getProjection() const override;
+    const glm::mat4& getView() const override;
+    const glm::mat4& getProjection() const override;
     
-    virtual glm::vec3 getPosition() const override;
-    virtual void setPosition(const glm::vec3& position) override;
+    glm::vec3 getPosition() const override;
+    void setPosition(const glm::vec3& position) override;
     
-    virtual void move(const glm::vec3& direction) override;
-    virtual void moveForward(float amount) override;
-    virtual void moveRight(float amount) override;
-    virtual void moveUp(float amount) override;
+    void move(const glm::vec3& direction) override;
+    void moveForward(float amount) override;
+    void moveRight(float amount) override;
+    void moveUp(float amount) override;
     
-    virtual void rotate(const glm::vec3& axis, float amount) override;
-    virtual void pitch(float amount) override;
-    virtual void roll(float amount) override;
-    virtual void yaw(float amount) override;
+    void rotate(const glm::vec3& axis, float amount) override;
+    void pitch(float amount) override;
+    void roll(float amount) override;
+    void yaw(float amount) override;
     
-    virtual void lookAt(const glm::vec3& target, const glm::vec3& up) override;
-    virtual void lookAt(const glm::vec3& position, const glm::vec3& target,
+    void lookAt(const glm::vec3& target, const glm::vec3& up) override;
+    void lookAt(const glm::vec3& position, const glm::vec3& target,
                         const glm::vec3& up) override;
     
-    virtual void setProjection(float fieldOfView, float aspectRatio, float zNear,
+	float getFieldOfView() const override;
+	float getZNear() const override;
+	float getZFar() const override;
+
+    void setProjection(float fieldOfView, float aspectRatio, float zNear,
                                float zFar) override;
     
 private:

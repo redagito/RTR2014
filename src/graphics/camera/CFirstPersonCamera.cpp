@@ -100,6 +100,21 @@ void CFirstPersonCamera::lookAt(const glm::vec3& eye, const glm::vec3& target, c
     lookAt(target, up);
 }
 
+float CFirstPersonCamera::getFieldOfView() const
+{
+	return m_fieldOfView;
+}
+
+float CFirstPersonCamera::getZNear() const
+{
+	return m_zNear;
+}
+
+float CFirstPersonCamera::getZFar() const
+{
+	return m_zFar;
+}
+
 void CFirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, float zNear,
                                        float zFar)
 {
