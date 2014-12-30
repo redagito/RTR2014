@@ -83,7 +83,6 @@ void main(void)
     vec4 temp = texture(diffuse_glow_texture, uv);
 	vec3 diffuseColor = temp.rgb;
 	vec3 glow = vec3(temp.a);
-	glow = vec3(0);
     vec3 light = texture(light_texture, uv).rgb;
     fragmentColor = diffuseColor * max(glow, light);
 	fragmentColor = filmicTonemap(fragmentColor);

@@ -73,12 +73,17 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Set framebuffer
     m_geometryBuffer.setActive(GL_FRAMEBUFFER);
+	// Clear buffer
+	// TODO Should be retrieved as scene parameters
+	// Diffuse, glow
+	GLfloat diffuseGlow[] = { 0.f, 0.f, 0.f, 0.f };
+	GLfloat normalSpecular[] = { 0.5f, 0.5f, 1.f, 0.f };
+	glClearBufferfv(GL_COLOR, 0, diffuseGlow);
+	// Normal, specular
+	glClearBufferfv(GL_COLOR, 1, normalSpecular);
 
-    // Set clear color
-    // TODO Retrieve as scene parameter
-    glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
     // Clear
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     // Depth
     glEnable(GL_DEPTH_TEST);
