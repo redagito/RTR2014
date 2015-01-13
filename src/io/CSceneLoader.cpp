@@ -54,11 +54,20 @@ bool CSceneLoader::load(const std::string& file, IScene& scene)
         return false;
     }
 
+	// Load directional lights
+	if (!loadDirectionalLights(root["directional_lights"], scene))
+	{
+		LOG_ERROR("Error while loading ambient light from scene file &s.", file.c_str());
+		return false;
+	}
+
+	// Load ambient light
 	if (!loadAmbientLight(root["ambient_light"], scene))
 	{
 		LOG_ERROR("Error while loading ambient light from scene file &s.", file.c_str());
 		return false;
 	}
+
     return true;
 }
 
@@ -67,7 +76,7 @@ bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene)
     // Node empty?
     if (node.empty())
     {
-        LOG_ERROR("Missing or empty 'scene_objects' node. No scene objects are loaded.");
+        LOG_INFO("Missing or empty 'scene_objects' node. No scene objects are loaded.");
         return true;
     }
 
@@ -148,7 +157,7 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene)
     // Node empty?
     if (node.empty())
     {
-        LOG_ERROR("Missing or empty 'point_lights' node. No point lights are loaded.");
+		LOG_INFO("Missing or empty 'point_lights' node. No point lights are loaded.");
         return true;
     }
 
@@ -202,8 +211,67 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene)
     return true;
 }
 
+bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene)
+{
+	// Node empty?
+	if (node.empty())
+	{
+		LOG_INFO("Missing or empty 'directional_lights' node. No directional lights are loaded.");
+		return true;
+	}
+
+	// Node is array type
+	if (!node.isArray())
+	{
+		LOG_ERROR("The node 'directional_lights' must be array type.");
+		return false;
+	}
+
+	// Load scene directional lights
+	for (unsigned int i = 0; i < node.size(); ++i)
+	{
+		if (!loadDirectionalLight(node[i], scene))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CSceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene)
+{
+	glm::vec3 direction;
+	glm::vec3 color;
+	float intensity;
+
+	if (!load(node, "direction", direction))
+	{
+		return false;
+	}
+
+	if (!load(node, "color", color))
+	{
+		return false;
+	}
+
+	if (!load(node, "intensity", intensity))
+	{
+		return false;
+	}
+
+	// Create object in scene
+	scene.createDirectionalLight(direction, color, intensity);
+	return true;
+}
+
 bool CSceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
 {
+	if (node.empty())
+	{
+		LOG_INFO("Missing or empty 'ambient_light' node. No ambient light is loaded.");
+		return true;
+	}
+
 	glm::vec3 color;
 	float intensity;
 

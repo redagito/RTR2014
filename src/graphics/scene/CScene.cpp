@@ -3,6 +3,7 @@
 #include "CSceneQuery.h"
 #include "SSceneObject.h"
 #include "SScenePointLight.h"
+#include "SSceneDirectionalLight.h"
 
 CScene::CScene() {}
 
@@ -76,7 +77,7 @@ void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float ra
                            const glm::vec3& color, float intensity)
 {
     // TODO Needs to be changed for better data structures
-    assert(id >= 0 && ((unsigned int)id) < m_objects.size() && "Invalid scene object id");
+	assert(id >= 0 && ((unsigned int)id) < m_pointLights.size() && "Invalid scene object id");
 
     // Write data
     m_pointLights[id].m_position = position;
@@ -86,6 +87,38 @@ void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float ra
     return;
 }
 
+SceneObjectId CScene::createDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity)
+{
+	m_directionalLights.push_back(SSceneDirectionalLight(direction, color, intensity));
+	return m_directionalLights.size() - 1;
+}
+
+bool CScene::getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color, float& intensity) const
+{
+	// TODO Needs to be changed for better data structures
+	if (id < 0 || ((unsigned int)id) >= m_directionalLights.size())
+	{
+		return false;
+	}
+
+	// Write data
+	direction = m_directionalLights.at(id).m_direction;
+	color = m_directionalLights.at(id).m_color;
+	intensity = m_directionalLights.at(id).m_intensity;
+	return true;
+}
+
+void CScene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color, float intensity)
+{
+	// TODO Needs to be changed for better data structures
+	assert(id >= 0 && ((unsigned int)id) < m_directionalLights.size() && "Invalid scene object id");
+
+	// Write data
+	m_directionalLights[id].m_direction = direction;
+	m_directionalLights[id].m_color = color;
+	m_directionalLights[id].m_intensity = intensity;
+	return;
+}
 
 void CScene::setAmbientLight(const glm::vec3& color, float intensity)
 {

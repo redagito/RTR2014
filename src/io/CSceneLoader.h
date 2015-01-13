@@ -33,6 +33,9 @@ class CSceneLoader
     bool loadPointLights(const Json::Value& node, IScene& scene);
     bool loadPointLight(const Json::Value& node, IScene& scene);
 
+	bool loadDirectionalLights(const Json::Value& node, IScene& scene);
+	bool loadDirectionalLight(const Json::Value& node, IScene& scene);
+
 	bool loadAmbientLight(const Json::Value& node, IScene& scene);
 
 	bool load(const Json::Value& node, const std::string& name, float& f);

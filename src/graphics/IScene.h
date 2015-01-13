@@ -59,6 +59,21 @@ class IScene
                                const glm::vec3& color, float intensity) = 0;
 
 	/**
+	* \brief Creates directional light.
+	*/
+	virtual SceneObjectId createDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity) = 0;
+
+	/**
+	* \brief Returns directional light data.
+	*/
+	virtual bool getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color, float& intensity) const = 0;
+
+	/**
+	* \brief Sets directional light parameters.
+	*/
+	virtual void setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color, float intensity) = 0;
+
+	/**
 	* \brief Sets the ambient light for the scene.
 	*/
 	virtual void setAmbientLight(const glm::vec3& color, float intensity) = 0;

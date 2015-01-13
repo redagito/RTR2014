@@ -24,13 +24,23 @@ class ISceneQuery
      */
     virtual SceneObjectId getNextObject() = 0;
 
-	/**
-	 * \brief Has visible point lights to return.
-	 */
-	virtual bool hasNextPointLight() const = 0;
+    /**
+     * \brief Has visible point lights to return.
+     */
+    virtual bool hasNextPointLight() const = 0;
 
-	/**
-	* \brief Returns id of next visible point light.
-	*/
-	virtual SceneObjectId getNextPointLight() = 0;
+    /**
+    * \brief Returns id of next visible point light.
+    */
+    virtual SceneObjectId getNextPointLight() = 0;
+
+    /**
+    * \brief Has visible directional light to return.
+    */
+    virtual bool hasNextDirectionalLight() const = 0;
+
+    /**
+    * \brief Returns id of next visible directional light.
+    */
+    virtual SceneObjectId getNextDirectionalLight() = 0;
 };
