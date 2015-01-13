@@ -1,0 +1,47 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/gear.obj",
+            "material" : "data/material/gear.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0, 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        }
+    ],
+    "point_lights" :  [
+        {
+            "position" :  [ 0.0, 2.0, 2.0 ],
+            "color" : [ 1.0, 0.2, 0.2 ],
+            "radius" :  5,
+            "intensity" : 2
+        },
+        {
+            "position" :  [ 2.0, 2.0, 0.0 ],
+            "color" : [ 0.2, 1.0, 0.2 ],
+            "radius" :  5,
+            "intensity" : 2
+        },
+        {
+            "position" :  [ -2.0, 2.0, 0.0 ],
+            "color" : [ 0.2, 0.2, 1.0 ],
+            "radius" :  5,
+            "intensity" : 2
+        },
+        {
+            "position" :  [ 0.0, 2.0, -2.0 ],
+            "color" : [ 1.0, 1.0, 0.2 ],
+            "radius" :  5,
+            "intensity" : 2
+        },
+        {
+            "position" :  [ 0.0, 3.0, 0.0 ],
+            "color" : [ 1.0, 1.0, 1.0 ],
+            "radius" :  5,
+            "intensity" : 2
+        }
+    ],
+    "ambient_light" : {
+        "color" : [ 1, 1, 1 ],
+        "intensity" : 0.1
+    }
+}
