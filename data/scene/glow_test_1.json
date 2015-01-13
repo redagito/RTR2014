@@ -1,0 +1,23 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/test_1.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        }
+    ],
+    "point_lights" :  [
+        {
+            "position" :  [ 3, 0, 0 ],
+            "color" : [ 1, 1, 1 ],
+            "radius" :  5,
+            "intensity" : 1
+        }
+    ],
+    "ambient_light" : {
+        "color" :  [ 1, 1, 1 ],
+        "intensity" : 0.01
+    }
+}
