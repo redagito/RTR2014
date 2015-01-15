@@ -19,7 +19,13 @@
         	"material" : "data/material/gear.ini",
         	"position": [0, 15, 0],
         	"rotation" :  [ 1.57, 0, 0 ],
-            "scale" :  [ 5, 5, 5 ]
+            "scale" :  [ 5, 5, 5 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, 1, 0 ]
+                }
+            ]
         },
         {
         	"mesh" : "data/mesh/gear.obj",
