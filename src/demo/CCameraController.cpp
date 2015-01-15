@@ -42,30 +42,35 @@ void CCameraController::animate(float dt)
 {
     if (m_inputProvider != nullptr && m_camera != nullptr)
     {
+        float walkingModifier = 1.0f;
+        if (m_inputProvider->isKeyPressed(GLFW_KEY_SPACE)) {
+            walkingModifier = 4.0f;
+        }
+        
         if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
         {
-            m_camera->moveForward(dt * 2.f * m_speed);
+            m_camera->moveForward(dt * 2.f * m_speed * walkingModifier);
         }
         if (m_inputProvider->isKeyPressed(GLFW_KEY_S))
         {
-            m_camera->moveForward(dt * -2.f * m_speed);
+            m_camera->moveForward(dt * -2.f * m_speed * walkingModifier);
         }
         if (m_inputProvider->isKeyPressed(GLFW_KEY_A))
         {
-            m_camera->moveRight(dt * 2.f * m_speed);
+            m_camera->moveRight(dt * 2.f * m_speed * walkingModifier);
         }
         if (m_inputProvider->isKeyPressed(GLFW_KEY_D))
         {
-            m_camera->moveRight(dt * -2.f * m_speed);
+            m_camera->moveRight(dt * -2.f * m_speed * walkingModifier);
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_Q))
         {
-            m_camera->moveUp(dt * -2.f * m_speed);
+            m_camera->moveUp(dt * -2.f * m_speed * walkingModifier);
         }
         if (m_inputProvider->isKeyPressed(GLFW_KEY_E))
         {
-            m_camera->moveUp(dt * 2.f * m_speed);
+            m_camera->moveUp(dt * 2.f * m_speed * walkingModifier);
         }
 
         if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
