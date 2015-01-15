@@ -123,7 +123,7 @@
         {
             "direction" :  [ -1, -1, -1 ],
             "color" :  [ 1, 1, 1 ],
-            "intensity" : 0.6
+            "intensity" : 2
         }
     ],
     "ambient_light" : {

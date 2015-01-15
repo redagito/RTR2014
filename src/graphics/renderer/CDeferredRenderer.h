@@ -50,6 +50,9 @@ class CDeferredRenderer : public ARenderer
     void directionalLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                               const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+    void postProcessPass(const IScene& scene, const ICamera& camera, const IWindow& window,
+                         const IGraphicsResourceManager& manager, ISceneQuery& query);
+
     /**
     * \brief Initializes resources for geometry pass.
     */
@@ -69,6 +72,18 @@ class CDeferredRenderer : public ARenderer
      * \brief Initializes resources for shadow map pass
      */
     bool initShadowMapPass(IResourceManager* manager);
+
+    /**
+	* \brief Initializes post processing pass.
+	*/
+	bool initPostProcessPass(IResourceManager* manager);
+
+	/**
+	* \brief Initializes post process pass for depth of field.
+	* 
+	* Called by initPostProcesPass.
+	*/
+	bool initDepthOfFieldPass(IResourceManager* manager);
 
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager,
@@ -109,6 +124,19 @@ class CDeferredRenderer : public ARenderer
     // Directional light pass
     ResourceId m_directionalLightPassShaderId = -1;
     ResourceId m_directionalLightScreenQuadId = -1;
+
+
+	// Post processing pass
+	ResourceId m_postProcessScreenQuadId = -1;
+	CFrameBuffer m_postProcessPassFrameBuffer;
+	std::shared_ptr<CTexture> m_postProcessPassTexture = nullptr;
+
+	// Gauss blur pass
+	ResourceId m_gaussBlurVerticalShaderId = -1;
+	ResourceId m_gaussBlurHorizontalShaderId = -1;
+	
+	// Depth-of-field pass
+	ResourceId m_depthOfFieldPassShaderId = -1;
 
     // Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;
