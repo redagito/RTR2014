@@ -34,6 +34,7 @@ const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";
 const std::string viewProjectionMatrixUniformName = "view_projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
+const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
 
 // Transformation matrix uniform names
 const std::string rotationMatrixUniformName = "rotation";
@@ -59,6 +60,7 @@ const GLint alphaTextureUnit = 4;
 // Texture units for light pass
 const GLint lightPassDepthTextureUnit = 0;
 const GLint lightPassNormalSpecularTextureUnit = 1;
+const GLint lightPassShadowMapTextureUnit = 2;
 
 // Texture sampler uniform names
 const std::string diffuseTextureUniformName = "diffuse_texture";
@@ -70,6 +72,7 @@ const std::string depthTextureUniformName = "depth_texture";
 const std::string normalSpecularTextureUniformName = "normal_specular_texture";
 const std::string diffuseGlowTextureUniformName = "diffuse_glow_texture";
 const std::string lightTextureUniformName = "light_texture";
+const std::string shadowMapTextureUniformName = "shadow_map";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";

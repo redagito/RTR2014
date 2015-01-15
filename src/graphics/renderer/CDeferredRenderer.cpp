@@ -47,6 +47,12 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+    if (!initShadowMapPass(manager))
+    {
+        LOG_ERROR("Failed to intialize shadow map pass.");
+        return false;
+    }
+
     // Init light pass resources
     if (!initPointLightPass(manager))
     {
@@ -80,6 +86,8 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Geometry pass fills gbuffer
     geometryPass(scene, camera, window, manager, *query);
+
+    shadowMapPass(scene, camera, window, manager, *query);
 
     // Light pass fills lbuffer
     lightPass(scene, camera, window, manager, *query);
@@ -209,6 +217,137 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 }
 
+// TODO extract in own file(s)
+class StaticCamera : public ICamera
+{
+   public:
+    StaticCamera(glm::mat4 view, glm::mat4 proj)
+    {
+        m_view = view;
+        m_proj = proj;
+    }
+
+    virtual const glm::mat4& getView() const { return m_view; }
+
+    virtual const glm::mat4& getProjection() const { return m_proj; }
+
+   private:
+    glm::mat4 m_view;
+    glm::mat4 m_proj;
+};
+
+void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*camera*/,
+                                      const IWindow& window,
+                                      const IGraphicsResourceManager& manager,
+                                      ISceneQuery& /*query*/)
+{
+    m_shadowMapPassShader = manager.getShaderProgram(m_shadowMapPassShaderId);
+
+    // Set framebuffer
+    m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
+
+    GLfloat diffuseGlow[] = {0.f, 0.f, 0.f, 0.f};
+    GLfloat normalSpecular[] = {0.5f, 0.5f, 1.f, 0.f};
+    glClearBufferfv(GL_COLOR, 0, diffuseGlow);
+    // Normal, specular
+    glClearBufferfv(GL_COLOR, 1, normalSpecular);
+    
+    // Clear
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    // Depth
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Backface culling disabled for debugging
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    // Winding order, standard is counter-clockwise
+    glFrontFace(GL_CCW);
+
+    // Reset viewport
+    glViewport(0, 0, 1200, 1200);
+    m_shadowMapBuffer.resize(1200, 1200);
+
+    // Stores active transformations
+    CTransformer transformer;
+
+    // TODO replace hardcoded directional light!!!
+    glm::mat4 view = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                                 glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 proj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
+    //glm::mat4 proj = glm::perspective(45.0f, 4.0f/3.0f, 0.01f, 1000.0f);
+    
+    // Set view and projection matrices
+    transformer.setViewMatrix(view);
+    transformer.setProjectionMatrix(proj);
+
+    m_shadowCamera.reset(new StaticCamera(view, proj));
+
+    // Query visible scene objects
+    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(*m_shadowCamera)));
+
+    // Send view/projection to default shader
+    m_shadowMapPassShader->setUniform(viewMatrixUniformName, transformer.getViewMatrix());
+    m_shadowMapPassShader->setUniform(projectionMatrixUniformName,
+                                      transformer.getProjectionMatrix());
+
+    // Traverse visible objects
+    while (query->hasNextObject())
+    {
+        // Get next visible object
+        SceneObjectId id = query->getNextObject();
+
+        // Object attributes
+        ResourceId meshId = -1;
+        ResourceId materialId = -1;
+        glm::vec3 position;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+
+        // Retrieve object data
+        if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
+        {
+            // Invalid id
+            LOG_ERROR("Invalid scene object id %l.", id);
+        }
+        else
+        {
+            // Resolve ids
+            CMesh* mesh = manager.getMesh(meshId);
+            CMaterial* material = manager.getMaterial(materialId);
+
+            // Set transformations
+            transformer.setPosition(position);
+            transformer.setRotation(rotation);
+            transformer.setScale(scale);
+
+            if (material->hasCustomShader())
+            {
+                // Custom shaders not supported
+                LOG_WARNING("Deferred renderer does not support custom material shaders.");
+            }
+            else
+            {
+                // Forward draw call
+                draw(mesh, transformer.getTranslationMatrix(), transformer.getRotationMatrix(),
+                     transformer.getScaleMatrix(), material, manager, m_shadowMapPassShader);
+            }
+        }
+    }
+    
+    // Post draw error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
+    
+    // Disable geometry buffer
+    m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
+}
+
 void CDeferredRenderer::lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                                   const IGraphicsResourceManager& manager, ISceneQuery& query)
 {
@@ -333,67 +472,80 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     // Restrieve shader
     CShaderProgram* directionalLightPassShader =
         manager.getShaderProgram(m_directionalLightPassShaderId);
-	if (directionalLightPassShader == nullptr)
-	{
-		LOG_ERROR("Shader program for directional light pass could not be retrieved.");
-		return;
-	}
+    if (directionalLightPassShader == nullptr)
+    {
+        LOG_ERROR("Shader program for directional light pass could not be retrieved.");
+        return;
+    }
 
-	// Retrieve fullscreen quad mesh
-	CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
-		return;
-	}
+    // Retrieve fullscreen quad mesh
+    CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
+        return;
+    }
 
-	// Reset culling
-	glCullFace(GL_BACK);
+    // Reset culling
+    glCullFace(GL_BACK);
 
-	// Set shader active
-	directionalLightPassShader->setActive();
+    // Set shader active
+    directionalLightPassShader->setActive();
 
-	// Set textures for point light pass
-	// Set depth texture
-	m_depthTexture->setActive(lightPassDepthTextureUnit);
-	directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+    // Set textures for point light pass
+    // Set depth texture
+    m_depthTexture->setActive(lightPassDepthTextureUnit);
+    directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
 
-	// Set texture with world space normal and specular power
-	m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
-	directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
-		lightPassNormalSpecularTextureUnit);
+    // Set texture with world space normal and specular power
+    m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+    directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                           lightPassNormalSpecularTextureUnit);
 
-	// Set screen size
-	directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
+    directionalLightPassShader->setUniform(shadowMapTextureUniformName,
+                                           lightPassShadowMapTextureUnit);
 
-	// Inverse view-projection
-	directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
-		m_transformer.getInverseViewProjectionMatrix());
+    // Set screen size
+    directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// Render point light volumes into light buffer
-	while (query.hasNextDirectionalLight())
-	{
-		// Retrieve light id
-		SceneObjectId directionalLightId = query.getNextDirectionalLight();
-		// Retrieve light parameters
-		glm::vec3 direction;
-		glm::vec3 color;
-		float intensity;
+    // Inverse view-projection
+    directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                           m_transformer.getInverseViewProjectionMatrix());
+    
+    // Shadow ViewProjectionBias
+    glm::mat4 shadowViewProjBiasMatrix = glm::mat4(0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f,
+                                                   0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f) *
+                                         m_shadowCamera->getProjection() *
+                                         m_shadowCamera->getView();
+    directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
+                                           shadowViewProjBiasMatrix);
+    
+    // Render point light volumes into light buffer
+    while (query.hasNextDirectionalLight())
+    {
+        // Retrieve light id
+        SceneObjectId directionalLightId = query.getNextDirectionalLight();
+        // Retrieve light parameters
+        glm::vec3 direction;
+        glm::vec3 color;
+        float intensity;
 
-		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
-		{
-			LOG_ERROR("Failed to retrieve point light data from point light id %i.", directionalLightId);
-		}
-		else
-		{
-			// Set point light parameters for fragment shader
-			directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
-			directionalLightPassShader->setUniform(lightColorUniformName, color);
-			directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
-			ARenderer::draw(quadMesh);
-		}
-	}
+        if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
+        {
+            LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
+                      directionalLightId);
+        }
+        else
+        {
+            // Set point light parameters for fragment shader
+            directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
+            directionalLightPassShader->setUniform(lightColorUniformName, color);
+            directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
+            ARenderer::draw(quadMesh);
+        }
+    }
     return;
 }
 
@@ -564,6 +716,70 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     return true;
 }
 
+bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
+{
+    std::string shaderFile("data/shader/shadow_map_pass.ini");
+    m_shadowMapPassShaderId = manager->loadShader(shaderFile);
+
+    if (m_shadowMapPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
+        return false;
+    }
+    
+    // TODO remove this!!!
+    m_shadowColorTexture = std::make_shared<CTexture>();
+    m_shadowColorTexture->init(1200, 1200, GL_RGBA);
+    m_shadowNormalTexture = std::make_shared<CTexture>();
+    m_shadowNormalTexture->init(1200, 1200, GL_RGBA16F);
+
+    // Depth texture
+    m_shadowDepthTexture = std::make_shared<CTexture>();
+    m_shadowDepthTexture->init(1200, 1200, GL_DEPTH_COMPONENT24);
+
+    glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture->getId());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+
+    // Total 96 bit per pixel
+    m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
+    m_shadowMapBuffer.attach(m_shadowColorTexture, GL_COLOR_ATTACHMENT0);
+    m_shadowMapBuffer.attach(m_shadowNormalTexture, GL_COLOR_ATTACHMENT1);
+
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+
+    LOG_INFO("GBuffer state: %s.", m_shadowMapBuffer.getState().c_str());
+
+    // Reset framebuffer
+    m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+    return true;
+}
+
 bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
 {
     // Point light shader
@@ -632,5 +848,5 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
         return false;
     }
 
-	return true;
+    return true;
 }

@@ -38,6 +38,9 @@ class CDeferredRenderer : public ARenderer
     void geometryPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                       const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+    void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
+                       const IGraphicsResourceManager& manager, ISceneQuery& query);
+
     void lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                    const IGraphicsResourceManager& manager, ISceneQuery& query);
 
@@ -62,6 +65,11 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDirectionalLightPass(IResourceManager* manager);
 
+    /**
+     * \brief Initializes resources for shadow map pass
+     */
+    bool initShadowMapPass(IResourceManager* manager);
+
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager,
               CShaderProgram* shader);
@@ -80,7 +88,16 @@ class CDeferredRenderer : public ARenderer
         m_normalSpecularTexture; /**< Normal texture with specularity as alpha. */
     ResourceId m_geometryPassShaderId = -1;
 
-    // Light pass cpmmon resources
+    // Shadow map pass
+    CFrameBuffer m_shadowMapBuffer;
+    std::shared_ptr<CTexture> m_shadowDepthTexture = nullptr;
+    std::shared_ptr<CTexture> m_shadowColorTexture = nullptr;
+    std::shared_ptr<CTexture> m_shadowNormalTexture = nullptr;
+    ResourceId m_shadowMapPassShaderId = -1;
+    CShaderProgram* m_shadowMapPassShader = nullptr;
+    std::unique_ptr<ICamera> m_shadowCamera = nullptr;
+
+    // Light pass common resources
     // TODO Put into light pass class
     CFrameBuffer m_lightPassFrameBuffer; /**< Stores lit scene and depth. */
     std::shared_ptr<CTexture> m_lightPassTexture = nullptr;
