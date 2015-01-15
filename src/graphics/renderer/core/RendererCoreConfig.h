@@ -44,6 +44,7 @@ const std::string modelViewProjectionMatrixUniformName = "model_view_projection"
 
 // Light parameter uniform names
 const std::string lightPositionUniformName = "light_position";
+const std::string lightDirectionUniformName = "light_direction";
 const std::string lightRadiusUniformName = "light_radius";
 const std::string lightIntensityUniformName = "light_intensity";
 const std::string lightColorUniformName = "light_color";

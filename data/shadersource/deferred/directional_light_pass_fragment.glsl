@@ -74,7 +74,7 @@ void main(void)
 	float specular = temp.w;
 
 	// Lambertian factor based on surface normal
-	float lambert_factor = max(0.0, dot(surface_normal_world, light_direction));
+	float lambert_factor = max(0.0, dot(surface_normal_world, -light_direction));
 
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color * light_intensity;

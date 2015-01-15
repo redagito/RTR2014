@@ -330,13 +330,70 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
                                              const IGraphicsResourceManager& manager,
                                              ISceneQuery& query)
 {
-    // Directional light pass
-    // Reset culling
-    glCullFace(GL_BACK);
-
     // Restrieve shader
     CShaderProgram* directionalLightPassShader =
         manager.getShaderProgram(m_directionalLightPassShaderId);
+	if (directionalLightPassShader == nullptr)
+	{
+		LOG_ERROR("Shader program for directional light pass could not be retrieved.");
+		return;
+	}
+
+	// Retrieve fullscreen quad mesh
+	CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
+	if (quadMesh == nullptr)
+	{
+		LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
+		return;
+	}
+
+	// Reset culling
+	glCullFace(GL_BACK);
+
+	// Set shader active
+	directionalLightPassShader->setActive();
+
+	// Set textures for point light pass
+	// Set depth texture
+	m_depthTexture->setActive(lightPassDepthTextureUnit);
+	directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+
+	// Set texture with world space normal and specular power
+	m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+	directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
+		lightPassNormalSpecularTextureUnit);
+
+	// Set screen size
+	directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+	directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+	// Inverse view-projection
+	directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+		m_transformer.getInverseViewProjectionMatrix());
+
+	// Render point light volumes into light buffer
+	while (query.hasNextDirectionalLight())
+	{
+		// Retrieve light id
+		SceneObjectId directionalLightId = query.getNextDirectionalLight();
+		// Retrieve light parameters
+		glm::vec3 direction;
+		glm::vec3 color;
+		float intensity;
+
+		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
+		{
+			LOG_ERROR("Failed to retrieve point light data from point light id %i.", directionalLightId);
+		}
+		else
+		{
+			// Set point light parameters for fragment shader
+			directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
+			directionalLightPassShader->setUniform(lightColorUniformName, color);
+			directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
+			ARenderer::draw(quadMesh);
+		}
+	}
     return;
 }
 
