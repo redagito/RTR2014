@@ -65,6 +65,17 @@ void main(void)
 	vec2 normalized_screen_coordinates = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
 	// Calculate world position of affected fragment
 	vec3 fragment_world_position = getWorldPosition(normalized_screen_coordinates);
+	
+	// Hard coded world boundaries, hacky fix for skybox
+	// TODO REMOVE THIIIIIIS IT HUUURTS
+	if (fragment_world_position.x > 400.0 || fragment_world_position.x < -400.0 ||
+		fragment_world_position.y > 400.0 || fragment_world_position.z < -400.0 ||
+		fragment_world_position.z > 400.0 || fragment_world_position.z < -400.0)
+	{
+		light_data = vec4(1.0, 1.0, 1.0, 0.0);
+		return;
+	}
+
 	// Temp storage for single texture fetch
 	vec4 temp = texture(normal_specular_texture, normalized_screen_coordinates);
 
