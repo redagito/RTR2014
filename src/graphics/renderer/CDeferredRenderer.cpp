@@ -502,6 +502,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
                                            lightPassNormalSpecularTextureUnit);
 
+	// Set shadow texture for shadow mapping
     m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
     directionalLightPassShader->setUniform(shadowMapTextureUniformName,
                                            lightPassShadowMapTextureUnit);
@@ -758,7 +759,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
         return false;
     }
 
-    LOG_INFO("GBuffer state: %s.", m_shadowMapBuffer.getState().c_str());
+    LOG_INFO("Shadow map buffer state: %s.", m_shadowMapBuffer.getState().c_str());
 
     // Reset framebuffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);

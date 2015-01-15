@@ -18,6 +18,8 @@ uniform mat4 shadow_view_projection_bias;
 // Depth, normal and specularity
 uniform sampler2D depth_texture;
 uniform sampler2D normal_specular_texture;
+
+// Shadow texture for shadow mapping
 uniform sampler2DShadow shadow_map;
 
 vec3 getWorldPosition(vec2 uv)
@@ -77,10 +79,11 @@ void main(void)
 
 	// Lambertian factor based on surface normal
 	float lambert_factor = max(0.0, dot(surface_normal_world, -light_direction));
+	float bias = 0.005f;
 
     // apply shadow map
     vec4 shadow_coordinates = shadow_view_projection_bias * vec4(fragment_world_position, 1);
-    float visibility = texture(shadow_map, vec3(shadow_coordinates.xy, (shadow_coordinates.z)/shadow_coordinates.w));
+    float visibility = texture(shadow_map, vec3(shadow_coordinates.xy, (shadow_coordinates.z - bias) / shadow_coordinates.w));
 
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color * light_intensity;
