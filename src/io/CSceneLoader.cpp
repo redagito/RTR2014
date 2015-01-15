@@ -299,6 +299,16 @@ bool CSceneLoader::load(const Json::Value& node, const std::string& name, float&
 	return true;
 }
 
+bool CSceneLoader::load(const Json::Value& node, const std::string& name, bool& b)
+{
+	if (!deserialize(node[name], b))
+	{
+		LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+		return false;
+	}
+	return true;
+}
+
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, glm::vec3& vec)
 {
 	if (!deserialize(node[name], vec))

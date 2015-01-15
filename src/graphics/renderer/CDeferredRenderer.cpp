@@ -54,6 +54,13 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+    // Init directional light pass
+    if (!initDirectionalLightPass(manager))
+    {
+        LOG_ERROR("Failed to initialize directional light pass.");
+        return false;
+    }
+
     if (!m_screenQuadPass.init(manager))
     {
         LOG_ERROR("Failed to initialize screen quad pass.");
@@ -68,22 +75,60 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Draw init
     window.setActive();
 
-    // Geometry pass, uses gbuffer fbo
-    m_geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
+    // Query visible scene objects and lights
+    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
+    // Geometry pass fills gbuffer
+    geometryPass(scene, camera, window, manager, *query);
+
+    // Light pass fills lbuffer
+    lightPass(scene, camera, window, manager, *query);
+
+    // Final pass, creates lit scene from lbuffer and gbuffer
+    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
+                          m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
+                          nullptr, &manager);
+
+    // Post draw error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
+}
+
+CDeferredRenderer* CDeferredRenderer::create(IResourceManager* manager)
+{
+    CDeferredRenderer* renderer = new CDeferredRenderer;
+    if (!renderer->init(manager))
+    {
+        delete renderer;
+        renderer = nullptr;
+        LOG_ERROR("Failed to create deferred renderer, initialization failed.");
+    }
+    return renderer;
+}
+
+void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
+                                     const IWindow& window, const IGraphicsResourceManager& manager,
+                                     ISceneQuery& query)
+{
     // Set framebuffer
     m_geometryBuffer.setActive(GL_FRAMEBUFFER);
-	// Clear buffer
-	// TODO Should be retrieved as scene parameters
-	// Diffuse, glow
-	GLfloat diffuseGlow[] = { 0.f, 0.f, 0.f, 0.f };
-	GLfloat normalSpecular[] = { 0.5f, 0.5f, 1.f, 0.f };
-	glClearBufferfv(GL_COLOR, 0, diffuseGlow);
-	// Normal, specular
-	glClearBufferfv(GL_COLOR, 1, normalSpecular);
+    // Clear buffer
+    // TODO Should be retrieved as scene parameters
+    // Diffuse, glow
+    GLfloat diffuseGlow[] = {0.f, 0.f, 0.f, 0.f};
+    GLfloat normalSpecular[] = {0.5f, 0.5f, 1.f, 0.f};
+    glClearBufferfv(GL_COLOR, 0, diffuseGlow);
+    // Normal, specular
+    glClearBufferfv(GL_COLOR, 1, normalSpecular);
 
     // Clear
     glClear(GL_DEPTH_BUFFER_BIT);
+
+    // Geometry pass, uses gbuffer fbo
+    CShaderProgram* geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
 
     // Depth
     glEnable(GL_DEPTH_TEST);
@@ -100,26 +145,20 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     glViewport(0, 0, window.getWidth(), window.getHeight());
     m_geometryBuffer.resize(window.getWidth(), window.getHeight());
 
-    // Stores active transformations
-    CTransformer transformer;
-
     // Set view and projection matrices
-    transformer.setViewMatrix(camera.getView());
-    transformer.setProjectionMatrix(camera.getProjection());
-
-    // Query visible scene objects
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+    m_transformer.setViewMatrix(camera.getView());
+    m_transformer.setProjectionMatrix(camera.getProjection());
 
     // Send view/projection to default shader
-    m_geometryPassShader->setUniform(viewMatrixUniformName, transformer.getViewMatrix());
-    m_geometryPassShader->setUniform(projectionMatrixUniformName,
-                                     transformer.getProjectionMatrix());
+    geometryPassShader->setUniform(viewMatrixUniformName, m_transformer.getViewMatrix());
+    geometryPassShader->setUniform(projectionMatrixUniformName,
+                                   m_transformer.getProjectionMatrix());
 
     // Traverse visible objects
-    while (query->hasNextObject())
+    while (query.hasNextObject())
     {
         // Get next visible object
-        SceneObjectId id = query->getNextObject();
+        SceneObjectId id = query.getNextObject();
 
         // Object attributes
         ResourceId meshId = -1;
@@ -141,21 +180,20 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
             CMaterial* material = manager.getMaterial(materialId);
 
             // Set transformations
-            transformer.setPosition(position);
-            transformer.setRotation(rotation);
-            transformer.setScale(scale);
+            m_transformer.setPosition(position);
+            m_transformer.setRotation(rotation);
+            m_transformer.setScale(scale);
 
             if (material->hasCustomShader())
             {
                 // Custom shaders not supported
                 LOG_WARNING("Deferred renderer does not support custom material shaders.");
-                // return;
             }
             else
             {
                 // Forward draw call
-                draw(mesh, transformer.getTranslationMatrix(), transformer.getRotationMatrix(),
-                     transformer.getScaleMatrix(), material, manager);
+                draw(mesh, m_transformer.getTranslationMatrix(), m_transformer.getRotationMatrix(),
+                     m_transformer.getScaleMatrix(), material, manager, geometryPassShader);
             }
         }
     }
@@ -169,11 +207,51 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Disable geometry buffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
+}
 
-    // Perform light pass
+void CDeferredRenderer::lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
+                                  const IGraphicsResourceManager& manager, ISceneQuery& query)
+{
+    // Prepare light pass frame buffer
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+    // Resize
+    m_lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
+    // Enable light buffer
+    m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+    // Retrieve ambient light
+    glm::vec3 ambientColor;
+    float ambientIntensity;
+    scene.getAmbientLight(ambientColor, ambientIntensity);
+    // Initialize light buffer with ambient light
+    glClearColor(ambientColor.x * ambientIntensity, ambientColor.y * ambientIntensity,
+                 ambientColor.z * ambientIntensity, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // No depth testing for light volumes
+    glDisable(GL_DEPTH_TEST);
+    // Additive blending for light accumulation
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    // Draw point light volumes
+    pointLightPass(scene, camera, window, manager, query);
+
+    // Draw directional lights
+    directionalLightPass(scene, camera, window, manager, query);
+
+    // Reset state and cleanup
+    glDisable(GL_BLEND);
+    m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
+}
+
+void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camera,
+                                       const IWindow& window,
+                                       const IGraphicsResourceManager& manager, ISceneQuery& query)
+{
     // Point light pass
-    m_pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
-    if (m_pointLightPassShader == nullptr)
+    CShaderProgram* pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
+    if (pointLightPassShader == nullptr)
     {
         LOG_ERROR("Shader program for point light pass could not be retrieved.");
         return;
@@ -186,51 +264,32 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         return;
     }
 
-    // Resize
-    m_lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
-    // Enable light buffer
-    m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-
-    // Retrieve ambient light
-    glm::vec3 ambientColor;
-    float ambientIntensity;
-    scene.getAmbientLight(ambientColor, ambientIntensity);
-    glClearColor(ambientColor.x * ambientIntensity, ambientColor.y * ambientIntensity,
-                 ambientColor.z * ambientIntensity, 1.f);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // No depth testing for light volumes
-    glDisable(GL_DEPTH_TEST);
-    // Additive blending for light accumulation
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    // No culling
-    // glDisable(GL_CULL_FACE);
+    // Cull front facing faces
     glCullFace(GL_FRONT);
 
     // Set textures for point light pass
     // Set depth texture
     m_depthTexture->setActive(lightPassDepthTextureUnit);
-    m_pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+    pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
 
     // Set texture with world space normal and specular power
     m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
-    m_pointLightPassShader->setUniform(normalSpecularTextureUniformName,
-                                       lightPassNormalSpecularTextureUnit);
+    pointLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                     lightPassNormalSpecularTextureUnit);
 
     // Set screen size
-    m_pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-    m_pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
     // Inverse view-projection
-    m_pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
-                                       transformer.getInverseViewProjectionMatrix());
+    pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                     m_transformer.getInverseViewProjectionMatrix());
 
     // Render point light volumes into light buffer
-    while (query->hasNextPointLight())
+    while (query.hasNextPointLight())
     {
         // Retrieve light id
-        SceneObjectId pointLightId = query->getNextPointLight();
+        SceneObjectId pointLightId = query.getNextPointLight();
         // Retrieve light parameters
         glm::vec3 position;
         glm::vec3 color;
@@ -243,56 +302,47 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
         }
         else
         {
-            transformer.setPosition(position);
+            m_transformer.setPosition(position);
             // Scale is calculated from light radius
             // Sphere model has radius 1.f
-            transformer.setScale(glm::vec3(radius));
+            m_transformer.setScale(glm::vec3(radius));
             // Point lights do not have rotation
-            transformer.setRotation(glm::vec3(0.f));
+            m_transformer.setRotation(glm::vec3(0.f));
 
             // Light volume transformation for vertex shader
-            m_pointLightPassShader->setUniform(modelViewProjectionMatrixUniformName,
-                                               transformer.getModelViewProjectionMatrix());
+            pointLightPassShader->setUniform(modelViewProjectionMatrixUniformName,
+                                             m_transformer.getModelViewProjectionMatrix());
 
             // Set point light parameters for fragment shader
-            m_pointLightPassShader->setUniform(lightPositionUniformName, position);
-            m_pointLightPassShader->setUniform(lightRadiusUniformName, radius);
-            m_pointLightPassShader->setUniform(lightColorUniformName, color);
-            m_pointLightPassShader->setUniform(lightIntensityUniformName, intensity);
+            pointLightPassShader->setUniform(lightPositionUniformName, position);
+            pointLightPassShader->setUniform(lightRadiusUniformName, radius);
+            pointLightPassShader->setUniform(lightColorUniformName, color);
+            pointLightPassShader->setUniform(lightIntensityUniformName, intensity);
             ARenderer::draw(pointLightMesh);
         }
     }
-    glDisable(GL_BLEND);
-    m_lightPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
-    glCullFace(GL_BACK);
 
-    // Geometry pass end, gbuffer populated
-    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
-                          m_depthTexture.get(), transformer.getInverseViewProjectionMatrix(),
-                          nullptr, &manager);
-
-    // Post draw error check
-    if (hasGLError(error))
-    {
-        LOG_ERROR("GL Error: %s", error.c_str());
-    }
+    return;
 }
 
-CDeferredRenderer* CDeferredRenderer::create(IResourceManager* manager)
+void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera& camera,
+                                             const IWindow& window,
+                                             const IGraphicsResourceManager& manager,
+                                             ISceneQuery& query)
 {
-    CDeferredRenderer* renderer = new CDeferredRenderer;
-    if (!renderer->init(manager))
-    {
-        delete renderer;
-        renderer = nullptr;
-        LOG_ERROR("Failed to create deferred renderer, initialization failed.");
-    }
-    return renderer;
+    // Directional light pass
+    // Reset culling
+    glCullFace(GL_BACK);
+
+    // Restrieve shader
+    CShaderProgram* directionalLightPassShader =
+        manager.getShaderProgram(m_directionalLightPassShaderId);
+    return;
 }
 
 void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
                              const glm::mat4& scale, CMaterial* material,
-                             const IGraphicsResourceManager& manager)
+                             const IGraphicsResourceManager& manager, CShaderProgram* shader)
 {
     std::string error;
     if (hasGLError(error))
@@ -300,7 +350,6 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
         LOG_ERROR("GL Error: %s", error.c_str());
     }
 
-    CShaderProgram* shader = m_geometryPassShader;
     shader->setActive();
 
     if (hasGLError(error))
@@ -500,4 +549,31 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
     }
     m_lightPassFrameBuffer.attach(depthBuffer, GL_DEPTH_ATTACHMENT);
     return true;
+}
+
+bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
+{
+    // Uses same frame buffer as point light pass
+    // Directional light shader
+    std::string directionalLightPassShaderFile("data/shader/deferred_directional_light_pass.ini");
+    m_directionalLightPassShaderId = manager->loadShader(directionalLightPassShaderFile);
+
+    // Check if ok
+    if (m_directionalLightPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  directionalLightPassShaderFile.c_str());
+        return false;
+    }
+
+    // Load quad mesh for directional light representation
+    std::string quadMesh = "data/mesh/screen_quad.obj";
+    m_directionalLightScreenQuadId = manager->loadMesh(quadMesh);
+    if (m_directionalLightScreenQuadId == invalidResource)
+    {
+        LOG_ERROR("Failed to load point light volume mesh %s.", quadMesh.c_str());
+        return false;
+    }
+
+	return true;
 }

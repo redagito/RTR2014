@@ -39,6 +39,7 @@ class CSceneLoader
 	bool loadAmbientLight(const Json::Value& node, IScene& scene);
 
 	bool load(const Json::Value& node, const std::string& name, float& f);
+	bool load(const Json::Value& node, const std::string& name, bool& b);
 	bool load(const Json::Value& node, const std::string& name, glm::vec3& vec);
 	bool load(const Json::Value& node, const std::string& name, std::string& str);
 

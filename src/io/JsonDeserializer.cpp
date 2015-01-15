@@ -2,6 +2,22 @@
 
 #include "debug/Log.h"
 
+bool deserialize(const Json::Value& node, bool& b)
+{
+	if (node.empty())
+	{
+		LOG_ERROR("Node is empty.");
+		return false;
+	}
+	if (!node.isBool())
+	{
+		LOG_ERROR("Node data type is not boolean.");
+		return false;
+	}
+	b = node.asBool();
+	return true;
+}
+
 bool deserialize(const Json::Value& node, float& f)
 {
 	if (node.empty())

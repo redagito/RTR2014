@@ -151,12 +151,20 @@ ISceneQuery* CScene::createQuery(const ICamera& camera) const
     }
 
     // TODO Light culling
-    // For now add all lights
+    // For now add all point lights
     for (unsigned int i = 0; i < m_pointLights.size(); ++i)
     {
         // Counter variable is light id
         query->addPointLight(i);
     }
+
+	// TODO Directional light culling?
+	// For now add all directional lights
+	for (unsigned int i = 0; i < m_directionalLights.size(); ++i)
+	{
+		// Counter variable is light id
+		query->addDirectionalLight(i);
+	}
 
     // Return query
     return query;
