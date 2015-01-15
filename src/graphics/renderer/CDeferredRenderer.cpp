@@ -333,67 +333,68 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     // Restrieve shader
     CShaderProgram* directionalLightPassShader =
         manager.getShaderProgram(m_directionalLightPassShaderId);
-	if (directionalLightPassShader == nullptr)
-	{
-		LOG_ERROR("Shader program for directional light pass could not be retrieved.");
-		return;
-	}
+    if (directionalLightPassShader == nullptr)
+    {
+        LOG_ERROR("Shader program for directional light pass could not be retrieved.");
+        return;
+    }
 
-	// Retrieve fullscreen quad mesh
-	CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
-		return;
-	}
+    // Retrieve fullscreen quad mesh
+    CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
+        return;
+    }
 
-	// Reset culling
-	glCullFace(GL_BACK);
+    // Reset culling
+    glCullFace(GL_BACK);
 
-	// Set shader active
-	directionalLightPassShader->setActive();
+    // Set shader active
+    directionalLightPassShader->setActive();
 
-	// Set textures for point light pass
-	// Set depth texture
-	m_depthTexture->setActive(lightPassDepthTextureUnit);
-	directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+    // Set textures for point light pass
+    // Set depth texture
+    m_depthTexture->setActive(lightPassDepthTextureUnit);
+    directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
 
-	// Set texture with world space normal and specular power
-	m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
-	directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
-		lightPassNormalSpecularTextureUnit);
+    // Set texture with world space normal and specular power
+    m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+    directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                           lightPassNormalSpecularTextureUnit);
 
-	// Set screen size
-	directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    // Set screen size
+    directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// Inverse view-projection
-	directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
-		m_transformer.getInverseViewProjectionMatrix());
+    // Inverse view-projection
+    directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                           m_transformer.getInverseViewProjectionMatrix());
 
-	// Render point light volumes into light buffer
-	while (query.hasNextDirectionalLight())
-	{
-		// Retrieve light id
-		SceneObjectId directionalLightId = query.getNextDirectionalLight();
-		// Retrieve light parameters
-		glm::vec3 direction;
-		glm::vec3 color;
-		float intensity;
+    // Render point light volumes into light buffer
+    while (query.hasNextDirectionalLight())
+    {
+        // Retrieve light id
+        SceneObjectId directionalLightId = query.getNextDirectionalLight();
+        // Retrieve light parameters
+        glm::vec3 direction;
+        glm::vec3 color;
+        float intensity;
 
-		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
-		{
-			LOG_ERROR("Failed to retrieve point light data from point light id %i.", directionalLightId);
-		}
-		else
-		{
-			// Set point light parameters for fragment shader
-			directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
-			directionalLightPassShader->setUniform(lightColorUniformName, color);
-			directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
-			ARenderer::draw(quadMesh);
-		}
-	}
+        if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
+        {
+            LOG_ERROR("Failed to retrieve point light data from point light id %i.",
+                      directionalLightId);
+        }
+        else
+        {
+            // Set point light parameters for fragment shader
+            directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
+            directionalLightPassShader->setUniform(lightColorUniformName, color);
+            directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
+            ARenderer::draw(quadMesh);
+        }
+    }
     return;
 }
 
@@ -628,9 +629,75 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
     m_directionalLightScreenQuadId = manager->loadMesh(quadMesh);
     if (m_directionalLightScreenQuadId == invalidResource)
     {
-        LOG_ERROR("Failed to load point light volume mesh %s.", quadMesh.c_str());
+        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
         return false;
     }
 
-	return true;
+    return true;
+}
+
+bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
+{
+    // Gauss blur shader
+	// Horizontal blur
+    std::string gaussBlurHorizontalShaderFile = "data/shader/post/gauss_blur_horizontal.ini";
+    m_gaussBlurHorizontalShaderId = manager->loadShader(gaussBlurHorizontalShaderFile);
+    // Check if ok
+    if (m_gaussBlurHorizontalShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  gaussBlurHorizontalShaderFile.c_str());
+        return false;
+    }
+
+	// Vertical blur
+    std::string gaussBlurVerticalShaderFile = "data/shader/post/gauss_blur_vertical.ini";
+    m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurVerticalShaderFile);
+    // Check if ok
+    if (m_gaussBlurVerticalShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  gaussBlurVerticalShaderFile.c_str());
+        return false;
+    }
+
+	// Screen quad mesh
+	std::string quadMesh = "data/mesh/screen_quad.obj";
+	m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
+	if (m_directionalLightScreenQuadId == invalidResource)
+	{
+		LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+		return false;
+	}
+
+    // Init post processing fbo
+    m_postProcessPassTexture = std::make_shared<CTexture>();
+	if (!m_postProcessPassTexture->init(800, 600, GL_RGBA))
+	{
+		LOG_ERROR("failed to initialize post process pass texture.");
+		return false;
+	}
+	m_postProcessPassFrameBuffer.attach(m_postProcessPassTexture, GL_COLOR_ATTACHMENT0);
+    // TODO Depth attachment required?
+
+    if (!initDepthOfFieldPass(manager))
+    {
+        LOG_ERROR("Failed to initialize depth of field pass.");
+        return false;
+    }
+    return true;
+}
+
+bool CDeferredRenderer::initDepthOfFieldPass(IResourceManager* manager)
+{
+    // Depth of field shader
+    std::string depthOfFieldShaderFile = "data/shader/post/depth_of_field_pass.ini";
+    m_depthOfFieldPassShaderId = manager->loadShader(depthOfFieldShaderFile);
+    // Check if ok
+    if (m_depthOfFieldPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
