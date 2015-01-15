@@ -35,6 +35,8 @@
 
 #include "CCameraController.h"
 
+#include "animation/IAnimationController.h"
+
 RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo() {}
@@ -177,6 +179,9 @@ int RTRDemo::run()
             m_debugInfoDisplay->draw(*m_debugInfo.get());
         }
 
+		// Perform animation update
+		updateAnimation((float) timeDiff);
+
         m_window->swapBuffer();
 
         // Update input
@@ -298,11 +303,19 @@ bool RTRDemo::initScene()
     // Get startup scene from config
     std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test_1.json");
     LOG_INFO("Loading initial scene from file %s.", sceneFile.c_str());
-    if (!loader.load(sceneFile, *m_scene))
+    if (!loader.load(sceneFile, *m_scene, m_animationController))
     {
         LOG_ERROR("Failed to load scene file %s.", sceneFile.c_str());
         m_scene = nullptr;
         return false;
     }
     return true;
+}
+
+void RTRDemo::updateAnimation(float timeDiff)
+{
+	for (auto controller : m_animationController)
+	{
+		controller->update(timeDiff);
+	}
 }

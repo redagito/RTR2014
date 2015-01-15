@@ -12,12 +12,14 @@
 
 #include "debug/Log.h"
 
+#include "animation/CRotationController.h"
+
 CSceneLoader::CSceneLoader(IResourceManager& resourceManager) : m_resourceManager(resourceManager)
 {
     return;
 }
 
-bool CSceneLoader::load(const std::string& file, IScene& scene)
+bool CSceneLoader::load(const std::string& file, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
     Json::Reader reader;
     Json::Value root;
@@ -41,21 +43,21 @@ bool CSceneLoader::load(const std::string& file, IScene& scene)
     ifs.close();
 
     // Load scene objects
-    if (!loadSceneObjects(root["scene_objects"], scene))
+	if (!loadSceneObjects(root["scene_objects"], scene, controllers))
     {
         LOG_ERROR("Error while loading scene objects from scene file %s.", file.c_str());
         return false;
     }
 
     // Load point lights
-    if (!loadPointLights(root["point_lights"], scene))
+    if (!loadPointLights(root["point_lights"], scene, controllers))
     {
         LOG_ERROR("Error while loading point lights from scene file %s.", file.c_str());
         return false;
     }
 
 	// Load directional lights
-	if (!loadDirectionalLights(root["directional_lights"], scene))
+	if (!loadDirectionalLights(root["directional_lights"], scene, controllers))
 	{
 		LOG_ERROR("Error while loading ambient light from scene file &s.", file.c_str());
 		return false;
@@ -71,7 +73,7 @@ bool CSceneLoader::load(const std::string& file, IScene& scene)
     return true;
 }
 
-bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
     // Node empty?
     if (node.empty())
@@ -90,7 +92,7 @@ bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene)
     // Load scene objects
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadSceneObject(node[i], scene))
+		if (!loadSceneObject(node[i], scene, controllers))
         {
             return false;
         }
@@ -98,7 +100,7 @@ bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene)
     return true;
 }
 
-bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
 	std::string mesh;
 	std::string material;
@@ -148,11 +150,19 @@ bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene)
     }
 
     // Create object in scene
-    scene.createObject(meshId, materialId, position, rotation, scale);
+    SceneObjectId objectId = scene.createObject(meshId, materialId, position, rotation, scale);
+
+	// Load optional animation controllers
+	if (!loadAnimationControllers(node["animations"], scene, controllers, objectId, AnimationObjectType::Model))
+	{
+		LOG_ERROR("Failed to load animation controller.");
+		return false;
+	}
+
     return true;
 }
 
-bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
     // Node empty?
     if (node.empty())
@@ -171,7 +181,7 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene)
     // Load scene point lights
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadPointLight(node[i], scene))
+		if (!loadPointLight(node[i], scene, controllers))
         {
             return false;
         }
@@ -179,7 +189,7 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene)
     return true;
 }
 
-bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
 	glm::vec3 position;
 	glm::vec3 color;
@@ -211,7 +221,7 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene)
     return true;
 }
 
-bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
 	// Node empty?
 	if (node.empty())
@@ -230,7 +240,7 @@ bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene)
 	// Load scene directional lights
 	for (unsigned int i = 0; i < node.size(); ++i)
 	{
-		if (!loadDirectionalLight(node[i], scene))
+		if (!loadDirectionalLight(node[i], scene, controllers))
 		{
 			return false;
 		}
@@ -238,7 +248,7 @@ bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene)
 	return true;
 }
 
-bool CSceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene)
+bool CSceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene, std::vector<std::shared_ptr<IAnimationController>>& controllers)
 {
 	glm::vec3 direction;
 	glm::vec3 color;
@@ -286,6 +296,60 @@ bool CSceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
 	}
 
 	scene.setAmbientLight(color, intensity);
+	return true;
+}
+
+bool CSceneLoader::loadAnimationControllers(const Json::Value& node, IScene& scene,
+	std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id, AnimationObjectType type)
+{
+	if (node.empty())
+	{
+		LOG_INFO("Missing or empty 'animations' node. No animation controllers where loaded.");
+		return true;
+	}
+
+	// Node is array type
+	if (!node.isArray())
+	{
+		LOG_ERROR("The node 'animations' must be array type.");
+		return false;
+	}
+
+	// Load animation controllers for object
+	for (unsigned int i = 0; i < node.size(); ++i)
+	{
+		if (!loadAnimationController(node[i], scene, controllers, id, type))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CSceneLoader::loadAnimationController(const Json::Value& node, IScene& scene,
+	std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id, AnimationObjectType type)
+{
+	std::string controllerType;
+	if (!load(node, "type", controllerType))
+	{
+		return false;
+	}
+	// 
+	if (controllerType == "rotation")
+	{
+		glm::vec3 rotation;
+		if (!load(node, "rotation", rotation))
+		{
+			return false;
+		}
+		controllers.push_back(std::make_shared<CRotationController>(id, type, scene, rotation));
+	}
+	else
+	{
+		// Unknown controller type
+		return false;
+	}
+
 	return true;
 }
 

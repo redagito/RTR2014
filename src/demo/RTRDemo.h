@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "io/CIniFile.h"
 
@@ -16,6 +17,7 @@ class IScene;
 class IControllableCamera;
 class CCameraController;
 class IGraphicsResourceManager;
+class IAnimationController;
 
 class CDebugInfo;
 class CDebugInfoDisplay;
@@ -34,6 +36,8 @@ class RTRDemo
     bool initRenderer();
     bool initScene();
 
+	void updateAnimation(float timeDiff);
+
     CIniFile m_config;
 
     std::shared_ptr<IResourceManager> m_resourceManager =
@@ -51,4 +55,7 @@ class RTRDemo
     std::shared_ptr<CDebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
     std::shared_ptr<CDebugInfoDisplay> m_debugInfoDisplay =
         nullptr; /**< Debug information renderer. */
+
+	// Animation
+	std::vector<std::shared_ptr<IAnimationController>> m_animationController;
 };
