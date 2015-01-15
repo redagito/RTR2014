@@ -123,6 +123,8 @@ int RTRDemo::run()
 
     bool displayDebugInfo = false;
 
+    m_window->toggleMouseCapture();
+    
     do
     {
         double startTime = glfwGetTime();

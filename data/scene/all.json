@@ -13,6 +13,48 @@
         	"position": [0, 0, 0],
         	"rotation" :  [ 0, 0, 0 ],
             "scale" :  [ 500, 500, 500 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [0, 15, 0],
+        	"rotation" :  [ 1.57, 0, 0 ],
+            "scale" :  [ 5, 5, 5 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [20, 15, 0],
+        	"rotation" :  [ 1.57, 0, 1 ],
+            "scale" :  [ 5, 5, 5 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-20, 15, 0],
+        	"rotation" :  [ 1.57, 0, 2 ],
+            "scale" :  [ 5, 5, 5 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [0, 15, 30],
+        	"rotation" :  [ 1.57, 0, 0 ],
+            "scale" :  [ 5, 5, 5 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [20, 15, -10],
+        	"rotation" :  [ 1.57, 0, 1 ],
+            "scale" :  [ 5, 5, 5 ]
+        },
+        {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-20, 15, 15],
+        	"rotation" :  [ 1.57, 0, 2 ],
+            "scale" :  [ 5, 5, 5 ]
         }
     ],
     "point_lights" :  [
