@@ -106,8 +106,6 @@ class CDeferredRenderer : public ARenderer
     // Shadow map pass
     CFrameBuffer m_shadowMapBuffer;
     std::shared_ptr<CTexture> m_shadowDepthTexture = nullptr;
-    std::shared_ptr<CTexture> m_shadowColorTexture = nullptr;
-    std::shared_ptr<CTexture> m_shadowNormalTexture = nullptr;
     ResourceId m_shadowMapPassShaderId = -1;
     CShaderProgram* m_shadowMapPassShader = nullptr;
     std::unique_ptr<ICamera> m_shadowCamera = nullptr;

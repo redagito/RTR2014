@@ -15,18 +15,8 @@ uniform mat4 scale;
 uniform mat4 view;
 uniform mat4 projection;
 
-// Texture coordinate
-out vec2 uv;
-// Nornal vector
-smooth out vec3 normalVectorWorldSpace;
-
 void main(void)
 {
     // Calculate vertex position in camera space
     gl_Position = projection * view * model * vec4(vertexPositionModelSpace, 1.f);
-    
-    // Forward texture coordinates
-    uv = vertexUV;
-    
-    normalVectorWorldSpace = normalize(rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
 }

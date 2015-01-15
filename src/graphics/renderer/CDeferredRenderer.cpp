@@ -726,12 +726,6 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
         LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
         return false;
     }
-    
-    // TODO remove this!!!
-    m_shadowColorTexture = std::make_shared<CTexture>();
-    m_shadowColorTexture->init(1200, 1200, GL_RGBA);
-    m_shadowNormalTexture = std::make_shared<CTexture>();
-    m_shadowNormalTexture->init(1200, 1200, GL_RGBA16F);
 
     // Depth texture
     m_shadowDepthTexture = std::make_shared<CTexture>();
@@ -756,8 +750,6 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
 
     // Total 96 bit per pixel
     m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
-    m_shadowMapBuffer.attach(m_shadowColorTexture, GL_COLOR_ATTACHMENT0);
-    m_shadowMapBuffer.attach(m_shadowNormalTexture, GL_COLOR_ATTACHMENT1);
 
     // Error check
     if (hasGLError(error))
