@@ -86,4 +86,11 @@ void main(void)
     vec3 light = texture(light_texture, uv).rgb;
     fragmentColor = diffuseColor * max(glow, light);
 	fragmentColor = filmicTonemap(fragmentColor);
+    
+    // TODO remove this
+    //float n = 1.0f;
+    //float f = 50.0f;
+    //float depth = texture(depth_texture, uv).x;
+    //depth = (2.0 * n) / (f + n - depth * (f-n));
+    //fragmentColor = vec3(depth, depth, depth);
 }

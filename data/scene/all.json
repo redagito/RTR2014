@@ -125,16 +125,15 @@
             "intensity" : 3
         }
     ],
-    "ambient_light" : {
-        "color" : [ 1, 1, 1 ],
-        "intensity" : 0.01
-    },
-    "directional_lights": [
+    "directional_lights" : [
         {
-            "direction" :  [ 0.2, -1, 0 ],
-            "color" : [ 1, 1, 0.8 ],
+            "direction" :  [ -1, -1, -1 ],
+            "color" :  [ 1, 1, 1 ],
             "intensity" : 2
         }
-    ]
-
+    ],
+    "ambient_light" : {
+        "color" : [ 1, 1, 0 ],
+        "intensity" : 0.1
+    }
 }

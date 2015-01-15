@@ -13,10 +13,12 @@ uniform float screen_height;
 
 // Transforms to world coords
 uniform mat4 inverse_view_projection;
+uniform mat4 shadow_view_projection_bias;
 
 // Depth, normal and specularity
 uniform sampler2D depth_texture;
 uniform sampler2D normal_specular_texture;
+uniform sampler2DShadow shadow_map;
 
 vec3 getWorldPosition(vec2 uv)
 {
@@ -76,7 +78,13 @@ void main(void)
 	// Lambertian factor based on surface normal
 	float lambert_factor = max(0.0, dot(surface_normal_world, -light_direction));
 
+    // apply shadow map
+    vec4 shadow_coordinates = shadow_view_projection_bias * vec4(fragment_world_position, 1);
+    float visibility = texture(shadow_map, vec3(shadow_coordinates.xy, (shadow_coordinates.z)/shadow_coordinates.w));
+
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color * light_intensity;
-	light_data = vec4(diffuse_light, 0.0);
+    light_data = vec4(diffuse_light, 0.0) * visibility;
+    
+    //light_data = vec4((shadow_coordinates.z)/shadow_coordinates.w, (shadow_coordinates.z)/shadow_coordinates.w, (shadow_coordinates.z)/shadow_coordinates.w, 0.0f);
 }
