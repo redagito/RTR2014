@@ -128,12 +128,12 @@
     "directional_lights" : [
         {
             "direction" :  [ -1, -1, -1 ],
-            "color" :  [ 1, 1, 1 ],
+            "color" :  [ 1, 0.9, 0.6 ],
             "intensity" : 2
         }
     ],
     "ambient_light" : {
-        "color" : [ 1, 1, 0 ],
-        "intensity" : 0.1
+        "color" : [ 1, 0.8, 0 ],
+        "intensity" : 0.3
     }
 }

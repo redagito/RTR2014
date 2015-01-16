@@ -39,7 +39,7 @@ class CDeferredRenderer : public ARenderer
                       const IGraphicsResourceManager& manager, ISceneQuery& query);
 
     void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                       const IGraphicsResourceManager& manager, ISceneQuery& query);
+                       const IGraphicsResourceManager& manager);
 
     void lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                    const IGraphicsResourceManager& manager, ISceneQuery& query);
@@ -108,7 +108,6 @@ class CDeferredRenderer : public ARenderer
     std::shared_ptr<CTexture> m_shadowDepthTexture = nullptr;
     ResourceId m_shadowMapPassShaderId = -1;
     CShaderProgram* m_shadowMapPassShader = nullptr;
-    std::unique_ptr<ICamera> m_shadowCamera = nullptr;
 
     // Light pass common resources
     // TODO Put into light pass class
@@ -122,7 +121,6 @@ class CDeferredRenderer : public ARenderer
     // Directional light pass
     ResourceId m_directionalLightPassShaderId = -1;
     ResourceId m_directionalLightScreenQuadId = -1;
-
 
 	// Post processing pass
 	ResourceId m_postProcessScreenQuadId = -1;

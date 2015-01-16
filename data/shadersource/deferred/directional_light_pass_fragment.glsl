@@ -99,6 +99,4 @@ void main(void)
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color * light_intensity;
     light_data = vec4(diffuse_light, 0.0) * visibility;
-    
-    //light_data = vec4((shadow_coordinates.z)/shadow_coordinates.w, (shadow_coordinates.z)/shadow_coordinates.w, (shadow_coordinates.z)/shadow_coordinates.w, 0.0f);
 }
