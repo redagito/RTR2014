@@ -76,6 +76,23 @@ vec3 gammaCorrection(vec3 color)
 	return color;
 }
 
+vec3 applyFog(vec3 color)
+{
+    float n = 0.01f;
+    float f = 1000.0f;
+    float d = texture(depth_texture, uv).x;
+    float z = (2.0 * n * f) / (f + n - d * (f-n));
+    
+    float fogN = 0.0f;
+    float fogF = 50.0f;
+    float fogD = 0.04f;
+    
+    float fogFactor = exp(-fogD*z);
+    //float fogFactor = (fogF - z) / (fogF - fogN);
+    
+    return mix(color, vec3(0.7, 0.5, 0.3), 1.0f - clamp(fogFactor, 0.1f, 1.0f));
+}
+
 void main(void)
 {
     
@@ -87,10 +104,5 @@ void main(void)
     fragmentColor = diffuseColor * max(glow, light);
 	fragmentColor = filmicTonemap(fragmentColor);
     
-    // TODO remove this
-    //float n = 1.0f;
-    //float f = 50.0f;
-    //float depth = texture(depth_texture, uv).x;
-    //depth = (2.0 * n) / (f + n - depth * (f-n));
-    //fragmentColor = vec3(depth, depth, depth);
+    fragmentColor = applyFog(fragmentColor);
 }

@@ -104,8 +104,6 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Geometry pass fills gbuffer
     geometryPass(scene, camera, window, manager, *query);
 
-    shadowMapPass(scene, camera, window, manager, *query);
-
     // Light pass fills lbuffer
     lightPass(scene, camera, window, manager, *query);
 
@@ -256,10 +254,9 @@ class StaticCamera : public ICamera
     glm::mat4 m_proj;
 };
 
-void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*camera*/,
+void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
                                       const IWindow& window,
-                                      const IGraphicsResourceManager& manager,
-                                      ISceneQuery& /*query*/)
+                                      const IGraphicsResourceManager& manager)
 {
     m_shadowMapPassShader = manager.getShaderProgram(m_shadowMapPassShaderId);
 
@@ -300,13 +297,11 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*came
     // glm::mat4 proj = glm::perspective(45.0f, 4.0f/3.0f, 0.01f, 1000.0f);
 
     // Set view and projection matrices
-    transformer.setViewMatrix(view);
-    transformer.setProjectionMatrix(proj);
-
-    m_shadowCamera.reset(new StaticCamera(view, proj));
+    transformer.setViewMatrix(camera.getView());
+    transformer.setProjectionMatrix(camera.getProjection());
 
     // Query visible scene objects
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(*m_shadowCamera)));
+    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Send view/projection to default shader
     m_shadowMapPassShader->setUniform(viewMatrixUniformName, transformer.getViewMatrix());
@@ -560,6 +555,63 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         }
         else
         {
+            glm::mat4 shadowView =
+                glm::lookAt(glm::normalize(-direction), glm::vec3(0.0f, 0.0f, 0.0f),
+                            glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
+            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj);
+            shadowMapPass(scene, shadowCamera, window, manager);
+
+            // Prepare light pass frame buffer
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+            // No depth testing for light volumes
+            glDisable(GL_DEPTH_TEST);
+            // Additive blending for light accumulation
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+
+            // Reset culling
+            glCullFace(GL_BACK);
+
+            // Set shader active
+            directionalLightPassShader->setActive();
+
+            // Set textures for point light pass
+            // Set depth texture
+            m_depthTexture->setActive(lightPassDepthTextureUnit);
+            directionalLightPassShader->setUniform(depthTextureUniformName,
+                                                   lightPassDepthTextureUnit);
+
+            // Set texture with world space normal and specular power
+            m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+            directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                                   lightPassNormalSpecularTextureUnit);
+
+            // Set shadow texture for shadow mapping
+            m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
+            directionalLightPassShader->setUniform(shadowMapTextureUniformName,
+                                                   lightPassShadowMapTextureUnit);
+
+            // Set screen size
+            directionalLightPassShader->setUniform(screenWidthUniformName,
+                                                   (float)window.getWidth());
+            directionalLightPassShader->setUniform(screenHeightUniformName,
+                                                   (float)window.getHeight());
+
+            // Inverse view-projection
+            directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                                   m_transformer.getInverseViewProjectionMatrix());
+
+            // Shadow ViewProjectionBias
+            glm::mat4 shadowViewProjBiasMatrix =
+                glm::mat4(0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f,
+                          0.5f, 0.5f, 0.5f, 1.0f) *
+                shadowProj * shadowView;
+            directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
+                                                   shadowViewProjBiasMatrix);
+
             // Set point light parameters for fragment shader
             directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
             directionalLightPassShader->setUniform(lightColorUniformName, color);

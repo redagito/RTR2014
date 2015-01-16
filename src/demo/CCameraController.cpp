@@ -44,7 +44,7 @@ void CCameraController::animate(float dt)
     {
         float walkingModifier = 1.0f;
         if (m_inputProvider->isKeyPressed(GLFW_KEY_SPACE)) {
-            walkingModifier = 4.0f;
+            walkingModifier = 6.0f;
         }
         
         if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
