@@ -1,4 +1,4 @@
-version 330 core
+#version 330 core
 
 // Screen parameters
 uniform float screen_width;
@@ -8,7 +8,7 @@ uniform float screen_height;
 // Set to 1 for normal blur
 uniform float blur_strength;
 
-// Input textue
+// Input textur
 uniform sampler2D texture0;
 
 // Output to texture at location 0

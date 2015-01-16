@@ -47,6 +47,8 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+    // Shadow mapping
+    // TODO Should be done in directional light pass
     if (!initShadowMapPass(manager))
     {
         LOG_ERROR("Failed to intialize shadow map pass.");
@@ -64,6 +66,21 @@ bool CDeferredRenderer::init(IResourceManager* manager)
     if (!initDirectionalLightPass(manager))
     {
         LOG_ERROR("Failed to initialize directional light pass.");
+        return false;
+    }
+
+    // Init illumination pass
+    if (!initIlluminationPass(manager))
+    {
+        LOG_ERROR("Failed to initialize illumination pass.");
+        return false;
+    }
+
+    // Post process
+    // TODO Dediacted post processor?
+    if (!initPostProcessPass(manager))
+    {
+        LOG_ERROR("Failed to initialize post processing pass.");
         return false;
     }
 
@@ -91,6 +108,9 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
 
     // Light pass fills lbuffer
     lightPass(scene, camera, window, manager, *query);
+
+    // Illumination pass renders lit scene from lbuffer and gbuffer
+    illuminationPass(scene, camera, window, manager, *query);
 
     // Final pass, creates lit scene from lbuffer and gbuffer
     m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
@@ -251,7 +271,7 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*came
     glClearBufferfv(GL_COLOR, 0, diffuseGlow);
     // Normal, specular
     glClearBufferfv(GL_COLOR, 1, normalSpecular);
-    
+
     // Clear
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -277,8 +297,8 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*came
     glm::mat4 view = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                                  glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 proj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-    //glm::mat4 proj = glm::perspective(45.0f, 4.0f/3.0f, 0.01f, 1000.0f);
-    
+    // glm::mat4 proj = glm::perspective(45.0f, 4.0f/3.0f, 0.01f, 1000.0f);
+
     // Set view and projection matrices
     transformer.setViewMatrix(view);
     transformer.setProjectionMatrix(proj);
@@ -336,14 +356,14 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& /*came
             }
         }
     }
-    
+
     // Post draw error check
     std::string error;
     if (hasGLError(error))
     {
         LOG_ERROR("GL Error: %s", error.c_str());
     }
-    
+
     // Disable geometry buffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
 }
@@ -502,7 +522,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
                                            lightPassNormalSpecularTextureUnit);
 
-	// Set shadow texture for shadow mapping
+    // Set shadow texture for shadow mapping
     m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
     directionalLightPassShader->setUniform(shadowMapTextureUniformName,
                                            lightPassShadowMapTextureUnit);
@@ -514,7 +534,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     // Inverse view-projection
     directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
                                            m_transformer.getInverseViewProjectionMatrix());
-    
+
     // Shadow ViewProjectionBias
     glm::mat4 shadowViewProjBiasMatrix = glm::mat4(0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f,
                                                    0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f) *
@@ -522,7 +542,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
                                          m_shadowCamera->getView();
     directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
                                            shadowViewProjBiasMatrix);
-    
+
     // Render point light volumes into light buffer
     while (query.hasNextDirectionalLight())
     {
@@ -548,6 +568,28 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         }
     }
     return;
+}
+
+void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& camera,
+                                         const IWindow& window,
+                                         const IGraphicsResourceManager& manager,
+                                         ISceneQuery& query)
+{
+    CShaderProgram* illuminationShader = manager.getShaderProgram(m_illuminationPassShaderId);
+    if (illuminationShader == nullptr)
+    {
+        LOG_ERROR("Shader program for illumination pass could not be retrieved.");
+        return;
+    }
+
+    // TODO
+}
+
+void CDeferredRenderer::postProcessPass(const IScene& scene, const ICamera& camera,
+                                        const IWindow& window,
+                                        const IGraphicsResourceManager& manager, ISceneQuery& query)
+{
+    // TODO
 }
 
 void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
@@ -660,7 +702,7 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     // Init geometry pass shader
     // TODO Read file name from config?
     // Geometry pass shader for filling gbuffer
-    std::string geometryPassShaderFile("data/shader/deferred_geometry_pass.ini");
+    std::string geometryPassShaderFile("data/shader/deferred/geometry_pass.ini");
     m_geometryPassShaderId = manager->loadShader(geometryPassShaderFile);
 
     // Check if ok
@@ -740,7 +782,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, 0);
-    
+
     // Error check
     std::string error;
     if (hasGLError(error))
@@ -776,7 +818,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
 bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
 {
     // Point light shader
-    std::string pointLightPassShaderFile("data/shader/deferred_point_light_pass.ini");
+    std::string pointLightPassShaderFile("data/shader/deferred/point_light_pass.ini");
     m_pointLightPassShaderId = manager->loadShader(pointLightPassShaderFile);
 
     // Check if ok
@@ -821,7 +863,7 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
 {
     // Uses same frame buffer as point light pass
     // Directional light shader
-    std::string directionalLightPassShaderFile("data/shader/deferred_directional_light_pass.ini");
+    std::string directionalLightPassShaderFile("data/shader/deferred/directional_light_pass.ini");
     m_directionalLightPassShaderId = manager->loadShader(directionalLightPassShaderFile);
 
     // Check if ok
@@ -844,10 +886,47 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
     return true;
 }
 
+bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
+{
+    // Load illumination shader
+    std::string illuminationPassShaderFile = "data/shader/deferred/illumination_pass.ini";
+    m_illuminationPassShaderId = manager->loadShader(illuminationPassShaderFile);
+    // Check if ok
+    if (m_illuminationPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  illuminationPassShaderFile.c_str());
+        return false;
+    }
+
+    // Screen quad mesh
+    std::string quadMesh = "data/mesh/screen_quad.obj";
+    m_illuminationPassScreenQuadId = manager->loadMesh(quadMesh);
+    // Check if ok
+    if (m_illuminationPassScreenQuadId == invalidResource)
+    {
+        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+        return false;
+    }
+
+    // FBO
+    m_illuminationPassTexture = std::make_shared<CTexture>();
+    if (!m_illuminationPassTexture->init(800, 600, GL_RGB16F))
+    {
+        LOG_ERROR("Failed to initialize illumination pass texture.");
+        return false;
+    }
+    m_illimationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
+
+    // TODO Check FBO
+
+    return true;
+}
+
 bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 {
     // Gauss blur shader
-	// Horizontal blur
+    // Horizontal blur
     std::string gaussBlurHorizontalShaderFile = "data/shader/post/gauss_blur_horizontal.ini";
     m_gaussBlurHorizontalShaderId = manager->loadShader(gaussBlurHorizontalShaderFile);
     // Check if ok
@@ -858,7 +937,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-	// Vertical blur
+    // Vertical blur
     std::string gaussBlurVerticalShaderFile = "data/shader/post/gauss_blur_vertical.ini";
     m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurVerticalShaderFile);
     // Check if ok
@@ -869,23 +948,23 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-	// Screen quad mesh
-	std::string quadMesh = "data/mesh/screen_quad.obj";
-	m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
-	if (m_directionalLightScreenQuadId == invalidResource)
-	{
-		LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
-		return false;
-	}
+    // Screen quad mesh
+    std::string quadMesh = "data/mesh/screen_quad.obj";
+    m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
+    if (m_directionalLightScreenQuadId == invalidResource)
+    {
+        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+        return false;
+    }
 
     // Init post processing fbo
     m_postProcessPassTexture = std::make_shared<CTexture>();
-	if (!m_postProcessPassTexture->init(800, 600, GL_RGBA))
-	{
-		LOG_ERROR("failed to initialize post process pass texture.");
-		return false;
-	}
-	m_postProcessPassFrameBuffer.attach(m_postProcessPassTexture, GL_COLOR_ATTACHMENT0);
+    if (!m_postProcessPassTexture->init(800, 600, GL_RGBA))
+    {
+        LOG_ERROR("Failed to initialize post process pass texture.");
+        return false;
+    }
+    m_postProcessPassFrameBuffer.attach(m_postProcessPassTexture, GL_COLOR_ATTACHMENT0);
     // TODO Depth attachment required?
 
     if (!initDepthOfFieldPass(manager))

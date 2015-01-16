@@ -50,6 +50,9 @@ class CDeferredRenderer : public ARenderer
     void directionalLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                               const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+    void illuminationPass(const IScene& scene, const ICamera& camera, const IWindow& window,
+                          const IGraphicsResourceManager& manager, ISceneQuery& query);
+
     void postProcessPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                          const IGraphicsResourceManager& manager, ISceneQuery& query);
 
@@ -68,22 +71,27 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDirectionalLightPass(IResourceManager* manager);
 
+	/**
+	* \brief Initializes resources for illumination pass.
+	*/
+	bool initIlluminationPass(IResourceManager* manager);
+
     /**
      * \brief Initializes resources for shadow map pass
      */
     bool initShadowMapPass(IResourceManager* manager);
 
     /**
-	* \brief Initializes post processing pass.
-	*/
-	bool initPostProcessPass(IResourceManager* manager);
+        * \brief Initializes post processing pass.
+        */
+    bool initPostProcessPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes post process pass for depth of field.
-	* 
-	* Called by initPostProcesPass.
-	*/
-	bool initDepthOfFieldPass(IResourceManager* manager);
+    /**
+    * \brief Initializes post process pass for depth of field.
+    *
+    * Called by initPostProcesPass.
+    */
+    bool initDepthOfFieldPass(IResourceManager* manager);
 
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager,
@@ -123,18 +131,27 @@ class CDeferredRenderer : public ARenderer
     ResourceId m_directionalLightPassShaderId = -1;
     ResourceId m_directionalLightScreenQuadId = -1;
 
+	// Illumination pass
+	ResourceId m_illuminationPassShaderId = -1;
+	ResourceId m_illuminationPassScreenQuadId = -1;
+	CFrameBuffer m_illimationPassFrameBuffer;
+	std::shared_ptr<CTexture> m_illuminationPassTexture = nullptr;
 
-	// Post processing pass
-	ResourceId m_postProcessScreenQuadId = -1;
-	CFrameBuffer m_postProcessPassFrameBuffer;
-	std::shared_ptr<CTexture> m_postProcessPassTexture = nullptr;
+    // Post processing pass
+    ResourceId m_postProcessScreenQuadId = -1;
+    CFrameBuffer m_postProcessPassFrameBuffer;
+    std::shared_ptr<CTexture> m_postProcessPassTexture = nullptr;
 
-	// Gauss blur pass
-	ResourceId m_gaussBlurVerticalShaderId = -1;
-	ResourceId m_gaussBlurHorizontalShaderId = -1;
-	
-	// Depth-of-field pass
-	ResourceId m_depthOfFieldPassShaderId = -1;
+    // Gauss blur pass
+    ResourceId m_gaussBlurVerticalShaderId = -1;
+    ResourceId m_gaussBlurHorizontalShaderId = -1;
+
+    // Depth-of-field pass
+    ResourceId m_depthOfFieldPassShaderId = -1;
+    float m_focusNear = 1.f;
+    float m_focusFar = 10.f;
+    float m_blurNear = 0.1f;
+    float m_blurFar = 20.f;
 
     // Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;

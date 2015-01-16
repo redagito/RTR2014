@@ -1,4 +1,4 @@
-version 330 core
+#version 330 core
 
 // Screen parameters
 uniform float screen_width;
@@ -23,7 +23,7 @@ void main()
 	float blur_height = pixel_height * blur_strength;
 
 	// Horizontal gauss blur
-	vec3 final_color = texture(texture0, vec2(screen_coords.x, screen_coords.y - blur_height * 3.o)).rgb * 0.006;
+	vec3 final_color = texture(texture0, vec2(screen_coords.x, screen_coords.y - blur_height * 3.0)).rgb * 0.006;
 	final_color += texture(texture0, vec2(screen_coords.x, screen_coords.y - blur_height * 2.0)).rgb * 0.061;
 	final_color += texture(texture0, vec2(screen_coords.x, screen_coords.y - blur_height)).rgb * 0.242;
 

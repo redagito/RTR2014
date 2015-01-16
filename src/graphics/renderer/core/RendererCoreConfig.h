@@ -29,6 +29,12 @@ const std::string cameraPositionUniformName = "camera_position";
 const std::string cameraDirectionUniformName = "camera_direction";
 const std::string viewDistanceUniformName = "view_distance";
 
+// Depth-of-field parameters
+const std::string fokusNearUniformName = "focus_near";
+const std::string fokusFarUniformName = "focus_far";
+const std::string blurNearUniformName = "blur_far";
+const std::string blurFarUniformName = "blur_far";
+
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";

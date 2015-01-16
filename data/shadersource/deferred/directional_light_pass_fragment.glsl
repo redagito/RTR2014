@@ -72,7 +72,7 @@ void main(void)
 		fragment_world_position.y > 400.0 || fragment_world_position.z < -400.0 ||
 		fragment_world_position.z > 400.0 || fragment_world_position.z < -400.0)
 	{
-		light_data = vec4(1.0, 1.0, 1.0, 0.0);
+		light_data = vec4(2.0, 2.0, 2.0, 0.0);
 		return;
 	}
 
