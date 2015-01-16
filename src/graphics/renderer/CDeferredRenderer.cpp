@@ -501,43 +501,6 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         return;
     }
 
-    // Reset culling
-    glCullFace(GL_BACK);
-
-    // Set shader active
-    directionalLightPassShader->setActive();
-
-    // Set textures for point light pass
-    // Set depth texture
-    m_depthTexture->setActive(lightPassDepthTextureUnit);
-    directionalLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
-
-    // Set texture with world space normal and specular power
-    m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
-    directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
-                                           lightPassNormalSpecularTextureUnit);
-
-    // Set shadow texture for shadow mapping
-    m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
-    directionalLightPassShader->setUniform(shadowMapTextureUniformName,
-                                           lightPassShadowMapTextureUnit);
-
-    // Set screen size
-    directionalLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-    directionalLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
-
-    // Inverse view-projection
-    directionalLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
-                                           m_transformer.getInverseViewProjectionMatrix());
-
-    // Shadow ViewProjectionBias
-    glm::mat4 shadowViewProjBiasMatrix = glm::mat4(0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f,
-                                                   0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f) *
-                                         m_shadowCamera->getProjection() *
-                                         m_shadowCamera->getView();
-    directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
-                                           shadowViewProjBiasMatrix);
-
     // Render point light volumes into light buffer
     while (query.hasNextDirectionalLight())
     {
