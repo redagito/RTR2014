@@ -1,16 +1,18 @@
 #version 330 core
 
-in vec2 uv;
-
 uniform sampler2D diffuse_glow_texture;
 uniform sampler2D light_texture;
 uniform sampler2D depth_texture;
+
+// Screen size
+uniform float screen_width;
+uniform float screen_height;
 
 uniform mat4 inverse_view_projection;
 
 out vec3 fragmentColor;
 
-vec3 getWorldPosition()
+vec3 getWorldPosition(vec2 uv)
 {
 	float z = texture(depth_texture, uv).x;
 	vec4 sPos = vec4(uv * 2 - 1, z * 2 - 1, 1.0);
@@ -78,7 +80,8 @@ vec3 gammaCorrection(vec3 color)
 
 void main(void)
 {
-	vec3 worldPos = getWorldPosition();
+	vec2 normalized_screen_coordinates = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
+	vec3 worldPos = getWorldPosition(normalized_screen_coordinates);
 	vec4 temp = texture(diffuse_glow_texture, uv);
 	vec3 diffuseColor = temp.rgb;
 	vec3 glow = vec3(temp.a);

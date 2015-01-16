@@ -903,6 +903,13 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
 
 bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 {
+	// Error check
+	std::string error;
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
     // Load illumination shader
     std::string illuminationPassShaderFile = "data/shader/deferred/illumination_pass.ini";
     m_illuminationPassShaderId = manager->loadShader(illuminationPassShaderFile);
@@ -914,6 +921,13 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         return false;
     }
 
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
+
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
     m_illuminationPassScreenQuadId = manager->loadMesh(quadMesh);
@@ -923,6 +937,13 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
         return false;
     }
+
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
 
     // FBO
     m_illuminationPassTexture = std::make_shared<CTexture>();
@@ -934,6 +955,13 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     m_illimationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
 
     // TODO Check FBO
+
+	// Error check
+	if (hasGLError(error))
+	{
+		LOG_ERROR("GL Error: %s", error.c_str());
+		return false;
+	}
 
     return true;
 }
