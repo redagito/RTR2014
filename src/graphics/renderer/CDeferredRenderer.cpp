@@ -239,19 +239,23 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
 class StaticCamera : public ICamera
 {
    public:
-    StaticCamera(glm::mat4 view, glm::mat4 proj)
+    StaticCamera(glm::mat4 view, glm::mat4 proj, glm::vec3 position)
     {
         m_view = view;
         m_proj = proj;
+        m_pos = position;
     }
 
     virtual const glm::mat4& getView() const { return m_view; }
 
     virtual const glm::mat4& getProjection() const { return m_proj; }
 
+    virtual glm::vec3 getPosition() const { return m_pos; }
+    
    private:
     glm::mat4 m_view;
     glm::mat4 m_proj;
+    glm::vec3 m_pos;
 };
 
 void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
@@ -284,17 +288,11 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
     glFrontFace(GL_CCW);
 
     // Reset viewport
-    glViewport(0, 0, 1200, 1200);
-    m_shadowMapBuffer.resize(1200, 1200);
+    glViewport(0, 0, 4000, 4000);
+    m_shadowMapBuffer.resize(4000, 4000);
 
     // Stores active transformations
     CTransformer transformer;
-
-    // TODO replace hardcoded directional light!!!
-    glm::mat4 view = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                                 glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 proj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-    // glm::mat4 proj = glm::perspective(45.0f, 4.0f/3.0f, 0.01f, 1000.0f);
 
     // Set view and projection matrices
     transformer.setViewMatrix(camera.getView());
@@ -519,10 +517,10 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         else
         {
             glm::mat4 shadowView =
-                glm::lookAt(glm::normalize(-direction), glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::lookAt(camera.getPosition(), camera.getPosition() + glm::normalize(direction),
                             glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj);
+            glm::mat4 shadowProj = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
             shadowMapPass(scene, shadowCamera, window, manager);
 
             // Prepare light pass frame buffer
@@ -787,7 +785,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
 
     // Depth texture
     m_shadowDepthTexture = std::make_shared<CTexture>();
-    m_shadowDepthTexture->init(1200, 1200, GL_DEPTH_COMPONENT24);
+    m_shadowDepthTexture->init(4000, 4000, GL_DEPTH_COMPONENT24);
 
     glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture->getId());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -808,7 +806,10 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
 
     // Total 96 bit per pixel
     m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
-
+    m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
+    glDrawBuffer(GL_NONE);
+    m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
+    
     // Error check
     if (hasGLError(error))
     {

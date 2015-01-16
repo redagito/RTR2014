@@ -85,9 +85,9 @@ vec3 applyFog(vec3 color)
     
     float fogN = 0.0f;
     float fogF = 50.0f;
-    float fogD = 0.04f;
+    float fogD = 0.02f;
     
-    float fogFactor = exp(-fogD*z);
+    float fogFactor = exp(-pow(fogD*z, 2.0f));
     //float fogFactor = (fogF - z) / (fogF - fogN);
     
     return mix(color, vec3(0.7, 0.5, 0.3), 1.0f - clamp(fogFactor, 0.1f, 1.0f));

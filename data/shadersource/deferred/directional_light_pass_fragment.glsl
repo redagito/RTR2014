@@ -90,7 +90,7 @@ void main(void)
 
 	// Lambertian factor based on surface normal
 	float lambert_factor = max(0.0, dot(surface_normal_world, -light_direction));
-	float bias = 0.005f;
+	float bias = 0.001f;
 
     // apply shadow map
     vec4 shadow_coordinates = shadow_view_projection_bias * vec4(fragment_world_position, 1);
