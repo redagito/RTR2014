@@ -82,10 +82,10 @@ void main(void)
 {
 	vec2 normalized_screen_coordinates = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
 	vec3 worldPos = getWorldPosition(normalized_screen_coordinates);
-	vec4 temp = texture(diffuse_glow_texture, uv);
+	vec4 temp = texture(diffuse_glow_texture, normalized_screen_coordinates);
 	vec3 diffuseColor = temp.rgb;
 	vec3 glow = vec3(temp.a);
-	vec3 light = texture(light_texture, uv).rgb;
+	vec3 light = texture(light_texture, normalized_screen_coordinates).rgb;
 	fragmentColor = diffuseColor * max(glow, light);
 	fragmentColor = filmicTonemap(fragmentColor);
 }
