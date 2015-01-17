@@ -507,19 +507,6 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         return;
     }
 
-	// Prepare light pass frame buffer
-	glViewport(0, 0, window.getWidth(), window.getHeight());
-	m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-
-	// No depth testing for light volumes
-	glDisable(GL_DEPTH_TEST);
-	// Additive blending for light accumulation
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-
-	// Reset culling
-	glCullFace(GL_BACK);
-
     // Render point light volumes into light buffer
     while (query.hasNextDirectionalLight())
     {
@@ -544,6 +531,19 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
             shadowMapPass(scene, shadowCamera, window, manager);
 
+            // Prepare light pass frame buffer
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+            
+            // No depth testing for light volumes
+            glDisable(GL_DEPTH_TEST);
+            // Additive blending for light accumulation
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            
+            // Reset culling
+            glCullFace(GL_BACK);
+            
             // Set shader active
             directionalLightPassShader->setActive();
 
@@ -588,6 +588,10 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             ARenderer::draw(quadMesh);
         }
     }
+    
+    // Reset culling
+    glCullFace(GL_BACK);
+    
     return;
 }
 
