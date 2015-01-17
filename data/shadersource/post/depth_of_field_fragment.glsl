@@ -1,7 +1,5 @@
 #version 330 core
 
-layout(location = 0) out vec4 output_color;
-
 // Depth of field parameters
 uniform float focus_near; // Closest non-blurry distance
 uniform float blur_near; // Max blur at near distance
@@ -16,10 +14,13 @@ uniform float screen_height;
 // Transforms to camera coords
 uniform mat4 inverse_projection;
 
-// Depth
-uniform sampler2D depth_texture;
+// Input textures
 uniform sampler2D base_texture;
 uniform sampler2D blur_texture;
+uniform sampler2D depth_texture;
+
+// Output color
+layout(location = 0) out vec3 color;
 
 vec3 getCameraSpacePosition(vec2 uv)
 {
@@ -40,15 +41,15 @@ void main(void)
 	if (distance < focus_near)
 	{
 		float a = min(1.0, blur_near / distance);
-		output_color = vec4(mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a), 0.0);
+		color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
 	else if (distance > focus_far)
 	{
-		float a = min(1.0, distance / blur_far);
-		output_color = vec4(mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a), 0.0);
+		float a = min(1.0, (distance - focus_far) / (blur_far - focus_far));
+		color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
 	else
 	{
-		output_color = vec4(texture(base_texture, normalized_screen_coordinates).xyz, 0.0);
+		color = texture(base_texture, normalized_screen_coordinates).xyz;
 	}
 }

@@ -35,9 +35,14 @@ const std::string fokusFarUniformName = "focus_far";
 const std::string blurNearUniformName = "blur_far";
 const std::string blurFarUniformName = "blur_far";
 
+// Blur parameters
+const std::string blurStrengthUniformName = "blur_strength";
+
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
+const std::string inverseViewMatrixUniformName = "inverse_view";
 const std::string projectionMatrixUniformName = "projection";
+const std::string inverseProjectionMatrixUniformName = "inverse_projection";
 const std::string viewProjectionMatrixUniformName = "view_projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
 const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
@@ -80,8 +85,19 @@ const GLint fogPassDepthTextureUnit = 1;
 // Texture units for display pass
 const GLint displayPassSceneTextureUnit = 0;
 
-// texture units for FXAA pass
-const GLint fxaaInputTextureId = 0;
+// Texture units for FXAA pass
+const GLint fxaaPassInputTextureUnit = 0;
+
+// Texture units for vertical gauss blur pass
+const GLint gaussBlurVerticalPassInputTextureUnit = 0;
+
+// Texture units for horiontal gauss blur pass
+const GLint gaussBlurHoriontalPassInputTextureUnit = 0;
+
+// Texture units
+const GLint depthOfFieldPassBaseTextureUnit = 0;
+const GLint depthOfFieldPassBlurTextureUnit = 1;
+const GLint depthOfFieldDepthTextureUnit = 2;
 
 // Texture sampler uniform names
 const std::string diffuseTextureUniformName = "diffuse_texture";
@@ -95,6 +111,7 @@ const std::string diffuseGlowTextureUniformName = "diffuse_glow_texture";
 const std::string lightTextureUniformName = "light_texture";
 const std::string shadowMapTextureUniformName = "shadow_map"; // Should be shadow_map_texture or shadow_texture
 const std::string sceneTextureUniformName = "scene_texture";
+const std::string blurTextureUniformName = "blur_texture";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";
