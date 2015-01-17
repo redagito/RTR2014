@@ -118,10 +118,10 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     illuminationPass(scene, camera, window, manager, *query);
 
     // Post processing pass
-    //postProcessPass(camera, window, manager, m_illuminationPassTexture);
+    postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
     // Final display pass
-    displayPass(window, manager, m_illuminationPassTexture);
+    displayPass(window, manager, m_postProcessPassOutputTexture);
 
     // Post draw error check
     std::string error;
