@@ -12,7 +12,7 @@ uniform float screen_width;
 uniform float screen_height;
 
 // Lit fragment
-out vec3 fragmentColor;
+layout(location = 0) out vec3 fragmentColor;
 
 // Filmic tonemapping operation based on "Uncharted 2" presentation 
 // http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting

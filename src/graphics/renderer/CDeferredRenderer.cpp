@@ -84,6 +84,13 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+    // Display pass
+    if (!initDisplayPass(manager))
+    {
+        LOG_ERROR("Failed to initialize display pass.");
+        return false;
+    }
+
     if (!m_screenQuadPass.init(manager))
     {
         LOG_ERROR("Failed to initialize screen quad pass.");
@@ -111,9 +118,11 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     illuminationPass(scene, camera, window, manager, *query);
 
     // Final pass, creates lit scene from lbuffer and gbuffer
-    m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
-                          m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
-                          nullptr, &manager);
+    // m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
+    //                         m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
+    //                          nullptr, &manager);
+
+	displayPass(window, manager, m_illuminationPassTexture);
 
     // Post draw error check
     std::string error;
@@ -251,7 +260,7 @@ class StaticCamera : public ICamera
     virtual const glm::mat4& getProjection() const { return m_proj; }
 
     virtual glm::vec3 getPosition() const { return m_pos; }
-    
+
    private:
     glm::mat4 m_view;
     glm::mat4 m_proj;
@@ -517,7 +526,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         else
         {
             glm::mat4 shadowView =
-            glm::lookAt(camera.getPosition(), camera.getPosition() + glm::normalize(direction),
+                glm::lookAt(camera.getPosition(), camera.getPosition() + glm::normalize(direction),
                             glm::vec3(0.0f, 1.0f, 0.0f));
             glm::mat4 shadowProj = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
@@ -588,12 +597,12 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
                                          const IGraphicsResourceManager& manager,
                                          ISceneQuery& query)
 {
-	// Reset viewport
-	glViewport(0, 0, window.getWidth(), window.getHeight());
-	m_illumationPassFrameBuffer.resize(window.getWidth(), window.getHeight());
-	// TODO Clear illumination pass buffer?
+    // Reset viewport
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+    m_illumationPassFrameBuffer.resize(window.getWidth(), window.getHeight());
+    // TODO Clear illumination pass buffer?
 
-	// Get illumination shader
+    // Get illumination shader
     CShaderProgram* illuminationShader = manager.getShaderProgram(m_illuminationPassShaderId);
     if (illuminationShader == nullptr)
     {
@@ -601,35 +610,36 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
         return;
     }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for illumination pass could not be retrieved.");
+        return;
+    }
 
-	// Final pass, creates lit scene from lbuffer and gbuffer
-	m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
-		m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
-		nullptr, &manager);
+    // Set textures
+    // L-buffer light texture
+    m_lightPassTexture->setActive(illuminationPassLightTextureUnit);
+    illuminationShader->setUniform(lightTextureUniformName, illuminationPassLightTextureUnit);
 
-	// Set textures
-	// L-buffer light texture
-	m_lightPassTexture->setActive(illuminationPassLightTextureUnit);
-	illuminationShader->setUniform(lightTextureUniformName, illuminationPassLightTextureUnit);
-	
-	// G-buffer diffuse glow texture
-	m_diffuseGlowTexture->setActive(illuminationPassDiffuseGlowTextureUnit);
-	illuminationShader->setUniform(diffuseGlowTextureUniformName, illuminationPassDiffuseGlowTextureUnit);
+    // G-buffer diffuse glow texture
+    m_diffuseGlowTexture->setActive(illuminationPassDiffuseGlowTextureUnit);
+    illuminationShader->setUniform(diffuseGlowTextureUniformName,
+                                   illuminationPassDiffuseGlowTextureUnit);
 
-	// G-buffer depth texture
-	m_depthTexture->setActive(illuminationPassDepthTextureUnit);
-	illuminationShader->setUniform(depthTextureUniformName, illuminationPassDepthTextureUnit);
+    // G-buffer depth texture
+    m_depthTexture->setActive(illuminationPassDepthTextureUnit);
+    illuminationShader->setUniform(depthTextureUniformName, illuminationPassDepthTextureUnit);
 
-	// Screen parameters
-	illuminationShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	illuminationShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    // Screen parameters
+    illuminationShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    illuminationShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// Draw into frame buffer
-	m_illumationPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-	ARenderer::draw(quadMesh);
-	m_illumationPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
+    // Draw into frame buffer
+    m_illumationPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+    ARenderer::draw(quadMesh);
+    m_illumationPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
 }
 
 void CDeferredRenderer::postProcessPass(const IScene& scene, const ICamera& camera,
@@ -637,6 +647,41 @@ void CDeferredRenderer::postProcessPass(const IScene& scene, const ICamera& came
                                         const IGraphicsResourceManager& manager, ISceneQuery& query)
 {
     // TODO
+}
+
+void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
+                                    std::shared_ptr<CTexture>& texture)
+{
+    // Reset viewport
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+
+    // Get display shader
+    CShaderProgram* displayShader = manager.getShaderProgram(m_displayPassShaderId);
+    if (displayShader == nullptr)
+    {
+        LOG_ERROR("Shader program for display pass could not be retrieved.");
+        return;
+    }
+
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for illumination pass could not be retrieved.");
+        return;
+    }
+
+    // Scene texture
+    texture->setActive(displayPassSceneTextureUnit);
+    displayShader->setUniform(sceneTextureUniformName, displayPassSceneTextureUnit);
+
+    // Screen parameters
+    displayShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    displayShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+    // Set main FBO active
+    CFrameBuffer::setDefaultActive();
+    ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
@@ -843,7 +888,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
     glDrawBuffer(GL_NONE);
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
-    
+
     // Error check
     if (hasGLError(error))
     {
@@ -938,13 +983,13 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
 
 bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 {
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-		return false;
-	}
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
     // Load illumination shader
     std::string illuminationPassShaderFile = "data/shader/deferred/illumination_pass.ini";
     m_illuminationPassShaderId = manager->loadShader(illuminationPassShaderFile);
@@ -956,12 +1001,12 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         return false;
     }
 
-	// Error check
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-		return false;
-	}
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
@@ -973,12 +1018,12 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         return false;
     }
 
-	// Error check
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-		return false;
-	}
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
 
     // FBO
     m_illuminationPassTexture = std::make_shared<CTexture>();
@@ -991,12 +1036,12 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 
     // TODO Check FBO
 
-	// Error check
-	if (hasGLError(error))
-	{
-		LOG_ERROR("GL Error: %s", error.c_str());
-		return false;
-	}
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
 
     return true;
 }
@@ -1062,6 +1107,20 @@ bool CDeferredRenderer::initDepthOfFieldPass(IResourceManager* manager)
     if (m_depthOfFieldPassShaderId == invalidResource)
     {
         LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool CDeferredRenderer::initDisplayPass(IResourceManager* manager)
+{
+    // Display shader
+    std::string displayPassShaderFile = "data/shader/display_pass.ini";
+    m_displayPassShaderId = manager->loadShader(displayPassShaderFile);
+    // Check if ok
+    if (m_displayPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", displayPassShaderFile.c_str());
         return false;
     }
     return true;

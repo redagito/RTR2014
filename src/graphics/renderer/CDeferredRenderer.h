@@ -41,41 +41,47 @@ class CDeferredRenderer : public ARenderer
     void geometryPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                       const IGraphicsResourceManager& manager, ISceneQuery& query);
 
-	/**
-	* \brief Performs shadow map calculation.
-	*/
+    /**
+    * \brief Performs shadow map calculation.
+    */
     void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                        const IGraphicsResourceManager& manager);
 
-	/**
-	* \brief Writes light data into l-buffer.
-	*/
+    /**
+    * \brief Writes light data into l-buffer.
+    */
     void lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                    const IGraphicsResourceManager& manager, ISceneQuery& query);
 
-	/**
-	* \brief Writes point light data to l-buffer.
-	*/
+    /**
+    * \brief Writes point light data to l-buffer.
+    */
     void pointLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                         const IGraphicsResourceManager& manager, ISceneQuery& query);
-	
-	/**
-	* \brief Writes directional light data to l-buffer.
-	*/
+
+    /**
+    * \brief Writes directional light data to l-buffer.
+    */
     void directionalLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                               const IGraphicsResourceManager& manager, ISceneQuery& query);
 
-	/**
-	* \brief Performs scene illumination and tone mapping.
-	*/
+    /**
+    * \brief Performs scene illumination and tone mapping.
+    */
     void illuminationPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                           const IGraphicsResourceManager& manager, ISceneQuery& query);
 
-	/**
-	* \brief Performs post processing of lit scene.
-	*/
+    /**
+    * \brief Performs post processing of lit scene.
+    */
     void postProcessPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                          const IGraphicsResourceManager& manager, ISceneQuery& query);
+
+    /**
+    * \brief Draws scene texture to main FBO.
+    */
+    void displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
+                     std::shared_ptr<CTexture>& texture);
 
     /**
     * \brief Initializes resources for geometry pass.
@@ -103,8 +109,8 @@ class CDeferredRenderer : public ARenderer
     bool initShadowMapPass(IResourceManager* manager);
 
     /**
-        * \brief Initializes post processing pass.
-        */
+     * \brief Initializes post processing pass.
+     */
     bool initPostProcessPass(IResourceManager* manager);
 
     /**
@@ -114,13 +120,17 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDepthOfFieldPass(IResourceManager* manager);
 
+    /**
+    * \brief Display pass draws final image to screen.
+    */
+    bool initDisplayPass(IResourceManager* manager);
+
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager,
               CShaderProgram* shader);
 
    private:
-    // Stores current transformation matrices
-    CTransformer m_transformer;
+    CTransformer m_transformer; /**< Stores current transformation matrices. */
 
     // Geometry pass
     // TODO Put into geometry pass class
@@ -172,6 +182,9 @@ class CDeferredRenderer : public ARenderer
     float m_focusFar = 10.f;
     float m_blurNear = 0.1f;
     float m_blurFar = 20.f;
+
+    // Display pass for final screen draw
+    ResourceId m_displayPassShaderId = -1;
 
     // Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;

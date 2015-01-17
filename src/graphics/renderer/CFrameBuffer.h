@@ -32,6 +32,8 @@ class CFrameBuffer
     void attach(const std::shared_ptr<CTexture>& texture, GLenum attachment);
     void attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment);
 
+	static void setDefaultActive();
+
    private:
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */
 

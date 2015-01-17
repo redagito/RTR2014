@@ -115,6 +115,11 @@ void CFrameBuffer::attach(const std::shared_ptr<CTexture>& texture, GLenum attac
     setInactive(GL_FRAMEBUFFER);
 }
 
+void CFrameBuffer::setDefaultActive()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void CFrameBuffer::attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment)
 {
     // Bind
