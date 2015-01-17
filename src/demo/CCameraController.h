@@ -32,6 +32,11 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
     virtual void handleResizeEvent(int width, int height) override;
 
    private:
+    // TODO "animate" is a stupid name
+    void animateFeatures(float dt);
+    void animateSequence(float dt);
+    void animateManual(float dt);
+    
     struct SequencePoint {
         glm::vec3 position;
         glm::vec3 orientation;

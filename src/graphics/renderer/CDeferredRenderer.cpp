@@ -645,72 +645,72 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
                                         const IGraphicsResourceManager& manager,
                                         const std::shared_ptr<CTexture>& texture)
 {
-	// Reset viewport
-	glViewport(0, 0, window.getWidth(), window.getHeight());
-	// Resize frame buffer
-	m_postProcessPassFrameBuffer0.resize(window.getWidth(), window.getHeight());
-	m_postProcessPassFrameBuffer1.resize(window.getWidth(), window.getHeight());
-	m_postProcessPassFrameBuffer2.resize(window.getWidth(), window.getHeight());
+    // Reset viewport
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+    // Resize frame buffer
+    m_postProcessPassFrameBuffer0.resize(window.getWidth(), window.getHeight());
+    m_postProcessPassFrameBuffer1.resize(window.getWidth(), window.getHeight());
+    m_postProcessPassFrameBuffer2.resize(window.getWidth(), window.getHeight());
 
-	// Pass 1: fxaa
-	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-	fxaaPass(window, manager, texture);
+    // Pass 1: fxaa
+    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+    fxaaPass(window, manager, texture);
 
-	// Pass 2: fog
-	// TODO Fog paarmeter
-	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-	fogPass(window, manager, m_postProcessPassTexture0);
-	// Foggy scene in tex1
+    // Pass 2: fog
+    // TODO Fog paarmeter
+    m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
+    fogPass(camera, window, manager, m_postProcessPassTexture0);
+    // Foggy scene in tex1
 
     // Pass 3: dof
-	// Pass 3.1: gauss blur
-	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-	gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
-	// Blurred in tex0
-	
-	m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-	gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
-	// Blurred in tex 2
+    // Pass 3.1: gauss blur
+    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+    gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
+    // Blurred in tex0
 
-	// TODO DOF parameter
-	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-	depthOfFieldPass(window, manager, m_postProcessPassTexture1, m_postProcessPassTexture2);
+    m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+    gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
+    // Blurred in tex 2
 
-	// Set output texture
-	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
+    // TODO DOF parameter
+    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+    depthOfFieldPass(window, manager, m_postProcessPassTexture1, m_postProcessPassTexture2);
+
+    // Set output texture
+    m_postProcessPassOutputTexture = m_postProcessPassTexture0;
 }
 
 void CDeferredRenderer::fxaaPass(const IWindow& window, const IGraphicsResourceManager& manager,
-	const std::shared_ptr<CTexture>& texture)
+                                 const std::shared_ptr<CTexture>& texture)
 {
-	// Get fxaa shader
-	CShaderProgram* fxaaShader = manager.getShaderProgram(m_fxaaPassShaderId);
-	if (fxaaShader == nullptr)
-	{
-		LOG_ERROR("Shader program for fxaa pass could not be retrieved.");
-		return;
-	}
+    // Get fxaa shader
+    CShaderProgram* fxaaShader = manager.getShaderProgram(m_fxaaPassShaderId);
+    if (fxaaShader == nullptr)
+    {
+        LOG_ERROR("Shader program for fxaa pass could not be retrieved.");
+        return;
+    }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for fxaa pass could not be retrieved.");
-		return;
-	}
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for fxaa pass could not be retrieved.");
+        return;
+    }
 
-	// Set input texture
-	texture->setActive(fxaaPassInputTextureUnit);
-	fxaaShader->setUniform(sceneTextureUniformName, fxaaPassInputTextureUnit);
+    // Set input texture
+    texture->setActive(fxaaPassInputTextureUnit);
+    fxaaShader->setUniform(sceneTextureUniformName, fxaaPassInputTextureUnit);
 
-	// Set screen size
-	fxaaShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	fxaaShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    // Set screen size
+    fxaaShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    fxaaShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	ARenderer::draw(quadMesh);
+    ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::fogPass(const IWindow& window,
+void CDeferredRenderer::fogPass(const ICamera& camera, const IWindow& window,
                                 const IGraphicsResourceManager& manager,
                                 const std::shared_ptr<CTexture>& texture)
 {
@@ -731,133 +731,157 @@ void CDeferredRenderer::fogPass(const IWindow& window,
     }
 
     fogShader->setActive();
-    
+
     texture->setActive(fogPassSceneTextureUnit);
     fogShader->setUniform(sceneTextureUniformName, fogPassSceneTextureUnit);
-    
+
     m_depthTexture->setActive(fogPassDepthTextureUnit);
     fogShader->setUniform(depthTextureUniformName, fogPassDepthTextureUnit);
-    
+
     fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     fogShader->setUniform(screenHeightUniformName, (float)window.getHeight());
     
+    int fogType = 0;
+    switch (camera.getFeatureInfo().fogType) {
+        case FogType::None:
+            fogType = 0;
+            break;
+        case FogType::Linear:
+            fogType = 1;
+            break;
+        case FogType::Exp:
+            fogType = 2;
+            break;
+        case FogType::Exp2:
+            fogType = 3;
+            break;
+        default:
+            fogType = 0;
+    }
+    fogShader->setUniform(fogPassTypeUniformName, fogType);
+
     ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::gaussBlurVerticalPass(const IWindow& window, const IGraphicsResourceManager& manager,
-	const std::shared_ptr<CTexture>& texture)
+void CDeferredRenderer::gaussBlurVerticalPass(const IWindow& window,
+                                              const IGraphicsResourceManager& manager,
+                                              const std::shared_ptr<CTexture>& texture)
 {
-	// Get gauss shader
-	CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurVerticalShaderId);
-	if (shader == nullptr)
-	{
-		LOG_ERROR("Shader program for vertical gauss blur pass could not be retrieved.");
-		return;
-	}
+    // Get gauss shader
+    CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurVerticalShaderId);
+    if (shader == nullptr)
+    {
+        LOG_ERROR("Shader program for vertical gauss blur pass could not be retrieved.");
+        return;
+    }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for vertical gauss blur pass could not be retrieved.");
-		return;
-	}
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for vertical gauss blur pass could not be retrieved.");
+        return;
+    }
 
-	// Input texture
-	texture->setActive(gaussBlurVerticalPassInputTextureUnit);
-	shader->setUniform(sceneTextureUniformName, gaussBlurVerticalPassInputTextureUnit);
+    // Input texture
+    texture->setActive(gaussBlurVerticalPassInputTextureUnit);
+    shader->setUniform(sceneTextureUniformName, gaussBlurVerticalPassInputTextureUnit);
 
-	// Blur parameter
-	shader->setUniform(blurStrengthUniformName, 3.f);
+    // Blur parameter
+    shader->setUniform(blurStrengthUniformName, 3.f);
 
-	/// Screen size
-	shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    /// Screen size
+    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// Perform pass
-	ARenderer::draw(quadMesh);
+    // Perform pass
+    ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::gaussBlurHorizontalPass(const IWindow& window, const IGraphicsResourceManager& manager,
-	const std::shared_ptr<CTexture>& texture)
+void CDeferredRenderer::gaussBlurHorizontalPass(const IWindow& window,
+                                                const IGraphicsResourceManager& manager,
+                                                const std::shared_ptr<CTexture>& texture)
 {
-	// Get gauss shader
-	CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurHorizontalShaderId);
-	if (shader == nullptr)
-	{
-		LOG_ERROR("Shader program for horizontal gauss blur pass could not be retrieved.");
-		return;
-	}
+    // Get gauss shader
+    CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurHorizontalShaderId);
+    if (shader == nullptr)
+    {
+        LOG_ERROR("Shader program for horizontal gauss blur pass could not be retrieved.");
+        return;
+    }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for horizontal gauss blur pass could not be retrieved.");
-		return;
-	}
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for horizontal gauss blur pass could not be retrieved.");
+        return;
+    }
 
-	// Input texture
-	texture->setActive(gaussBlurHoriontalPassInputTextureUnit);
-	shader->setUniform(sceneTextureUniformName, gaussBlurHoriontalPassInputTextureUnit);
+    // Input texture
+    texture->setActive(gaussBlurHoriontalPassInputTextureUnit);
+    shader->setUniform(sceneTextureUniformName, gaussBlurHoriontalPassInputTextureUnit);
 
-	// Blur parameter
-	shader->setUniform(blurStrengthUniformName, 3.f);
+    // Blur parameter
+    shader->setUniform(blurStrengthUniformName, 3.f);
 
-	/// Screen size
-	shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    /// Screen size
+    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// Perform pass
-	ARenderer::draw(quadMesh);
+    // Perform pass
+    ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::depthOfFieldPass(const IWindow& window, const IGraphicsResourceManager& manager,
-	const std::shared_ptr<CTexture>& sceneTexture, const std::shared_ptr<CTexture>& blurTexture)
+void CDeferredRenderer::depthOfFieldPass(const IWindow& window,
+                                         const IGraphicsResourceManager& manager,
+                                         const std::shared_ptr<CTexture>& sceneTexture,
+                                         const std::shared_ptr<CTexture>& blurTexture)
 {
-	// Get shader
-	CShaderProgram* shader = manager.getShaderProgram(m_depthOfFieldPassShaderId);
-	if (shader == nullptr)
-	{
-		LOG_ERROR("Shader program for depth-of-field pass could not be retrieved.");
-		return;
-	}
+    // Get shader
+    CShaderProgram* shader = manager.getShaderProgram(m_depthOfFieldPassShaderId);
+    if (shader == nullptr)
+    {
+        LOG_ERROR("Shader program for depth-of-field pass could not be retrieved.");
+        return;
+    }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for depth-of-field pass could not be retrieved.");
-		return;
-	}
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for depth-of-field pass could not be retrieved.");
+        return;
+    }
 
-	// Input base texture
-	sceneTexture->setActive(depthOfFieldPassBaseTextureUnit);
-	shader->setUniform(sceneTextureUniformName, depthOfFieldPassBaseTextureUnit);
-	
-	// Input blur texture
-	blurTexture->setActive(depthOfFieldPassBlurTextureUnit);
-	shader->setUniform(blurTextureUniformName, depthOfFieldPassBlurTextureUnit);
+    // Input base texture
+    sceneTexture->setActive(depthOfFieldPassBaseTextureUnit);
+    shader->setUniform(sceneTextureUniformName, depthOfFieldPassBaseTextureUnit);
 
-	// Input depth texture
-	m_depthTexture->setActive(depthOfFieldDepthTextureUnit);
-	shader->setUniform(depthTextureUniformName, depthOfFieldPassBlurTextureUnit);
+    // Input blur texture
+    blurTexture->setActive(depthOfFieldPassBlurTextureUnit);
+    shader->setUniform(blurTextureUniformName, depthOfFieldPassBlurTextureUnit);
 
-	// Depth-of-field parameters
-	shader->setUniform(blurNearUniformName, 0.1f);
-	shader->setUniform(fokusNearUniformName, 0.2f);
-	shader->setUniform(fokusFarUniformName, 50.f);
-	shader->setUniform(blurFarUniformName, 100.f);
+    // Input depth texture
+    m_depthTexture->setActive(depthOfFieldDepthTextureUnit);
+    shader->setUniform(depthTextureUniformName, depthOfFieldPassBlurTextureUnit);
 
-	// Transformation
-	shader->setUniform(inverseProjectionMatrixUniformName, m_transformer.getInverseProjectionMatrix());
+    // Depth-of-field parameters
+    shader->setUniform(blurNearUniformName, 0.1f);
+    shader->setUniform(fokusNearUniformName, 0.2f);
+    shader->setUniform(fokusFarUniformName, 50.f);
+    shader->setUniform(blurFarUniformName, 100.f);
 
-	/// Screen size
-	shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    // Transformation
+    shader->setUniform(inverseProjectionMatrixUniformName,
+                       m_transformer.getInverseProjectionMatrix());
 
-	// Perform pass
-	ARenderer::draw(quadMesh);
+    /// Screen size
+    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+    // Perform pass
+    ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
@@ -1260,24 +1284,24 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 {
     // Gauss blur pass
-	if (!initGaussBlurHorizontalPass(manager))
-	{
-		LOG_ERROR("Failed to initialize gauss blur horizontal pass.");
-		return false;
-	}
-	if (!initGaussBlurVerticalPass(manager))
-	{
-		LOG_ERROR("Failed to initialize gauss blur vertical pass.");
-		return false;
-	}
+    if (!initGaussBlurHorizontalPass(manager))
+    {
+        LOG_ERROR("Failed to initialize gauss blur horizontal pass.");
+        return false;
+    }
+    if (!initGaussBlurVerticalPass(manager))
+    {
+        LOG_ERROR("Failed to initialize gauss blur vertical pass.");
+        return false;
+    }
 
-	// FXAA
-	if (!initFxaaPass(manager))
-	{
-		LOG_ERROR("Failed to initialize fxaa pass.");
-		return false;
-	}
-    
+    // FXAA
+    if (!initFxaaPass(manager))
+    {
+        LOG_ERROR("Failed to initialize fxaa pass.");
+        return false;
+    }
+
     // FXAA
     if (!initFogPass(manager))
     {
@@ -1295,33 +1319,33 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     }
 
     // Init post processing FBOs
-	// Texture 0
-	m_postProcessPassTexture0 = std::make_shared<CTexture>();
-	if (!m_postProcessPassTexture0->init(800, 600, GL_RGB))
-	{
-		LOG_ERROR("Failed to initialize post process pass texture 0.");
-		return false;
-	}
+    // Texture 0
+    m_postProcessPassTexture0 = std::make_shared<CTexture>();
+    if (!m_postProcessPassTexture0->init(800, 600, GL_RGB))
+    {
+        LOG_ERROR("Failed to initialize post process pass texture 0.");
+        return false;
+    }
 
-	// Texture 1
-	m_postProcessPassTexture1 = std::make_shared<CTexture>();
-	if (!m_postProcessPassTexture1->init(800, 600, GL_RGB))
-	{
-		LOG_ERROR("Failed to initialize post process pass texture 1.");
-		return false;
-	}
-	
-	// Texture 2
-	m_postProcessPassTexture2 = std::make_shared<CTexture>();
-	if (!m_postProcessPassTexture2->init(800, 600, GL_RGB))
-	{
-		LOG_ERROR("Failed to initialize post process pass texture 2.");
-		return false;
-	}
+    // Texture 1
+    m_postProcessPassTexture1 = std::make_shared<CTexture>();
+    if (!m_postProcessPassTexture1->init(800, 600, GL_RGB))
+    {
+        LOG_ERROR("Failed to initialize post process pass texture 1.");
+        return false;
+    }
 
-	m_postProcessPassFrameBuffer0.attach(m_postProcessPassTexture0, GL_COLOR_ATTACHMENT0);
-	m_postProcessPassFrameBuffer1.attach(m_postProcessPassTexture1, GL_COLOR_ATTACHMENT0);
-	m_postProcessPassFrameBuffer2.attach(m_postProcessPassTexture2, GL_COLOR_ATTACHMENT0);
+    // Texture 2
+    m_postProcessPassTexture2 = std::make_shared<CTexture>();
+    if (!m_postProcessPassTexture2->init(800, 600, GL_RGB))
+    {
+        LOG_ERROR("Failed to initialize post process pass texture 2.");
+        return false;
+    }
+
+    m_postProcessPassFrameBuffer0.attach(m_postProcessPassTexture0, GL_COLOR_ATTACHMENT0);
+    m_postProcessPassFrameBuffer1.attach(m_postProcessPassTexture1, GL_COLOR_ATTACHMENT0);
+    m_postProcessPassFrameBuffer2.attach(m_postProcessPassTexture2, GL_COLOR_ATTACHMENT0);
     // TODO Depth attachment required?
 
     if (!initDepthOfFieldPass(manager))
@@ -1334,72 +1358,74 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 
 bool CDeferredRenderer::initDepthOfFieldPass(IResourceManager* manager)
 {
-	// Depth of field shader
-	std::string depthOfFieldShaderFile = "data/shader/post/depth_of_field_pass.ini";
-	m_depthOfFieldPassShaderId = manager->loadShader(depthOfFieldShaderFile);
-	// Check if ok
-	if (m_depthOfFieldPassShaderId == invalidResource)
-	{
-		LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
-		return false;
-	}
-	return true;
+    // Depth of field shader
+    std::string depthOfFieldShaderFile = "data/shader/post/depth_of_field_pass.ini";
+    m_depthOfFieldPassShaderId = manager->loadShader(depthOfFieldShaderFile);
+    // Check if ok
+    if (m_depthOfFieldPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CDeferredRenderer::initGaussBlurVerticalPass(IResourceManager* manager)
 {
-	// Depth of field shader
-	std::string gaussBlurVerticalShaderFile = "data/shader/post/gauss_blur_vertical_pass.ini";
-	m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurVerticalShaderFile);
-	// Check if ok
-	if (m_gaussBlurVerticalShaderId == invalidResource)
-	{
-		LOG_ERROR("Failed to initialize the shader from file %s.", gaussBlurVerticalShaderFile.c_str());
-		return false;
-	}
-	return true;
+    // Depth of field shader
+    std::string gaussBlurVerticalShaderFile = "data/shader/post/gauss_blur_vertical_pass.ini";
+    m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurVerticalShaderFile);
+    // Check if ok
+    if (m_gaussBlurVerticalShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  gaussBlurVerticalShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CDeferredRenderer::initGaussBlurHorizontalPass(IResourceManager* manager)
 {
-	// Depth of field shader
-	std::string gaussBlurHorizontalShaderFile = "data/shader/post/gauss_blur_horizontal_pass.ini";
-	m_gaussBlurHorizontalShaderId = manager->loadShader(gaussBlurHorizontalShaderFile);
-	// Check if ok
-	if (m_gaussBlurHorizontalShaderId == invalidResource)
-	{
-		LOG_ERROR("Failed to initialize the shader from file %s.", gaussBlurHorizontalShaderFile.c_str());
-		return false;
-	}
-	return true;
+    // Depth of field shader
+    std::string gaussBlurHorizontalShaderFile = "data/shader/post/gauss_blur_horizontal_pass.ini";
+    m_gaussBlurHorizontalShaderId = manager->loadShader(gaussBlurHorizontalShaderFile);
+    // Check if ok
+    if (m_gaussBlurHorizontalShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.",
+                  gaussBlurHorizontalShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CDeferredRenderer::initFxaaPass(IResourceManager* manager)
 {
-	// Fxaa shader
-	std::string fxaaShaderFile = "data/shader/post/fxaa_pass.ini";
-	m_fxaaPassShaderId = manager->loadShader(fxaaShaderFile);
-	// Check if ok
-	if (m_fxaaPassShaderId == invalidResource)
-	{
-		LOG_ERROR("Failed to initialize the shader from file %s.", fxaaShaderFile.c_str());
-		return false;
-	}
-	return true;
+    // Fxaa shader
+    std::string fxaaShaderFile = "data/shader/post/fxaa_pass.ini";
+    m_fxaaPassShaderId = manager->loadShader(fxaaShaderFile);
+    // Check if ok
+    if (m_fxaaPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", fxaaShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CDeferredRenderer::initFogPass(IResourceManager* manager)
 {
-	// Fog shader
-	std::string fogShaderFile = "data/shader/post/fog_pass.ini";
-	m_fogPassShaderId = manager->loadShader(fogShaderFile);
-	// Check if ok
-	if (m_fogPassShaderId == invalidResource)
-	{
-		LOG_ERROR("Failed to initialize the shader from file %s.", fogShaderFile.c_str());
-		return false;
-	}
-	return true;
+    // Fog shader
+    std::string fogShaderFile = "data/shader/post/fog_pass.ini";
+    m_fogPassShaderId = manager->loadShader(fogShaderFile);
+    // Check if ok
+    if (m_fogPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", fogShaderFile.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CDeferredRenderer::initDisplayPass(IResourceManager* manager)

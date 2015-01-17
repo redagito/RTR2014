@@ -38,6 +38,9 @@ const std::string blurFarUniformName = "blur_far";
 // Blur parameters
 const std::string blurStrengthUniformName = "blur_strength";
 
+// Fog parameters
+const std::string fogPassTypeUniformName = "fog_type";
+
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
 const std::string inverseViewMatrixUniformName = "inverse_view";

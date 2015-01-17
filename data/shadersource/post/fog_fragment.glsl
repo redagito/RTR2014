@@ -9,6 +9,8 @@ uniform sampler2D depth_texture;
 uniform float screen_width;
 uniform float screen_height;
 
+uniform int fog_type;
+
 vec3 applyFog(vec3 color, float d)
 {
     float n = 0.01f;
@@ -19,8 +21,16 @@ vec3 applyFog(vec3 color, float d)
     float fogF = 50.0f;
     float fogD = 0.02f;
     
-    float fogFactor = exp(-pow(fogD*z, 2.0f));
-    //float fogFactor = (fogF - z) / (fogF - fogN);
+    float fogFactor = 0;
+    if (fog_type == 0) {
+        return color;
+    } else if (fog_type == 1) {
+        fogFactor = (fogF - z) / (fogF - fogN);
+    } else if (fog_type == 2) {
+        fogFactor = exp(-fogD*z);
+    } else if (fog_type == 3) {
+        fogFactor = exp(-pow(fogD*z, 2.0f));
+    }
     
     return mix(color, vec3(0.7, 0.6, 0.5), 1.0f - clamp(fogFactor, 0.5f, 1.0f));
 }

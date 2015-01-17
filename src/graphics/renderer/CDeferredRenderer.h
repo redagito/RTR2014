@@ -78,7 +78,7 @@ class CDeferredRenderer : public ARenderer
                          const IGraphicsResourceManager& manager,
                          const std::shared_ptr<CTexture>& texture);
 
-    void fogPass(const IWindow&, const IGraphicsResourceManager& manager,
+    void fogPass(const ICamera& camera, const IWindow&, const IGraphicsResourceManager& manager,
                  const std::shared_ptr<CTexture>& texture);
 
     /**
