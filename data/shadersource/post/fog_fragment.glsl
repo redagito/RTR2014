@@ -34,5 +34,5 @@ void main(void)
     
     float d = texture(depth_texture, normalized_screen_coordinates).x;
     
-    output_color = applyFog(sceneColor, d);
+    output_color = vec4(applyFog(sceneColor, d), 1.0f);
 }

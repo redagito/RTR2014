@@ -657,15 +657,16 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 	fxaaPass(window, manager, texture);
 	m_postProcessPassFrameBuffer0.setInactive(GL_FRAMEBUFFER);
 	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
-	return;
 
-	/*
 	// Pass 2: fog
 	// TODO Fog paarmeter
 	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-	fogPass(camera, window, manager, m_postProcessPassTexture0);
+	fogPass(window, manager, m_postProcessPassTexture0);
+    m_postProcessPassFrameBuffer1.setInactive(GL_FRAMEBUFFER);
+    m_postProcessPassOutputTexture = m_postProcessPassTexture1;
 
-	// Pass 3: dof
+    /*
+    // Pass 3: dof
 	// Pass 3.1: gauss blur
 	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
 	gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
@@ -1163,6 +1164,13 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 		LOG_ERROR("Failed to initialize fxaa pass.");
 		return false;
 	}
+    
+    // FXAA
+    if (!initFogPass(manager))
+    {
+        LOG_ERROR("Failed to initialize fog pass.");
+        return false;
+    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
