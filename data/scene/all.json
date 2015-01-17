@@ -199,6 +199,19 @@
             ]
         },
         {
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-22, 50, 170],
+        	"rotation" :  [ 1.57, 0, 0 ],
+            "scale" :  [ 50, 50, 50 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, 0.2, 0 ]
+                }
+            ]
+        },
+        {
         	"mesh" : "data/mesh/sword.obj",
         	"material" : "data/material/sword.ini",
         	"position": [0, 0, 55],
