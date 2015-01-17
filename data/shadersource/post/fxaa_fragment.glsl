@@ -12,8 +12,6 @@ layout (location = 0) out vec3 color;
 
 // Based on http://www.glge.org/demos/fxaa/
 void main(){
-
-
 	vec2 inverse_buffer_size = vec2(1.0 / screen_width, 1.0 / screen_height);
 
 	vec3 rgbNW = texture(scene_texture, (gl_FragCoord.xy + vec2(-1.0, -1.0)) * inverse_buffer_size).xyz;

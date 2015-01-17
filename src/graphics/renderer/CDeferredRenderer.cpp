@@ -656,6 +656,7 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
 	fxaaPass(window, manager, texture);
 	m_postProcessPassFrameBuffer0.setInactive(GL_FRAMEBUFFER);
+
 	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
 	return;
 
