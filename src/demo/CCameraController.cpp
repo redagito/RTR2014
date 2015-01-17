@@ -337,6 +337,11 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
     {
         info.fxaaActive = !info.fxaaActive;
     }
+    
+    if (keyCode == GLFW_KEY_G)
+    {
+        info.dofActive = !info.dofActive;
+    }
 }
 
 void CCameraController::handleMouseMovementEvent(int x, int y)
