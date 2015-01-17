@@ -76,6 +76,9 @@ const GLint illuminationPassDepthTextureUnit = 2;
 // Texture units for display pass
 const GLint displayPassSceneTextureUnit = 0;
 
+// texture units for FXAA pass
+const GLint fxaaInputTextureId = 0;
+
 // Texture sampler uniform names
 const std::string diffuseTextureUniformName = "diffuse_texture";
 const std::string normalTextureUniformName = "normal_texture";

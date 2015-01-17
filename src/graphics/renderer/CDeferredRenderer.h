@@ -79,6 +79,12 @@ class CDeferredRenderer : public ARenderer
                          const std::shared_ptr<CTexture>& texture);
 
     /**
+    * \brief FXAA Pass.
+    */
+    void fxaaPass(const IWindow& window, const IGraphicsResourceManager& manager,
+                  const std::shared_ptr<CTexture>& texture);
+
+    /**
     * \brief Draws scene texture to main FBO.
     */
     void displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
@@ -121,25 +127,25 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDepthOfFieldPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes vertical gauss blur pass.
-	*/
-	bool initGaussBlurVerticalPass(IResourceManager* manager);
+    /**
+    * \brief Initializes vertical gauss blur pass.
+    */
+    bool initGaussBlurVerticalPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes horizontal gauss blur pass.
-	*/
-	bool initGaussBlurHorizontalPass(IResourceManager* manager);
+    /**
+    * \brief Initializes horizontal gauss blur pass.
+    */
+    bool initGaussBlurHorizontalPass(IResourceManager* manager);
 
     /**
     * \brief Initializes FXAA pass for post processing.
     */
-	bool initFxaaPass(IResourceManager* manager);
+    bool initFxaaPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes fog pass for post processing.
-	*/
-	bool initFogPass(IResourceManager* manager);
+    /**
+    * \brief Initializes fog pass for post processing.
+    */
+    bool initFogPass(IResourceManager* manager);
 
     /**
     * \brief Display pass draws final image to screen.
@@ -192,8 +198,10 @@ class CDeferredRenderer : public ARenderer
     ResourceId m_postProcessScreenQuadId = -1;
     CFrameBuffer m_postProcessPassFrameBuffer0;
     CFrameBuffer m_postProcessPassFrameBuffer1;
+    CFrameBuffer m_postProcessPassFrameBuffer2;
     std::shared_ptr<CTexture> m_postProcessPassTexture0 = nullptr;
     std::shared_ptr<CTexture> m_postProcessPassTexture1 = nullptr;
+    std::shared_ptr<CTexture> m_postProcessPassTexture2 = nullptr;
     std::shared_ptr<CTexture> m_postProcessPassOutputTexture = nullptr;
 
     // Gauss blur pass
