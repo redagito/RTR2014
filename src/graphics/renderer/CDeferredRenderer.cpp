@@ -118,10 +118,10 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     illuminationPass(scene, camera, window, manager, *query);
 
     // Post processing pass
-    postProcessPass(camera, window, manager, m_illuminationPassTexture);
+    //postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
     // Final display pass
-    displayPass(window, manager, m_postProcessPassOutputTexture);
+    displayPass(window, manager, m_illuminationPassTexture);
 
     // Post draw error check
     std::string error;
@@ -507,6 +507,19 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         return;
     }
 
+	// Prepare light pass frame buffer
+	glViewport(0, 0, window.getWidth(), window.getHeight());
+	m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+	// No depth testing for light volumes
+	glDisable(GL_DEPTH_TEST);
+	// Additive blending for light accumulation
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	// Reset culling
+	glCullFace(GL_BACK);
+
     // Render point light volumes into light buffer
     while (query.hasNextDirectionalLight())
     {
@@ -530,19 +543,6 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             glm::mat4 shadowProj = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
             shadowMapPass(scene, shadowCamera, window, manager);
-
-            // Prepare light pass frame buffer
-            glViewport(0, 0, window.getWidth(), window.getHeight());
-            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-
-            // No depth testing for light volumes
-            glDisable(GL_DEPTH_TEST);
-            // Additive blending for light accumulation
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
-
-            // Reset culling
-            glCullFace(GL_BACK);
 
             // Set shader active
             directionalLightPassShader->setActive();
