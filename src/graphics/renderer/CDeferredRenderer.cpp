@@ -658,7 +658,7 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 	// Pass 2: fog
 	// TODO Fog paarmeter
 	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-	fogPass(window, manager, m_postProcessPassTexture0);
+	fogPass(camera, window, manager, m_postProcessPassTexture0);
 
 	// Pass 3: dof
 	// Pass 3.1: gauss blur
@@ -674,6 +674,40 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 
 	// Set output texture
 	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
+}
+
+void CDeferredRenderer::fogPass(const IWindow& window,
+                                const IGraphicsResourceManager& manager,
+                                const std::shared_ptr<CTexture>& texture)
+{
+    // Get fxaa shader
+    CShaderProgram* fogShader = manager.getShaderProgram(m_fogPassShaderId);
+    if (fogShader == nullptr)
+    {
+        LOG_ERROR("Shader program for fog pass could not be retrieved.");
+        return;
+    }
+
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for fog pass could not be retrieved.");
+        return;
+    }
+
+    fogShader->setActive();
+    
+    texture->setActive(fogPassSceneTextureUnit);
+    fogShader->setUniform(sceneTextureUniformName, fogPassSceneTextureUnit);
+    
+    m_depthTexture->setActive(fogPassDepthTextureUnit);
+    fogShader->setUniform(depthTextureUniformName, fogPassDepthTextureUnit);
+    
+    fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    fogShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    
+    ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,

@@ -78,6 +78,9 @@ class CDeferredRenderer : public ARenderer
                          const IGraphicsResourceManager& manager,
                          const std::shared_ptr<CTexture>& texture);
 
+    void fogPass(const IWindow&, const IGraphicsResourceManager& manager,
+                 const std::shared_ptr<CTexture>& texture);
+
     /**
     * \brief Draws scene texture to main FBO.
     */
@@ -121,25 +124,25 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDepthOfFieldPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes vertical gauss blur pass.
-	*/
-	bool initGaussBlurVerticalPass(IResourceManager* manager);
+    /**
+    * \brief Initializes vertical gauss blur pass.
+    */
+    bool initGaussBlurVerticalPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes horizontal gauss blur pass.
-	*/
-	bool initGaussBlurHorizontalPass(IResourceManager* manager);
+    /**
+    * \brief Initializes horizontal gauss blur pass.
+    */
+    bool initGaussBlurHorizontalPass(IResourceManager* manager);
 
     /**
     * \brief Initializes FXAA pass for post processing.
     */
-	bool initFxaaPass(IResourceManager* manager);
+    bool initFxaaPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes fog pass for post processing.
-	*/
-	bool initFogPass(IResourceManager* manager);
+    /**
+    * \brief Initializes fog pass for post processing.
+    */
+    bool initFogPass(IResourceManager* manager);
 
     /**
     * \brief Display pass draws final image to screen.
