@@ -73,6 +73,10 @@ const GLint illuminationPassLightTextureUnit = 0;
 const GLint illuminationPassDiffuseGlowTextureUnit = 1;
 const GLint illuminationPassDepthTextureUnit = 2;
 
+// Texture units for fog pass
+const GLint fogPassSceneTextureUnit = 0;
+const GLint fogPassDepthTextureUnit = 1;
+
 // Texture units for display pass
 const GLint displayPassSceneTextureUnit = 0;
 

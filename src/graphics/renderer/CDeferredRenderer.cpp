@@ -658,15 +658,16 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 	m_postProcessPassFrameBuffer0.setInactive(GL_FRAMEBUFFER);
 
 	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
-	return;
 
-	/*
 	// Pass 2: fog
 	// TODO Fog paarmeter
 	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
 	fogPass(window, manager, m_postProcessPassTexture0);
+    m_postProcessPassFrameBuffer1.setInactive(GL_FRAMEBUFFER);
+    m_postProcessPassOutputTexture = m_postProcessPassTexture1;
 
-	// Pass 3: dof
+    /*
+    // Pass 3: dof
 	// Pass 3.1: gauss blur
 	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
 	gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
@@ -711,6 +712,40 @@ void CDeferredRenderer::fxaaPass(const IWindow& window, const IGraphicsResourceM
 	fxaaShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
 	ARenderer::draw(quadMesh);
+}
+
+void CDeferredRenderer::fogPass(const IWindow& window,
+                                const IGraphicsResourceManager& manager,
+                                const std::shared_ptr<CTexture>& texture)
+{
+    // Get fxaa shader
+    CShaderProgram* fogShader = manager.getShaderProgram(m_fogPassShaderId);
+    if (fogShader == nullptr)
+    {
+        LOG_ERROR("Shader program for fog pass could not be retrieved.");
+        return;
+    }
+
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for fog pass could not be retrieved.");
+        return;
+    }
+
+    fogShader->setActive();
+    
+    texture->setActive(fogPassSceneTextureUnit);
+    fogShader->setUniform(sceneTextureUniformName, fogPassSceneTextureUnit);
+    
+    m_depthTexture->setActive(fogPassDepthTextureUnit);
+    fogShader->setUniform(depthTextureUniformName, fogPassDepthTextureUnit);
+    
+    fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    fogShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    
+    ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
@@ -1130,6 +1165,13 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 		LOG_ERROR("Failed to initialize fxaa pass.");
 		return false;
 	}
+    
+    // FXAA
+    if (!initFogPass(manager))
+    {
+        LOG_ERROR("Failed to initialize fog pass.");
+        return false;
+    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
