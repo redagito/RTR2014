@@ -4,11 +4,11 @@
 
 class CShaderPreprocessor
 {
-public:
-	void setIncludePath(const std::string& includePath);
+   public:
+    void setIncludePath(const std::string& includePath);
 
-	bool preprocess(const std::string& shaderCode, std::string& preprocessedShaderCode);
+    bool preprocess(const std::string& shaderCode, std::string& preprocessedShaderCode);
 
-private:
-	std::string m_includePath;
+   private:
+    std::string m_includePath;
 };
