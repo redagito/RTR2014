@@ -10,6 +10,7 @@
 
 #include "io/CIniFile.h"
 #include "io/CObjModelLoader.h"
+#include "io/CShaderPreprocessor.h"
 
 #include "debug/Log.h"
 
@@ -367,36 +368,7 @@ ResourceId CResourceManager::createString(const std::string& text)
 
 ResourceId CResourceManager::loadString(const std::string& file)
 {
-    auto iter = m_textFiles.find(file);
-    if (iter != m_textFiles.end())
-    {
-        return iter->second;
-    }
-
-	LOG_DEBUG("Loading text from file %s.", file.c_str());
-    std::ifstream ifs(file);
-    if (!ifs.is_open())
-    {
-        LOG_ERROR("Failed to open the text file %s.", file.c_str());
-        return -1;
-    }
-
-    // Load file
-    std::string text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-    ifs.close();
-
-    ResourceId stringId = -1;
-
-    // Create new string entry
-    stringId = createString(text);
-    if (stringId == -1)
-    {
-        LOG_ERROR("Failed to create string id for text file %s.", file.c_str());
-        return -1;
-    }
-
-    m_textFiles[file] = stringId;
-    return stringId;
+	return loadString(file, false);
 }
 
 bool CResourceManager::getString(ResourceId id, std::string& text) const
@@ -476,7 +448,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
         return -1;
     }
 
-    ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"));
+    ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"), true);
     if (vertexId == -1)
     {
         LOG_ERROR(
@@ -486,7 +458,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
         return -1;
     }
 
-    ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"));
+	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"), true);
     if (fragmentId == -1)
     {
         LOG_ERROR(
@@ -500,7 +472,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation control shader source
     if (ini.hasKey("tessellation_control", "file"))
     {
-        tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"));
+		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"), true);
         if (tessCtrlId == -1)
         {
             LOG_ERROR(
@@ -515,7 +487,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation evaluation shader source
     if (ini.hasKey("tessellation_evaluation", "file"))
     {
-        tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"));
+		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"), true);
         if (tessEvalId == -1)
         {
             LOG_ERROR(
@@ -530,7 +502,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load geometry shader source
     if (ini.hasKey("geometry", "file"))
     {
-        geometryId = loadString(ini.getValue("geometry", "file", "error"));
+		geometryId = loadString(ini.getValue("geometry", "file", "error"), true);
         if (geometryId == -1)
         {
             LOG_ERROR(
@@ -572,4 +544,50 @@ void CResourceManager::notifyResourceListeners(EResourceType type, ResourceId id
     {
         listener->notify(type, id, event, this);
     }
+}
+
+ResourceId CResourceManager::loadString(const std::string& file, bool preprocess)
+{
+	auto iter = m_textFiles.find(file);
+	if (iter != m_textFiles.end())
+	{
+		return iter->second;
+	}
+
+	LOG_DEBUG("Loading text from file %s.", file.c_str());
+	std::ifstream ifs(file);
+	if (!ifs.is_open())
+	{
+		LOG_ERROR("Failed to open the text file %s.", file.c_str());
+		return -1;
+	}
+
+	// Load file
+	std::string text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	ifs.close();
+
+	ResourceId stringId = -1;
+
+	if (preprocess)
+	{
+		// Preprocessing of include statements for shader source files
+		CShaderPreprocessor preprocessor;
+		preprocessor.setIncludePath("data/shadersource/include/");
+		if (!preprocessor.preprocess(text, text))
+		{
+			LOG_ERROR("Failed to preprocess the text file %s.", file.c_str());
+			return -1;
+		}
+	}
+
+	// Create new string entry
+	stringId = createString(text);
+	if (stringId == -1)
+	{
+		LOG_ERROR("Failed to create string id for text file %s.", file.c_str());
+		return -1;
+	}
+
+	m_textFiles[file] = stringId;
+	return stringId;
 }
