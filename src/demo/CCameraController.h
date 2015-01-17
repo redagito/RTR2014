@@ -1,6 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+
+#include <glm/glm.hpp>
 
 #include "graphics/window/CGlfwWindow.h"
 
@@ -18,6 +21,8 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
     void setCamera(std::shared_ptr<IControllableCamera> camera);
     void setInputProvider(IInputProvider* provider);
 
+    bool loadSequence(std::string file);
+    
     void animate(float dt);
 
     virtual void handleKeyEvent(EKeyEventType type, int keyCode) override;
@@ -27,11 +32,19 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
     virtual void handleResizeEvent(int width, int height) override;
 
    private:
+    struct SequencePoint {
+        glm::vec3 position;
+        glm::vec3 orientation;
+        float timestamp;
+    };
+    
+    bool m_isRunningSequence = false;
+    float m_sequenceTime = 0;
+    std::vector<SequencePoint> m_sequencePoints;
+    
     float m_speed = 1.0f;
-   
     std::shared_ptr<IControllableCamera> m_camera = nullptr;
     IInputProvider* m_inputProvider = nullptr;
-    
     int m_lastX = 0;
     int m_lastY = 0;
 };

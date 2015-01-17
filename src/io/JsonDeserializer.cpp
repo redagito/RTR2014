@@ -18,6 +18,22 @@ bool deserialize(const Json::Value& node, bool& b)
 	return true;
 }
 
+bool deserialize(const Json::Value& node, int64_t& l)
+{
+    if (node.empty())
+    {
+        LOG_ERROR("Node is empty.");
+        return false;
+    }
+    if (!node.isNumeric())
+    {
+        LOG_ERROR("Node data type is not numeric.");
+        return false;
+    }
+    l = node.asInt64();
+    return true;
+}
+
 bool deserialize(const Json::Value& node, float& f)
 {
 	if (node.empty())

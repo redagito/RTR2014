@@ -116,6 +116,7 @@ int RTRDemo::run()
     double f1Cooldown = 0.0;
     double f2Cooldown = 0.0;
     double f3Cooldown = 0.0;
+    double f5Cooldown = 0.0;
     double k1Cooldown = 0.0;
     double timeDiff = 0.0;
 
@@ -135,6 +136,7 @@ int RTRDemo::run()
         f1Cooldown -= timeDiff;
         f2Cooldown -= timeDiff;
         f3Cooldown -= timeDiff;
+        f5Cooldown -= timeDiff;
         k1Cooldown -= timeDiff;
         fpsCoolDown -= timeDiff;
 
@@ -161,6 +163,12 @@ int RTRDemo::run()
         {
             f3Cooldown = 0.3f;
             m_renderer = m_forwardRenderer;
+        }
+        
+        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F5) == GLFW_PRESS && f5Cooldown <= 0.f)
+        {
+            f5Cooldown = 0.3f;
+            m_cameraController->loadSequence("data/democam.json");
         }
 
         m_cameraController->animate((float)timeDiff);
