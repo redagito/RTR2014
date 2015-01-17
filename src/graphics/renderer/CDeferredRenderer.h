@@ -74,14 +74,15 @@ class CDeferredRenderer : public ARenderer
     /**
     * \brief Performs post processing of lit scene.
     */
-    void postProcessPass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                         const IGraphicsResourceManager& manager, ISceneQuery& query);
+    void postProcessPass(const ICamera& camera, const IWindow& window,
+                         const IGraphicsResourceManager& manager,
+                         const std::shared_ptr<CTexture>& texture);
 
     /**
     * \brief Draws scene texture to main FBO.
     */
     void displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
-                     std::shared_ptr<CTexture>& texture);
+                     const std::shared_ptr<CTexture>& texture);
 
     /**
     * \brief Initializes resources for geometry pass.
@@ -119,6 +120,26 @@ class CDeferredRenderer : public ARenderer
     * Called by initPostProcesPass.
     */
     bool initDepthOfFieldPass(IResourceManager* manager);
+
+	/**
+	* \brief Initializes vertical gauss blur pass.
+	*/
+	bool initGaussBlurVerticalPass(IResourceManager* manager);
+
+	/**
+	* \brief Initializes horizontal gauss blur pass.
+	*/
+	bool initGaussBlurHorizontalPass(IResourceManager* manager);
+
+    /**
+    * \brief Initializes FXAA pass for post processing.
+    */
+	bool initFxaaPass(IResourceManager* manager);
+
+	/**
+	* \brief Initializes fog pass for post processing.
+	*/
+	bool initFogPass(IResourceManager* manager);
 
     /**
     * \brief Display pass draws final image to screen.
@@ -169,19 +190,24 @@ class CDeferredRenderer : public ARenderer
 
     // Post processing pass
     ResourceId m_postProcessScreenQuadId = -1;
-    CFrameBuffer m_postProcessPassFrameBuffer;
-    std::shared_ptr<CTexture> m_postProcessPassTexture = nullptr;
+    CFrameBuffer m_postProcessPassFrameBuffer0;
+    CFrameBuffer m_postProcessPassFrameBuffer1;
+    std::shared_ptr<CTexture> m_postProcessPassTexture0 = nullptr;
+    std::shared_ptr<CTexture> m_postProcessPassTexture1 = nullptr;
+    std::shared_ptr<CTexture> m_postProcessPassOutputTexture = nullptr;
 
     // Gauss blur pass
     ResourceId m_gaussBlurVerticalShaderId = -1;
     ResourceId m_gaussBlurHorizontalShaderId = -1;
 
+    // FXAA pass
+    ResourceId m_fxaaPassShaderId = -1;
+
+    // Fog pass
+    ResourceId m_fogPassShaderId = -1;
+
     // Depth-of-field pass
     ResourceId m_depthOfFieldPassShaderId = -1;
-    float m_focusNear = 1.f;
-    float m_focusFar = 10.f;
-    float m_blurNear = 0.1f;
-    float m_blurFar = 20.f;
 
     // Display pass for final screen draw
     ResourceId m_displayPassShaderId = -1;

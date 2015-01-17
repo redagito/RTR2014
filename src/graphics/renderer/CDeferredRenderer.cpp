@@ -117,12 +117,11 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Illumination pass renders lit scene from lbuffer and gbuffer
     illuminationPass(scene, camera, window, manager, *query);
 
-    // Final pass, creates lit scene from lbuffer and gbuffer
-    // m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
-    //                         m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
-    //                          nullptr, &manager);
+    // Post processing pass
+    postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
-	displayPass(window, manager, m_illuminationPassTexture);
+    // Final display pass
+    displayPass(window, manager, m_postProcessPassTexture);
 
     // Post draw error check
     std::string error;
@@ -642,15 +641,43 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
     m_illumationPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
 }
 
-void CDeferredRenderer::postProcessPass(const IScene& scene, const ICamera& camera,
-                                        const IWindow& window,
-                                        const IGraphicsResourceManager& manager, ISceneQuery& query)
+void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& window,
+                                        const IGraphicsResourceManager& manager,
+                                        const std::shared_ptr<CTexture>& texture)
 {
-    // TODO
+	// Reset viewport
+	glViewport(0, 0, window.getWidth(), window.getHeight());
+	// Resize frame buffer
+	m_postProcessPassFrameBuffer0.resize(window.getWidth(), window.getWidth());
+	m_postProcessPassFrameBuffer1.resize(window.getWidth(), window.getWidth());
+
+	// Pass 1: fxaa
+	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+	fxaaPass(window, manager, texture);
+
+	// Pass 2: fog
+	// TODO Fog paarmeter
+	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
+	fogPass(window, manager, m_postProcessPassTexture0);
+
+	// Pass 3: dof
+	// Pass 3.1: gauss blur
+	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+	gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
+
+	m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
+	gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
+
+	// TODOD DOF parameter
+	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+	depthOfFieldPass(window, manager, m_postProcessPassTexture1);
+
+	// Set output texture
+	m_postProcessPassOutputTexture = m_postProcessPassTexture0;
 }
 
 void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
-                                    std::shared_ptr<CTexture>& texture)
+                                    const std::shared_ptr<CTexture>& texture)
 {
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -1080,14 +1107,24 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-    // Init post processing fbo
-    m_postProcessPassTexture = std::make_shared<CTexture>();
-    if (!m_postProcessPassTexture->init(800, 600, GL_RGBA))
-    {
-        LOG_ERROR("Failed to initialize post process pass texture.");
-        return false;
-    }
-    m_postProcessPassFrameBuffer.attach(m_postProcessPassTexture, GL_COLOR_ATTACHMENT0);
+    // Init post processing FBOs
+	// Texture 0
+	m_postProcessPassTexture0 = std::make_shared<CTexture>();
+	if (!m_postProcessPassTexture0->init(800, 600, GL_RGBA))
+	{
+		LOG_ERROR("Failed to initialize post process pass texture.");
+		return false;
+	}
+	// Texture 1
+	m_postProcessPassTexture1 = std::make_shared<CTexture>();
+	if (!m_postProcessPassTexture1->init(800, 600, GL_RGBA))
+	{
+		LOG_ERROR("Failed to initialize post process pass texture.");
+		return false;
+	}
+
+	m_postProcessPassFrameBuffer0.attach(m_postProcessPassTexture0, GL_COLOR_ATTACHMENT0);
+	m_postProcessPassFrameBuffer1.attach(m_postProcessPassTexture1, GL_COLOR_ATTACHMENT0);
     // TODO Depth attachment required?
 
     if (!initDepthOfFieldPass(manager))
@@ -1100,16 +1137,72 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 
 bool CDeferredRenderer::initDepthOfFieldPass(IResourceManager* manager)
 {
-    // Depth of field shader
-    std::string depthOfFieldShaderFile = "data/shader/post/depth_of_field_pass.ini";
-    m_depthOfFieldPassShaderId = manager->loadShader(depthOfFieldShaderFile);
-    // Check if ok
-    if (m_depthOfFieldPassShaderId == invalidResource)
-    {
-        LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
-        return false;
-    }
-    return true;
+	// Depth of field shader
+	std::string depthOfFieldShaderFile = "data/shader/post/depth_of_field_pass.ini";
+	m_depthOfFieldPassShaderId = manager->loadShader(depthOfFieldShaderFile);
+	// Check if ok
+	if (m_depthOfFieldPassShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool CDeferredRenderer::initGaussBlurVerticalPass(IResourceManager* manager)
+{
+	// Depth of field shader
+	std::string gaussBlurVerticalShaderFile = "data/shader/post/gauss_blur_vertical_pass.ini";
+	m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurVerticalShaderFile);
+	// Check if ok
+	if (m_gaussBlurVerticalShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", gaussBlurVerticalShaderFile.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool CDeferredRenderer::initGaussBlurHorizontalPass(IResourceManager* manager)
+{
+	// Depth of field shader
+	std::string gaussBlurHorizontalShaderFile = "data/shader/post/gauss_blur_horizontal_pass.ini";
+	m_gaussBlurVerticalShaderId = manager->loadShader(gaussBlurHorizontalShaderFile);
+	// Check if ok
+	if (m_gaussBlurVerticalShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", gaussBlurHorizontalShaderFile.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool CDeferredRenderer::initFxaaPass(IResourceManager* manager)
+{
+	// Fxaa shader
+	std::string fxaaShaderFile = "data/shader/post/fxaa_pass.ini";
+	m_fxaaPassShaderId = manager->loadShader(fxaaShaderFile);
+	// Check if ok
+	if (m_fxaaPassShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", fxaaShaderFile.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool CDeferredRenderer::initFogPass(IResourceManager* manager)
+{
+	// Fog shader
+	std::string fogShaderFile = "data/shader/post/fog_pass.ini";
+	m_fogPassShaderId = manager->loadShader(fogShaderFile);
+	// Check if ok
+	if (m_fogPassShaderId == invalidResource)
+	{
+		LOG_ERROR("Failed to initialize the shader from file %s.", fogShaderFile.c_str());
+		return false;
+	}
+	return true;
 }
 
 bool CDeferredRenderer::initDisplayPass(IResourceManager* manager)
