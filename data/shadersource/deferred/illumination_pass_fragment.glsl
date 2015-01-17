@@ -1,33 +1,18 @@
 #version 330 core
 
+// G-buffer textures
 uniform sampler2D diffuse_glow_texture;
-uniform sampler2D light_texture;
 uniform sampler2D depth_texture;
+
+// L-buffer texture
+uniform sampler2D light_texture;
 
 // Screen size
 uniform float screen_width;
 uniform float screen_height;
 
-uniform mat4 inverse_view_projection;
-
+// Lit fragment
 out vec3 fragmentColor;
-
-vec3 getWorldPosition(vec2 uv)
-{
-	float z = texture(depth_texture, uv).x;
-	vec4 sPos = vec4(uv * 2 - 1, z * 2 - 1, 1.0);
-	sPos = inverse_view_projection * sPos;
-	return (sPos.xyz / sPos.w);
-}
-
-vec3 illuminate(vec3 worldPos, vec3 surfaceColor, vec3 surfaceNormal, vec3 lightPosition, vec3 lightColor, float intensity)
-{
-	vec3 lightDirection = lightPosition - worldPos;
-	float distance = length(lightDirection);
-	lightDirection = lightDirection / distance;
-	float attenuation = max(0.0, (intensity - distance) / intensity);
-	return surfaceColor * max(0, dot(surfaceNormal, lightDirection)) * attenuation * lightColor;
-}
 
 // Filmic tonemapping operation based on "Uncharted 2" presentation 
 // http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
@@ -80,12 +65,21 @@ vec3 gammaCorrection(vec3 color)
 
 void main(void)
 {
+	// Get screen position for uv texture lookup
 	vec2 normalized_screen_coordinates = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
-	vec3 worldPos = getWorldPosition(normalized_screen_coordinates);
+	// Retrieve gbuffer data
 	vec4 temp = texture(diffuse_glow_texture, normalized_screen_coordinates);
+	// Extract diffuse base color
 	vec3 diffuseColor = temp.rgb;
+	// Extract glow, should be used for blur pass
 	vec3 glow = vec3(temp.a);
+	// Retrieve light data
 	vec3 light = texture(light_texture, normalized_screen_coordinates).rgb;
-	fragmentColor = diffuseColor * max(glow, light);
-	fragmentColor = filmicTonemap(fragmentColor);
+	
+	// Perform tone mapping on incomming light
+	// Should be done with average luminance
+	light = filmicTonemap(light);
+
+	// Calculate fragment color based on incomming light or glow
+	fragmentColor = diffuseColor * max(light, glow);
 }

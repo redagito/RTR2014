@@ -35,24 +35,45 @@ class CDeferredRenderer : public ARenderer
     static CDeferredRenderer* create(IResourceManager* manager);
 
    protected:
+    /**
+    * \brief Writes geometry data into g-buffer.
+    */
     void geometryPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                       const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+	/**
+	* \brief Performs shadow map calculation.
+	*/
     void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                        const IGraphicsResourceManager& manager);
 
+	/**
+	* \brief Writes light data into l-buffer.
+	*/
     void lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                    const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+	/**
+	* \brief Writes point light data to l-buffer.
+	*/
     void pointLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                         const IGraphicsResourceManager& manager, ISceneQuery& query);
-
+	
+	/**
+	* \brief Writes directional light data to l-buffer.
+	*/
     void directionalLightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                               const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+	/**
+	* \brief Performs scene illumination and tone mapping.
+	*/
     void illuminationPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                           const IGraphicsResourceManager& manager, ISceneQuery& query);
 
+	/**
+	* \brief Performs post processing of lit scene.
+	*/
     void postProcessPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                          const IGraphicsResourceManager& manager, ISceneQuery& query);
 
@@ -71,10 +92,10 @@ class CDeferredRenderer : public ARenderer
     */
     bool initDirectionalLightPass(IResourceManager* manager);
 
-	/**
-	* \brief Initializes resources for illumination pass.
-	*/
-	bool initIlluminationPass(IResourceManager* manager);
+    /**
+    * \brief Initializes resources for illumination pass.
+    */
+    bool initIlluminationPass(IResourceManager* manager);
 
     /**
      * \brief Initializes resources for shadow map pass
@@ -130,11 +151,11 @@ class CDeferredRenderer : public ARenderer
     ResourceId m_directionalLightPassShaderId = -1;
     ResourceId m_directionalLightScreenQuadId = -1;
 
-	// Illumination pass
-	ResourceId m_illuminationPassShaderId = -1;
-	ResourceId m_illuminationPassScreenQuadId = -1;
-	CFrameBuffer m_illimationPassFrameBuffer;
-	std::shared_ptr<CTexture> m_illuminationPassTexture = nullptr;
+    // Illumination pass
+    ResourceId m_illuminationPassShaderId = -1;
+    ResourceId m_illuminationPassScreenQuadId = -1;
+    CFrameBuffer m_illumationPassFrameBuffer;
+    std::shared_ptr<CTexture> m_illuminationPassTexture = nullptr;
 
     // Post processing pass
     ResourceId m_postProcessScreenQuadId = -1;

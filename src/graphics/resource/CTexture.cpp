@@ -75,12 +75,12 @@ void CTexture::resize(unsigned int width, unsigned int height)
     {
         return;
     }
-	LOG_DEBUG("Texture resize from %u, %u to %u, %u.", m_width, m_height, width, height);
+    LOG_DEBUG("Texture resize from %u, %u to %u, %u.", m_width, m_height, width, height);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, GL_UNSIGNED_BYTE,
                  nullptr);
-	m_width = width;
-	m_height = height;
+    m_width = width;
+    m_height = height;
 }
 
 GLuint CTexture::getId() const { return m_textureId; }
@@ -130,7 +130,8 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         m_externalFormat = GL_RG;
         bytePerPixel = 2;
         break;
-    case GL_RGB8:  // RGB texture with values from 0-255
+    case GL_RGB:  // RGB texture with values from 0-255
+    case GL_RGB8:
         m_externalFormat = GL_RGB;
         bytePerPixel = 3;
         break;
@@ -139,9 +140,6 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         bytePerPixel = 3;
         break;
     case GL_RGBA:  // RGB texture with alpha channel
-        m_externalFormat = GL_RGBA;
-        bytePerPixel = 4;
-        break;
     case GL_RGBA8:
         m_externalFormat = GL_RGBA;
         bytePerPixel = 4;

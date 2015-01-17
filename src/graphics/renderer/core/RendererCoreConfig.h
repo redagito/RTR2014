@@ -68,6 +68,11 @@ const GLint lightPassDepthTextureUnit = 0;
 const GLint lightPassNormalSpecularTextureUnit = 1;
 const GLint lightPassShadowMapTextureUnit = 2; // Should be lightPassShadowTextureUnit
 
+// Texture units for illumination pass
+const GLint illuminationPassLightTextureUnit = 0;
+const GLint illuminationPassDiffuseGlowTextureUnit = 1;
+const GLint illuminationPassDepthTextureUnit = 2;
+
 // Texture sampler uniform names
 const std::string diffuseTextureUniformName = "diffuse_texture";
 const std::string normalTextureUniformName = "normal_texture";

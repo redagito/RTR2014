@@ -588,6 +588,12 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
                                          const IGraphicsResourceManager& manager,
                                          ISceneQuery& query)
 {
+	// Reset viewport
+	glViewport(0, 0, window.getWidth(), window.getHeight());
+	m_illumationPassFrameBuffer.resize(window.getWidth(), window.getHeight());
+	// TODO Clear illumination pass buffer?
+
+	// Get illumination shader
     CShaderProgram* illuminationShader = manager.getShaderProgram(m_illuminationPassShaderId);
     if (illuminationShader == nullptr)
     {
@@ -595,7 +601,35 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
         return;
     }
 
-    // TODO
+	// Get screen space quad
+	CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
+
+	// Final pass, creates lit scene from lbuffer and gbuffer
+	m_screenQuadPass.draw(m_diffuseGlowTexture.get(), m_lightPassTexture.get(),
+		m_depthTexture.get(), m_transformer.getInverseViewProjectionMatrix(),
+		nullptr, &manager);
+
+	// Set textures
+	// L-buffer light texture
+	m_lightPassTexture->setActive(illuminationPassLightTextureUnit);
+	illuminationShader->setUniform(lightTextureUniformName, illuminationPassLightTextureUnit);
+	
+	// G-buffer diffuse glow texture
+	m_diffuseGlowTexture->setActive(illuminationPassDiffuseGlowTextureUnit);
+	illuminationShader->setUniform(diffuseGlowTextureUniformName, illuminationPassDiffuseGlowTextureUnit);
+
+	// G-buffer depth texture
+	m_depthTexture->setActive(illuminationPassDepthTextureUnit);
+	illuminationShader->setUniform(depthTextureUniformName, illuminationPassDepthTextureUnit);
+
+	// Screen parameters
+	illuminationShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+	illuminationShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+	// Draw into frame buffer
+	m_illumationPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+	ARenderer::draw(quadMesh);
+	m_illumationPassFrameBuffer.setInactive(GL_FRAMEBUFFER);
 }
 
 void CDeferredRenderer::postProcessPass(const IScene& scene, const ICamera& camera,
@@ -948,12 +982,12 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 
     // FBO
     m_illuminationPassTexture = std::make_shared<CTexture>();
-    if (!m_illuminationPassTexture->init(800, 600, GL_RGB16F))
+    if (!m_illuminationPassTexture->init(800, 600, GL_RGB))
     {
         LOG_ERROR("Failed to initialize illumination pass texture.");
         return false;
     }
-    m_illimationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
+    m_illumationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
 
     // TODO Check FBO
 
