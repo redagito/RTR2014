@@ -25,6 +25,11 @@ class CTexture
     CTexture(unsigned int width, unsigned int height, EColorFormat format,
              bool createMipmaps = true);
 
+    // TODO remove this and introduce ability to create cubetextures (necessary for point light
+    // shadows)
+    CTexture(GLint id, bool hasMipmaps, unsigned int width, unsigned int height, GLint format,
+             GLenum externalFormat);
+
     ~CTexture();
 
     /**

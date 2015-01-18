@@ -113,6 +113,7 @@ const std::string normalSpecularTextureUniformName = "normal_specular_texture";
 const std::string diffuseGlowTextureUniformName = "diffuse_glow_texture";
 const std::string lightTextureUniformName = "light_texture";
 const std::string shadowMapTextureUniformName = "shadow_map"; // Should be shadow_map_texture or shadow_texture
+const std::string shadowCubeTextureUniformName = "shadow_cube";
 const std::string sceneTextureUniformName = "scene_texture";
 const std::string blurTextureUniformName = "blur_texture";
 

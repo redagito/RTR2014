@@ -55,6 +55,12 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
+    if (!initShadowCubePass(manager))
+    {
+        LOG_ERROR("Failed to intialize shadow map pass.");
+        return false;
+    }
+
     // Init light pass resources
     if (!initPointLightPass(manager))
     {
@@ -275,12 +281,6 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
     // Set framebuffer
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
 
-    GLfloat diffuseGlow[] = {0.f, 0.f, 0.f, 0.f};
-    GLfloat normalSpecular[] = {0.5f, 0.5f, 1.f, 0.f};
-    glClearBufferfv(GL_COLOR, 0, diffuseGlow);
-    // Normal, specular
-    glClearBufferfv(GL_COLOR, 1, normalSpecular);
-
     // Clear
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -367,6 +367,131 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
 
     // Disable geometry buffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
+
+    glCullFace(GL_BACK);
+}
+
+struct CameraDirection
+{
+    GLenum cubemapFace;
+    glm::vec3 target;
+    glm::vec3 up;
+};
+
+CameraDirection g_cameraDirections[6] = {
+    {GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
+    {GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
+    {GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
+    {GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)},
+    {GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
+    {GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)}};
+
+void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camera,
+                                       const IWindow& window,
+                                       const IGraphicsResourceManager& manager)
+{
+    m_shadowCubePassShader = manager.getShaderProgram(m_shadowCubePassShaderId);
+    m_shadowCubePassShader->setActive();
+    
+    // Depth
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Backface culling disabled for debugging
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    
+    glDisable(GL_BLEND);
+
+    // Winding order, standard is counter-clockwise
+    glFrontFace(GL_CCW);
+
+    // Reset viewport
+    glViewport(0, 0, 1000, 1000);
+    // m_shadowMapBuffer.resize(1000, 1000);
+
+    // Stores active transformations
+    CTransformer transformer;
+
+    // Set view and projection matrices
+    transformer.setProjectionMatrix(camera.getProjection());
+
+    // Query visible scene objects
+    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+
+    // Send view/projection to default shader
+    m_shadowCubePassShader->setUniform(projectionMatrixUniformName,
+                                       transformer.getProjectionMatrix());
+
+    m_shadowCubePassShader->setUniform(lightPositionUniformName, camera.getPosition());
+
+    glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+
+    // Traverse visible objects
+    while (query->hasNextObject())
+    {
+        // Get next visible object 
+        SceneObjectId id = query->getNextObject();
+
+        // Object attributes
+        ResourceId meshId = -1;
+        ResourceId materialId = -1;
+        glm::vec3 position;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+
+        // Retrieve object data
+        if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
+        {
+            // Invalid id
+            LOG_ERROR("Invalid scene object id %l.", id);
+        }
+        else
+        {
+            for (unsigned int i = 0; i < 6; ++i)
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                       g_cameraDirections[i].cubemapFace,
+                                       m_shadowCubeTexture->getId(), 0);
+                glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+                glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+                transformer.setViewMatrix(glm::lookAt(
+                    camera.getPosition(), camera.getPosition() + g_cameraDirections[i].target,
+                    g_cameraDirections[i].up));
+                m_shadowCubePassShader->setUniform(viewMatrixUniformName,
+                                                   transformer.getViewMatrix());
+
+                // Resolve ids
+                CMesh* mesh = manager.getMesh(meshId);
+                CMaterial* material = manager.getMaterial(materialId);
+
+                // Set transformations
+                transformer.setPosition(position);
+                transformer.setRotation(rotation);
+                transformer.setScale(scale);
+
+                // Forward draw call
+                draw(mesh, transformer.getTranslationMatrix(), transformer.getRotationMatrix(),
+                     transformer.getScaleMatrix(), material, manager, m_shadowCubePassShader);
+            }
+        }
+    }
+
+    // Post draw error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+    }
+
+    // Disable buffer
+    m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
+
+    glClearColor(0, 0, 0, 0);
+    glCullFace(GL_BACK);
 }
 
 void CDeferredRenderer::lightPass(const IScene& scene, const ICamera& camera, const IWindow& window,
@@ -424,27 +549,6 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         return;
     }
 
-    // Cull front facing faces
-    glCullFace(GL_FRONT);
-
-    // Set textures for point light pass
-    // Set depth texture
-    m_depthTexture->setActive(lightPassDepthTextureUnit);
-    pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
-
-    // Set texture with world space normal and specular power
-    m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
-    pointLightPassShader->setUniform(normalSpecularTextureUniformName,
-                                     lightPassNormalSpecularTextureUnit);
-
-    // Set screen size
-    pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
-    pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
-
-    // Inverse view-projection
-    pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
-                                     m_transformer.getInverseViewProjectionMatrix());
-
     // Render point light volumes into light buffer
     while (query.hasNextPointLight())
     {
@@ -462,6 +566,47 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         }
         else
         {
+            glm::mat4 shadowProj = glm::perspective(90.0f, 1.0f, 0.1f, radius);
+            StaticCamera shadowCamera = StaticCamera(glm::mat4x4(), shadowProj, position);
+            shadowCubePass(scene, shadowCamera, window, manager);
+
+            // Prepare light pass frame buffer
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+
+            // No depth testing for light volumes
+            glDisable(GL_DEPTH_TEST);
+            // Additive blending for light accumulation
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+
+            // Cull front facing faces
+            glCullFace(GL_FRONT);
+
+            // Set textures for point light pass
+            // Set depth texture
+            m_depthTexture->setActive(lightPassDepthTextureUnit);
+            pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
+
+            // Set texture with world space normal and specular power
+            m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+            pointLightPassShader->setUniform(normalSpecularTextureUniformName,
+                                             lightPassNormalSpecularTextureUnit);
+
+            // Set shadow texture for shadow mapping
+            glActiveTexture(GL_TEXTURE0 + lightPassShadowMapTextureUnit);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowCubeTexture->getId());
+            pointLightPassShader->setUniform(shadowCubeTextureUniformName,
+                                             lightPassShadowMapTextureUnit);
+
+            // Set screen size
+            pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
+            pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+            // Inverse view-projection
+            pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
+                                             m_transformer.getInverseViewProjectionMatrix());
+
             m_transformer.setPosition(position);
             // Scale is calculated from light radius
             // Sphere model has radius 1.f
@@ -534,16 +679,16 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             // Prepare light pass frame buffer
             glViewport(0, 0, window.getWidth(), window.getHeight());
             m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-            
+
             // No depth testing for light volumes
             glDisable(GL_DEPTH_TEST);
             // Additive blending for light accumulation
             glEnable(GL_BLEND);
             glBlendFunc(GL_ONE, GL_ONE);
-            
+
             // Reset culling
             glCullFace(GL_BACK);
-            
+
             // Set shader active
             directionalLightPassShader->setActive();
 
@@ -588,10 +733,10 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             ARenderer::draw(quadMesh);
         }
     }
-    
+
     // Reset culling
     glCullFace(GL_BACK);
-    
+
     return;
 }
 
@@ -744,23 +889,24 @@ void CDeferredRenderer::fogPass(const ICamera& camera, const IWindow& window,
 
     fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     fogShader->setUniform(screenHeightUniformName, (float)window.getHeight());
-    
+
     int fogType = 0;
-    switch (camera.getFeatureInfo().fogType) {
-        case FogType::None:
-            fogType = 0;
-            break;
-        case FogType::Linear:
-            fogType = 1;
-            break;
-        case FogType::Exp:
-            fogType = 2;
-            break;
-        case FogType::Exp2:
-            fogType = 3;
-            break;
-        default:
-            fogType = 0;
+    switch (camera.getFeatureInfo().fogType)
+    {
+    case FogType::None:
+        fogType = 0;
+        break;
+    case FogType::Linear:
+        fogType = 1;
+        break;
+    case FogType::Exp:
+        fogType = 2;
+        break;
+    case FogType::Exp2:
+        fogType = 3;
+        break;
+    default:
+        fogType = 0;
     }
     fogShader->setUniform(fogPassTypeUniformName, fogType);
 
@@ -1080,6 +1226,85 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
 
     // Reset framebuffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
+{
+    std::string shaderFile("data/shader/shadow_cube_pass.ini");
+    m_shadowCubePassShaderId = manager->loadShader(shaderFile);
+
+    if (m_shadowCubePassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
+        return false;
+    }
+
+    // Depth texture
+    m_shadowCubeDepthTexture = std::make_shared<CTexture>();
+    m_shadowCubeDepthTexture->init(1000, 1000, GL_DEPTH_COMPONENT24);
+
+    glBindTexture(GL_TEXTURE_2D, m_shadowCubeDepthTexture->getId());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    for (uint i = 0; i < 6; i++)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, 1000, 1000, 0, GL_RED,
+                     GL_FLOAT, NULL);
+    }
+
+    m_shadowCubeTexture = std::make_shared<CTexture>(textureId, false, 1000, 1000,
+                                                     GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT);
+
+    // Error check
+    std::string error;
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                           m_shadowCubeDepthTexture->getId(), 0);
+
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // Error check
+    if (hasGLError(error))
+    {
+        LOG_ERROR("GL Error: %s", error.c_str());
+        return false;
+    }
+
+    LOG_INFO("Shadow cube buffer state: %s.", m_shadowCubeBuffer.getState().c_str());
+
+    // Reset framebuffer
+    m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
 
     // Error check
     if (hasGLError(error))

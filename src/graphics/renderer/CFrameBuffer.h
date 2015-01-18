@@ -18,6 +18,8 @@ class CFrameBuffer
     CFrameBuffer();
     ~CFrameBuffer();
 
+    GLuint getId() const { return m_fboId; };
+
     bool init();
 
     bool isValid() const;
@@ -32,13 +34,14 @@ class CFrameBuffer
     void attach(const std::shared_ptr<CTexture>& texture, GLenum attachment);
     void attach(const std::shared_ptr<CRenderBuffer>& renderBuffer, GLenum attachment);
 
-	static void setDefaultActive();
+    static void setDefaultActive();
 
    private:
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */
 
-	std::unordered_map<GLenum, std::shared_ptr<CTexture>> m_textures; /**< Stores attached textures. */
-	std::unordered_map<GLenum, std::shared_ptr<CRenderBuffer>>
+    std::unordered_map<GLenum, std::shared_ptr<CTexture>>
+        m_textures; /**< Stores attached textures. */
+    std::unordered_map<GLenum, std::shared_ptr<CRenderBuffer>>
         m_renderBuffers; /**< Stores attached render buffers. */
 
     GLuint m_fboId; /**< Frame buffer id. */

@@ -19,6 +19,8 @@ uniform mat4 inverse_view_projection;
 uniform sampler2D depth_texture;
 uniform sampler2D normal_specular_texture;
 
+uniform samplerCube shadow_cube;
+
 vec3 getWorldPosition(vec2 uv) 
 {
     float z = texture(depth_texture, uv).x;
@@ -91,7 +93,14 @@ void main(void)
 	// Lambertian factor based on surface normal
 	float lambert_factor = max(0.0, dot(surface_normal_world, light_direction));
 	
+    // applay shadow cube
+    float d = texture(shadow_cube, -light_direction).r;
+    float visibility = 1.0f;
+    if (fragment_light_distance >= d + 0.1) {
+        visibility = 0.0f;
+    }
+    
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color;
-	light_data = vec4(diffuse_light * attenuated_intensity, 0.0);
+	light_data = vec4(diffuse_light * attenuated_intensity, 0.0) * visibility;
 }

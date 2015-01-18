@@ -33,6 +33,18 @@ CTexture::CTexture(unsigned int width, unsigned int height, EColorFormat format,
     }
 }
 
+CTexture::CTexture(GLint id, bool hasMipmaps, unsigned int width, unsigned int height, GLint format,
+                   GLenum externalFormat)
+{
+    m_valid = true;
+    m_hasMipmaps = hasMipmaps;
+    m_textureId = id;
+    m_width = width;
+    m_height = height;
+    m_format = format;
+    m_externalFormat = externalFormat;
+}
+
 CTexture::~CTexture()
 {
     if (m_valid)
@@ -137,6 +149,7 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
         m_externalFormat = GL_DEPTH_COMPONENT;
+        type = GL_FLOAT;
         bytePerPixel = 3;
         break;
     case GL_RGBA:  // RGB texture with alpha channel

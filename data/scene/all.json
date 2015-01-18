@@ -214,30 +214,17 @@
         {
         	"mesh" : "data/mesh/sword.obj",
         	"material" : "data/material/sword.ini",
-        	"position": [1.8, -0.5, 15],
-        	"rotation" :  [ 0, 0, -0.8 ],
-            "scale" :  [ 0.1, 0.1, 0.1 ]
-        },
-        {
-        	"mesh" : "data/mesh/sword.obj",
-        	"material" : "data/material/sword.ini",
-        	"position": [-15, 1, 55],
-        	"rotation" :  [ 0, 0, -1.57 ],
+        	"position": [1.2, -0.5, 15],
+        	"rotation" :  [ 0, 0, -1 ],
             "scale" :  [ 0.1, 0.1, 0.1 ]
         }
     ],
     "point_lights" :  [
         {
-            "position" :  [ 1.8, 0, 115 ],
-            "color" :  [ 1, 1, 1 ],
-            "intensity" : 2,
-            "radius": 2
-        },
-        {
-            "position" :  [ 0, 0.8, 15 ],
+            "position" :  [ 0.0, 0.1, 15 ],
             "color" :  [ 1, 1, 1 ],
             "intensity" : 5,
-            "radius": 5
+            "radius": 4
         }
     ],
     "directional_lights" : [
