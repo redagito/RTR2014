@@ -115,6 +115,13 @@ class CDeferredRenderer : public ARenderer
     void displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
                      const std::shared_ptr<CTexture>& texture);
 
+    void godRayPass1(const IWindow& window, const IGraphicsResourceManager& manager,
+                     const std::shared_ptr<CTexture>& texture);
+
+    void godRayPass2(const IWindow& window, const IGraphicsResourceManager& manager,
+                     const std::shared_ptr<CTexture>& texture,
+                     const std::shared_ptr<CTexture>& godrayTexture);
+
     /**
     * \brief Initializes resources for geometry pass.
     */
@@ -176,6 +183,9 @@ class CDeferredRenderer : public ARenderer
     * \brief Initializes fog pass for post processing.
     */
     bool initFogPass(IResourceManager* manager);
+
+    bool initGodRayPass1(IResourceManager* manager);
+    bool initGodRayPass2(IResourceManager* manager);
 
     /**
     * \brief Display pass draws final image to screen.
@@ -254,6 +264,10 @@ class CDeferredRenderer : public ARenderer
 
     // Depth-of-field pass
     ResourceId m_depthOfFieldPassShaderId = -1;
+
+    // Godray pass
+    ResourceId m_godRayPass1ShaderId = -1;
+    ResourceId m_godRayPass2ShaderId = -1;
 
     // Display pass for final screen draw
     ResourceId m_displayPassShaderId = -1;

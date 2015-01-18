@@ -59,6 +59,7 @@ const std::string modelViewProjectionMatrixUniformName = "model_view_projection"
 
 // Light parameter uniform names
 const std::string lightPositionUniformName = "light_position";
+const std::string lightPositionScreenUniformName = "light_position_screen";
 const std::string lightDirectionUniformName = "light_direction";
 const std::string lightRadiusUniformName = "light_radius";
 const std::string lightIntensityUniformName = "light_intensity";
@@ -97,6 +98,14 @@ const GLint gaussBlurVerticalPassInputTextureUnit = 0;
 // Texture units for horiontal gauss blur pass
 const GLint gaussBlurHoriontalPassInputTextureUnit = 0;
 
+// God ray pass 1
+const GLint godRayPass1InputTextureUnit = 0;
+const GLint godRayPassDepthTextureUnit = 1;
+
+// God ray pass 2
+const GLint godRayPass2SceneTextureUnit = 0;
+const GLint godRayPass2GodRayTextureUnit = 1;
+
 // Texture units
 const GLint depthOfFieldPassBaseTextureUnit = 0;
 const GLint depthOfFieldPassBlurTextureUnit = 1;
@@ -116,6 +125,7 @@ const std::string shadowMapTextureUniformName = "shadow_map"; // Should be shado
 const std::string shadowCubeTextureUniformName = "shadow_cube";
 const std::string sceneTextureUniformName = "scene_texture";
 const std::string blurTextureUniformName = "blur_texture";
+const std::string godRayTextureUniformName = "godray_texture";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";
