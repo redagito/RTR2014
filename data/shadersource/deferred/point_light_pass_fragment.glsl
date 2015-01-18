@@ -96,7 +96,7 @@ void main(void)
     // applay shadow cube
     float d = texture(shadow_cube, -light_direction).r;
     float visibility = 1.0f;
-    if (fragment_light_distance >= d + 0.1) {
+    if (fragment_light_distance >= d + 0.01) {
         visibility = 0.0f;
     }
     

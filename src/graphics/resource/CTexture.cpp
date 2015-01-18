@@ -149,7 +149,6 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
         m_externalFormat = GL_DEPTH_COMPONENT;
-        type = GL_FLOAT;
         bytePerPixel = 3;
         break;
     case GL_RGBA:  // RGB texture with alpha channel
