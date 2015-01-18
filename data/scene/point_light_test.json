@@ -1,0 +1,51 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ -2, 0, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, -2, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, 0, -2 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        },
+        {
+            "mesh" :  "data/mesh/duck.obj",
+            "material" : "data/material/duck_1_diffuse.ini",
+            "position" :  [ 0, -0.5, 0 ],
+            "rotation" :  [ 0 , 0, 0 ],
+            "scale" :  [ 0.2, 0.2, 0.2 ]
+        }
+    ],
+    "point_lights" :  [
+        {
+            "position" :  [ 1.5, 1.5, 1.5 ],
+            "color" :  [ 1, 1, 1 ],
+            "intensity" : 4,
+            "radius": 4
+        }
+    ],
+    "directional_lights" : [
+        {
+            "direction" :  [ -1, -1, -1 ],
+            "color" :  [ 1, 1, 1 ],
+            "intensity" : 0.3
+        }
+    ],
+    "ambient_light" : {
+        "color" : [ 1, 1, 1 ],
+        "intensity" : 0.1
+    }
+}

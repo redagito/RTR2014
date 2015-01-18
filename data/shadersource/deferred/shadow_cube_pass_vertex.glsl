@@ -15,11 +15,11 @@ uniform mat4 scale;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 world_pos;
+out vec4 world_pos;
 
 void main(void)
 {
     // Calculate vertex position in camera space
     gl_Position = projection * view * model * vec4(vertexPositionModelSpace, 1.f);
-    world_pos = (model * vec4(vertexPositionModelSpace, 1.0f)).xyz;
+    world_pos = model * vec4(vertexPositionModelSpace, 1.0f);
 }

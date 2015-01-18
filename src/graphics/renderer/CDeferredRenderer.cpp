@@ -399,7 +399,7 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
 
     // Backface culling disabled for debugging
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glCullFace(GL_FRONT);
 
     glDisable(GL_BLEND);
 
@@ -451,13 +451,13 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
                 glViewport(0, 0, 1024, 1024);
 
                 // Send view/projection to default shader
-                m_shadowCubePassShader->setUniform(projectionMatrixUniformName, camera.getProjection());
-                
-                m_shadowCubePassShader->setUniform(
-                    viewMatrixUniformName,
-                    glm::lookAt(camera.getPosition(),
-                                camera.getPosition() + g_cameraDirections[i].target,
-                                g_cameraDirections[i].up));
+                glm::mat4 proj = glm::perspective(89.54f, 1.0f, 0.01f, 4.0f);
+                glm::mat4 view = glm::lookAt(camera.getPosition(),
+                                             camera.getPosition() + g_cameraDirections[i].target,
+                                             g_cameraDirections[i].up);
+
+                m_shadowCubePassShader->setUniform(projectionMatrixUniformName, proj);
+                m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
 
                 // Resolve ids
                 CMesh* mesh = manager.getMesh(meshId);
@@ -563,8 +563,7 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         }
         else
         {
-            glm::mat4 shadowProj = glm::perspective(90.0f, 1.0f, 0.01f, radius);
-            StaticCamera shadowCamera = StaticCamera(glm::mat4x4(), shadowProj, position);
+            StaticCamera shadowCamera = StaticCamera(glm::mat4(), glm::mat4(), position);
             shadowCubePass(scene, shadowCamera, window, manager);
 
             // Prepare light pass frame buffer
@@ -1626,17 +1625,17 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-//    if (!initGodRayPass1(manager))
-//    {
-//        LOG_ERROR("Failed to initialize god ray 1 pass.");
-//        return false;
-//    }
+    //    if (!initGodRayPass1(manager))
+    //    {
+    //        LOG_ERROR("Failed to initialize god ray 1 pass.");
+    //        return false;
+    //    }
 
-//    if (!initGodRayPass2(manager))
-//    {
-//        LOG_ERROR("Failed to initialize god ray 2 pass.");
-//        return false;
-//    }
+    //    if (!initGodRayPass2(manager))
+    //    {
+    //        LOG_ERROR("Failed to initialize god ray 2 pass.");
+    //        return false;
+    //    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
