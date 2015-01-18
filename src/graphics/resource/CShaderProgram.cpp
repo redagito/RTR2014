@@ -192,6 +192,17 @@ void CShaderProgram::setUniform(const std::string& name, float f)
     setUniform(getUniformLocation(name), f);
 }
 
+void CShaderProgram::setUniform(GLint location, const glm::vec2& v)
+{
+	setActive();
+	glUniform2f(location, v.x, v.y);
+}
+
+void CShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
+{
+	setUniform(getUniformLocation(name), v);
+}
+
 void CShaderProgram::setUniform(GLint location, const glm::vec3& v)
 {
     setActive();

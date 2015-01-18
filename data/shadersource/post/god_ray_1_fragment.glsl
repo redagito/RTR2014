@@ -1,0 +1,60 @@
+#version 330 core
+
+// Light source position
+uniform vec2 light_position_screen;
+
+// Input scene texture
+uniform sampler2D scene_texture;
+uniform sampler2D depth_texture;
+
+// Screen parameters
+uniform float screen_width;
+uniform float screen_height;
+
+// Inverse projection matrix
+uniform mat4 inverse_projection;
+
+layout(location = 0) out vec3 color;
+
+const float exposure = 0.6;
+const float decay = 0.93;
+const float density = 0.96;
+const float weight = 0.4;
+const int NUM_SAMPLES = 20;
+const float clampMax = 1.0;
+
+vec3 getCameraSpacePosition(vec2 uv)
+{
+	float z = texture(depth_texture, uv).x;
+	vec4 sPos = vec4(uv * 2 - 1, z * 2 - 1, 1.0);
+	sPos = inverse_projection * sPos;
+	return (sPos.xyz / sPos.w);
+}
+
+// God ray pass
+// References
+// http://http.developer.nvidia.com/GPUGems3/gpugems3_ch13.html
+// http://fabiensanglard.net/lightScattering/
+void main()
+{
+	vec2 uv = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
+
+	vec2 deltaTextCoord = uv - light_position_screen.xy;
+	deltaTextCoord *= 1.0 / float(NUM_SAMPLES) * density;
+	vec2 coord = uv;
+	float illuminationDecay = 1.0;
+
+	for (int i = 0; i < NUM_SAMPLES; ++i)
+	{
+		coord -= deltaTextCoord;
+		vec3 texel = texture2D(scene_texture, coord).xyz;
+
+		texel *= illuminationDecay * weight;
+
+		color += texel;
+
+		illuminationDecay *= decay;
+	}
+
+	color *= exposure;
+}
