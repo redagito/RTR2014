@@ -70,6 +70,16 @@ bool load(const Json::Value& node, const std::string& name, float& f)
     return true;
 }
 
+bool load(const Json::Value& node, const std::string& name, bool& b)
+{
+    if (!deserialize(node[name], b))
+    {
+        LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+        return false;
+    }
+    return true;
+}
+
 bool CCameraController::loadSequence(std::string file)
 {
     m_sequenceTime = 0;
@@ -119,6 +129,8 @@ bool CCameraController::loadSequence(std::string file)
         glm::vec3 position;
         glm::vec3 orientation;
         float timestamp;
+        bool fxaaActive;
+        bool fogActive;
 
         if (!load(node[i], "position", position))
         {
@@ -140,8 +152,22 @@ bool CCameraController::loadSequence(std::string file)
             success = false;
             break;
         }
+        
+        if (!load(node[i], "fxaa", fxaaActive))
+        {
+            LOG_ERROR("Failed loading node 'fxaa' for element #%i.", i);
+            success = false;
+            break;
+        }
+        
+        if (!load(node[i], "fog", fogActive))
+        {
+            LOG_ERROR("Failed loading node 'fog' for element #%i.", i);
+            success = false;
+            break;
+        }
 
-        SequencePoint sp{position, glm::normalize(orientation), timestamp};
+        SequencePoint sp{position, glm::normalize(orientation), timestamp, fxaaActive, fogActive};
         m_sequencePoints.push_back(sp);
     }
 
@@ -219,6 +245,8 @@ void CCameraController::animateSequence(float dt) {
     glm::vec3 cameraOrientation = before.orientation * (1.0f - ix) + after.orientation * ix;
     
     m_camera->lookAt(cameraPosition, cameraPosition + cameraOrientation, glm::vec3(0,1,0));
+    m_camera->getFeatureInfoForWrite().fogType = (before.fogActive ? FogType::Exp2 : FogType::None);
+    m_camera->getFeatureInfoForWrite().fxaaActive = before.fxaaActive;
 }
 
 void CCameraController::animateManual(float dt) {

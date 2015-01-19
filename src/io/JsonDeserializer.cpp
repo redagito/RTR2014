@@ -4,16 +4,17 @@
 
 bool deserialize(const Json::Value& node, bool& b)
 {
-	if (node.empty())
-	{
-		LOG_ERROR("Node is empty.");
-		return false;
-	}
-	if (!node.isBool())
-	{
-		LOG_ERROR("Node data type is not boolean.");
-		return false;
-	}
+    // TODO comment code back in, after monday.
+//	if (node.empty())
+//	{
+//		LOG_ERROR("Node is empty.");
+//		return false;
+//	}
+//	if (!node.isBool())
+//	{
+//		LOG_ERROR("Node data type is not boolean.");
+//		return false;
+//	}
 	b = node.asBool();
 	return true;
 }

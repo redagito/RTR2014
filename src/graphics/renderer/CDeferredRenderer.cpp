@@ -688,9 +688,8 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         else
         {
             glm::mat4 shadowView =
-                glm::lookAt(camera.getPosition(), camera.getPosition() + glm::normalize(direction),
-                            glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::mat4 shadowProj = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+            glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
             shadowMapPass(scene, shadowCamera, window, manager);
 

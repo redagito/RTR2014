@@ -41,10 +41,13 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
         glm::vec3 position;
         glm::vec3 orientation;
         float timestamp;
+        bool fxaaActive;
+        bool fogActive;
     };
     
     bool m_isRunningSequence = false;
     float m_sequenceTime = 0;
+    
     std::vector<SequencePoint> m_sequencePoints;
     
     float m_speed = 1.0f;
