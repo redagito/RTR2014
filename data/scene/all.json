@@ -6,15 +6,13 @@
             "position" :  [ 0, 0, 0 ],
             "rotation" :  [ 0, 0, 0 ],
             "scale" :  [ 1, 1, 1 ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/skybox.obj",
         	"material" : "data/material/skybox.ini",
         	"position": [0, 0, 0],
         	"rotation" :  [ 0, 0, 0 ],
             "scale" :  [ 500, 500, 500 ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-28, 20, -49],
@@ -26,8 +24,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-26, 22, 60],
@@ -39,8 +36,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-16, 18, 94],
@@ -52,8 +48,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-2, 27, -47],
@@ -65,8 +60,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [53, 17, 79],
@@ -78,8 +72,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-35, 16, 23],
@@ -91,8 +84,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [34, 25, 150],
@@ -104,9 +96,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        }
-        ,
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [64, 16, 143],
@@ -118,9 +108,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        }
-        ,
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-3, 15, 54],
@@ -132,8 +120,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-10, 26, 78],
@@ -158,8 +145,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-52, 26, 104],
@@ -171,8 +157,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [6, 17, 8],
@@ -184,8 +169,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [19, 20, 109],
@@ -197,8 +181,7 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
+        },{
         	"mesh" : "data/mesh/gear.obj",
         	"material" : "data/material/gear.ini",
         	"position": [-22, 50, 170],
@@ -210,38 +193,106 @@
                     "rotation" :  [ 0, 0.2, 0 ]
                 }
             ]
-        },
-        {
-            "mesh" :  "data/mesh/duck.obj",
-            "material" : "data/material/duck_1_diffuse.ini",
-            "position" :  [ -9.2, -0.47, 32.2 ],
-            "rotation" :  [ -0.2 , 0, 0 ],
-            "scale" :  [ 0.3, 0.3, 0.3 ]
-        },
-        {
-            "mesh" :  "data/mesh/duck.obj",
-            "material" : "data/material/duck_1_diffuse.ini",
-            "position" :  [ -10.5, -0.4, 33 ],
-            "rotation" :  [ -0.2 , 0.3, 0 ],
-            "scale" :  [ 0.9, 0.9, 0.9 ]
-        },
-        {
+        },{
+            "mesh" :  "data/mesh/sword.obj",
+            "material" : "data/material/sword.ini",
+            "position" :  [ -6.5, 0.0, 32.1 ],
+            "rotation" :  [ 0, 0.3, -1.4 ],
+            "scale" :  [ 0.1, 0.1, 0.1 ]
+        },{
+            "mesh" :  "data/mesh/sword.obj",
+            "material" : "data/material/sword.ini",
+            "position" :  [ -6.5, -0.1, 31.4 ],
+            "rotation" :  [ 0, -0.3, -1.7 ],
+            "scale" :  [ 0.1, 0.1, 0.1 ]
+        },{
+            "mesh" :  "data/mesh/sword.obj",
+            "material" : "data/material/sword.ini",
+            "position" :  [ -6.5, -0.2, 30.7 ],
+            "rotation" :  [ 0, 0.4, -1.6 ],
+            "scale" :  [ 0.1, 0.1, 0.1 ]
+        },{
+            "mesh" :  "data/mesh/sword.obj",
+            "material" : "data/material/sword.ini",
+            "position" :  [ -6.5, -0.05, 30 ],
+            "rotation" :  [ 0 , -0.2, -1.2 ],
+            "scale" :  [ 0.1, 0.1, 0.1 ]
+        },{
         	"mesh" : "data/mesh/sword.obj",
         	"material" : "data/material/sword.ini",
         	"position": [1.6, -0.7, 15],
         	"rotation" :  [ 0, 3.14, -1.57 ],
             "scale" :  [ 0.1, 0.1, 0.1 ]
-        },
-        {
-        	"mesh" : "data/mesh/sphere_with_missing_faces.obj",
-        	"material" : "data/material/duck_1_diffuse.ini",
-        	"position": [-4, 0.1, 25],
-        	"rotation" :  [ 0, 0, 0 ],
-            "scale" :  [ 0.3, 0.3, 0.3 ],
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-8, 0.0, 31],
+        	"rotation" :  [ 0, 0.2, 0 ],
+            "scale" :  [ 0.47, 0.47, 0.47 ],
             "animations" : [
                 {
                     "type" :  "rotation",
                     "rotation" :  [ 0, 0.2, 0 ]
+                }
+            ]
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-8, 1.0, 31],
+        	"rotation" :  [ 0, -0.2, 0 ],
+            "scale" :  [ 0.47, 0.47, 0.47 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, -0.2, 0 ]
+                }
+            ]
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-8, 0.5, 31.5],
+        	"rotation" :  [ 1.57, 0, 0 ],
+            "scale" :  [ 0.47, 0.47, 0.47 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, 0.2, 0 ]
+                }
+            ]
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-8, 0.5, 30.5],
+        	"rotation" :  [ 1.57, 0, 0 ],
+            "scale" :  [ 0.47, 0.47, 0.47 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, -0.2, 0 ]
+                }
+            ]
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-8.5, 0.5, 31],
+        	"rotation" :  [ 0, 0, 1.57 ],
+            "scale" :  [ 0.44, 0.44, 0.44 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ -0.2, 0, 0 ]
+                }
+            ]
+        },{
+        	"mesh" : "data/mesh/gear.obj",
+        	"material" : "data/material/gear.ini",
+        	"position": [-7.5, 0.5, 31],
+        	"rotation" :  [ 0, 0, 1.57 ],
+            "scale" :  [ 0.44, 0.44, 0.44 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0.2, 0, 0 ]
                 }
             ]
         }
@@ -258,24 +309,21 @@
             		"direction" : [0, 0, 4]
             	}
             ]
-        },
-        {
-            "position" :  [ -9.5, -0.4, 31.9 ],
+        },{
+            "position" :  [ -8, 0.5, 31 ],
             "color" :  [ 1, 1, 1 ],
-            "intensity" : 3,
-            "radius": 5
-        },
-        {
+            "intensity" : 4,
+            "radius": 10
+        },{
             "position" :  [ 0, 0, 0 ],
             "color" :  [ 1, 1, 0.5 ],
             "intensity" : 1,
             "radius": 10
-        },
-        {
+        },{
             "position" :  [ -4, 0, 25 ],
             "color" :  [ 1, 1, 0.5 ],
             "intensity" : 1,
-            "radius": 5
+            "radius": 10
         }
     ],
     "directional_lights" : [
@@ -286,7 +334,7 @@
         }
     ],
     "ambient_light" : {
-        "color" : [ 1, 0.8, 0 ],
+        "color" : [ 1, 1, 0.6 ],
         "intensity" : 0.2
     }
 }
