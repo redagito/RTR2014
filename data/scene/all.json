@@ -224,6 +224,19 @@
         	"position": [1.6, -0.7, 15],
         	"rotation" :  [ 0, 3.14, -1.57 ],
             "scale" :  [ 0.1, 0.1, 0.1 ]
+        },
+        {
+        	"mesh" : "data/mesh/sphere_with_missing_faces.obj",
+        	"material" : "data/material/duck_1_diffuse.ini",
+        	"position": [-3, 0.1, 25],
+        	"rotation" :  [ 0, 0, 0 ],
+            "scale" :  [ 0.3, 0.3, 0.3 ],
+            "animations" : [
+                {
+                    "type" :  "rotation",
+                    "rotation" :  [ 0, 0.2, 0 ]
+                }
+            ]
         }
     ],
     "point_lights" :  [
