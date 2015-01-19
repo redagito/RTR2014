@@ -126,8 +126,28 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Post processing pass
     postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
-    // Final display pass
-    displayPass(window, manager, m_postProcessPassOutputTexture);
+    // Select rendering mode
+    if (camera.getFeatureInfo().renderMode == RenderMode::Color)
+    {
+        displayPass(window, manager, m_diffuseGlowTexture);
+    }
+    else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
+    {
+        displayPass(window, manager, m_depthTexture);
+    }
+    else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
+    {
+        displayPass(window, manager, m_lightPassTexture);
+    }
+    else if (camera.getFeatureInfo().renderMode == RenderMode::Normals)
+    {
+        displayPass(window, manager, m_normalSpecularTexture);
+    }
+    else  // Final mode
+    {
+        // Final display pass
+        displayPass(window, manager, m_postProcessPassOutputTexture);
+    }
 
     // Post draw error check
     std::string error;
@@ -801,27 +821,43 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 
     // Pass 1: fxaa
     m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-    fxaaPass(window, manager, texture);
+    if (camera.getFeatureInfo().fxaaActive)
+    {
+        fxaaPass(window, manager, texture);
+    }
+    else
+    {
+        // Passthrough
+        passthroughPass(window, manager, texture);
+    }
 
     // Pass 2: fog
-    // TODO Fog paarmeter
+    // TODO Fog parameter
     m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
     fogPass(camera, window, manager, m_postProcessPassTexture0);
     // Foggy scene in tex1
 
     // Pass 3: dof
-    // Pass 3.1: gauss blur
-    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-    gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
-    // Blurred in tex0
+    if (camera.getFeatureInfo().dofActive)
+    {
+        // Pass 3.1: gauss blur
+        m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+        gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
+        // Blurred in tex0
 
-    m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-    gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
-    // Blurred in tex 2
+        m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+        gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
+        // Blurred in tex 2
 
-    // TODO DOF parameter
-    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-    depthOfFieldPass(window, manager, m_postProcessPassTexture1, m_postProcessPassTexture2);
+        // TODO DOF parameter
+        m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+        depthOfFieldPass(window, manager, m_postProcessPassTexture1, m_postProcessPassTexture2);
+    }
+    else
+    {
+        // Passthrough
+        passthroughPass(window, manager, texture);
+    }
     // Processed scene in tex 0
 
     // TODO God ray pass disabled, not working as intended
@@ -1046,6 +1082,15 @@ void CDeferredRenderer::depthOfFieldPass(const IWindow& window,
 void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
                                     const std::shared_ptr<CTexture>& texture)
 {
+    // Set main FBO active
+    CFrameBuffer::setDefaultActive();
+    passthroughPass(window, manager, texture);
+}
+
+void CDeferredRenderer::passthroughPass(const IWindow& window,
+                                        const IGraphicsResourceManager& manager,
+                                        const std::shared_ptr<CTexture>& texture)
+{
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
 
@@ -1073,8 +1118,6 @@ void CDeferredRenderer::displayPass(const IWindow& window, const IGraphicsResour
     displayShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     displayShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-    // Set main FBO active
-    CFrameBuffer::setDefaultActive();
     ARenderer::draw(quadMesh);
 }
 

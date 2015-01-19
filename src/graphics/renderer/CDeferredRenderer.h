@@ -46,12 +46,12 @@ class CDeferredRenderer : public ARenderer
     */
     void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                        const IGraphicsResourceManager& manager);
-    
+
     /**
      * \brief Performs shadow cube calculation.
      */
     void shadowCubePass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                       const IGraphicsResourceManager& manager);
+                        const IGraphicsResourceManager& manager);
 
     /**
     * \brief Writes light data into l-buffer.
@@ -115,6 +115,9 @@ class CDeferredRenderer : public ARenderer
     void displayPass(const IWindow& window, const IGraphicsResourceManager& manager,
                      const std::shared_ptr<CTexture>& texture);
 
+    void passthroughPass(const IWindow& window, const IGraphicsResourceManager& manager,
+                         const std::shared_ptr<CTexture>& texture);
+
     void godRayPass1(const IWindow& window, const IGraphicsResourceManager& manager,
                      const std::shared_ptr<CTexture>& texture);
 
@@ -146,7 +149,7 @@ class CDeferredRenderer : public ARenderer
      * \brief Initializes resources for shadow map pass
      */
     bool initShadowMapPass(IResourceManager* manager);
-    
+
     /**
      * \brief Initializes resources for shadow map pass
      */
@@ -208,13 +211,13 @@ class CDeferredRenderer : public ARenderer
     std::shared_ptr<CTexture>
         m_normalSpecularTexture; /**< Normal texture with specularity as alpha. */
     ResourceId m_geometryPassShaderId = -1;
-    
+
     // Shadow map pass
     ResourceId m_shadowMapPassShaderId = -1;
     CShaderProgram* m_shadowMapPassShader = nullptr;
     CFrameBuffer m_shadowMapBuffer;
     std::shared_ptr<CTexture> m_shadowDepthTexture = nullptr;
-    
+
     // Shadow cube pass
     ResourceId m_shadowCubePassShaderId = -1;
     CShaderProgram* m_shadowCubePassShader = nullptr;
