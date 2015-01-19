@@ -451,12 +451,12 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
                 glViewport(0, 0, 1024, 1024);
 
                 // Send view/projection to default shader
-                glm::mat4 proj = glm::perspective(89.54f, 1.0f, 0.01f, 4.0f);
                 glm::mat4 view = glm::lookAt(camera.getPosition(),
                                              camera.getPosition() + g_cameraDirections[i].target,
                                              g_cameraDirections[i].up);
 
-                m_shadowCubePassShader->setUniform(projectionMatrixUniformName, proj);
+                m_shadowCubePassShader->setUniform(projectionMatrixUniformName,
+                                                   camera.getProjection());
                 m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
 
                 // Resolve ids
@@ -563,7 +563,11 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         }
         else
         {
-            StaticCamera shadowCamera = StaticCamera(glm::mat4(), glm::mat4(), position);
+            // fov should be 90.f instead of 89.54f, but this does not work, because the view is too
+            // wide in this case. 89.54f is determined by testing. 89.53 is already too small and
+            // 89.55 too big.
+            glm::mat4 shadowProj = glm::perspective(89.54f, 1.0f, 0.01f, radius * 1.5f);
+            StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
             shadowCubePass(scene, shadowCamera, window, manager);
 
             // Prepare light pass frame buffer
