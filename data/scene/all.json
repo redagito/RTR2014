@@ -219,6 +219,13 @@
             "scale" :  [ 0.3, 0.3, 0.3 ]
         },
         {
+            "mesh" :  "data/mesh/duck.obj",
+            "material" : "data/material/duck_1_diffuse.ini",
+            "position" :  [ -10.5, -0.4, 33 ],
+            "rotation" :  [ -0.2 , 0.3, 0 ],
+            "scale" :  [ 0.9, 0.9, 0.9 ]
+        },
+        {
         	"mesh" : "data/mesh/sword.obj",
         	"material" : "data/material/sword.ini",
         	"position": [1.6, -0.7, 15],
@@ -228,7 +235,7 @@
         {
         	"mesh" : "data/mesh/sphere_with_missing_faces.obj",
         	"material" : "data/material/duck_1_diffuse.ini",
-        	"position": [-3, 0.1, 25],
+        	"position": [-4, 0.1, 25],
         	"rotation" :  [ 0, 0, 0 ],
             "scale" :  [ 0.3, 0.3, 0.3 ],
             "animations" : [
