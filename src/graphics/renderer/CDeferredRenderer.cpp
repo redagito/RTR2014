@@ -410,55 +410,53 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
     glViewport(0, 0, 1024, 1024);
     // m_shadowMapBuffer.resize(1024, 1024);
 
-    // Query visible scene objects
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
-
     m_shadowCubePassShader->setUniform(lightPositionUniformName, camera.getPosition());
 
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 
-    // Traverse visible objects
-    while (query->hasNextObject())
+    for (unsigned int i = 0; i < 6; ++i)
     {
-        // Get next visible object
-        SceneObjectId id = query->getNextObject();
+        glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                               g_cameraDirections[i].cubemapFace, m_shadowCubeTexture->getId(), 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-        // Object attributes
-        ResourceId meshId = -1;
-        ResourceId materialId = -1;
-        glm::vec3 position;
-        glm::vec3 rotation;
-        glm::vec3 scale;
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        // Retrieve object data
-        if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
+        glViewport(0, 0, 1024, 1024);
+
+        // Send view/projection to default shader
+        glm::mat4 view =
+            glm::lookAt(camera.getPosition(), camera.getPosition() + g_cameraDirections[i].target,
+                        g_cameraDirections[i].up);
+
+        m_shadowCubePassShader->setUniform(projectionMatrixUniformName, camera.getProjection());
+        m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
+
+        // Query visible scene objects
+        std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+        
+        // Traverse visible objects
+        while (query->hasNextObject())
         {
-            // Invalid id
-            LOG_ERROR("Invalid scene object id %l.", id);
-        }
-        else
-        {
-            for (unsigned int i = 0; i < 6; ++i)
+            // Get next visible object
+            SceneObjectId id = query->getNextObject();
+
+            // Object attributes
+            ResourceId meshId = -1;
+            ResourceId materialId = -1;
+            glm::vec3 position;
+            glm::vec3 rotation;
+            glm::vec3 scale;
+
+            // Retrieve object data
+            if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
             {
-                glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                       g_cameraDirections[i].cubemapFace,
-                                       m_shadowCubeTexture->getId(), 0);
-                glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-                glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-                glViewport(0, 0, 1024, 1024);
-
-                // Send view/projection to default shader
-                glm::mat4 view = glm::lookAt(camera.getPosition(),
-                                             camera.getPosition() + g_cameraDirections[i].target,
-                                             g_cameraDirections[i].up);
-
-                m_shadowCubePassShader->setUniform(projectionMatrixUniformName,
-                                                   camera.getProjection());
-                m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
-
+                // Invalid id
+                LOG_ERROR("Invalid scene object id %l.", id);
+            }
+            else
+            {
                 // Resolve ids
                 CMesh* mesh = manager.getMesh(meshId);
                 CMaterial* material = manager.getMaterial(materialId);

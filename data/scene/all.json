@@ -212,10 +212,17 @@
             ]
         },
         {
+            "mesh" :  "data/mesh/duck.obj",
+            "material" : "data/material/duck_1_diffuse.ini",
+            "position" :  [ -9.2, -0.47, 32.2 ],
+            "rotation" :  [ -0.2 , 0, 0 ],
+            "scale" :  [ 0.3, 0.3, 0.3 ]
+        },
+        {
         	"mesh" : "data/mesh/sword.obj",
         	"material" : "data/material/sword.ini",
-        	"position": [1.5, -0.5, 15],
-        	"rotation" :  [ 0, 0, -0.8 ],
+        	"position": [1.6, -0.7, 15],
+        	"rotation" :  [ 0, 3.14, -1.57 ],
             "scale" :  [ 0.1, 0.1, 0.1 ]
         }
     ],
@@ -223,14 +230,32 @@
         {
             "position" :  [ -0.5, 0.3, 13 ],
             "color" :  [ 1, 1, 1 ],
-            "intensity" : 5,
-            "radius": 4,
+            "intensity" : 3,
+            "radius": 6,
             "animations": [
             	{
             		"type": "movement",
             		"direction" : [0, 0, 4]
             	}
             ]
+        },
+        {
+            "position" :  [ -9.5, -0.4, 31.9 ],
+            "color" :  [ 1, 1, 1 ],
+            "intensity" : 3,
+            "radius": 5
+        },
+        {
+            "position" :  [ 0, 0, 0 ],
+            "color" :  [ 1, 1, 0.5 ],
+            "intensity" : 1,
+            "radius": 10
+        },
+        {
+            "position" :  [ -4, 0, 25 ],
+            "color" :  [ 1, 1, 0.5 ],
+            "intensity" : 1,
+            "radius": 5
         }
     ],
     "directional_lights" : [
