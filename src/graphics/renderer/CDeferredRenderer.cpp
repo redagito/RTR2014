@@ -1056,7 +1056,7 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
         return;
     }
 
-    // Input base texture
+    // Input scene texture
     sceneTexture->setActive(depthOfFieldPassSceneTextureUnit);
 	shader->setUniform(sceneTextureUniformName, depthOfFieldPassSceneTextureUnit);
 
@@ -1065,8 +1065,8 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
     shader->setUniform(blurTextureUniformName, depthOfFieldPassBlurTextureUnit);
 
     // Input depth texture
-    m_depthTexture->setActive(depthOfFieldDepthTextureUnit);
-    shader->setUniform(depthTextureUniformName, depthOfFieldPassBlurTextureUnit);
+    m_depthTexture->setActive(depthOfFieldPassDepthTextureUnit);
+	shader->setUniform(depthTextureUniformName, depthOfFieldPassDepthTextureUnit);
 
     // Depth-of-field parameters
     shader->setUniform(blurNearUniformName, camera.getFeatureInfo().dofNearBlur);
@@ -1155,8 +1155,8 @@ void CDeferredRenderer::godRayPass1(const IWindow& window, const IGraphicsResour
     shader->setUniform(sceneTextureUniformName, godRayPass1InputTextureUnit);
 
     // Depth texture
-    m_depthTexture->setActive(godRayPassDepthTextureUnit);
-    shader->setUniform(depthTextureUniformName, godRayPassDepthTextureUnit);
+    m_depthTexture->setActive(godRayPass1DepthTextureUnit);
+    shader->setUniform(depthTextureUniformName, godRayPass1DepthTextureUnit);
 
     // Inverse projection
     shader->setUniform(inverseProjectionMatrixUniformName,

@@ -44,17 +44,14 @@ void main(void)
 	// Distance to viewer
 	float d = distance(fragment_world_position, camera_position);
 
-	color = texture(scene_texture, normalized_screen_coordinates).xyz;
-	return;
-
 	// Apply blur
-	if (d < 0.5)
+	if (d < focus_near)
 	{
 		//float a = min(1.0, blur_near / distance);
 		//color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 		color = texture(blur_texture, normalized_screen_coordinates).xyz;
 	}
-	else if (d > 10.0)
+	else if (d > focus_far)
 	{
 		//float a = min(1.0, (distance - focus_far) / (blur_far - focus_far));
 		//color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);

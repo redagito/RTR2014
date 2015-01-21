@@ -102,16 +102,16 @@ const GLint gaussBlurHoriontalPassInputTextureUnit = 0;
 
 // Texture units for god ray pass 1 (ray generation)
 const GLint godRayPass1InputTextureUnit = 0;
-const GLint godRayPassDepthTextureUnit = 1;
+const GLint godRayPass1DepthTextureUnit = 1;
 
 // Texture units for god ray pass 2 (blending)
 const GLint godRayPass2SceneTextureUnit = 0;
 const GLint godRayPass2GodRayTextureUnit = 1;
 
-// Depth-of-field pass texture units
+// Texture units for depth-of-field pass
 const GLint depthOfFieldPassSceneTextureUnit = 0;
 const GLint depthOfFieldPassBlurTextureUnit = 1;
-const GLint depthOfFieldDepthTextureUnit = 2;
+const GLint depthOfFieldPassDepthTextureUnit = 2;
 
 // Texture units for depth texture visualization pass
 const GLint visualizeDepthPassDepthTextureUnit = 0;
