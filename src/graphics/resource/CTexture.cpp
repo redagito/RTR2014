@@ -191,35 +191,44 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     }
     else
     {
-        // Default value is linear filtering
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		if (m_hasMipmaps)
+		{
+			// Bilinear filtering
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		}
+		else
+		{
+			// Default value is linear filtering
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		}
     }
 
     // Set wrap mode
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 
-    // Load data
-    if (image.empty())
-    {
-        // No image data, only allocate texture space
-        // TODO As of OpenGL 4.3, glTexStorage should be used for this.
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type, nullptr);
-    }
-    else
-    {
-        // Load image data
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type,
-                     image.data());
-    }
+	// Load data
+	if (image.empty())
+	{
+		// No image data, only allocate texture space
+		// TODO As of OpenGL 4.3, glTexStorage should be used for this.
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type, nullptr);
+	}
+	else
+	{
+		// Load image data
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type,
+			image.data());
+	}
 
-    // Mipmaps
-    // Do not generate for 1x1 images
-    if (width != 1 && height != 1 && createMipmaps)
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
+	// Mipmaps
+	// Do not generate for 1x1 images
+	if (width != 1 && height != 1 && createMipmaps)
+	{
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
 
     // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
