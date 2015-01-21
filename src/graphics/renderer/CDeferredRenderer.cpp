@@ -102,6 +102,11 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         LOG_ERROR("Failed to initialize screen quad pass.");
         return false;
     }
+
+    if (!initVisualizeDepthPass(manager))
+    {
+		LOG_ERROR("Failed to initialize depth visualization pass.");
+    }
     return true;
 }
 
@@ -126,14 +131,16 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Post processing pass
     postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
+	CFrameBuffer::setDefaultActive();
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // Select rendering mode
     if (camera.getFeatureInfo().renderMode == RenderMode::Color)
     {
         displayPass(window, manager, m_diffuseGlowTexture);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
-    {
-        displayPass(window, manager, m_depthTexture);
+	{
+		visualizeDepthPass(camera, window, manager);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {
@@ -455,7 +462,7 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
 
         // Query visible scene objects
         std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
-        
+
         // Traverse visible objects
         while (query->hasNextObject())
         {
@@ -688,7 +695,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         else
         {
             glm::mat4 shadowView =
-            glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+                glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
             glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
             shadowMapPass(scene, shadowCamera, window, manager);
@@ -850,7 +857,8 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
 
         // TODO DOF parameter
         m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-        depthOfFieldPass(window, manager, m_postProcessPassTexture1, m_postProcessPassTexture2);
+        depthOfFieldPass(camera, window, manager, m_postProcessPassTexture1,
+                         m_postProcessPassTexture2);
     }
     else
     {
@@ -1027,7 +1035,7 @@ void CDeferredRenderer::gaussBlurHorizontalPass(const IWindow& window,
     ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::depthOfFieldPass(const IWindow& window,
+void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& window,
                                          const IGraphicsResourceManager& manager,
                                          const std::shared_ptr<CTexture>& sceneTexture,
                                          const std::shared_ptr<CTexture>& blurTexture)
@@ -1049,8 +1057,8 @@ void CDeferredRenderer::depthOfFieldPass(const IWindow& window,
     }
 
     // Input base texture
-    sceneTexture->setActive(depthOfFieldPassBaseTextureUnit);
-    shader->setUniform(sceneTextureUniformName, depthOfFieldPassBaseTextureUnit);
+    sceneTexture->setActive(depthOfFieldPassSceneTextureUnit);
+	shader->setUniform(sceneTextureUniformName, depthOfFieldPassSceneTextureUnit);
 
     // Input blur texture
     blurTexture->setActive(depthOfFieldPassBlurTextureUnit);
@@ -1061,14 +1069,17 @@ void CDeferredRenderer::depthOfFieldPass(const IWindow& window,
     shader->setUniform(depthTextureUniformName, depthOfFieldPassBlurTextureUnit);
 
     // Depth-of-field parameters
-    shader->setUniform(blurNearUniformName, 0.1f);
-    shader->setUniform(fokusNearUniformName, 0.2f);
-    shader->setUniform(fokusFarUniformName, 50.f);
-    shader->setUniform(blurFarUniformName, 100.f);
+    shader->setUniform(blurNearUniformName, camera.getFeatureInfo().dofNearBlur);
+    shader->setUniform(focusNearUniformName, camera.getFeatureInfo().dofNearFocus);
+    shader->setUniform(focusFarUniformName, camera.getFeatureInfo().dofFarFocus);
+    shader->setUniform(blurFarUniformName, camera.getFeatureInfo().dofFarBlur);
+
+    // Camera position
+    shader->setUniform(cameraPositionUniformName, camera.getPosition());
 
     // Transformation
-    shader->setUniform(inverseProjectionMatrixUniformName,
-                       m_transformer.getInverseProjectionMatrix());
+    shader->setUniform(inverseViewProjectionMatrixUniformName,
+                       m_transformer.getInverseViewProjectionMatrix());
 
     /// Screen size
     shader->setUniform(screenWidthUniformName, (float)window.getWidth());
@@ -1196,6 +1207,42 @@ void CDeferredRenderer::godRayPass2(const IWindow& window, const IGraphicsResour
 
     // Perform pass
     ARenderer::draw(quadMesh);
+}
+
+void CDeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow& window,
+                                           const IGraphicsResourceManager& manager)
+{
+	// Get shader
+	CShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
+	if (shader == nullptr)
+	{
+		LOG_ERROR("Shader program for depth visualization pass could not be retrieved.");
+		return;
+	}
+
+	// Get screen space quad
+	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+	if (quadMesh == nullptr)
+	{
+		LOG_ERROR("Mesh object for depth visualization pass could not be retrieved.");
+		return;
+	}
+
+	// Depth texture
+	m_depthTexture->setActive(visualizeDepthPassDepthTextureUnit);
+	shader->setUniform(depthTextureUniformName, visualizeDepthPassDepthTextureUnit);
+
+	/// Screen size
+	shader->setUniform(screenWidthUniformName, (float)window.getWidth());
+	shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+
+	// camera parameters
+	// TODO Replace
+	shader->setUniform(cameraZNearUniformName, 0.01f);
+	shader->setUniform(cameraZFarUniformName, 1000.f);
+
+	// Perform pass
+	ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
@@ -1837,6 +1884,20 @@ bool CDeferredRenderer::initDisplayPass(IResourceManager* manager)
     if (m_displayPassShaderId == invalidResource)
     {
         LOG_ERROR("Failed to initialize the shader from file %s.", displayPassShaderFile.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool CDeferredRenderer::initVisualizeDepthPass(IResourceManager* manager)
+{
+    // Get shader
+    std::string shaderFile = "data/shader/debug/visualize_depth_buffer_pass.ini";
+    m_visualizeDepthPassShaderId = manager->loadShader(shaderFile);
+    // Check if ok
+    if (m_visualizeDepthPassShaderId == invalidResource)
+    {
+        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
         return false;
     }
     return true;

@@ -27,12 +27,14 @@ const std::string screenHeightUniformName = "screen_height";
 // Camera parameters
 const std::string cameraPositionUniformName = "camera_position";
 const std::string cameraDirectionUniformName = "camera_direction";
-const std::string viewDistanceUniformName = "view_distance";
+const std::string viewDistanceUniformName = "view_distance"; // TODO Rename, same as z-far?
+const std::string cameraZNearUniformName = "camera_z_near";
+const std::string cameraZFarUniformName = "camera_z_far";
 
 // Depth-of-field parameters
-const std::string fokusNearUniformName = "focus_near";
-const std::string fokusFarUniformName = "focus_far";
-const std::string blurNearUniformName = "blur_far";
+const std::string focusNearUniformName = "focus_near";
+const std::string focusFarUniformName = "focus_far";
+const std::string blurNearUniformName = "blur_near";
 const std::string blurFarUniformName = "blur_far";
 
 // Blur parameters
@@ -98,18 +100,21 @@ const GLint gaussBlurVerticalPassInputTextureUnit = 0;
 // Texture units for horiontal gauss blur pass
 const GLint gaussBlurHoriontalPassInputTextureUnit = 0;
 
-// God ray pass 1
+// Texture units for god ray pass 1 (ray generation)
 const GLint godRayPass1InputTextureUnit = 0;
 const GLint godRayPassDepthTextureUnit = 1;
 
-// God ray pass 2
+// Texture units for god ray pass 2 (blending)
 const GLint godRayPass2SceneTextureUnit = 0;
 const GLint godRayPass2GodRayTextureUnit = 1;
 
-// Texture units
-const GLint depthOfFieldPassBaseTextureUnit = 0;
+// Depth-of-field pass texture units
+const GLint depthOfFieldPassSceneTextureUnit = 0;
 const GLint depthOfFieldPassBlurTextureUnit = 1;
 const GLint depthOfFieldDepthTextureUnit = 2;
+
+// Texture units for depth texture visualization pass
+const GLint visualizeDepthPassDepthTextureUnit = 0;
 
 // Texture sampler uniform names
 const std::string diffuseTextureUniformName = "diffuse_texture";

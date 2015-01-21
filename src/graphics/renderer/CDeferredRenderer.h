@@ -105,7 +105,8 @@ class CDeferredRenderer : public ARenderer
     void gaussBlurHorizontalPass(const IWindow& window, const IGraphicsResourceManager& manager,
                                  const std::shared_ptr<CTexture>& texture);
 
-    void depthOfFieldPass(const IWindow& window, const IGraphicsResourceManager& manager,
+    void depthOfFieldPass(const ICamera& camera, const IWindow& window,
+                          const IGraphicsResourceManager& manager,
                           const std::shared_ptr<CTexture>& sceneTexture,
                           const std::shared_ptr<CTexture>& blurTexture);
 
@@ -124,6 +125,13 @@ class CDeferredRenderer : public ARenderer
     void godRayPass2(const IWindow& window, const IGraphicsResourceManager& manager,
                      const std::shared_ptr<CTexture>& texture,
                      const std::shared_ptr<CTexture>& godrayTexture);
+
+    /**
+    * \brief Depth visualization pass.
+    *
+    * For debugging.
+    */
+	void visualizeDepthPass(const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager);
 
     /**
     * \brief Initializes resources for geometry pass.
@@ -194,6 +202,8 @@ class CDeferredRenderer : public ARenderer
     * \brief Display pass draws final image to screen.
     */
     bool initDisplayPass(IResourceManager* manager);
+
+    bool initVisualizeDepthPass(IResourceManager* manager);
 
     void draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
               const glm::mat4& scale, CMaterial* material, const IGraphicsResourceManager& manager,
@@ -274,6 +284,9 @@ class CDeferredRenderer : public ARenderer
 
     // Display pass for final screen draw
     ResourceId m_displayPassShaderId = -1;
+
+    // Depth visualization pass
+    ResourceId m_visualizeDepthPassShaderId = -1;
 
     // Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;
