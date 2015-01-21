@@ -42,20 +42,18 @@ void main(void)
 	vec3 fragment_world_position = getWorldPosition(normalized_screen_coordinates);
 
 	// Distance to viewer
-	float d = distance(fragment_world_position, camera_position);
+	float distance = distance(fragment_world_position, camera_position);
 
 	// Apply blur
-	if (d < focus_near)
+	if (distance < focus_near)
 	{
-		//float a = min(1.0, blur_near / distance);
-		//color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
-		color = texture(blur_texture, normalized_screen_coordinates).xyz;
+		float a = min(1.0, blur_near / distance);
+		color = mix(texture(scene_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
-	else if (d > focus_far)
+	else if (distance > focus_far)
 	{
-		//float a = min(1.0, (distance - focus_far) / (blur_far - focus_far));
-		//color = mix(texture(base_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
-		color = texture(blur_texture, normalized_screen_coordinates).xyz;
+		float a = min(1.0, (distance - focus_far) / (blur_far - focus_far));
+		color = mix(texture(scene_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
 	else
 	{
