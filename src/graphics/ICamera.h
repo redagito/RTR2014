@@ -22,19 +22,19 @@ enum class RenderMode
 struct SFeatureInfo
 {
     FogType fogType = FogType::None;
-    float fogBegin = 0;
-    float fogEnd = 0;
-    float fogDensity = 0;
+    float fogBegin = 0.f;
+    float fogEnd = 0.f;
+    float fogDensity = 0.f;
 
     RenderMode renderMode = RenderMode::Final;
 
     bool shadowsActive = true;
     
     bool dofActive = true;
-    float dofNearFocus = 0;
-    float dofNearBlur = 0;
-    float dofFarFocus = 0;
-    float dofFarBlur = 0;
+    float dofNearFocus = 0.3f;
+    float dofNearBlur = 0.1f;
+    float dofFarFocus = 10.f;
+    float dofFarBlur = 20.f;
     
     bool fxaaActive = true;
     
