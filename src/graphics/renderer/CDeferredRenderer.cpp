@@ -581,12 +581,13 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         glm::vec3 color;
         float intensity;
         float radius;
+		bool castsShadow;
 
-        if (!scene.getPointLight(pointLightId, position, radius, color, intensity))
+		if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
         {
             LOG_ERROR("Failed to retrieve point light data from point light id %i.", pointLightId);
         }
-        else
+		else if (castsShadow)
         {
             // fov should be 90.f instead of 89.54f, but this does not work, because the view is too
             // wide in this case. 89.54f is determined by testing. 89.53 is already too small and
@@ -686,13 +687,14 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         glm::vec3 direction;
         glm::vec3 color;
         float intensity;
+		bool castsShadow;
 
-        if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity))
+		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity, castsShadow))
         {
             LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
                       directionalLightId);
         }
-        else
+		else if (castsShadow)
         {
             glm::mat4 shadowView =
                 glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
