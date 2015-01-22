@@ -50,17 +50,17 @@ void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
 }
 
 SceneObjectId CScene::createPointLight(const glm::vec3& position, float radius,
-                                       const glm::vec3& color, float intensity)
+                                       const glm::vec3& color, float intensity, bool castsShadow)
 {
-    m_pointLights.push_back(SScenePointLight(position, radius, color, intensity));
+    m_pointLights.push_back(SScenePointLight(position, radius, color, intensity, castsShadow));
     return m_pointLights.size() - 1;
 }
 
 bool CScene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color,
-                           float& intensity) const
+                           float& intensity, bool& castsShadow) const
 {
     // TODO Needs to be changed for better data structures
-	if (id < 0 || ((unsigned int)id) >= m_pointLights.size())
+    if (id < 0 || ((unsigned int)id) >= m_pointLights.size())
     {
         return false;
     }
@@ -70,67 +70,74 @@ bool CScene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius,
     radius = m_pointLights.at(id).m_radius;
     color = m_pointLights.at(id).m_color;
     intensity = m_pointLights.at(id).m_intensity;
+	castsShadow = m_pointLights.at(id).m_castsShadow;
     return true;
 }
 
 void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
-                           const glm::vec3& color, float intensity)
+                           const glm::vec3& color, float intensity, bool castsShadow)
 {
     // TODO Needs to be changed for better data structures
-	assert(id >= 0 && ((unsigned int)id) < m_pointLights.size() && "Invalid scene object id");
+    assert(id >= 0 && ((unsigned int)id) < m_pointLights.size() && "Invalid scene object id");
 
     // Write data
     m_pointLights[id].m_position = position;
     m_pointLights[id].m_radius = radius;
     m_pointLights[id].m_color = color;
-    m_pointLights[id].m_intensity = intensity;
+	m_pointLights[id].m_intensity = intensity;
+	m_pointLights[id].m_castsShadow = castsShadow;
     return;
 }
 
-SceneObjectId CScene::createDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity)
+SceneObjectId CScene::createDirectionalLight(const glm::vec3& direction, const glm::vec3& color,
+                                             float intensity, bool castsShadow)
 {
-	m_directionalLights.push_back(SSceneDirectionalLight(direction, color, intensity));
-	return m_directionalLights.size() - 1;
+    m_directionalLights.push_back(SSceneDirectionalLight(direction, color, intensity, castsShadow));
+    return m_directionalLights.size() - 1;
 }
 
-bool CScene::getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color, float& intensity) const
+bool CScene::getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color,
+                                 float& intensity, bool& castsShadow) const
 {
-	// TODO Needs to be changed for better data structures
-	if (id < 0 || ((unsigned int)id) >= m_directionalLights.size())
-	{
-		return false;
-	}
+    // TODO Needs to be changed for better data structures
+    if (id < 0 || ((unsigned int)id) >= m_directionalLights.size())
+    {
+        return false;
+    }
 
-	// Write data
-	direction = m_directionalLights.at(id).m_direction;
-	color = m_directionalLights.at(id).m_color;
-	intensity = m_directionalLights.at(id).m_intensity;
-	return true;
+    // Write data
+    direction = m_directionalLights.at(id).m_direction;
+    color = m_directionalLights.at(id).m_color;
+    intensity = m_directionalLights.at(id).m_intensity;
+	castsShadow = m_directionalLights.at(id).m_castsShadow;
+    return true;
 }
 
-void CScene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color, float intensity)
+void CScene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction,
+                                 const glm::vec3& color, float intensity, bool castsShadow)
 {
-	// TODO Needs to be changed for better data structures
-	assert(id >= 0 && ((unsigned int)id) < m_directionalLights.size() && "Invalid scene object id");
+    // TODO Needs to be changed for better data structures
+    assert(id >= 0 && ((unsigned int)id) < m_directionalLights.size() && "Invalid scene object id");
 
-	// Write data
-	m_directionalLights[id].m_direction = direction;
+    // Write data
+    m_directionalLights[id].m_direction = direction;
 	m_directionalLights[id].m_color = color;
 	m_directionalLights[id].m_intensity = intensity;
-	return;
+	m_directionalLights[id].m_castsShadow = castsShadow;
+    return;
 }
 
 void CScene::setAmbientLight(const glm::vec3& color, float intensity)
 {
-	m_ambientColor = color;
-	m_ambientIntensity = intensity;
+    m_ambientColor = color;
+    m_ambientIntensity = intensity;
 }
 
 bool CScene::getAmbientLight(glm::vec3& color, float& intensity) const
 {
-	color = m_ambientColor;
-	intensity = m_ambientIntensity;
-	return true;
+    color = m_ambientColor;
+    intensity = m_ambientIntensity;
+    return true;
 }
 
 ISceneQuery* CScene::createQuery(const ICamera& camera) const
@@ -158,13 +165,13 @@ ISceneQuery* CScene::createQuery(const ICamera& camera) const
         query->addPointLight(i);
     }
 
-	// TODO Directional light culling?
-	// For now add all directional lights
-	for (unsigned int i = 0; i < m_directionalLights.size(); ++i)
-	{
-		// Counter variable is light id
-		query->addDirectionalLight(i);
-	}
+    // TODO Directional light culling?
+    // For now add all directional lights
+    for (unsigned int i = 0; i < m_directionalLights.size(); ++i)
+    {
+        // Counter variable is light id
+        query->addDirectionalLight(i);
+    }
 
     // Return query
     return query;

@@ -44,34 +44,34 @@ class IScene
      * \brief Creates point light in scene and returns id.
      */
     virtual SceneObjectId createPointLight(const glm::vec3& position, float radius,
-                                           const glm::vec3& color, float intensity) = 0;
+                                           const glm::vec3& color, float intensity, bool castsShadow) = 0;
 
     /**
      * \brief Returns point light data.
      */
     virtual bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius,
-                               glm::vec3& color, float& intensity) const = 0;
+                               glm::vec3& color, float& intensity, bool& castsShadow) const = 0;
 
     /**
     * \brief Sets point light parameters.
     */
     virtual void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
-                               const glm::vec3& color, float intensity) = 0;
+                               const glm::vec3& color, float intensity, bool castsShadow) = 0;
 
 	/**
 	* \brief Creates directional light.
 	*/
-	virtual SceneObjectId createDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity) = 0;
+	virtual SceneObjectId createDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity, bool castsShadow) = 0;
 
 	/**
 	* \brief Returns directional light data.
 	*/
-	virtual bool getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color, float& intensity) const = 0;
+	virtual bool getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color, float& intensity, bool& castsShadow) const = 0;
 
 	/**
 	* \brief Sets directional light parameters.
 	*/
-	virtual void setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color, float intensity) = 0;
+	virtual void setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color, float intensity, bool castsShadow) = 0;
 
 	/**
 	* \brief Sets the ambient light for the scene.

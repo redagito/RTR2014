@@ -30,22 +30,22 @@ class CScene : public IScene
                    const glm::vec3& rotation, const glm::vec3& scale);
 
     SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color,
-                                   float intensity);
+                                   float intensity, bool castsShadow);
 
     bool getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color,
-                       float& intensity) const;
+                       float& intensity, bool& castsShadow) const;
 
     void setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
-                       const glm::vec3& color, float intensity);
+                       const glm::vec3& color, float intensity, bool castsShadow);
 
     SceneObjectId createDirectionalLight(const glm::vec3& direction, const glm::vec3& color,
-                                         float intensity);
+                                         float intensity, bool castsShadow);
 
     bool getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color,
-                             float& intensity) const;
+                             float& intensity, bool& castsShadow) const;
 
     void setDirectionalLight(SceneObjectId id, const glm::vec3& direction, const glm::vec3& color,
-                             float intensity);
+                             float intensity, bool castsShadow);
 
     void setAmbientLight(const glm::vec3& color, float intensity);
 
