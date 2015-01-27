@@ -31,10 +31,10 @@ struct SFeatureInfo
     bool shadowsActive = true;
     
     bool dofActive = true;
-    float dofNearFocus = 0.3f;
+    float dofNearFocus = 0.5f;
     float dofNearBlur = 0.1f;
-    float dofFarFocus = 10.f;
-    float dofFarBlur = 20.f;
+    float dofFarFocus = 50.f;
+    float dofFarBlur = 80.f;
     
     bool fxaaActive = true;
     

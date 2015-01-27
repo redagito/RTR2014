@@ -858,18 +858,6 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
         m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
         gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
         // Blurred in tex 2
-		
-		for (unsigned int i = 0; i < 0; ++i)
-		{
-			// Pass 3.1: gauss blur
-			m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-			gaussBlurVerticalPass(window, manager, m_postProcessPassTexture2);
-			// Blurred in tex0
-
-			m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-			gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
-			// Blurred in tex 2
-		}
 
         // TODO DOF parameter
         m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
