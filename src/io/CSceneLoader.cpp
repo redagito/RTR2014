@@ -202,7 +202,7 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
     glm::vec3 color;
     float radius;
     float intensity;
-    bool castsShadow = true;  // TODO change to false
+	bool castsShadow;
 
     if (!load(node, "position", position))
     {
@@ -224,15 +224,13 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
         return false;
     }
 
-    if (!load(node, "shadow", castsShadow))
-    {
-        // TODO handle return value
-        // return false;
-    }
+	if (!load(node, "casts_shadow", castsShadow))
+	{
+		return false;
+	}
 
     // Create object in scene
-    SceneObjectId objectId =
-        scene.createPointLight(position, radius, color, intensity, castsShadow);
+	SceneObjectId objectId = scene.createPointLight(position, radius, color, intensity, castsShadow);
 
     // Load optional animation controllers
     if (!loadAnimationControllers(node["animations"], scene, controllers, objectId,
@@ -280,7 +278,7 @@ bool CSceneLoader::loadDirectionalLight(
     glm::vec3 direction;
     glm::vec3 color;
     float intensity;
-    bool castsShadow = true;  // TODO change to false
+	bool castsShadow;
 
     if (!load(node, "direction", direction))
     {
@@ -292,16 +290,15 @@ bool CSceneLoader::loadDirectionalLight(
         return false;
     }
 
-    if (!load(node, "intensity", intensity))
-    {
-        return false;
-    }
+	if (!load(node, "intensity", intensity))
+	{
+		return false;
+	}
 
-    if (!load(node, "shadow", castsShadow))
-    {
-        // TODO handle return value
-        // return false;
-    }
+	if (!load(node, "casts_shadow", castsShadow))
+	{
+		return false;
+	}
 
     // Create object in scene
     scene.createDirectionalLight(direction, color, intensity, castsShadow);
@@ -389,7 +386,8 @@ bool CSceneLoader::loadAnimationController(
         {
             return false;
         }
-        controllers.push_back(std::make_shared<CMovementController>(id, type, scene, direction));
+        controllers.push_back(
+            std::make_shared<CMovementController>(id, type, scene, direction));
     }
     else
     {

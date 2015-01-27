@@ -1,0 +1,32 @@
+{
+    "scene_objects" :  [
+        {
+            "mesh" :  "data/mesh/plane.obj",
+            "material" : "data/material/brick_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, 0, 0 ],
+            "rotation" :  [ 0, 0, 0 ],
+            "scale" :  [ 10, 1, 10 ]
+        },
+        {
+            "mesh" :  "data/mesh/cube.obj",
+            "material" : "data/material/stone_1_diffuse_normal_specular.ini",
+            "position" :  [ 0, 3, 0 ],
+            "rotation" :  [ 0, 0, 0 ],
+            "scale" :  [ 1, 1, 1 ]
+        }
+    ],
+    "directional_lights" : [
+        {
+            "direction" :  [ 0, -1, 0.5 ],
+            "color" :  [ 1, 1, 1 ],
+            "intensity" : 0.4,
+            "casts_shadow" :  true
+        },
+        {
+            "direction" :  [ 0.5, -1, 0 ],
+            "color" :  [ 1, 1, 1 ],
+            "intensity" : 0.4,
+            "casts_shadow" :  true
+        }
+    ]
+}
