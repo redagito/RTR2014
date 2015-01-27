@@ -105,7 +105,7 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 
     if (!initVisualizeDepthPass(manager))
     {
-		LOG_ERROR("Failed to initialize depth visualization pass.");
+        LOG_ERROR("Failed to initialize depth visualization pass.");
     }
     return true;
 }
@@ -131,16 +131,16 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     // Post processing pass
     postProcessPass(camera, window, manager, m_illuminationPassTexture);
 
-	CFrameBuffer::setDefaultActive();
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    CFrameBuffer::setDefaultActive();
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // Select rendering mode
     if (camera.getFeatureInfo().renderMode == RenderMode::Color)
     {
         displayPass(window, manager, m_diffuseGlowTexture);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
-	{
-		visualizeDepthPass(camera, window, manager);
+    {
+        visualizeDepthPass(camera, window, manager);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {
@@ -581,13 +581,13 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
         glm::vec3 color;
         float intensity;
         float radius;
-		bool castsShadow;
+        bool castsShadow;
 
-		if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
+        if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
         {
             LOG_ERROR("Failed to retrieve point light data from point light id %i.", pointLightId);
         }
-		else if (castsShadow)
+        else
         {
             // fov should be 90.f instead of 89.54f, but this does not work, because the view is too
             // wide in this case. 89.54f is determined by testing. 89.53 is already too small and
@@ -687,10 +687,9 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         glm::vec3 direction;
         glm::vec3 color;
         float intensity;
-		bool castsShadow;
+        bool castsShadow;
 
-		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity, castsShadow))
-        {
+		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity, castsShadow))        {
             LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
                       directionalLightId);
         }
@@ -1075,7 +1074,7 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
 
     // Input scene texture
     sceneTexture->setActive(depthOfFieldPassSceneTextureUnit);
-	shader->setUniform(sceneTextureUniformName, depthOfFieldPassSceneTextureUnit);
+    shader->setUniform(sceneTextureUniformName, depthOfFieldPassSceneTextureUnit);
 
     // Input blur texture
     blurTexture->setActive(depthOfFieldPassBlurTextureUnit);
@@ -1083,7 +1082,7 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
 
     // Input depth texture
     m_depthTexture->setActive(depthOfFieldPassDepthTextureUnit);
-	shader->setUniform(depthTextureUniformName, depthOfFieldPassDepthTextureUnit);
+    shader->setUniform(depthTextureUniformName, depthOfFieldPassDepthTextureUnit);
 
     // Depth-of-field parameters
     shader->setUniform(blurNearUniformName, camera.getFeatureInfo().dofNearBlur);
@@ -1229,37 +1228,37 @@ void CDeferredRenderer::godRayPass2(const IWindow& window, const IGraphicsResour
 void CDeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow& window,
                                            const IGraphicsResourceManager& manager)
 {
-	// Get shader
-	CShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
-	if (shader == nullptr)
-	{
-		LOG_ERROR("Shader program for depth visualization pass could not be retrieved.");
-		return;
-	}
+    // Get shader
+    CShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
+    if (shader == nullptr)
+    {
+        LOG_ERROR("Shader program for depth visualization pass could not be retrieved.");
+        return;
+    }
 
-	// Get screen space quad
-	CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-	if (quadMesh == nullptr)
-	{
-		LOG_ERROR("Mesh object for depth visualization pass could not be retrieved.");
-		return;
-	}
+    // Get screen space quad
+    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
+    if (quadMesh == nullptr)
+    {
+        LOG_ERROR("Mesh object for depth visualization pass could not be retrieved.");
+        return;
+    }
 
-	// Depth texture
-	m_depthTexture->setActive(visualizeDepthPassDepthTextureUnit);
-	shader->setUniform(depthTextureUniformName, visualizeDepthPassDepthTextureUnit);
+    // Depth texture
+    m_depthTexture->setActive(visualizeDepthPassDepthTextureUnit);
+    shader->setUniform(depthTextureUniformName, visualizeDepthPassDepthTextureUnit);
 
-	/// Screen size
-	shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-	shader->setUniform(screenHeightUniformName, (float)window.getHeight());
+    /// Screen size
+    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
+    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-	// camera parameters
-	// TODO Replace
-	shader->setUniform(cameraZNearUniformName, 0.01f);
-	shader->setUniform(cameraZFarUniformName, 1000.f);
+    // camera parameters
+    // TODO Replace
+    shader->setUniform(cameraZNearUniformName, 0.01f);
+    shader->setUniform(cameraZFarUniformName, 1000.f);
 
-	// Perform pass
-	ARenderer::draw(quadMesh);
+    // Perform pass
+    ARenderer::draw(quadMesh);
 }
 
 void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
