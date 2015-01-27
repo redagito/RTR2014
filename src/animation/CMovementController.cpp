@@ -42,14 +42,15 @@ void CMovementController::update(float timeStep)
         glm::vec3 color;
         float radius;
         float intensity;
+        bool castsShadow;
         // Retrieve object
-        if (!m_scene.getPointLight(m_objectId, position, radius, color, intensity))
+        if (!m_scene.getPointLight(m_objectId, position, radius, color, intensity, castsShadow))
         {
             // Invalid id?
             return;
         }
         position += diff;
-        m_scene.setPointLight(m_objectId, position, radius, color, intensity);
+        m_scene.setPointLight(m_objectId, position, radius, color, intensity, castsShadow);
     }
     else
     {
