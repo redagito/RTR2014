@@ -694,17 +694,20 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
                       directionalLightId);
         }
-		else if (castsShadow)
+		else
         {
-            glm::mat4 shadowView =
-                glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
-            shadowMapPass(scene, shadowCamera, window, manager);
+			// Create shadow camera
+			glm::mat4 shadowView =
+				glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
+			StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
 
+			// Render shadow map
+			shadowMapPass(scene, shadowCamera, window, manager);
+			
             // Prepare light pass frame buffer
-            glViewport(0, 0, window.getWidth(), window.getHeight());
-            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+			m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+			glViewport(0, 0, window.getWidth(), window.getHeight());
 
             // No depth testing for light volumes
             glDisable(GL_DEPTH_TEST);
@@ -752,7 +755,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
             directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
                                                    shadowViewProjBiasMatrix);
 
-            // Set point light parameters for fragment shader
+            // Set directional light parameters
             directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
             directionalLightPassShader->setUniform(lightColorUniformName, color);
             directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
@@ -856,6 +859,18 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
         m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
         gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
         // Blurred in tex 2
+		
+		for (unsigned int i = 0; i < 0; ++i)
+		{
+			// Pass 3.1: gauss blur
+			m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+			gaussBlurVerticalPass(window, manager, m_postProcessPassTexture2);
+			// Blurred in tex0
+
+			m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+			gaussBlurHorizontalPass(window, manager, m_postProcessPassTexture0);
+			// Blurred in tex 2
+		}
 
         // TODO DOF parameter
         m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
