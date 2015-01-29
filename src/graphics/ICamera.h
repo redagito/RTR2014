@@ -16,12 +16,14 @@ enum class RenderMode
     Color,
     Depth,
     Normals,
-    Lights
+    Lights,
+	GodRay
 };
 
 struct SFeatureInfo
 {
     FogType fogType = FogType::None;
+	bool fogActive = false; // TODO Use this flag instead FogType::NONE
     float fogBegin = 0.f;
     float fogEnd = 0.f;
     float fogDensity = 0.f;
@@ -37,6 +39,8 @@ struct SFeatureInfo
     float dofFarBlur = 80.f;
     
     bool fxaaActive = true;
+
+	bool godRayActive  = true;
     
     bool normalMappingActive = true;
 };

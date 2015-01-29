@@ -311,7 +311,35 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
     
     SFeatureInfo& info = m_camera->getFeatureInfoForWrite();
     
-    if (keyCode == GLFW_KEY_F)
+
+	if (keyCode == GLFW_KEY_R)
+	{
+		switch (info.renderMode) {
+		case RenderMode::Final:
+			info.renderMode = RenderMode::Color;
+			break;
+		case RenderMode::Color:
+			info.renderMode = RenderMode::Depth;
+			break;
+		case RenderMode::Depth:
+			info.renderMode = RenderMode::Lights;
+			break;
+		case RenderMode::Lights:
+			info.renderMode = RenderMode::Normals;
+			break;
+		case RenderMode::Normals:
+			info.renderMode = RenderMode::GodRay;
+			break;
+		case RenderMode::GodRay:
+			info.renderMode = RenderMode::Final;
+			break;
+		default:
+			info.renderMode = RenderMode::Final;
+			break;
+		}
+	}
+
+    if (keyCode == GLFW_KEY_T)
     {
         switch (info.fogType) {
             case FogType::None:
@@ -332,49 +360,30 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
         }
     }
     
-    if (keyCode == GLFW_KEY_R)
-    {
-        switch (info.renderMode) {
-            case RenderMode::Final:
-                info.renderMode = RenderMode::Color;
-                break;
-            case RenderMode::Color:
-                info.renderMode = RenderMode::Depth;
-                break;
-            case RenderMode::Depth:
-                info.renderMode = RenderMode::Lights;
-                break;
-            case RenderMode::Lights:
-                info.renderMode = RenderMode::Normals;
-                break;
-            case RenderMode::Normals:
-                info.renderMode = RenderMode::Final;
-                break;
-            default:
-                info.renderMode = RenderMode::Final;
-                break;
-        }
-    }
-    
     if (keyCode == GLFW_KEY_Z)
     {
         info.shadowsActive = !info.shadowsActive;
     }
     
-    if (keyCode == GLFW_KEY_T)
+    if (keyCode == GLFW_KEY_U)
     {
         info.fxaaActive = !info.fxaaActive;
     }
     
-    if (keyCode == GLFW_KEY_G)
+    if (keyCode == GLFW_KEY_I)
     {
         info.dofActive = !info.dofActive;
     }
     
-    if (keyCode == GLFW_KEY_H)
+    if (keyCode == GLFW_KEY_O)
     {
         info.normalMappingActive = !info.normalMappingActive;
     }
+
+	if (keyCode == GLFW_KEY_P)
+	{
+		info.godRayActive = !info.godRayActive;
+	}
 }
 
 void CCameraController::handleMouseMovementEvent(int x, int y)

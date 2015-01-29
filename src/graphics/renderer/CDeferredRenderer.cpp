@@ -689,24 +689,26 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         float intensity;
         bool castsShadow;
 
-		if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity, castsShadow))        {
+        if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity,
+                                       castsShadow))
+        {
             LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
                       directionalLightId);
         }
-		else
+        else
         {
-			// Create shadow camera
-			glm::mat4 shadowView =
-				glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-			StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
+            // Create shadow camera
+            glm::mat4 shadowView =
+                glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
+            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
 
-			// Render shadow map
-			shadowMapPass(scene, shadowCamera, window, manager);
-			
+            // Render shadow map
+            shadowMapPass(scene, shadowCamera, window, manager);
+
             // Prepare light pass frame buffer
-			m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
-			glViewport(0, 0, window.getWidth(), window.getHeight());
+            m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
 
             // No depth testing for light volumes
             glDisable(GL_DEPTH_TEST);
@@ -848,10 +850,10 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
     // Foggy scene in tex1
 
     // Pass 3: dof
+	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
     if (camera.getFeatureInfo().dofActive)
     {
         // Pass 3.1: gauss blur
-        m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
         gaussBlurVerticalPass(window, manager, m_postProcessPassTexture1);
         // Blurred in tex0
 
@@ -871,18 +873,36 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
     }
     // Processed scene in tex 0
 
-    // TODO God ray pass disabled, not working as intended
-    // God ray pass 1
-    // m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-    // godRayPass1(window, manager, m_postProcessPassTexture0);
-    // God ray texture in tex 1
+	if (camera.getFeatureInfo().godRayActive || camera.getFeatureInfo().renderMode == RenderMode::GodRay)
+	{
+		// TODO God ray pass disabled, not working as intended
+		// God ray pass 1
+		m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
+		godRayPass1(window, manager, m_postProcessPassTexture0);
+		// God ray texture in tex 1
 
-    // God ray pass 2
-    // m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-    // godRayPass2(window, manager, m_postProcessPassTexture0, m_postProcessPassTexture1);
+		// Godray debug mode
+		if (camera.getFeatureInfo().renderMode == RenderMode::GodRay)
+		{
+			// Return generated godray texture
+			m_postProcessPassOutputTexture = m_postProcessPassTexture1;
+			return;
+		}
+
+		// God ray pass 2
+		m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+		godRayPass2(window, manager, m_postProcessPassTexture0, m_postProcessPassTexture1);
+	}
+	else
+	{
+		// Passthrough into tex 2
+		m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+		passthroughPass(window, manager, texture);
+	}
 
     // Set output texture
-    m_postProcessPassOutputTexture = m_postProcessPassTexture0;
+    m_postProcessPassOutputTexture = m_postProcessPassTexture2;
+	return;
 }
 
 void CDeferredRenderer::fxaaPass(const IWindow& window, const IGraphicsResourceManager& manager,
@@ -1138,7 +1158,7 @@ void CDeferredRenderer::passthroughPass(const IWindow& window,
 void CDeferredRenderer::godRayPass1(const IWindow& window, const IGraphicsResourceManager& manager,
                                     const std::shared_ptr<CTexture>& texture)
 {
-    // Get gauss shader
+    // Get shader
     CShaderProgram* shader = manager.getShaderProgram(m_godRayPass1ShaderId);
     if (shader == nullptr)
     {
@@ -1713,24 +1733,26 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-    // FXAA
+    // Fog
     if (!initFogPass(manager))
     {
         LOG_ERROR("Failed to initialize fog pass.");
         return false;
     }
 
-    //    if (!initGodRayPass1(manager))
-    //    {
-    //        LOG_ERROR("Failed to initialize god ray 1 pass.");
-    //        return false;
-    //    }
+	// Godray
+    if (!initGodRayPass1(manager))
+    {
+        LOG_ERROR("Failed to initialize god ray 1 pass.");
+        return false;
+    }
 
-    //    if (!initGodRayPass2(manager))
-    //    {
-    //        LOG_ERROR("Failed to initialize god ray 2 pass.");
-    //        return false;
-    //    }
+	// Should actually compose by additive blending
+    if (!initGodRayPass2(manager))
+    {
+        LOG_ERROR("Failed to initialize god ray 2 pass.");
+        return false;
+    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
