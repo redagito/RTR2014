@@ -337,7 +337,7 @@ bool CSceneLoader::loadAnimationControllers(
 {
     if (node.empty())
     {
-        LOG_INFO("Missing or empty 'animations' node. No animation controllers where loaded.");
+        // LOG_INFO("Missing or empty 'animations' node. No animation controllers where loaded.");
         return true;
     }
 
