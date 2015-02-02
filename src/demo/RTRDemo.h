@@ -6,29 +6,45 @@
 
 #include "io/CIniFile.h"
 
+// GLFW
 struct GLFWwindow;
 
-class IResourceManager;
+// Graphics
 class CGlfwWindow;
 class IRenderer;
-class CForwardRenderer;
-class CDeferredRenderer;
 class IScene;
+
+// Resource
+class IResourceManager;
+
+// Animation
+class IInputProvider;
 class IControllableCamera;
 class CCameraController;
 class IGraphicsResourceManager;
-class IAnimationController;
+class CAnimationWorld;
 
+// Debug
 class CDebugInfo;
 class CDebugInfoDisplay;
 
+/**
+* \brief Demo application class.
+*/
 class RTRDemo
 {
    public:
     RTRDemo();
     ~RTRDemo();
 
+	/**
+	* \brief nitialize demo with config file.
+	*/
     int init(const std::string& configFile);
+
+	/**
+	* \brief Run demo.
+	*/
     int run();
 
    private:
@@ -44,7 +60,10 @@ class RTRDemo
         nullptr; /**< Resource loader and manager. */
     std::shared_ptr<IGraphicsResourceManager> m_graphicsResourceManager =
         nullptr; /**< Resource manager for graphics resources. */
-    std::shared_ptr<CGlfwWindow> m_window = nullptr;
+    
+	std::shared_ptr<CGlfwWindow> m_window = nullptr;
+	std::shared_ptr<IInputProvider> m_inputProvider = nullptr;
+
     std::shared_ptr<IRenderer> m_renderer = nullptr;                 /**< Active renderer. */
     std::shared_ptr<IRenderer> m_deferredRenderer = nullptr;         /**< Deferred renderer. */
     std::shared_ptr<IRenderer> m_forwardRenderer = nullptr;          /**< Forward renderer. */
@@ -57,5 +76,5 @@ class RTRDemo
         nullptr; /**< Debug information renderer. */
 
 	// Animation
-	std::vector<std::shared_ptr<IAnimationController>> m_animationController;
+	std::shared_ptr<CAnimationWorld> m_animationWorld;
 };

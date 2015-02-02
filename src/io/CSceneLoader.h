@@ -16,7 +16,7 @@ class Value; /**< Forward declare for json node handling. */
 
 class IScene;
 class IResourceManager;
-class IAnimationController;
+class CAnimationWorld;
 
 /**
 * \brief Scene loader utility class.
@@ -30,32 +30,29 @@ class CSceneLoader
     * \brief Create scene loader with resource manager.
     */
     CSceneLoader(IResourceManager& resourceManager);
-    bool load(const std::string& file, IScene& scene,
-              std::vector<std::shared_ptr<IAnimationController>>& controllers);
+    bool load(const std::string& file, IScene& scene, CAnimationWorld& animationWorld);
 
    protected:
-    bool loadSceneObjects(const Json::Value& node, IScene& scene,
-                          std::vector<std::shared_ptr<IAnimationController>>& controllers);
-    bool loadSceneObject(const Json::Value& node, IScene& scene,
-                         std::vector<std::shared_ptr<IAnimationController>>& controllers);
+    bool loadSceneObjects(const Json::Value& node, IScene& scene, CAnimationWorld& animationWorld);
+    bool loadSceneObject(const Json::Value& node, IScene& scene, CAnimationWorld& animationWorld);
 
-    bool loadPointLights(const Json::Value& node, IScene& scene,
-                         std::vector<std::shared_ptr<IAnimationController>>& controllers);
-    bool loadPointLight(const Json::Value& node, IScene& scene,
-                        std::vector<std::shared_ptr<IAnimationController>>& controllers);
+    bool loadPointLights(const Json::Value& node, IScene& scene, CAnimationWorld& animationWorld);
+    bool loadPointLight(const Json::Value& node, IScene& scene, CAnimationWorld& animationWorld);
 
     bool loadDirectionalLights(const Json::Value& node, IScene& scene,
-                               std::vector<std::shared_ptr<IAnimationController>>& controllers);
+                               CAnimationWorld& animationWorld);
     bool loadDirectionalLight(const Json::Value& node, IScene& scene,
-                              std::vector<std::shared_ptr<IAnimationController>>& controllers);
+                              CAnimationWorld& animationWorld);
 
     bool loadAmbientLight(const Json::Value& node, IScene& scene);
 
-	bool loadAnimationControllers(const Json::Value& node, IScene& scene,
-		std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id, AnimationObjectType type);
+    bool loadAnimationControllers(const Json::Value& node, IScene& scene,
+                                  CAnimationWorld& animationWorld, SceneObjectId id,
+                                  AnimationObjectType type);
 
-	bool loadAnimationController(const Json::Value& node, IScene& scene,
-		std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id, AnimationObjectType type);
+    bool loadAnimationController(const Json::Value& node, IScene& scene,
+                                 CAnimationWorld& animationWorld, SceneObjectId id,
+                                 AnimationObjectType type);
 
     bool load(const Json::Value& node, const std::string& name, float& f);
     bool load(const Json::Value& node, const std::string& name, bool& b);

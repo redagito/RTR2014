@@ -4,158 +4,158 @@
             "position" :  [0, 0.5, 0],
             "orientation" : [0, 0, 1],
             "timestamp" :  0,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [0, 0.4, 9],
             "orientation" : [0, 0, 1],
             "timestamp" :  6,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.7, 0.2, 15],
             "orientation" : [1, 0, 0],
             "timestamp" :  9,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.7, 0.2, 15],
             "orientation" : [1, 0, 0],
             "timestamp" :  13,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.5, 0.2, 17],
             "orientation" : [-0.2, 0, 1],
             "timestamp" :  16,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-5, 0.45, 28],
             "orientation" : [-0.2, 0, 1],
             "timestamp" :  22,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-5, 0.5, 30],
             "orientation" : [-1.8, 0, 1],
             "timestamp" :  24,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-5, 0.5, 30],
             "orientation" : [-1.8, 0, 1],
             "timestamp" :  27,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-5, 0.5, 30],
             "orientation" : [0.3, 0, 1],
             "timestamp" :  30,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-1, -0.4, 42],
             "orientation" : [0.3, 0, 1],
             "timestamp" :  35,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.5, -0.2, 47],
             "orientation" : [0, 1, 1],
             "timestamp" :  39,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.5, -0.2, 47],
             "orientation" : [-1, 0.5, 0.8],
             "timestamp" :  42,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.5, -0.2, 47],
             "orientation" : [-1, 0.5, 0.8],
             "timestamp" :  44,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
             "position" :  [-0.5, -0.2, 47],
             "orientation" : [1, 0.5, 0.8],
             "timestamp" :  48,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [2, 2, 49],
             "orientation" : [1, 0, 0],
             "timestamp" :  52,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [4, 3.5, 47],
             "orientation" : [1, 0, -1],
             "timestamp" :  56,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.1, 44],
             "orientation" : [0, 0, -1],
             "timestamp" :  61,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.9, 0.0, 0],
             "timestamp" :  65,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0.7, 1],
             "timestamp" :  69,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0.7, 1],
             "timestamp" :  70,
-            "fxaa" :  0,
-            "fog" :  0
+            "fxaa" :  false,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0.7, 1],
             "timestamp" :  71,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0.7, 1],
             "timestamp" :  72,
-            "fxaa" :  0,
-            "fog" :  0
+            "fxaa" :  false,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0.7, 1],
             "timestamp" :  73,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0, 1],
             "timestamp" :  75,
-            "fxaa" :  1,
-            "fog" :  1
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0, 1],
             "timestamp" :  77,
-            "fxaa" :  1,
-            "fog" :  0
+            "fxaa" :  true,
+            "fog" :  false
         },{
         	"position" :  [6, 4.4, 43],
             "orientation" : [-0.2, 0, 1],
             "timestamp" :  78,
-            "fxaa" :  1,
-            "fog" :  1
+            "fxaa" :  true,
+            "fog" :  false
         }
     ]
 }

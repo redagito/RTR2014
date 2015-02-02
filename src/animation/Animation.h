@@ -3,5 +3,6 @@
 enum class AnimationObjectType
 {
 	Model,
-	PointLight
+	PointLight,
+	DirectionalLight
 };

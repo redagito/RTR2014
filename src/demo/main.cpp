@@ -1,9 +1,6 @@
 #include "demo/RTRDemo.h"
 
-#include <iostream>
-#include <fstream>
-
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
     RTRDemo demo;
 

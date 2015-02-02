@@ -12,6 +12,7 @@
 
 #include "debug/Log.h"
 
+#include "animation/CAnimationWorld.h"
 #include "animation/CRotationController.h"
 #include "animation/CMovementController.h"
 
@@ -20,8 +21,7 @@ CSceneLoader::CSceneLoader(IResourceManager& resourceManager) : m_resourceManage
     return;
 }
 
-bool CSceneLoader::load(const std::string& file, IScene& scene,
-                        std::vector<std::shared_ptr<IAnimationController>>& controllers)
+bool CSceneLoader::load(const std::string& file, IScene& scene, CAnimationWorld& animationWorld)
 {
     Json::Reader reader;
     Json::Value root;
@@ -45,21 +45,21 @@ bool CSceneLoader::load(const std::string& file, IScene& scene,
     ifs.close();
 
     // Load scene objects
-    if (!loadSceneObjects(root["scene_objects"], scene, controllers))
+    if (!loadSceneObjects(root["scene_objects"], scene, animationWorld))
     {
         LOG_ERROR("Error while loading scene objects from scene file %s.", file.c_str());
         return false;
     }
 
     // Load point lights
-    if (!loadPointLights(root["point_lights"], scene, controllers))
+    if (!loadPointLights(root["point_lights"], scene, animationWorld))
     {
         LOG_ERROR("Error while loading point lights from scene file %s.", file.c_str());
         return false;
     }
 
     // Load directional lights
-    if (!loadDirectionalLights(root["directional_lights"], scene, controllers))
+    if (!loadDirectionalLights(root["directional_lights"], scene, animationWorld))
     {
         LOG_ERROR("Error while loading ambient light from scene file &s.", file.c_str());
         return false;
@@ -76,7 +76,7 @@ bool CSceneLoader::load(const std::string& file, IScene& scene,
 }
 
 bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
-                                    std::vector<std::shared_ptr<IAnimationController>>& controllers)
+                                    CAnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
@@ -95,7 +95,7 @@ bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
     // Load scene objects
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadSceneObject(node[i], scene, controllers))
+        if (!loadSceneObject(node[i], scene, animationWorld))
         {
             return false;
         }
@@ -104,7 +104,7 @@ bool CSceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
 }
 
 bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
-                                   std::vector<std::shared_ptr<IAnimationController>>& controllers)
+                                   CAnimationWorld& animationWorld)
 {
     std::string mesh;
     std::string material;
@@ -157,7 +157,7 @@ bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
     SceneObjectId objectId = scene.createObject(meshId, materialId, position, rotation, scale);
 
     // Load optional animation controllers
-    if (!loadAnimationControllers(node["animations"], scene, controllers, objectId,
+	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
                                   AnimationObjectType::Model))
     {
         LOG_ERROR("Failed to load animation controller.");
@@ -168,7 +168,7 @@ bool CSceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
 }
 
 bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
-                                   std::vector<std::shared_ptr<IAnimationController>>& controllers)
+                                   CAnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
@@ -187,7 +187,7 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
     // Load scene point lights
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadPointLight(node[i], scene, controllers))
+		if (!loadPointLight(node[i], scene, animationWorld))
         {
             return false;
         }
@@ -196,13 +196,13 @@ bool CSceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
 }
 
 bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
-                                  std::vector<std::shared_ptr<IAnimationController>>& controllers)
+                                  CAnimationWorld& animationWorld)
 {
     glm::vec3 position;
     glm::vec3 color;
     float radius;
     float intensity;
-	bool castsShadow;
+    bool castsShadow;
 
     if (!load(node, "position", position))
     {
@@ -224,16 +224,17 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
         return false;
     }
 
-	if (!load(node, "casts_shadow", castsShadow))
-	{
-		return false;
-	}
+    if (!load(node, "casts_shadow", castsShadow))
+    {
+        return false;
+    }
 
     // Create object in scene
-	SceneObjectId objectId = scene.createPointLight(position, radius, color, intensity, castsShadow);
+    SceneObjectId objectId =
+        scene.createPointLight(position, radius, color, intensity, castsShadow);
 
     // Load optional animation controllers
-    if (!loadAnimationControllers(node["animations"], scene, controllers, objectId,
+	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
                                   AnimationObjectType::PointLight))
     {
         LOG_ERROR("Failed to load animation controller.");
@@ -242,9 +243,8 @@ bool CSceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
     return true;
 }
 
-bool CSceneLoader::loadDirectionalLights(
-    const Json::Value& node, IScene& scene,
-    std::vector<std::shared_ptr<IAnimationController>>& controllers)
+bool CSceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene,
+                                         CAnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
@@ -263,7 +263,7 @@ bool CSceneLoader::loadDirectionalLights(
     // Load scene directional lights
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadDirectionalLight(node[i], scene, controllers))
+		if (!loadDirectionalLight(node[i], scene, animationWorld))
         {
             return false;
         }
@@ -271,14 +271,13 @@ bool CSceneLoader::loadDirectionalLights(
     return true;
 }
 
-bool CSceneLoader::loadDirectionalLight(
-    const Json::Value& node, IScene& scene,
-    std::vector<std::shared_ptr<IAnimationController>>& controllers)
+bool CSceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene,
+                                        CAnimationWorld& animationWorld)
 {
     glm::vec3 direction;
     glm::vec3 color;
     float intensity;
-	bool castsShadow;
+    bool castsShadow;
 
     if (!load(node, "direction", direction))
     {
@@ -290,15 +289,15 @@ bool CSceneLoader::loadDirectionalLight(
         return false;
     }
 
-	if (!load(node, "intensity", intensity))
-	{
-		return false;
-	}
+    if (!load(node, "intensity", intensity))
+    {
+        return false;
+    }
 
-	if (!load(node, "casts_shadow", castsShadow))
-	{
-		return false;
-	}
+    if (!load(node, "casts_shadow", castsShadow))
+    {
+        return false;
+    }
 
     // Create object in scene
     scene.createDirectionalLight(direction, color, intensity, castsShadow);
@@ -330,10 +329,9 @@ bool CSceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
     return true;
 }
 
-bool CSceneLoader::loadAnimationControllers(
-    const Json::Value& node, IScene& scene,
-    std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id,
-    AnimationObjectType type)
+bool CSceneLoader::loadAnimationControllers(const Json::Value& node, IScene& scene,
+                                            CAnimationWorld& animationWorld, SceneObjectId id,
+                                            AnimationObjectType type)
 {
     if (node.empty())
     {
@@ -351,7 +349,7 @@ bool CSceneLoader::loadAnimationControllers(
     // Load animation controllers for object
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-        if (!loadAnimationController(node[i], scene, controllers, id, type))
+		if (!loadAnimationController(node[i], scene, animationWorld, id, type))
         {
             return false;
         }
@@ -359,10 +357,9 @@ bool CSceneLoader::loadAnimationControllers(
     return true;
 }
 
-bool CSceneLoader::loadAnimationController(
-    const Json::Value& node, IScene& scene,
-    std::vector<std::shared_ptr<IAnimationController>>& controllers, SceneObjectId id,
-    AnimationObjectType type)
+bool CSceneLoader::loadAnimationController(const Json::Value& node, IScene& scene,
+                                           CAnimationWorld& animationWorld, SceneObjectId id,
+                                           AnimationObjectType type)
 {
     std::string controllerType;
     if (!load(node, "type", controllerType))
@@ -377,7 +374,7 @@ bool CSceneLoader::loadAnimationController(
         {
             return false;
         }
-        controllers.push_back(std::make_shared<CRotationController>(id, type, scene, rotation));
+		animationWorld.addAnimationController(std::make_shared<CRotationController>(id, type, scene, rotation));
     }
     else if (controllerType == "movement")
     {
@@ -386,8 +383,7 @@ bool CSceneLoader::loadAnimationController(
         {
             return false;
         }
-        controllers.push_back(
-            std::make_shared<CMovementController>(id, type, scene, direction));
+		animationWorld.addAnimationController(std::make_shared<CMovementController>(id, type, scene, direction));
     }
     else
     {
