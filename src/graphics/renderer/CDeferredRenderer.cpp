@@ -629,6 +629,9 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
             pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
             pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
+			// Camera position
+			pointLightPassShader->setUniform(cameraPositionUniformName, camera.getPosition());
+
             // Inverse view-projection
             pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
                                              m_transformer.getInverseViewProjectionMatrix());

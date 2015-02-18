@@ -53,8 +53,8 @@ void CFirstPersonCamera::pitch(float amount)
 {
     m_pitch += amount;
     m_pitch = fmin(m_pitch, glm::pi<float>() / 4);
-	m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
-    
+    m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
+
     updateView();
 }
 
@@ -65,11 +65,12 @@ void CFirstPersonCamera::roll(float amount)
 
 void CFirstPersonCamera::yaw(float amount)
 {
-    glm::vec3 forward = TransformUtils::rotate(glm::vec3(0.0f, 1.0f, 0.0f), amount, glm::vec3(m_forward.x, 0.0f, m_forward.y));
-    
+    glm::vec3 forward = TransformUtils::rotate(glm::vec3(0.0f, 1.0f, 0.0f), amount,
+                                               glm::vec3(m_forward.x, 0.0f, m_forward.y));
+
     m_forward.x = forward.x;
     m_forward.y = forward.z;
-    
+
     updateView();
 }
 
@@ -77,11 +78,11 @@ void CFirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up 
 {
     glm::vec3 forward = glm::normalize(target - m_position);
     m_pitch = -std::asinf(forward.y / std::sqrt(2.f));
-    
+
     m_forward.x = forward.x;
     m_forward.y = forward.z;
     m_forward = glm::normalize(m_forward);
-    
+
     updateView();
 }
 
@@ -95,20 +96,11 @@ void CFirstPersonCamera::lookAt(const glm::vec3& eye, const glm::vec3& target, c
     lookAt(target, up);
 }
 
-float CFirstPersonCamera::getFieldOfView() const
-{
-	return m_fieldOfView;
-}
+float CFirstPersonCamera::getFieldOfView() const { return m_fieldOfView; }
 
-float CFirstPersonCamera::getZNear() const
-{
-	return m_zNear;
-}
+float CFirstPersonCamera::getZNear() const { return m_zNear; }
 
-float CFirstPersonCamera::getZFar() const
-{
-	return m_zFar;
-}
+float CFirstPersonCamera::getZFar() const { return m_zFar; }
 
 void CFirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, float zNear,
                                        float zFar)
@@ -124,8 +116,8 @@ void CFirstPersonCamera::updateView()
 {
     glm::vec3 forward = glm::vec3(m_forward.x, 0.0f, m_forward.y);
     glm::vec3 axis = glm::vec3(m_forward.y, 0.0f, -m_forward.x);
-    
+
     forward = TransformUtils::rotate(axis, m_pitch, forward);
-    
+
     m_view = glm::lookAt(m_position, m_position + forward, glm::vec3(0.0, 1.0f, 0.0f));
 }

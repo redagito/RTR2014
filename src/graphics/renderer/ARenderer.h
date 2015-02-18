@@ -24,13 +24,15 @@ class ARenderer : public IRenderer
 
     /**
     * \brief Draws whole scene.
-    * Implemented in specialized rendering classes.
+    *
+	* Implemented in specialized rendering classes.
     */
 	virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) = 0;
 
    protected:
     /**
     * \brief Performs GL draw call based on mesh data.
+	*
     * Sets vertex array object active and performs either indexed or non-indexed draw call.
     * Shader must be set by caller.
     */

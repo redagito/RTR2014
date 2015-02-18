@@ -131,7 +131,8 @@ class CDeferredRenderer : public ARenderer
     *
     * For debugging.
     */
-	void visualizeDepthPass(const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager);
+    void visualizeDepthPass(const ICamera& camera, const IWindow& window,
+                            const IGraphicsResourceManager& manager);
 
     /**
     * \brief Initializes resources for geometry pass.

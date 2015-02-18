@@ -158,6 +158,13 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
     unsigned int width;
     unsigned int height;
 
+	// PNG type check
+	if (file.find(".png") == std::string::npos)
+	{
+		LOG_ERROR("Unknown file format encountered while loading image file %s.", file.c_str());
+		return false;
+	}
+
     // Map color type
     LodePNGColorType colorType;
     switch (format)

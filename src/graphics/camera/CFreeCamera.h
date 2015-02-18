@@ -36,7 +36,7 @@ class CFreeCamera : public IControllableCamera
 
    private:
     void updateView();
-    
+
     glm::mat4 m_view;
     glm::mat4 m_proj; /**< Projection matrix. */
 
