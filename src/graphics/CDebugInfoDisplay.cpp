@@ -84,7 +84,7 @@ bool CDebugInfoDisplay::loadFont(const std::string &path)
         return false;
     }
 
-    m_texture.reset(new CTexture(data, width, height, colorFormat));
+    m_texture.reset(new CTexture(data, width, height, colorFormat, false));
 
     return true;
 }
