@@ -280,7 +280,7 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
 class StaticCamera : public ICamera
 {
    public:
-    StaticCamera(glm::mat4 view, glm::mat4 proj, glm::vec3 position)
+    StaticCamera(const glm::mat4& view, const glm::mat4& proj, glm::vec3 position)
     {
         m_view = view;
         m_proj = proj;
