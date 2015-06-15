@@ -13,7 +13,9 @@
 
 # Introduction
 
-This demo was created for the realtime rendering university course. It features a data driven deferred OpenGL based renderer with powerful post processing capabilities.
+This demo was created for the realtime rendering university course. It features a data driven deferred OpenGL based renderer with post processing capabilities.
+
+The code in this repository is no longer maintained and will not receive any updates.
 
 ## Features
 * Modern OpenGL (4.1 core profile)
