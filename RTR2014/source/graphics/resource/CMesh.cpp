@@ -2,7 +2,6 @@
 #include "graphics/resource/CMesh.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
-#include "graphics/renderer/debug/RendererDebug.h"
 
 #include <cassert>
 
@@ -95,12 +94,6 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
     // Disable vao
     m_vao->setInactive();
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     return true;
 }

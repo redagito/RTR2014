@@ -10,7 +10,6 @@
 
 // Graphics
 #include "graphics/renderer/core/RendererCoreConfig.h"
-#include "graphics/renderer/debug/RendererDebug.h"
 
 #include <GLFW/glfw3.h>
 

@@ -3,7 +3,6 @@
 
 #include <cassert>
 
-#include "graphics/renderer/debug/RendererDebug.h"
 
 CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usage)
     : m_bufferId(0), m_size(0), m_valid(false)
@@ -24,13 +23,6 @@ CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usag
     // Unbind
     setInactive();
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return;
-    }
     m_valid = true;
 }
 

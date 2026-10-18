@@ -23,7 +23,6 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
-#include "graphics/renderer/debug/RendererDebug.h"
 
 CDeferredRenderer::CDeferredRenderer() { return; }
 
@@ -33,13 +32,6 @@ bool CDeferredRenderer::init(IResourceManager* manager)
 {
     spdlog::info("Initializing deferred renderer.");
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // Init geometry pass resources
     if (!initGeometryPass(manager))
@@ -158,11 +150,6 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     }
 
     // Post draw error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 }
 
 CDeferredRenderer* CDeferredRenderer::create(IResourceManager* manager)
@@ -267,11 +254,6 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     }
 
     // Post draw error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Disable geometry buffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
@@ -387,11 +369,6 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
     }
 
     // Post draw error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Disable geometry buffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
@@ -504,11 +481,6 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
     }
 
     // Post draw error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Disable buffer
     m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
@@ -1176,23 +1148,10 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
                              const glm::mat4& scale, CMaterial* material,
                              const IGraphicsResourceManager& manager, CShaderProgram* shader)
 {
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     shader->setActive();
 
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Transformation matrices
     shader->setUniform(translationMatrixUniformName, translation);
@@ -1200,10 +1159,6 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     shader->setUniform(scaleMatrixUniformName, scale);
     shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
 
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Send material textures to shader
     if (material->hasDiffuse())
@@ -1261,19 +1216,11 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     }
     shader->setUniform(alphaTextureUniformName, alphaTextureUnit);
 
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
     ARenderer::draw(mesh);
 
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
     // TODO Cleanup?
 }
 
@@ -1305,37 +1252,18 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     m_depthTexture = std::make_shared<CTexture>();
     m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // Total 96 bit per pixel
     m_geometryBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
     m_geometryBuffer.attach(m_diffuseGlowTexture, GL_COLOR_ATTACHMENT0);
     m_geometryBuffer.attach(m_normalSpecularTexture, GL_COLOR_ATTACHMENT1);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     spdlog::info("GBuffer state: {}.", m_geometryBuffer.getState().c_str());
 
     // Reset framebuffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
     return true;
 }
 
@@ -1383,13 +1311,6 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
     m_shadowCubeTexture = std::make_shared<CTexture>(textureId, false, 1024, 1024,
                                                      GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT);
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
@@ -1399,24 +1320,12 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
     glReadBuffer(GL_NONE);
     m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     spdlog::info("Shadow cube buffer state: {}.", m_shadowCubeBuffer.getState().c_str());
 
     // Reset framebuffer
     m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
     return true;
 }
 
@@ -1444,13 +1353,6 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // Total 96 bit per pixel
     m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
@@ -1458,24 +1360,12 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     glDrawBuffer(GL_NONE);
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     spdlog::info("Shadow map buffer state: {}.", m_shadowMapBuffer.getState().c_str());
 
     // Reset framebuffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
     return true;
 }
 
@@ -1552,13 +1442,6 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
 
 bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 {
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
     // Load illumination shader
     std::string illuminationPassShaderFile = "data/shader/deferred/illumination_pass.ini";
     m_illuminationPassShaderId = manager->loadShader(illuminationPassShaderFile);
@@ -1570,12 +1453,6 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         return false;
     }
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
@@ -1587,12 +1464,6 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
         return false;
     }
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // FBO
     m_illuminationPassTexture = std::make_shared<CTexture>();
@@ -1605,12 +1476,6 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
 
     // TODO Check FBO
 
-    // Error check
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     return true;
 }

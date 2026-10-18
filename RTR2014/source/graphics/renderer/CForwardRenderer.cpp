@@ -21,7 +21,6 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
-#include "graphics/renderer/debug/RendererDebug.h"
 
 CForwardRenderer::CForwardRenderer()
 {
@@ -49,13 +48,6 @@ bool CForwardRenderer::init(IResourceManager* manager)
 	// Winding order, standard is counter-clockwise
 	glFrontFace(GL_CCW);
 
-	// Error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		spdlog::error("GL Error: {}", error.c_str());
-		return false;
-	}
 
     // Load and init default shaders
     return initDefaultShaders(manager);
@@ -128,11 +120,6 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
 	}
 
 	// Post draw error check
-	std::string error;
-	if (hasGLError(error))
-	{
-		spdlog::error("GL Error: {}", error.c_str());
-	}
 }
 
 CForwardRenderer* CForwardRenderer::create(IResourceManager* manager)

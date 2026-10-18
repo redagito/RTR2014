@@ -4,7 +4,6 @@
 #include <cassert>
 #include <string>
 
-#include "graphics/renderer/debug/RendererDebug.h"
 #include <lodepng.h>
 
 CTexture::CTexture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
@@ -233,12 +232,6 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-        return false;
-    }
 
     // Clean up previously created id
     if (m_textureId != 0)

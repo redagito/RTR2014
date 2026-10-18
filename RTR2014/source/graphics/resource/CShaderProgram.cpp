@@ -1,7 +1,6 @@
 #include <spdlog/spdlog.h>
 #include "graphics/resource/CShaderProgram.h"
 
-#include "graphics/renderer/debug/RendererDebug.h"
 
 #include <cassert>
 
@@ -115,12 +114,6 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     // Clear uniform location cache
     m_uniformLocations.clear();
 
-    // Error check
-    std::string error;
-    if (hasGLError(error))
-    {
-        spdlog::error("GL Error: {}", error.c_str());
-    }
 
     return true;
 }
