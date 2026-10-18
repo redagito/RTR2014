@@ -1,4 +1,4 @@
-#include "graphics\scene/SScenePointLight.h"
+#include "graphics/scene/SScenePointLight.h"
 
 SScenePointLight::SScenePointLight() {}
 

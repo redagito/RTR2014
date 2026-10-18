@@ -1,4 +1,4 @@
-#include "resource\core/SImage.h"
+#include "resource/core/SImage.h"
 
 SImage::SImage(std::vector<unsigned char> data, unsigned int width, unsigned int height,
                EColorFormat format)

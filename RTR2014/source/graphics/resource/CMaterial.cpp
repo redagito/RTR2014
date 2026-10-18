@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\resource/CMaterial.h"
+#include "graphics/resource/CMaterial.h"
 
 
 CMaterial::CMaterial(const CTexture* diffuse, const CTexture* normal, const CTexture* specular,

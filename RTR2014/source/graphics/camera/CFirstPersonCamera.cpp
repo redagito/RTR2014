@@ -1,4 +1,4 @@
-#include "graphics\camera/CFirstPersonCamera.h"
+#include "graphics/camera/CFirstPersonCamera.h"
 
 #include <cmath>
 

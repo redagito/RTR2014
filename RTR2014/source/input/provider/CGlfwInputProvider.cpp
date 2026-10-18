@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "input\provider/CGlfwInputProvider.h"
+#include "input/provider/CGlfwInputProvider.h"
 
 #include <cassert>
 

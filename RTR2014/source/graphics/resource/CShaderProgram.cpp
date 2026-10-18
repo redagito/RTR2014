@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\resource/CShaderProgram.h"
+#include "graphics/resource/CShaderProgram.h"
 
 #include "graphics/renderer/debug/RendererDebug.h"
 

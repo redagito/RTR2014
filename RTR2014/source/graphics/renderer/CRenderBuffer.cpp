@@ -1,4 +1,4 @@
-#include "graphics\renderer/CRenderBuffer.h"
+#include "graphics/renderer/CRenderBuffer.h"
 
 CRenderBuffer::CRenderBuffer() : m_bufferId(0), m_height(0), m_width(0) { return; }
 

@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\renderer/CDeferredRenderer.h"
+#include "graphics/renderer/CDeferredRenderer.h"
 
 #include <cassert>
 #include <string>

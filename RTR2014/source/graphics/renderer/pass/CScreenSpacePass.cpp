@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\renderer\pass/CScreenSpacePass.h"
+#include "graphics/renderer/pass/CScreenSpacePass.h"
 
 // Resource management
 #include "resource/IResourceManager.h"

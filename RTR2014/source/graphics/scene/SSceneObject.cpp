@@ -1,4 +1,4 @@
-#include "graphics\scene/SSceneObject.h"
+#include "graphics/scene/SSceneObject.h"
 
 SSceneObject::SSceneObject()
     : m_mesh(-1), m_material(-1), m_position(0.f), m_rotation(0.f), m_scale(1.f)

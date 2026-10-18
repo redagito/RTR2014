@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\resource/CGraphicsResourceManager.h"
+#include "graphics/resource/CGraphicsResourceManager.h"
 
 #include <cassert>
 #include <string>

@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\renderer\pass/CScreenQuadPass.h"
+#include "graphics/renderer/pass/CScreenQuadPass.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 

@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\resource/CMesh.h"
+#include "graphics/resource/CMesh.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "graphics/renderer/debug/RendererDebug.h"

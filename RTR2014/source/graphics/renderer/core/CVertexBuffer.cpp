@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\renderer\core/CVertexBuffer.h"
+#include "graphics/renderer/core/CVertexBuffer.h"
 
 #include <cassert>
 

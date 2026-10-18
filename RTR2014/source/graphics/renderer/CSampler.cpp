@@ -1,4 +1,4 @@
-#include "graphics\renderer/CSampler.h"
+#include "graphics/renderer/CSampler.h"
 
 CSampler::CSampler()
 {

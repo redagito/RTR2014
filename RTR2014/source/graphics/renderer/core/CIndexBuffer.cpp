@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\renderer\core/CIndexBuffer.h"
+#include "graphics/renderer/core/CIndexBuffer.h"
 
 #include <cassert>
 

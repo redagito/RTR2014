@@ -1,4 +1,4 @@
-#include "resource\core/SMesh.h"
+#include "resource/core/SMesh.h"
 
 SMesh::SMesh(std::vector<float> vertices, std::vector<unsigned int> indices,
              std::vector<float> normals, std::vector<float> uvs, EPrimitiveType type)

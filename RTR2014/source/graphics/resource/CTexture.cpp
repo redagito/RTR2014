@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\resource/CTexture.h"
+#include "graphics/resource/CTexture.h"
 
 #include <cassert>
 #include <string>

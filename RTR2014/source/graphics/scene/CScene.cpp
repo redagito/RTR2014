@@ -1,9 +1,9 @@
-#include "graphics\scene/CScene.h"
+#include "graphics/scene/CScene.h"
 
-#include "graphics\scene/CSceneQuery.h"
-#include "graphics\scene/SSceneObject.h"
-#include "graphics\scene/SScenePointLight.h"
-#include "graphics\scene/SSceneDirectionalLight.h"
+#include "graphics/scene/CSceneQuery.h"
+#include "graphics/scene/SSceneObject.h"
+#include "graphics/scene/SScenePointLight.h"
+#include "graphics/scene/SSceneDirectionalLight.h"
 
 CScene::CScene() {}
 

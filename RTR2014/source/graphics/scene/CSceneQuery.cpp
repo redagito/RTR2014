@@ -1,4 +1,4 @@
-#include "graphics\scene/CSceneQuery.h"
+#include "graphics/scene/CSceneQuery.h"
 
 #include "graphics/scene/CScene.h"
 #include "graphics/ICamera.h"

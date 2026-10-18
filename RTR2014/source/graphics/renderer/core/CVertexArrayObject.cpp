@@ -1,4 +1,4 @@
-#include "graphics\renderer\core/CVertexArrayObject.h"
+#include "graphics/renderer/core/CVertexArrayObject.h"
 
 CVertexArrayObject::CVertexArrayObject() { glGenVertexArrays(1, &m_vaoId); }
 

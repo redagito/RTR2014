@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "resource\core/CResourceManager.h"
+#include "resource/core/CResourceManager.h"
 
 #include <fstream>
 #include <sstream>

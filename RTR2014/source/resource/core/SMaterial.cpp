@@ -1,4 +1,4 @@
-#include "resource\core/SMaterial.h"
+#include "resource/core/SMaterial.h"
 
 SMaterial::SMaterial(ResourceId diffuse, ResourceId normal, ResourceId specular, ResourceId glow,
                      ResourceId alpha, ResourceId customShader)

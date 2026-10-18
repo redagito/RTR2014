@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics\window/CGlfwWindow.h"
+#include "graphics/window/CGlfwWindow.h"
 
 #include <cassert>
 
