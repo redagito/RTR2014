@@ -1,7 +1,7 @@
+#include <spdlog/spdlog.h>
 #include "graphics/CDebugInfoDisplay.h"
 
 #include "debug/CDebugInfo.h"
-#include "debug/Log.h"
 
 #include "graphics/renderer/core/CVertexArrayObject.h"
 #include "graphics/renderer/core/CVertexBuffer.h"
@@ -21,7 +21,7 @@ bool loadShader(const std::string &path, std::shared_ptr<IResourceManager> &reso
                                     tessellationEvaluationShaderId, geometryShaderId,
                                     fragmentShaderId))
     {
-        LOG_ERROR("Error on retrieving shader code.");
+        spdlog::error("Error on retrieving shader code.");
         return false;
     }
 
@@ -31,21 +31,21 @@ bool loadShader(const std::string &path, std::shared_ptr<IResourceManager> &reso
     resourceManager->getString(fragmentShaderId, fragmentShaderText);
     if (vertexShaderText.empty() || fragmentShaderText.empty())
     {
-        LOG_ERROR("Error on retrieving shader code.");
+        spdlog::error("Error on retrieving shader code.");
         return false;
     }
 
     TShaderObject<GL_VERTEX_SHADER> vertexShader(vertexShaderText);
     if (!vertexShader.isValid())
     {
-        LOG_ERROR("%s", vertexShader.getErrorString().c_str());
+        spdlog::error("{}", vertexShader.getErrorString().c_str());
         return false;
     }
 
     TShaderObject<GL_FRAGMENT_SHADER> fragmentShader(fragmentShaderText);
     if (!fragmentShader.isValid())
     {
-        LOG_ERROR("%s", fragmentShader.getErrorString().c_str());
+        spdlog::error("{}", fragmentShader.getErrorString().c_str());
         return false;
     }
 
@@ -80,7 +80,7 @@ bool CDebugInfoDisplay::loadFont(const std::string &path)
     EColorFormat colorFormat;
     if (!m_resourceManager->getImage(imageId, data, width, height, colorFormat))
     {
-        LOG_ERROR("Error on retrieving data from image.");
+        spdlog::error("Error on retrieving data from image.");
         return false;
     }
 

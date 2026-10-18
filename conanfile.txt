@@ -6,6 +6,7 @@ jsoncpp/1.9.6
 lodepng/cci.20260102
 tinyobjloader/1.0.7
 catch2/3.16.0
+spdlog/1.17.0
 
 [options]
 glad/*:gl_profile=core

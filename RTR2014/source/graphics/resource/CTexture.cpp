@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\resource/CTexture.h"
 
 #include <cassert>
@@ -5,7 +6,6 @@
 
 #include "graphics/renderer/debug/RendererDebug.h"
 #include <lodepng.h>
-#include "debug/Log.h"
 
 CTexture::CTexture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
@@ -19,7 +19,7 @@ CTexture::CTexture(const std::vector<unsigned char>& image, unsigned int width, 
     // Init texture with data
     if (!init(image, width, height, format, createMipmaps))
     {
-        LOG_ERROR("Failed to initialize texture.");
+        spdlog::error("Failed to initialize texture.");
     }
 }
 
@@ -29,7 +29,7 @@ CTexture::CTexture(unsigned int width, unsigned int height, EColorFormat format,
     // Init texture with data
     if (!init({}, width, height, format, createMipmaps))
     {
-        LOG_ERROR("Failed to initialize texture.");
+        spdlog::error("Failed to initialize texture.");
     }
 }
 
@@ -87,7 +87,7 @@ void CTexture::resize(unsigned int width, unsigned int height)
     {
         return;
     }
-    LOG_DEBUG("Texture resize from %u, %u to %u, %u.", m_width, m_height, width, height);
+    spdlog::debug("Texture resize from {}, {} to {}, {}.", m_width, m_height, width, height);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, GL_UNSIGNED_BYTE,
                  nullptr);
@@ -236,7 +236,7 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 

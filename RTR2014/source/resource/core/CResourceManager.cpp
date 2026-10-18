@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "resource\core/CResourceManager.h"
 
 #include <fstream>
@@ -12,7 +13,6 @@
 #include "io/CObjModelLoader.h"
 #include "io/CShaderPreprocessor.h"
 
-#include "debug/Log.h"
 
 CResourceManager::CResourceManager()
     : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0), m_nextStringId(0), m_nextShaderId(0)
@@ -49,7 +49,7 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
     auto pos = file.find_last_of('.');
     if (pos == std::string::npos)
     {
-        LOG_ERROR("The mesh file %s does not have a file extension and could not be loaded.",
+        spdlog::error("The mesh file {} does not have a file extension and could not be loaded.",
                   file.c_str());
         return -1;
     }
@@ -71,16 +71,16 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
         // Load as obj
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str()))
         {
-            LOG_ERROR("%s.", err.c_str());
+            spdlog::error("{}.", err.c_str());
             return -1;
         }
         if (shapes.size() > 1)
         {
-            LOG_WARNING("Multple meshes in obj files not supported.");
+            spdlog::warn("Multple meshes in obj files not supported.");
         }
         if (shapes.empty())
         {
-            LOG_ERROR("No mesh data loaded from file %s.", file.c_str());
+            spdlog::error("No mesh data loaded from file {}.", file.c_str());
             return -1;
         }
 
@@ -94,7 +94,7 @@ std::vector<float> vertices;
         {
             if (index.vertex_index < 0)
             {
-                LOG_ERROR("Mesh file %s has a face corner without a position.", file.c_str());
+                spdlog::error("Mesh file {} has a face corner without a position.", file.c_str());
                 return -1;
             }
             vertices.insert(vertices.end(), attrib.vertices.begin() + index.vertex_index * 3,
@@ -136,7 +136,7 @@ std::vector<float> vertices;
         CObjModelLoader objLoader;
         if (!objLoader.load(file))
         {
-            LOG_ERROR("Failed to load mesh file %s as non-indexed obj file.", file.c_str());
+            spdlog::error("Failed to load mesh file {} as non-indexed obj file.", file.c_str());
             return -1;
         }
         meshId = createMesh(objLoader.getVertices(), {}, objLoader.getNormals(), objLoader.getUV(),
@@ -145,7 +145,7 @@ std::vector<float> vertices;
 
     if (meshId == -1)
     {
-        LOG_ERROR("Failed to create mesh resource id from file %s.", file.c_str());
+        spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
         return -1;
     }
     m_meshFiles[file] = meshId;
@@ -204,7 +204,7 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
 	// PNG type check
 	if (file.find(".png") == std::string::npos)
 	{
-		LOG_ERROR("Unknown file format encountered while loading image file %s.", file.c_str());
+		spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
 		return false;
 	}
 
@@ -222,7 +222,7 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
         colorType = LCT_RGBA;
         break;
     default:
-        LOG_ERROR("Unknown color format encountered while loading image file %s.", file.c_str());
+        spdlog::error("Unknown color format encountered while loading image file {}.", file.c_str());
         return -1;
         break;
     }
@@ -231,7 +231,7 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
     unsigned int err = lodepng::decode(data, width, height, file, colorType);
     if (err != 0)
     {
-        LOG_ERROR("An error occured while decoding the image file %s: %s", file.c_str(),
+        spdlog::error("An error occured while decoding the image file {}: {}", file.c_str(),
                   lodepng_error_text(err));
         return -1;
     }
@@ -239,7 +239,7 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
     ResourceId imageId = createImage(data, width, height, format);
     if (imageId == -1)
     {
-        LOG_ERROR("Failed to create image resource id from file %s.", file.c_str());
+        spdlog::error("Failed to create image resource id from file {}.", file.c_str());
         return -1;
     }
     m_imageFiles[file] = imageId;
@@ -288,11 +288,11 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         return entry->second;
     }
 
-	LOG_DEBUG("Loading material from file %s.", file.c_str());
+	spdlog::debug("Loading material from file {}.", file.c_str());
     CIniFile ini;
     if (!ini.load(file))
     {
-        LOG_ERROR("Failed to load material file %s as ini file.", file.c_str());
+        spdlog::error("Failed to load material file {} as ini file.", file.c_str());
         return -1;
     }
 
@@ -303,7 +303,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         diffuseId = loadImage(ini.getValue("diffuse", "file", "error"), EColorFormat::RGB24);
         if (diffuseId == -1)
         {
-            LOG_ERROR("Failed to load diffuse texture specified in material file %s.",
+            spdlog::error("Failed to load diffuse texture specified in material file {}.",
                       file.c_str());
             return -1;
         }
@@ -316,7 +316,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         normalId = loadImage(ini.getValue("normal", "file", "error"), EColorFormat::RGB24);
         if (normalId == -1)
         {
-            LOG_ERROR("Failed to load normal texture specified in material file %s.", file.c_str());
+            spdlog::error("Failed to load normal texture specified in material file {}.", file.c_str());
             return -1;
         }
     }
@@ -328,7 +328,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         specularId = loadImage(ini.getValue("specular", "file", "error"), EColorFormat::GreyScale8);
         if (specularId == -1)
         {
-            LOG_ERROR("Failed to load specular texture specified in material file %s.",
+            spdlog::error("Failed to load specular texture specified in material file {}.",
                       file.c_str());
             return -1;
         }
@@ -341,7 +341,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         glowId = loadImage(ini.getValue("glow", "file", "error"), EColorFormat::GreyScale8);
         if (glowId == -1)
         {
-            LOG_ERROR("Failed to load glow texture specified in material file %s.", file.c_str());
+            spdlog::error("Failed to load glow texture specified in material file {}.", file.c_str());
             return -1;
         }
     }
@@ -353,7 +353,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         alphaId = loadImage(ini.getValue("alpha", "file", "error"), EColorFormat::GreyScale8);
         if (alphaId == -1)
         {
-            LOG_ERROR("Failed to load alpha texture specified in material file %s.", file.c_str());
+            spdlog::error("Failed to load alpha texture specified in material file {}.", file.c_str());
             return -1;
         }
     }
@@ -365,7 +365,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         customShaderId = loadShader(ini.getValue("shader", "file", "error"));
         if (customShaderId == -1)
         {
-            LOG_ERROR("Failed to load custom shader file specified in material file %s.",
+            spdlog::error("Failed to load custom shader file specified in material file {}.",
                       file.c_str());
             return -1;
         }
@@ -375,7 +375,7 @@ ResourceId CResourceManager::loadMaterial(const std::string& file)
         createMaterial(diffuseId, normalId, specularId, glowId, alphaId, customShaderId);
     if (materialId == -1)
     {
-        LOG_ERROR("Failed to create material resource id for material file %s.", file.c_str());
+        spdlog::error("Failed to create material resource id for material file {}.", file.c_str());
         return -1;
     }
     m_materialFiles[file] = materialId;
@@ -478,21 +478,21 @@ ResourceId CResourceManager::loadShader(const std::string& file)
         return entry->second;
     }
 
-	LOG_DEBUG("Loading shader from file %s.", file.c_str());
+	spdlog::debug("Loading shader from file {}.", file.c_str());
 
     // Load shader ini
     CIniFile ini;
     if (!ini.load(file))
     {
-        LOG_ERROR("Failed to load shader program file %s", file.c_str());
+        spdlog::error("Failed to load shader program file {}", file.c_str());
         return -1;
     }
 
     // Requires vertex and fragment shader files
     if (!ini.hasKey("vertex", "file") || !ini.hasKey("fragment", "file"))
     {
-        LOG_ERROR(
-            "The shader program file %s is missing a vertex and/or fragment shader source file "
+        spdlog::error(
+            "The shader program file {} is missing a vertex and/or fragment shader source file "
             "specifier.",
             file.c_str());
         return -1;
@@ -501,8 +501,8 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"), true);
     if (vertexId == -1)
     {
-        LOG_ERROR(
-            "The vertex shader source file %s, specified in the shader program file %s could not "
+        spdlog::error(
+            "The vertex shader source file {}, specified in the shader program file {} could not "
             "be loaded.",
             ini.getValue("vertex", "file", "error").c_str(), file.c_str());
         return -1;
@@ -511,8 +511,8 @@ ResourceId CResourceManager::loadShader(const std::string& file)
 	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"), true);
     if (fragmentId == -1)
     {
-        LOG_ERROR(
-            "The fragment shader source file %s, specified in the shader program file %s could not "
+        spdlog::error(
+            "The fragment shader source file {}, specified in the shader program file {} could not "
             "be loaded.",
             ini.getValue("fragment", "file", "error").c_str(), file.c_str());
         return -1;
@@ -525,9 +525,9 @@ ResourceId CResourceManager::loadShader(const std::string& file)
 		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"), true);
         if (tessCtrlId == -1)
         {
-            LOG_ERROR(
-                "The tessellation control shader source file %s, specified in the shader program "
-                "file %s could not be loaded.",
+            spdlog::error(
+                "The tessellation control shader source file {}, specified in the shader program "
+                "file {} could not be loaded.",
                 ini.getValue("tessellation_control", "file", "error").c_str(), file.c_str());
             return -1;
         }
@@ -540,9 +540,9 @@ ResourceId CResourceManager::loadShader(const std::string& file)
 		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"), true);
         if (tessEvalId == -1)
         {
-            LOG_ERROR(
-                "The tessellation evaluation shader source file %s, specified in the shader "
-                "program file %s could not be loaded.",
+            spdlog::error(
+                "The tessellation evaluation shader source file {}, specified in the shader "
+                "program file {} could not be loaded.",
                 ini.getValue("tessellation_evaluation", "file", "error").c_str(), file.c_str());
             return -1;
         }
@@ -555,8 +555,8 @@ ResourceId CResourceManager::loadShader(const std::string& file)
 		geometryId = loadString(ini.getValue("geometry", "file", "error"), true);
         if (geometryId == -1)
         {
-            LOG_ERROR(
-                "The geometry shader source file %s, specified in the shader program file %s could "
+            spdlog::error(
+                "The geometry shader source file {}, specified in the shader program file {} could "
                 "not be loaded.",
                 ini.getValue("geometry", "file", "error").c_str(), file.c_str());
             return -1;
@@ -568,7 +568,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     shaderId = createShader(vertexId, tessCtrlId, tessEvalId, geometryId, fragmentId);
     if (shaderId == -1)
     {
-        LOG_ERROR("Failed to create reasource id for shader file %s.", file.c_str());
+        spdlog::error("Failed to create reasource id for shader file {}.", file.c_str());
         return -1;
     }
     m_shaderFiles[file] = shaderId;
@@ -604,11 +604,11 @@ ResourceId CResourceManager::loadString(const std::string& file, bool preprocess
 		return iter->second;
 	}
 
-	LOG_DEBUG("Loading text from file %s.", file.c_str());
+	spdlog::debug("Loading text from file {}.", file.c_str());
 	std::ifstream ifs(file);
 	if (!ifs.is_open())
 	{
-		LOG_ERROR("Failed to open the text file %s.", file.c_str());
+		spdlog::error("Failed to open the text file {}.", file.c_str());
 		return -1;
 	}
 
@@ -625,7 +625,7 @@ ResourceId CResourceManager::loadString(const std::string& file, bool preprocess
 		preprocessor.setIncludePath("data/shadersource/include/");
 		if (!preprocessor.preprocess(text, text))
 		{
-			LOG_ERROR("Failed to preprocess the text file %s.", file.c_str());
+			spdlog::error("Failed to preprocess the text file {}.", file.c_str());
 			return -1;
 		}
 	}
@@ -634,7 +634,7 @@ ResourceId CResourceManager::loadString(const std::string& file, bool preprocess
 	stringId = createString(text);
 	if (stringId == -1)
 	{
-		LOG_ERROR("Failed to create string id for text file %s.", file.c_str());
+		spdlog::error("Failed to create string id for text file {}.", file.c_str());
 		return -1;
 	}
 

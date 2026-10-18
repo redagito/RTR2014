@@ -1,10 +1,10 @@
+#include <spdlog/spdlog.h>
 #include "graphics\resource/CGraphicsResourceManager.h"
 
 #include <cassert>
 #include <string>
 
 #include "resource/IResourceManager.h"
-#include "debug/Log.h"
 
 CGraphicsResourceManager::CGraphicsResourceManager()
 {
@@ -61,7 +61,7 @@ void CGraphicsResourceManager::notify(EResourceType type, ResourceId id, EListen
 		handleStringEvent(id, event, resourceManager);
 		break;
 	default:
-		LOG_ERROR("Unknown resource type encountered.");
+		spdlog::error("Unknown resource type encountered.");
 		break;
 	}
 }
@@ -148,7 +148,7 @@ CShaderProgram* CGraphicsResourceManager::getShaderProgram(ResourceId id) const
 	// TODO Allow shader loading if not found?
 	if (iter == m_shaderPrograms.end())
 	{
-		LOG_ERROR("The requested shader program id %i has not been loaded.", id);
+		spdlog::error("The requested shader program id {} has not been loaded.", id);
 		return nullptr;
 	}
 	return iter->second.get();
@@ -284,7 +284,7 @@ bool CGraphicsResourceManager::loadVertexShader(ResourceId id, IResourceManager*
 	// Check compile error
 	if (!shader->isValid())
 	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
+		spdlog::error("{}", shader->getErrorString().c_str());
 		return false;
 	}
 	// Move to map
@@ -316,7 +316,7 @@ bool CGraphicsResourceManager::loadTessControlShader(ResourceId id, IResourceMan
 	// Check compile error
 	if (!shader->isValid())
 	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
+		spdlog::error("{}", shader->getErrorString().c_str());
 		return false;
 	}
 	// Move to map
@@ -348,7 +348,7 @@ bool CGraphicsResourceManager::loadTessEvalShader(ResourceId id, IResourceManage
 	// Check compile error
 	if (!shader->isValid())
 	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
+		spdlog::error("{}", shader->getErrorString().c_str());
 		return false;
 	}
 	// Move to map
@@ -380,7 +380,7 @@ bool CGraphicsResourceManager::loadGeometryShader(ResourceId id, IResourceManage
 	// Check compile error
 	if (!shader->isValid())
 	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
+		spdlog::error("{}", shader->getErrorString().c_str());
 		return false;
 	}
 	// Move to map
@@ -412,7 +412,7 @@ bool CGraphicsResourceManager::loadFragmentShader(ResourceId id, IResourceManage
 	// Check compile error
 	if (!shader->isValid())
 	{
-		LOG_ERROR("%s", shader->getErrorString().c_str());
+		spdlog::error("{}", shader->getErrorString().c_str());
 		return false;
 	}
 	// Move to map

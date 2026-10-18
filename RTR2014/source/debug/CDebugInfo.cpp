@@ -1,9 +1,17 @@
 #include "debug/CDebugInfo.h"
 
-void CDebugInfo::notify(const std::string& level, const std::string& file, unsigned int line,
-                        const std::string& function, const std::string& text)
+#include <spdlog/common.h>
+
+void CDebugInfo::sink_it_(const spdlog::details::log_msg& msg)
 {
-    m_logBuffer.push_back("[" + level + "]: " + text);
+    const auto& levelName = spdlog::level::to_string_view(msg.level);
+
+    std::string entry = "[";
+    entry.append(levelName.data(), levelName.size());
+    entry += "]: ";
+    entry.append(msg.payload.data(), msg.payload.size());
+
+    m_logBuffer.push_back(entry);
     if (m_logBuffer.size() > m_logBufferSize)
     {
         m_logBuffer.pop_front();
@@ -15,7 +23,7 @@ const std::list<std::string>& CDebugInfo::getLog() const { return m_logBuffer; }
 void CDebugInfo::setLogBufferSize(size_t size)
 {
     m_logBufferSize = size;
-    while (m_logBufferSize > m_logBuffer.size())
+    while (m_logBuffer.size() > m_logBufferSize)
     {
         m_logBuffer.pop_front();
     }

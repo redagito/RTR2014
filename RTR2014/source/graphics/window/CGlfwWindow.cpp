@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\window/CGlfwWindow.h"
 
 #include <cassert>
@@ -5,7 +6,6 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include <GLFW/glfw3.h>
 
-#include "debug/Log.h"
 
 std::unordered_map<GLFWwindow*, CGlfwWindow*> CGlfwWindow::s_windows; /**< Window mapping. */
 
@@ -24,7 +24,7 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
 {
     if (!glfwInit())
     {
-        LOG_ERROR("Failed to initialize GLFW.");
+        spdlog::error("Failed to initialize GLFW.");
         return false;
     }
 
@@ -38,7 +38,7 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
     m_window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (m_window == nullptr)
     {
-        LOG_ERROR("Failed to create GLFW window.");
+        spdlog::error("Failed to create GLFW window.");
         glfwTerminate();
         return false;
     }
@@ -57,7 +57,7 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
 if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
         glfwTerminate();
-        LOG_ERROR("Failed to initialize glad.");
+        spdlog::error("Failed to initialize glad.");
         return false;
     }
 

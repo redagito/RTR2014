@@ -1,21 +1,20 @@
 #pragma once
 
 #include <list>
-#include <unordered_map>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 
-#include "ILogListener.h"
+#include <spdlog/details/log_msg.h>
+#include <spdlog/sinks/base_sink.h>
 
 /**
  * \brief Stores debug data.
- * Stores log events in a ring buffer and key/value debug data pairs.
+ * Log sink that keeps events in a ring buffer, plus key/value debug data pairs.
  */
-class CDebugInfo : public ILogListener
+class CDebugInfo : public spdlog::sinks::base_sink<std::mutex>
 {
    public:
-    void notify(const std::string& level, const std::string& file, unsigned int line,
-                const std::string& function, const std::string& text);
-
     const std::list<std::string>& getLog() const;
 
     void setLogBufferSize(size_t size);
@@ -25,6 +24,9 @@ class CDebugInfo : public ILogListener
     const std::unordered_map<std::string, std::string>& getValues() const;
 
    private:
+    void sink_it_(const spdlog::details::log_msg& msg) override;
+    void flush_() override {}
+
     size_t m_logBufferSize = 10;        /**< Maximum number of log events stored. */
     std::list<std::string> m_logBuffer; /**< Log buffer with latest log events. */
     std::unordered_map<std::string, std::string> m_values; /**< Stores debug key/value pairs. */

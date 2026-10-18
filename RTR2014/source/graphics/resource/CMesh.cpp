@@ -1,5 +1,5 @@
+#include <spdlog/spdlog.h>
 #include "graphics\resource/CMesh.h"
-#include "debug/Log.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "graphics/renderer/debug/RendererDebug.h"
@@ -99,7 +99,7 @@ bool CMesh::init(const std::vector<float>& vertices, const std::vector<unsigned 
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     return true;
@@ -133,7 +133,7 @@ GLenum CMesh::toGLPrimitive(EPrimitiveType type)
         return GL_TRIANGLES;
         break;
     default:
-        LOG_ERROR("Invalid or unknown primitive type, default triangle type used.");
+        spdlog::error("Invalid or unknown primitive type, default triangle type used.");
         // Default
         return GL_TRIANGLES;
     }
@@ -153,7 +153,7 @@ unsigned int CMesh::getPrimitiveSize(EPrimitiveType type)
         return 3;
         break;
     default:
-        LOG_ERROR("Invalid or unknown primitive type");
+        spdlog::error("Invalid or unknown primitive type");
         return 0;
     }
 }

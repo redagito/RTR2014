@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer/CForwardRenderer.h"
 
 #include <cassert>
@@ -21,7 +22,6 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
 #include "graphics/renderer/debug/RendererDebug.h"
-#include "debug/Log.h"
 
 CForwardRenderer::CForwardRenderer()
 {
@@ -53,7 +53,7 @@ bool CForwardRenderer::init(IResourceManager* manager)
 	std::string error;
 	if (hasGLError(error))
 	{
-		LOG_ERROR("GL Error: %s", error.c_str());
+		spdlog::error("GL Error: {}", error.c_str());
 		return false;
 	}
 
@@ -105,7 +105,7 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
 		if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
 		{
 			// Invalid id
-			LOG_ERROR("Invalid scene object id %l.", id);
+			spdlog::error("Invalid scene object id {}.", id);
 		}
 		else
 		{
@@ -131,7 +131,7 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
 	std::string error;
 	if (hasGLError(error))
 	{
-		LOG_ERROR("GL Error: %s", error.c_str());
+		spdlog::error("GL Error: {}", error.c_str());
 	}
 }
 
@@ -142,7 +142,7 @@ CForwardRenderer* CForwardRenderer::create(IResourceManager* manager)
 	{
 		delete renderer;
 		renderer = nullptr;
-		LOG_ERROR("Failed to create forward renderer, initialization failed.");
+		spdlog::error("Failed to create forward renderer, initialization failed.");
 	}
 	return renderer;
 }
@@ -242,7 +242,7 @@ bool CForwardRenderer::initDefaultShaders(IResourceManager* manager)
     // Check if ok
 	if (m_forwardShader == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the default shader from file %s.",
+        spdlog::error("Failed to initialize the default shader from file {}.",
                   defaultShaderFile.c_str());
         return false;
     }

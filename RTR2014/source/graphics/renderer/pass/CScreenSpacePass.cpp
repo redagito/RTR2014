@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer\pass/CScreenSpacePass.h"
 
 // Resource management
@@ -11,7 +12,6 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
 // Debugging
-#include "debug/Log.h"
 
 CScreenSpacePass::CScreenSpacePass()
 {
@@ -24,11 +24,11 @@ CScreenSpacePass::CScreenSpacePass()
 
 bool CScreenSpacePass::init(const std::string& shaderFile, IResourceManager* manager)
 {
-	LOG_INFO("Initializing screen space pass with shader %s.", shaderFile.c_str());
+	spdlog::info("Initializing screen space pass with shader {}.", shaderFile.c_str());
 	m_shaderId = manager->loadShader(shaderFile);
 	if (m_shaderId == invalidResource)
 	{
-		LOG_ERROR("Failed to initialize the screen space pass from shader %s.", shaderFile.c_str());
+		spdlog::error("Failed to initialize the screen space pass from shader {}.", shaderFile.c_str());
 		return false;
 	}
 	return true;
@@ -39,7 +39,7 @@ void CScreenSpacePass::draw(const IGraphicsResourceManager* manager, CFrameBuffe
 {
 	if (m_shaderId == invalidResource)
 	{
-		LOG_ERROR("The screen space pass shader id is not valid.");
+		spdlog::error("The screen space pass shader id is not valid.");
 		return;
 	}
 
@@ -48,7 +48,7 @@ void CScreenSpacePass::draw(const IGraphicsResourceManager* manager, CFrameBuffe
 	CShaderProgram* shader = manager->getShaderProgram(m_shaderId);
 	if (shader == nullptr)
 	{
-		LOG_ERROR("Failed to load screen space pass shader with id %.");
+		spdlog::error("Failed to load screen space pass shader with id {}.", m_shaderId);
 		return;
 	}
 

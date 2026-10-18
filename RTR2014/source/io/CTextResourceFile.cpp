@@ -3,7 +3,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "debug/Log.h"
 
 bool CTextResourceFile::load(const std::string& file)
 {

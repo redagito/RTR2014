@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer\pass/CScreenQuadPass.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
@@ -17,7 +18,7 @@ bool CScreenQuadPass::init(IResourceManager* manager)
 	m_shaderId = manager->loadShader(screenQuadShaderFile);
 	if (m_shaderId == invalidResource)
 	{
-		LOG_ERROR("Failed to load screenquad shader %s.", screenQuadShaderFile.c_str());
+		spdlog::error("Failed to load screenquad shader {}.", screenQuadShaderFile.c_str());
 		return false;
 	}
 	return true;

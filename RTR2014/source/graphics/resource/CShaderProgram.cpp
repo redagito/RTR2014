@@ -1,7 +1,7 @@
+#include <spdlog/spdlog.h>
 #include "graphics\resource/CShaderProgram.h"
 
 #include "graphics/renderer/debug/RendererDebug.h"
-#include "debug/Log.h"
 
 #include <cassert>
 
@@ -119,7 +119,7 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     return true;

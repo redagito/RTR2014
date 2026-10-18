@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer/CDeferredRenderer.h"
 
 #include <cassert>
@@ -23,7 +24,6 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
 #include "graphics/renderer/debug/RendererDebug.h"
-#include "debug/Log.h"
 
 CDeferredRenderer::CDeferredRenderer() { return; }
 
@@ -31,20 +31,20 @@ CDeferredRenderer::~CDeferredRenderer() { return; }
 
 bool CDeferredRenderer::init(IResourceManager* manager)
 {
-    LOG_INFO("Initializing deferred renderer.");
+    spdlog::info("Initializing deferred renderer.");
 
     // Error check
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
     // Init geometry pass resources
     if (!initGeometryPass(manager))
     {
-        LOG_ERROR("Failed to intialize geometry pass.");
+        spdlog::error("Failed to intialize geometry pass.");
         return false;
     }
 
@@ -52,34 +52,34 @@ bool CDeferredRenderer::init(IResourceManager* manager)
     // TODO Should be done in directional light pass
     if (!initShadowMapPass(manager))
     {
-        LOG_ERROR("Failed to intialize shadow map pass.");
+        spdlog::error("Failed to intialize shadow map pass.");
         return false;
     }
 
     if (!initShadowCubePass(manager))
     {
-        LOG_ERROR("Failed to intialize shadow map pass.");
+        spdlog::error("Failed to intialize shadow map pass.");
         return false;
     }
 
     // Init light pass resources
     if (!initPointLightPass(manager))
     {
-        LOG_ERROR("Failed to initialize point light pass.");
+        spdlog::error("Failed to initialize point light pass.");
         return false;
     }
 
     // Init directional light pass
     if (!initDirectionalLightPass(manager))
     {
-        LOG_ERROR("Failed to initialize directional light pass.");
+        spdlog::error("Failed to initialize directional light pass.");
         return false;
     }
 
     // Init illumination pass
     if (!initIlluminationPass(manager))
     {
-        LOG_ERROR("Failed to initialize illumination pass.");
+        spdlog::error("Failed to initialize illumination pass.");
         return false;
     }
 
@@ -87,26 +87,26 @@ bool CDeferredRenderer::init(IResourceManager* manager)
     // TODO Dediacted post processor?
     if (!initPostProcessPass(manager))
     {
-        LOG_ERROR("Failed to initialize post processing pass.");
+        spdlog::error("Failed to initialize post processing pass.");
         return false;
     }
 
     // Display pass
     if (!initDisplayPass(manager))
     {
-        LOG_ERROR("Failed to initialize display pass.");
+        spdlog::error("Failed to initialize display pass.");
         return false;
     }
 
     if (!m_screenQuadPass.init(manager))
     {
-        LOG_ERROR("Failed to initialize screen quad pass.");
+        spdlog::error("Failed to initialize screen quad pass.");
         return false;
     }
 
     if (!initVisualizeDepthPass(manager))
     {
-        LOG_ERROR("Failed to initialize depth visualization pass.");
+        spdlog::error("Failed to initialize depth visualization pass.");
     }
     return true;
 }
@@ -161,7 +161,7 @@ void CDeferredRenderer::draw(const IScene& scene, const ICamera& camera, const I
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 }
 
@@ -172,7 +172,7 @@ CDeferredRenderer* CDeferredRenderer::create(IResourceManager* manager)
     {
         delete renderer;
         renderer = nullptr;
-        LOG_ERROR("Failed to create deferred renderer, initialization failed.");
+        spdlog::error("Failed to create deferred renderer, initialization failed.");
     }
     return renderer;
 }
@@ -239,7 +239,7 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
         if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
         {
             // Invalid id
-            LOG_ERROR("Invalid scene object id %l.", id);
+            spdlog::error("Invalid scene object id {}.", id);
         }
         else
         {
@@ -255,7 +255,7 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
             if (material->hasCustomShader())
             {
                 // Custom shaders not supported
-                LOG_WARNING("Deferred renderer does not support custom material shaders.");
+                spdlog::warn("Deferred renderer does not support custom material shaders.");
             }
             else
             {
@@ -270,7 +270,7 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Disable geometry buffer
@@ -359,7 +359,7 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
         if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
         {
             // Invalid id
-            LOG_ERROR("Invalid scene object id %l.", id);
+            spdlog::error("Invalid scene object id {}.", id);
         }
         else
         {
@@ -375,7 +375,7 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
             if (material->hasCustomShader())
             {
                 // Custom shaders not supported
-                LOG_WARNING("Deferred renderer does not support custom material shaders.");
+                spdlog::warn("Deferred renderer does not support custom material shaders.");
             }
             else
             {
@@ -390,7 +390,7 @@ void CDeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Disable geometry buffer
@@ -481,7 +481,7 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
             if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
             {
                 // Invalid id
-                LOG_ERROR("Invalid scene object id %l.", id);
+                spdlog::error("Invalid scene object id {}.", id);
             }
             else
             {
@@ -507,7 +507,7 @@ void CDeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camer
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Disable buffer
@@ -561,14 +561,14 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
     CShaderProgram* pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
     if (pointLightPassShader == nullptr)
     {
-        LOG_ERROR("Shader program for point light pass could not be retrieved.");
+        spdlog::error("Shader program for point light pass could not be retrieved.");
         return;
     }
 
     CMesh* pointLightMesh = manager.getMesh(m_pointLightSphereId);
     if (pointLightMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for point light pass could not be retrieved.");
+        spdlog::error("Mesh object for point light pass could not be retrieved.");
         return;
     }
 
@@ -586,7 +586,7 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
 
         if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
         {
-            LOG_ERROR("Failed to retrieve point light data from point light id %i.", pointLightId);
+            spdlog::error("Failed to retrieve point light data from point light id {}.", pointLightId);
         }
         else
         {
@@ -670,7 +670,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         manager.getShaderProgram(m_directionalLightPassShaderId);
     if (directionalLightPassShader == nullptr)
     {
-        LOG_ERROR("Shader program for directional light pass could not be retrieved.");
+        spdlog::error("Shader program for directional light pass could not be retrieved.");
         return;
     }
 
@@ -678,7 +678,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
     CMesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for directional light pass could not be retrieved.");
+        spdlog::error("Mesh object for directional light pass could not be retrieved.");
         return;
     }
 
@@ -696,7 +696,7 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity,
                                        castsShadow))
         {
-            LOG_ERROR("Failed to retrieve directional light data from point light id %i.",
+            spdlog::error("Failed to retrieve directional light data from point light id {}.",
                       directionalLightId);
         }
         else
@@ -788,7 +788,7 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
     CShaderProgram* illuminationShader = manager.getShaderProgram(m_illuminationPassShaderId);
     if (illuminationShader == nullptr)
     {
-        LOG_ERROR("Shader program for illumination pass could not be retrieved.");
+        spdlog::error("Shader program for illumination pass could not be retrieved.");
         return;
     }
 
@@ -796,7 +796,7 @@ void CDeferredRenderer::illuminationPass(const IScene& scene, const ICamera& cam
     CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for illumination pass could not be retrieved.");
+        spdlog::error("Mesh object for illumination pass could not be retrieved.");
         return;
     }
 
@@ -916,7 +916,7 @@ void CDeferredRenderer::fxaaPass(const IWindow& window, const IGraphicsResourceM
     CShaderProgram* fxaaShader = manager.getShaderProgram(m_fxaaPassShaderId);
     if (fxaaShader == nullptr)
     {
-        LOG_ERROR("Shader program for fxaa pass could not be retrieved.");
+        spdlog::error("Shader program for fxaa pass could not be retrieved.");
         return;
     }
 
@@ -924,7 +924,7 @@ void CDeferredRenderer::fxaaPass(const IWindow& window, const IGraphicsResourceM
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for fxaa pass could not be retrieved.");
+        spdlog::error("Mesh object for fxaa pass could not be retrieved.");
         return;
     }
 
@@ -947,7 +947,7 @@ void CDeferredRenderer::fogPass(const ICamera& camera, const IWindow& window,
     CShaderProgram* fogShader = manager.getShaderProgram(m_fogPassShaderId);
     if (fogShader == nullptr)
     {
-        LOG_ERROR("Shader program for fog pass could not be retrieved.");
+        spdlog::error("Shader program for fog pass could not be retrieved.");
         return;
     }
 
@@ -955,7 +955,7 @@ void CDeferredRenderer::fogPass(const ICamera& camera, const IWindow& window,
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for fog pass could not be retrieved.");
+        spdlog::error("Mesh object for fog pass could not be retrieved.");
         return;
     }
 
@@ -1001,7 +1001,7 @@ void CDeferredRenderer::gaussBlurVerticalPass(const IWindow& window,
     CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurVerticalShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for vertical gauss blur pass could not be retrieved.");
+        spdlog::error("Shader program for vertical gauss blur pass could not be retrieved.");
         return;
     }
 
@@ -1009,7 +1009,7 @@ void CDeferredRenderer::gaussBlurVerticalPass(const IWindow& window,
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for vertical gauss blur pass could not be retrieved.");
+        spdlog::error("Mesh object for vertical gauss blur pass could not be retrieved.");
         return;
     }
 
@@ -1036,7 +1036,7 @@ void CDeferredRenderer::gaussBlurHorizontalPass(const IWindow& window,
     CShaderProgram* shader = manager.getShaderProgram(m_gaussBlurHorizontalShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for horizontal gauss blur pass could not be retrieved.");
+        spdlog::error("Shader program for horizontal gauss blur pass could not be retrieved.");
         return;
     }
 
@@ -1044,7 +1044,7 @@ void CDeferredRenderer::gaussBlurHorizontalPass(const IWindow& window,
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for horizontal gauss blur pass could not be retrieved.");
+        spdlog::error("Mesh object for horizontal gauss blur pass could not be retrieved.");
         return;
     }
 
@@ -1072,7 +1072,7 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
     CShaderProgram* shader = manager.getShaderProgram(m_depthOfFieldPassShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for depth-of-field pass could not be retrieved.");
+        spdlog::error("Shader program for depth-of-field pass could not be retrieved.");
         return;
     }
 
@@ -1080,7 +1080,7 @@ void CDeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& w
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for depth-of-field pass could not be retrieved.");
+        spdlog::error("Mesh object for depth-of-field pass could not be retrieved.");
         return;
     }
 
@@ -1136,7 +1136,7 @@ void CDeferredRenderer::passthroughPass(const IWindow& window,
     CShaderProgram* displayShader = manager.getShaderProgram(m_displayPassShaderId);
     if (displayShader == nullptr)
     {
-        LOG_ERROR("Shader program for display pass could not be retrieved.");
+        spdlog::error("Shader program for display pass could not be retrieved.");
         return;
     }
 
@@ -1144,7 +1144,7 @@ void CDeferredRenderer::passthroughPass(const IWindow& window,
     CMesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for illumination pass could not be retrieved.");
+        spdlog::error("Mesh object for illumination pass could not be retrieved.");
         return;
     }
 
@@ -1166,7 +1166,7 @@ void CDeferredRenderer::godRayPass1(const IWindow& window, const IGraphicsResour
     CShaderProgram* shader = manager.getShaderProgram(m_godRayPass1ShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for god ray 1 pass could not be retrieved.");
+        spdlog::error("Shader program for god ray 1 pass could not be retrieved.");
         return;
     }
 
@@ -1174,7 +1174,7 @@ void CDeferredRenderer::godRayPass1(const IWindow& window, const IGraphicsResour
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for god ray 1 pass could not be retrieved.");
+        spdlog::error("Mesh object for god ray 1 pass could not be retrieved.");
         return;
     }
 
@@ -1209,7 +1209,7 @@ void CDeferredRenderer::godRayPass2(const IWindow& window, const IGraphicsResour
     CShaderProgram* shader = manager.getShaderProgram(m_godRayPass2ShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for god ray 2 pass could not be retrieved.");
+        spdlog::error("Shader program for god ray 2 pass could not be retrieved.");
         return;
     }
 
@@ -1217,7 +1217,7 @@ void CDeferredRenderer::godRayPass2(const IWindow& window, const IGraphicsResour
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for god ray 2 pass could not be retrieved.");
+        spdlog::error("Mesh object for god ray 2 pass could not be retrieved.");
         return;
     }
 
@@ -1244,7 +1244,7 @@ void CDeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow&
     CShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
     if (shader == nullptr)
     {
-        LOG_ERROR("Shader program for depth visualization pass could not be retrieved.");
+        spdlog::error("Shader program for depth visualization pass could not be retrieved.");
         return;
     }
 
@@ -1252,7 +1252,7 @@ void CDeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow&
     CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
     if (quadMesh == nullptr)
     {
-        LOG_ERROR("Mesh object for depth visualization pass could not be retrieved.");
+        spdlog::error("Mesh object for depth visualization pass could not be retrieved.");
         return;
     }
 
@@ -1280,19 +1280,19 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     shader->setActive();
 
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Transformation matrices
@@ -1303,7 +1303,7 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
 
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Send material textures to shader
@@ -1364,7 +1364,7 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
 
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
 
     // Draw mesh
@@ -1373,7 +1373,7 @@ void CDeferredRenderer::draw(CMesh* mesh, const glm::mat4& translation, const gl
 
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
     }
     // TODO Cleanup?
 }
@@ -1389,7 +1389,7 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     // Check if ok
     if (m_geometryPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", geometryPassShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", geometryPassShaderFile.c_str());
         return false;
     }
 
@@ -1410,7 +1410,7 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1422,11 +1422,11 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
-    LOG_INFO("GBuffer state: %s.", m_geometryBuffer.getState().c_str());
+    spdlog::info("GBuffer state: {}.", m_geometryBuffer.getState().c_str());
 
     // Reset framebuffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
@@ -1434,7 +1434,7 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
     return true;
@@ -1447,7 +1447,7 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
 
     if (m_shadowCubePassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
         return false;
     }
 
@@ -1488,7 +1488,7 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1503,11 +1503,11 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
-    LOG_INFO("Shadow cube buffer state: %s.", m_shadowCubeBuffer.getState().c_str());
+    spdlog::info("Shadow cube buffer state: {}.", m_shadowCubeBuffer.getState().c_str());
 
     // Reset framebuffer
     m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
@@ -1515,7 +1515,7 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
     return true;
@@ -1528,7 +1528,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
 
     if (m_shadowMapPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
         return false;
     }
 
@@ -1549,7 +1549,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1562,11 +1562,11 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
-    LOG_INFO("Shadow map buffer state: %s.", m_shadowMapBuffer.getState().c_str());
+    spdlog::info("Shadow map buffer state: {}.", m_shadowMapBuffer.getState().c_str());
 
     // Reset framebuffer
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
@@ -1574,7 +1574,7 @@ bool CDeferredRenderer::initShadowMapPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
     return true;
@@ -1589,7 +1589,7 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
     // Check if ok
     if (m_pointLightPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.",
+        spdlog::error("Failed to initialize the shader from file {}.",
                   pointLightPassShaderFile.c_str());
         return false;
     }
@@ -1599,7 +1599,7 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
     m_pointLightSphereId = manager->loadMesh(sphereMesh);
     if (m_pointLightSphereId == invalidResource)
     {
-        LOG_ERROR("Failed to load point light volume mesh %s.", sphereMesh.c_str());
+        spdlog::error("Failed to load point light volume mesh {}.", sphereMesh.c_str());
         return false;
     }
 
@@ -1607,7 +1607,7 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
     m_lightPassTexture = std::make_shared<CTexture>();
     if (!m_lightPassTexture->init(800, 600, GL_RGBA16F))
     {
-        LOG_ERROR("Failed to create color texture for light pass frame buffer.");
+        spdlog::error("Failed to create color texture for light pass frame buffer.");
         return false;
     }
     m_lightPassFrameBuffer.attach(m_lightPassTexture, GL_COLOR_ATTACHMENT0);
@@ -1617,7 +1617,7 @@ bool CDeferredRenderer::initPointLightPass(IResourceManager* manager)
     std::shared_ptr<CRenderBuffer> depthBuffer = std::make_shared<CRenderBuffer>();
     if (!depthBuffer->init(800, 600, GL_DEPTH_COMPONENT))
     {
-        LOG_ERROR("Failed to create depth buffer for light pass frame buffer.");
+        spdlog::error("Failed to create depth buffer for light pass frame buffer.");
         return false;
     }
     m_lightPassFrameBuffer.attach(depthBuffer, GL_DEPTH_ATTACHMENT);
@@ -1634,7 +1634,7 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
     // Check if ok
     if (m_directionalLightPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.",
+        spdlog::error("Failed to initialize the shader from file {}.",
                   directionalLightPassShaderFile.c_str());
         return false;
     }
@@ -1644,7 +1644,7 @@ bool CDeferredRenderer::initDirectionalLightPass(IResourceManager* manager)
     m_directionalLightScreenQuadId = manager->loadMesh(quadMesh);
     if (m_directionalLightScreenQuadId == invalidResource)
     {
-        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
         return false;
     }
 
@@ -1657,7 +1657,7 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
     // Load illumination shader
@@ -1666,7 +1666,7 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     // Check if ok
     if (m_illuminationPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.",
+        spdlog::error("Failed to initialize the shader from file {}.",
                   illuminationPassShaderFile.c_str());
         return false;
     }
@@ -1674,7 +1674,7 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1684,14 +1684,14 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     // Check if ok
     if (m_illuminationPassScreenQuadId == invalidResource)
     {
-        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
         return false;
     }
 
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1699,7 +1699,7 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     m_illuminationPassTexture = std::make_shared<CTexture>();
     if (!m_illuminationPassTexture->init(800, 600, GL_RGB))
     {
-        LOG_ERROR("Failed to initialize illumination pass texture.");
+        spdlog::error("Failed to initialize illumination pass texture.");
         return false;
     }
     m_illumationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
@@ -1709,7 +1709,7 @@ bool CDeferredRenderer::initIlluminationPass(IResourceManager* manager)
     // Error check
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return false;
     }
 
@@ -1721,40 +1721,40 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     // Gauss blur pass
     if (!initGaussBlurHorizontalPass(manager))
     {
-        LOG_ERROR("Failed to initialize gauss blur horizontal pass.");
+        spdlog::error("Failed to initialize gauss blur horizontal pass.");
         return false;
     }
     if (!initGaussBlurVerticalPass(manager))
     {
-        LOG_ERROR("Failed to initialize gauss blur vertical pass.");
+        spdlog::error("Failed to initialize gauss blur vertical pass.");
         return false;
     }
 
     // FXAA
     if (!initFxaaPass(manager))
     {
-        LOG_ERROR("Failed to initialize fxaa pass.");
+        spdlog::error("Failed to initialize fxaa pass.");
         return false;
     }
 
     // Fog
     if (!initFogPass(manager))
     {
-        LOG_ERROR("Failed to initialize fog pass.");
+        spdlog::error("Failed to initialize fog pass.");
         return false;
     }
 
 	// Godray
     if (!initGodRayPass1(manager))
     {
-        LOG_ERROR("Failed to initialize god ray 1 pass.");
+        spdlog::error("Failed to initialize god ray 1 pass.");
         return false;
     }
 
 	// Should actually compose by additive blending
     if (!initGodRayPass2(manager))
     {
-        LOG_ERROR("Failed to initialize god ray 2 pass.");
+        spdlog::error("Failed to initialize god ray 2 pass.");
         return false;
     }
 
@@ -1763,7 +1763,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
     if (m_directionalLightScreenQuadId == invalidResource)
     {
-        LOG_ERROR("Failed to load screen quad mesh %s.", quadMesh.c_str());
+        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
         return false;
     }
 
@@ -1772,7 +1772,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     m_postProcessPassTexture0 = std::make_shared<CTexture>();
     if (!m_postProcessPassTexture0->init(800, 600, GL_RGB))
     {
-        LOG_ERROR("Failed to initialize post process pass texture 0.");
+        spdlog::error("Failed to initialize post process pass texture 0.");
         return false;
     }
 
@@ -1780,7 +1780,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     m_postProcessPassTexture1 = std::make_shared<CTexture>();
     if (!m_postProcessPassTexture1->init(800, 600, GL_RGB))
     {
-        LOG_ERROR("Failed to initialize post process pass texture 1.");
+        spdlog::error("Failed to initialize post process pass texture 1.");
         return false;
     }
 
@@ -1788,7 +1788,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     m_postProcessPassTexture2 = std::make_shared<CTexture>();
     if (!m_postProcessPassTexture2->init(800, 600, GL_RGB))
     {
-        LOG_ERROR("Failed to initialize post process pass texture 2.");
+        spdlog::error("Failed to initialize post process pass texture 2.");
         return false;
     }
 
@@ -1799,7 +1799,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
 
     if (!initDepthOfFieldPass(manager))
     {
-        LOG_ERROR("Failed to initialize depth of field pass.");
+        spdlog::error("Failed to initialize depth of field pass.");
         return false;
     }
     return true;
@@ -1813,7 +1813,7 @@ bool CDeferredRenderer::initDepthOfFieldPass(IResourceManager* manager)
     // Check if ok
     if (m_depthOfFieldPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", depthOfFieldShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", depthOfFieldShaderFile.c_str());
         return false;
     }
     return true;
@@ -1827,7 +1827,7 @@ bool CDeferredRenderer::initGaussBlurVerticalPass(IResourceManager* manager)
     // Check if ok
     if (m_gaussBlurVerticalShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.",
+        spdlog::error("Failed to initialize the shader from file {}.",
                   gaussBlurVerticalShaderFile.c_str());
         return false;
     }
@@ -1842,7 +1842,7 @@ bool CDeferredRenderer::initGaussBlurHorizontalPass(IResourceManager* manager)
     // Check if ok
     if (m_gaussBlurHorizontalShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.",
+        spdlog::error("Failed to initialize the shader from file {}.",
                   gaussBlurHorizontalShaderFile.c_str());
         return false;
     }
@@ -1857,7 +1857,7 @@ bool CDeferredRenderer::initFxaaPass(IResourceManager* manager)
     // Check if ok
     if (m_fxaaPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", fxaaShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", fxaaShaderFile.c_str());
         return false;
     }
     return true;
@@ -1871,7 +1871,7 @@ bool CDeferredRenderer::initFogPass(IResourceManager* manager)
     // Check if ok
     if (m_fogPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", fogShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", fogShaderFile.c_str());
         return false;
     }
     return true;
@@ -1885,7 +1885,7 @@ bool CDeferredRenderer::initGodRayPass1(IResourceManager* manager)
     // Check if ok
     if (m_godRayPass1ShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", shader.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", shader.c_str());
         return false;
     }
     return true;
@@ -1899,7 +1899,7 @@ bool CDeferredRenderer::initGodRayPass2(IResourceManager* manager)
     // Check if ok
     if (m_godRayPass2ShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", shader.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", shader.c_str());
         return false;
     }
     return true;
@@ -1913,7 +1913,7 @@ bool CDeferredRenderer::initDisplayPass(IResourceManager* manager)
     // Check if ok
     if (m_displayPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", displayPassShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", displayPassShaderFile.c_str());
         return false;
     }
     return true;
@@ -1927,7 +1927,7 @@ bool CDeferredRenderer::initVisualizeDepthPass(IResourceManager* manager)
     // Check if ok
     if (m_visualizeDepthPassShaderId == invalidResource)
     {
-        LOG_ERROR("Failed to initialize the shader from file %s.", shaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
         return false;
     }
     return true;

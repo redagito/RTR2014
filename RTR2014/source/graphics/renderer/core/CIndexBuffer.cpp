@@ -1,16 +1,16 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer\core/CIndexBuffer.h"
 
 #include <cassert>
 
 #include "graphics/renderer/debug/RendererDebug.h"
-#include "debug/Log.h"
 
 CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usage)
     : m_bufferId(0), m_size(0), m_valid(false)
 {
     if (indices.empty())
     {
-        LOG_ERROR("Index buffer data is empty.");
+        spdlog::error("Index buffer data is empty.");
         return;
     }
     glGenBuffers(1, &m_bufferId);
@@ -28,7 +28,7 @@ CIndexBuffer::CIndexBuffer(const std::vector<unsigned int>& indices, GLenum usag
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return;
     }
     m_valid = true;

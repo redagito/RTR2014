@@ -4,12 +4,12 @@ find_package(glm CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(lodepng CONFIG REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(RTR2014 STATIC ${SOURCES} ${HEADERS})
-add_library(RTR2014::RTR2014 ALIAS RTR2014)
 
 target_compile_features(RTR2014 PUBLIC cxx_std_23)
 
@@ -25,4 +25,5 @@ target_link_libraries(RTR2014 PUBLIC
     glm::glm
     JsonCpp::JsonCpp
     lodepng::lodepng
-    tinyobjloader::tinyobjloader)
+    tinyobjloader::tinyobjloader
+    spdlog::spdlog)

@@ -1,3 +1,5 @@
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include "demo/RTRDemo.h"
 
 #include <string>
@@ -5,7 +7,6 @@
 
 // Debug
 #include "debug/CDebugInfo.h"
-#include "debug/Log.h"
 
 // Graphics
 #include "graphics/renderer/core/RendererCoreConfig.h"
@@ -44,24 +45,29 @@ int RTRDemo::init(const std::string& configFile)
 {
     // Init log file
     std::string logFile = "log/" + createTimeStamp() + ".log";
-    if (!CLogger::initLogFile(logFile))
+    try
     {
-        LOG_WARNING("Failed to create log file at %s.", logFile.c_str());
+        spdlog::default_logger()->sinks().push_back(
+            std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFile));
+    }
+    catch (const spdlog::spdlog_ex& ex)
+    {
+        spdlog::warn("Failed to create log file at {}: {}", logFile, ex.what());
     }
 
     m_debugInfo = std::make_shared<CDebugInfo>();
-    CLogger::addListener(m_debugInfo.get());
+    spdlog::default_logger()->sinks().push_back(m_debugInfo);
 
     if (!m_config.load(configFile))
     {
-        LOG_WARNING("Failed to load config file %s, starting with default settings.",
+        spdlog::warn("Failed to load config file {}, starting with default settings.",
                     configFile.c_str());
     }
 
     // Create window for rendering
     if (!initWindow())
     {
-        LOG_ERROR("Failed to initialize window.");
+        spdlog::error("Failed to initialize window.");
         return 1;
     }
 
@@ -71,7 +77,7 @@ int RTRDemo::init(const std::string& configFile)
     m_resourceManager.reset(createResourceManager());
     if (m_resourceManager == nullptr)
     {
-        LOG_ERROR("Failed to initialize resource manager.");
+        spdlog::error("Failed to initialize resource manager.");
         return 1;
     }
 
@@ -86,13 +92,13 @@ int RTRDemo::init(const std::string& configFile)
     // Create renderer
     if (!initRenderer())
     {
-        LOG_ERROR("Failed to initialize renderer.");
+        spdlog::error("Failed to initialize renderer.");
         return 1;
     }
 
     if (!initScene())
     {
-        LOG_ERROR("Failed to initialize scene.");
+        spdlog::error("Failed to initialize scene.");
         return 1;
     }
 
@@ -222,22 +228,22 @@ bool RTRDemo::initWindow()
         return true;
     }
 
-    LOG_INFO("Initializing application window.");
+    spdlog::info("Initializing application window.");
 
     // Read config values
     unsigned int width = m_config.getValue("window", "width", 800);
     unsigned int height = m_config.getValue("window", "height", 600);
     std::string title = m_config.getValue("window", "title", "Demo");
 
-    LOG_INFO("Window width: %u.", width);
-    LOG_INFO("Window height: %u.", height);
-    LOG_INFO("Window title: %s.", title.c_str());
+    spdlog::info("Window width: {}.", width);
+    spdlog::info("Window height: {}.", height);
+    spdlog::info("Window title: {}.", title.c_str());
 
     // Create window
     CGlfwWindow* window = new CGlfwWindow;
     if (!window->init(width, height, title))
     {
-        LOG_ERROR("Failed to initialize GLFW window wrapper.");
+        spdlog::error("Failed to initialize GLFW window wrapper.");
         delete window;
         return false;
     }
@@ -251,31 +257,31 @@ bool RTRDemo::initRenderer()
 {
     if (m_renderer != nullptr || m_deferredRenderer != nullptr || m_forwardRenderer != nullptr)
     {
-        LOG_INFO("Renderer already initialized and re-initialization is not supported.");
+        spdlog::info("Renderer already initialized and re-initialization is not supported.");
         return true;
     }
 
     // Initialize deferred renderer
-    LOG_INFO("Initializing deferred renderer.");
+    spdlog::info("Initializing deferred renderer.");
     m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
     if (m_deferredRenderer == nullptr)
     {
-        LOG_ERROR("Failed to initialize deferred renderer.");
+        spdlog::error("Failed to initialize deferred renderer.");
         return false;
     }
 
     // Initialize forward renderer
-    LOG_INFO("Initializing forward renderer.");
+    spdlog::info("Initializing forward renderer.");
     m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
     if (m_forwardRenderer == nullptr)
     {
-        LOG_ERROR("Failed to initialize forward renderer.");
+        spdlog::error("Failed to initialize forward renderer.");
         return false;
     }
 
     // Set renderer
     std::string rendererType = m_config.getValue("renderer", "type", "forward");
-    LOG_INFO("Initial renderer type set to %s.", rendererType.c_str());
+    spdlog::info("Initial renderer type set to {}.", rendererType.c_str());
 
     // Set renderer object
     if (rendererType == "forward")
@@ -289,7 +295,7 @@ bool RTRDemo::initRenderer()
     else
     {
         // Should not happen as default renderer is set to forward in config call
-        LOG_WARNING("Invalid renderer type %s specified. Fallback to forward renderer.",
+        spdlog::warn("Invalid renderer type {} specified. Fallback to forward renderer.",
                     rendererType.c_str());
         m_renderer = m_forwardRenderer;
     }
@@ -297,7 +303,7 @@ bool RTRDemo::initRenderer()
     // Initialize renderer resources
     if (m_renderer == nullptr)
     {
-        LOG_ERROR("Failed to initialize renderer.");
+        spdlog::error("Failed to initialize renderer.");
         return false;
     }
     return true;
@@ -310,10 +316,10 @@ bool RTRDemo::initScene()
 
     // Get startup scene from config
     std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test_1.json");
-    LOG_INFO("Loading initial scene from file %s.", sceneFile.c_str());
+    spdlog::info("Loading initial scene from file {}.", sceneFile.c_str());
     if (!loader.load(sceneFile, *m_scene, *m_animationWorld))
     {
-        LOG_ERROR("Failed to load scene file %s.", sceneFile.c_str());
+        spdlog::error("Failed to load scene file {}.", sceneFile.c_str());
         m_scene = nullptr;
         return false;
     }

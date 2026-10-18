@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "io/CObjModelLoader.h"
 
 #include <fstream>
@@ -7,7 +8,6 @@
 
 #include <glm/glm.hpp>
 
-#include "debug/Log.h"
 
 // Parse obj file
 CObjModelLoader::CObjModelLoader() {}
@@ -17,7 +17,7 @@ bool CObjModelLoader::load(const std::string& file)
     std::ifstream ifs(file);
     if (!ifs.is_open())
     {
-        LOG_ERROR("The mesh file %s could not be opened.", file.c_str());
+        spdlog::error("The mesh file {} could not be opened.", file.c_str());
         return false;
     }
 
@@ -32,7 +32,7 @@ bool CObjModelLoader::load(const std::string& file)
     {
         parseLine(line, tempVert, tempNorm, tempUV);
     }
-    LOG_INFO("Loaded obj model %s with %u triangles.", file.c_str(), d_vertices.size() / 3);
+    spdlog::info("Loaded obj model {} with {} triangles.", file.c_str(), d_vertices.size() / 3);
     return true;
 }
 

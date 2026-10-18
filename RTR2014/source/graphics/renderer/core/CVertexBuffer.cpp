@@ -1,16 +1,16 @@
+#include <spdlog/spdlog.h>
 #include "graphics\renderer\core/CVertexBuffer.h"
 
 #include <cassert>
 
 #include "graphics/renderer/debug/RendererDebug.h"
-#include "debug/Log.h"
 
 CVertexBuffer::CVertexBuffer(const std::vector<float>& data, GLenum usage)
     : m_bufferId(0), m_valid(false), m_size((unsigned int)data.size()), m_usage(usage)
 {
     if (data.empty())
     {
-        LOG_ERROR("Vertex buffer data is empty.");
+        spdlog::error("Vertex buffer data is empty.");
         return;
     }
     // Create GL buffer resource
@@ -24,7 +24,7 @@ CVertexBuffer::CVertexBuffer(const std::vector<float>& data, GLenum usage)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return;
     }
     m_valid = true;
@@ -53,7 +53,7 @@ CVertexBuffer::CVertexBuffer(GLenum usage)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return;
     }
 }
@@ -68,7 +68,7 @@ void CVertexBuffer::setData(const std::vector<float>& data)
     std::string error;
     if (hasGLError(error))
     {
-        LOG_ERROR("GL Error: %s", error.c_str());
+        spdlog::error("GL Error: {}", error.c_str());
         return;
     }
     m_valid = true;

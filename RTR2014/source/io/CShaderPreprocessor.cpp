@@ -1,9 +1,9 @@
+#include <spdlog/spdlog.h>
 #include "io/CShaderPreprocessor.h"
 
 #include <fstream>
 #include <sstream>
 
-#include "debug/Log.h"
 
 void CShaderPreprocessor::setIncludePath(const std::string& includePath)
 {
@@ -70,7 +70,7 @@ bool CShaderPreprocessor::preprocess(const std::string& shaderCode,
             std::ifstream include(m_includePath + includeFile);
             if (!include.is_open())
             {
-                LOG_ERROR("Failed to open include file %s.", (m_includePath + includeFile).c_str());
+                spdlog::error("Failed to open include file {}.", (m_includePath + includeFile).c_str());
                 return false;
             }
             ss << include.rdbuf();

@@ -6,7 +6,6 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "graphics/resource/CMesh.h"
 
-#include "debug/Log.h"
 
 ARenderer::ARenderer()
 {

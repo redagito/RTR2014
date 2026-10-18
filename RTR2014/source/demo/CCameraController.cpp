@@ -1,13 +1,20 @@
+#include <fstream>
+#include <spdlog/spdlog.h>
+#include <fstream>
 #include "demo/CCameraController.h"
 
-#include "debug/Log.h"
 
+#include <fstream>
 #include <GLFW/glfw3.h>
+#include <fstream>
 #include <json/json.h>
 
+#include <fstream>
 #include "graphics/camera/IControllableCamera.h"
 
+#include <fstream>
 #include "input/IInputProvider.h"
+#include <fstream>
 #include "io/JsonDeserializer.h"
 
 CCameraController::CCameraController() {}
@@ -44,7 +51,7 @@ bool load(const Json::Value& node, const std::string& name, std::string& str)
 {
     if (!deserialize(node[name], str))
     {
-        LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+        spdlog::error("Failed to load '{}' parameter.", name.c_str());
         return false;
     }
     return true;
@@ -54,7 +61,7 @@ bool load(const Json::Value& node, const std::string& name, glm::vec3& vec)
 {
     if (!deserialize(node[name], vec))
     {
-        LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+        spdlog::error("Failed to load '{}' parameter.", name.c_str());
         return false;
     }
     return true;
@@ -64,7 +71,7 @@ bool load(const Json::Value& node, const std::string& name, float& f)
 {
     if (!deserialize(node[name], f))
     {
-        LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+        spdlog::error("Failed to load '{}' parameter.", name.c_str());
         return false;
     }
     return true;
@@ -74,7 +81,7 @@ bool load(const Json::Value& node, const std::string& name, bool& b)
 {
     if (!deserialize(node[name], b))
     {
-        LOG_ERROR("Failed to load '%s' parameter.", name.c_str());
+        spdlog::error("Failed to load '{}' parameter.", name.c_str());
         return false;
     }
     return true;
@@ -92,14 +99,14 @@ bool CCameraController::loadSequence(std::string file)
     std::ifstream ifs(file);
     if (!ifs.is_open())
     {
-        LOG_ERROR("Failed to open json file %s.", file.c_str());
+        spdlog::error("Failed to open json file {}.", file.c_str());
         return false;
     }
 
     // Parse json data
     if (!reader.parse(ifs, root))
     {
-        LOG_ERROR("Failed to load scene file %s with error %s.", file.c_str(),
+        spdlog::error("Failed to load scene file {} with error {}.", file.c_str(),
                   reader.getFormattedErrorMessages().c_str());
         return false;
     }
@@ -111,14 +118,14 @@ bool CCameraController::loadSequence(std::string file)
     // Node empty?
     if (node.empty())
     {
-        LOG_INFO("Missing or empty 'positions' node. No scene objects are loaded.");
+        spdlog::info("Missing or empty 'positions' node. No scene objects are loaded.");
         return true;
     }
 
     // Node is array type
     if (!node.isArray())
     {
-        LOG_ERROR("The node 'positions' must be array type.");
+        spdlog::error("The node 'positions' must be array type.");
         return false;
     }
 
@@ -134,35 +141,35 @@ bool CCameraController::loadSequence(std::string file)
 
         if (!load(node[i], "position", position))
         {
-            LOG_ERROR("Failed loading node 'position' for element #%i.", i);
+            spdlog::error("Failed loading node 'position' for element #{}.", i);
             success = false;
             break;
         }
 
         if (!load(node[i], "orientation", orientation))
         {
-            LOG_ERROR("Failed loading node 'orientation' for element #%i.", i);
+            spdlog::error("Failed loading node 'orientation' for element #{}.", i);
             success = false;
             break;
         }
 
         if (!load(node[i], "timestamp", timestamp))
         {
-            LOG_ERROR("Failed loading node 'timestamp' for element #%i.", i);
+            spdlog::error("Failed loading node 'timestamp' for element #{}.", i);
             success = false;
             break;
         }
         
         if (!load(node[i], "fxaa", fxaaActive))
         {
-            LOG_ERROR("Failed loading node 'fxaa' for element #%i.", i);
+            spdlog::error("Failed loading node 'fxaa' for element #{}.", i);
             success = false;
             break;
         }
         
         if (!load(node[i], "fog", fogActive))
         {
-            LOG_ERROR("Failed loading node 'fog' for element #%i.", i);
+            spdlog::error("Failed loading node 'fog' for element #{}.", i);
             success = false;
             break;
         }
