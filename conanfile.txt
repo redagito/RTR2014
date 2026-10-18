@@ -10,8 +10,7 @@ spdlog/1.17.0
 
 [options]
 glad/*:gl_profile=core
-glad/*:gl_version=4.1
-glad/*:extensions=GL_ARB_vertex_array_object,GL_EXT_texture_filter_anisotropic
+glad/*:gl_version=4.6
 
 [generators]
 CMakeDeps

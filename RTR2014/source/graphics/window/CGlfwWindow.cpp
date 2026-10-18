@@ -2,9 +2,40 @@
 #include "graphics/window/CGlfwWindow.h"
 
 #include <cassert>
+#include <cstdlib>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include <GLFW/glfw3.h>
+
+namespace
+{
+void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                             GLsizei length, const GLchar* message, const void* userParam)
+{
+    std::string text = (length > 0) ? std::string(message, length) : std::string(message);
+
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        spdlog::critical("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        spdlog::error("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
+        break;
+    case GL_DEBUG_SEVERITY_LOW:
+        spdlog::warn("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
+        break;
+    default:
+        spdlog::debug("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
+        break;
+    }
+
+    if (type == GL_DEBUG_TYPE_ERROR)
+    {
+        std::abort();
+    }
+}
+} // namespace
 
 
 std::unordered_map<GLFWwindow*, CGlfwWindow*> CGlfwWindow::s_windows; /**< Window mapping. */
@@ -30,7 +61,7 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
 
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -60,6 +91,11 @@ if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
         spdlog::error("Failed to initialize glad.");
         return false;
     }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(debugCallback, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
     // Add mapping
     s_windows[m_window] = this;
