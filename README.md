@@ -19,7 +19,7 @@ The original version of this project, before the build system migration describe
 
 ## Features
 * Modern OpenGL (4.1 core profile)
-* Cross platform (tested on Linux, Win7 and MacOSX)
+* Cross platform (developed on Windows 10)
 * Deferred rendering
 * Point lights
 * Directional lights
