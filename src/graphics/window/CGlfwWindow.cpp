@@ -54,15 +54,12 @@ bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::strin
     glfwMakeContextCurrent(m_window);
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 
-// Load OpenGL extensions
-#ifndef __APPLE__
-    if (flextInit(m_window) != GL_TRUE)
+if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
         glfwTerminate();
-        LOG_ERROR("Failed to initialize flextGL.");
+        LOG_ERROR("Failed to initialize glad.");
         return false;
     }
-#endif
 
     // Add mapping
     s_windows[m_window] = this;

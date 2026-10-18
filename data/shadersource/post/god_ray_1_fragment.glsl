@@ -63,7 +63,7 @@ void main()
 		// Step on ray
 		coord -= deltaTexCoord;
 		// Get sample
-		vec3 texel = texture2D(scene_texture, coord).xyz;
+		vec3 texel = texture(scene_texture, coord).xyz;
 		if (texel.x > 0.8 && texel.y > 0.8 && texel.z > 0.8)
 		{
 			texel = vec3(1.0);

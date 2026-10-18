@@ -63,12 +63,13 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
     if (extension == "obj")
     {
         // Wavefront OBJ file format loaded with tinyobj
+        tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
+        std::string warn;
+        std::string err;
         // Load as obj
-        std::string err = tinyobj::LoadObj(shapes, materials, file.c_str());
-
-        if (!err.empty())
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str()))
         {
             LOG_ERROR("%s.", err.c_str());
             return -1;
@@ -82,10 +83,53 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
             LOG_ERROR("No mesh data loaded from file %s.", file.c_str());
             return -1;
         }
+
+        // tinyobj keeps attributes in shared arrays; expand them per face corner so
+        // that positions, normals and texcoords all stay one entry per corner.
+        std::vector<float> vertices;
+        std::vector<float> normals;
+        std::vector<float> uvs;
+        bool hasNormals = true;
+        bool hasUvs = true;
+        for (const tinyobj::index_t& index : shapes.at(0).mesh.indices)
+        {
+            if (index.vertex_index < 0)
+            {
+                LOG_ERROR("Mesh file %s has a face corner without a position.", file.c_str());
+                return -1;
+            }
+            vertices.insert(vertices.end(), attrib.vertices.begin() + index.vertex_index * 3,
+                            attrib.vertices.begin() + index.vertex_index * 3 + 3);
+            if (index.normal_index < 0)
+            {
+                hasNormals = false;
+            }
+            else
+            {
+                normals.insert(normals.end(), attrib.normals.begin() + index.normal_index * 3,
+                               attrib.normals.begin() + index.normal_index * 3 + 3);
+            }
+            if (index.texcoord_index < 0)
+            {
+                hasUvs = false;
+            }
+            else
+            {
+                uvs.insert(uvs.end(), attrib.texcoords.begin() + index.texcoord_index * 2,
+                           attrib.texcoords.begin() + index.texcoord_index * 2 + 2);
+            }
+        }
+        if (!hasNormals)
+        {
+            normals.clear();
+        }
+        if (!hasUvs)
+        {
+            uvs.clear();
+        }
+
         // Create mesh resource
-        meshId = createMesh(shapes.at(0).mesh.positions, shapes.at(0).mesh.indices,
-                            shapes.at(0).mesh.normals, shapes.at(0).mesh.texcoords,
-                            EPrimitiveType::Triangle);
+        meshId = createMesh(vertices, {}, normals, uvs, EPrimitiveType::Triangle);
     }
     else if (extension == "oni")
     {

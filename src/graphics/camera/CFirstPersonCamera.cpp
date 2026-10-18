@@ -2,7 +2,8 @@
 
 #include <cmath>
 
-#include <glm/ext.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 CFirstPersonCamera::CFirstPersonCamera(const glm::vec3& position, const glm::vec3& target,
                                        const glm::vec3& up, float fieldOfView, float aspectRatio,

@@ -3,7 +3,8 @@
 #include <cassert>
 #include <string>
 
-#include <glm/ext.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"

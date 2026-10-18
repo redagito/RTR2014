@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <list>
 #include <set>
+#include <string>
 
 #include "graphics/IWindow.h"
 #include "input/IInputProvider.h"

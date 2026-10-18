@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#include <glm/ext.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 GLuint CShaderProgram::s_activeShaderProgram = 0;
 

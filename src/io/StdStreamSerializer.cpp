@@ -1,6 +1,6 @@
 #include "StdStreamSerializer.h"
 
-#include <glm/ext.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 template <typename T>
 bool serializeNative(std::ostream& stream, const T* value, uint64_t size)

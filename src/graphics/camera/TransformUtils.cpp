@@ -1,6 +1,6 @@
 #include "TransformUtils.h"
 
-#include <glm/gtx/transform.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 glm::vec3 TransformUtils::rotate(const glm::vec3& axis, float amount, const glm::vec3& vector)
 {
@@ -18,5 +18,6 @@ glm::mat4 TransformUtils::createModelMatrix(const glm::vec3& position, const glm
         glm::mat4(-right.x, -right.y, -right.z, 0.0f, up.x, up.y, up.z, 0.0f, forward.x, forward.y,
                   forward.z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-    return glm::translate(position) * glm::scale(glm::mat4(1), glm::vec3(scale)) * rotationMatrix;
+    return glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(scale)) *
+           rotationMatrix;
 }

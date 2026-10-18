@@ -3,7 +3,7 @@
 #include <cassert>
 #include <string>
 
-#include <glm/ext.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
@@ -114,13 +114,13 @@ void CForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IW
 			CMaterial* material = manager.getMaterial(materialId);
 
 			// Create matrices
-			glm::mat4 translationMatrix = glm::translate(position);
+			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
 
 			// TODO Correct but slow?
-			glm::mat4 rotationMatrix = glm::rotate(rotation.x, glm::vec3(1.f, 0.f, 0.f)) *
-				glm::rotate(rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
-				glm::rotate(rotation.z, glm::vec3(0.f, 0.f, 1.f));
-			glm::mat4 scaleMatrix = glm::scale(scale);
+			glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotation.x, glm::vec3(1.f, 0.f, 0.f)) *
+				glm::rotate(glm::mat4(1.0f), rotation.y, glm::vec3(0.f, 1.f, 0.f)) *
+				glm::rotate(glm::mat4(1.0f), rotation.z, glm::vec3(0.f, 0.f, 1.f));
+			glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
 
 			// Forward draw call
 			draw(mesh, translationMatrix, rotationMatrix, scaleMatrix, material, manager);

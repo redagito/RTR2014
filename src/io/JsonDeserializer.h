@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include <glm/glm.hpp>
-#include <glm/ext.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 // Json lib forward declare
 namespace Json
