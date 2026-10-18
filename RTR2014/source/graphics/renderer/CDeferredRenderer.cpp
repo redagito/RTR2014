@@ -873,7 +873,7 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
     else
     {
         // Passthrough
-        passthroughPass(window, manager, texture);
+        passthroughPass(window, manager, m_postProcessPassTexture1);
     }
     // Processed scene in tex 0
 
@@ -1646,7 +1646,7 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
     m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
-    if (m_directionalLightScreenQuadId == invalidResource)
+    if (m_postProcessScreenQuadId == invalidResource)
     {
         spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
         return false;

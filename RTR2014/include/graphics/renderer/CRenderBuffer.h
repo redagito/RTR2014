@@ -47,7 +47,7 @@ class CRenderBuffer
 
    private:
     GLuint m_bufferId = 0;     /**< Render buffer id. */
-    GLenum m_format;           /**< Buffer format. */
+    GLenum m_format = 0;        /**< Buffer format. */
     unsigned int m_width = 0;  /**< Buffer width. */
     unsigned int m_height = 0; /**< Buffer height. */
     bool m_init = false;

@@ -22,6 +22,7 @@ bool CRenderBuffer::init(unsigned int width, unsigned int height, GLenum format)
     m_width = width;
     m_height = height;
     m_format = format;
+    m_init = true;
     return true;
 }
 

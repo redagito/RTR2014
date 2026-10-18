@@ -204,8 +204,8 @@ ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat for
 	// PNG type check
 	if (file.find(".png") == std::string::npos)
 	{
-		spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
-		return false;
+spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
+        return invalidResource;
 	}
 
     // Map color type
