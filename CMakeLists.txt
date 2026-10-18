@@ -19,7 +19,6 @@ add_executable(RTRDemo ${RTR2014_SOURCES})
 
 target_compile_features(RTRDemo PRIVATE cxx_std_23)
 
-# glad owns every GL entry point, so GLFW must not pull in the platform GL headers.
 target_compile_definitions(RTRDemo PRIVATE
     GLFW_INCLUDE_NONE
     $<$<CONFIG:Debug>:DEBUG>)
@@ -34,7 +33,6 @@ target_link_libraries(RTRDemo PRIVATE
     lodepng::lodepng
     tinyobjloader::tinyobjloader)
 
-# Assets are loaded by CWD-relative path at runtime.
 add_custom_command(TARGET RTRDemo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PROJECT_SOURCE_DIR}/data $<TARGET_FILE_DIR:RTRDemo>/data)
