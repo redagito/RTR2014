@@ -15,11 +15,9 @@
 
 This demo was created for the realtime rendering university course. It features a data driven deferred OpenGL based renderer with post processing capabilities.
 
-The original version of this project, before the build system migration described below, is preserved at the [`v1`](https://github.com/redagito/RTR2014/tree/v1) tag.
+The original version of this project is preserved at the [`v1`](https://github.com/redagito/RTR2014/tree/v1) tag.
 
 ## Features
-* Modern OpenGL (4.1 core profile)
-* Cross platform (developed on Windows 10)
 * Deferred rendering
 * Point lights
 * Directional lights
@@ -31,10 +29,6 @@ The original version of this project, before the build system migration describe
 * Screen space godray effect (experimental)
 
 # Building
-
-All third party dependencies are resolved through Conan 2, so there are no git submodules to clone.
-
-The OpenGL loader is [glad](https://github.com/Dav1dde/glad), which ships pregenerated for the GL 4.1 core profile. The previous flextGL codegen step is gone.
 
 ## Prerequisites
 

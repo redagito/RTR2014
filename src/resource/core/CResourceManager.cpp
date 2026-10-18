@@ -84,9 +84,8 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
             return -1;
         }
 
-        // tinyobj keeps attributes in shared arrays; expand them per face corner so
-        // that positions, normals and texcoords all stay one entry per corner.
-        std::vector<float> vertices;
+// tinyobj keeps attributes in shared arrays indexed per corner
+std::vector<float> vertices;
         std::vector<float> normals;
         std::vector<float> uvs;
         bool hasNormals = true;
