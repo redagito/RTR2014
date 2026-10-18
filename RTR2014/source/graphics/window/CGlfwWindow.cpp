@@ -49,6 +49,12 @@ CGlfwWindow::~CGlfwWindow()
 {
     // Remove mapping
     s_windows.erase(m_window);
+
+    if (m_window != nullptr)
+    {
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
+    }
 }
 
 bool CGlfwWindow::init(unsigned int width, unsigned int height, const std::string& name)

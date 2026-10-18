@@ -38,7 +38,19 @@
 
 RTRDemo::RTRDemo() {}
 
-RTRDemo::~RTRDemo() {}
+RTRDemo::~RTRDemo()
+{
+    // GL objects must die while the context is still current, so release the
+    // renderers and resource managers before GLFW tears the context down.
+    m_debugInfoDisplay.reset();
+    m_renderer.reset();
+    m_deferredRenderer.reset();
+    m_forwardRenderer.reset();
+    m_graphicsResourceManager.reset();
+    m_window.reset();
+
+    glfwTerminate();
+}
 
 int RTRDemo::init(const std::string& configFile)
 {
@@ -213,8 +225,6 @@ int RTRDemo::run()
 
     } while (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_ESCAPE) != GLFW_PRESS &&
              glfwWindowShouldClose(m_window->getGlfwHandle()) == 0);
-
-    glfwTerminate();
 
     return 0;
 }
