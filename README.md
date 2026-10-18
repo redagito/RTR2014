@@ -50,13 +50,6 @@ cmake --preset conan-default
 cmake --build build --config Debug
 ```
 
-Output:
-
-```
-build/Debug/RTRDemo.exe
-build/Debug/data/
-```
-
 ## Release build
 
 ```
@@ -64,12 +57,3 @@ conan install . --build=missing -s build_type=Release
 cmake --preset conan-default
 cmake --build build --config Release
 ```
-
-Output:
-
-```
-build/Release/RTRDemo.exe
-build/Release/data/
-```
-
-Verified on Windows with CMake 4.4.3, Conan 2.32.0 and MSVC 19.51.
