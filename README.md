@@ -42,7 +42,7 @@ The OpenGL loader is [glad](https://github.com/Dav1dde/glad), which ships pregen
 * Conan 2
 * A C++23 capable compiler
 
-## Build
+## Debug build
 
 ```
 conan install . --build=missing -s build_type=Debug
@@ -50,13 +50,26 @@ cmake --preset conan-default
 cmake --build build --config Debug
 ```
 
-Replace `Debug` with `Release` in the first and last command to build the release configuration. Keep the same output folder for both, otherwise each install writes its own preset and they collide.
-
-The executable and the `data` directory it loads at runtime are written next to each other, so run the demo from that directory:
+Output:
 
 ```
 build/Debug/RTRDemo.exe
 build/Debug/data/
 ```
 
-The commands above are verified on Windows with CMake 4.4.3, Conan 2.32.0 and MSVC 19.51.
+## Release build
+
+```
+conan install . --build=missing -s build_type=Release
+cmake --preset conan-default
+cmake --build build --config Release
+```
+
+Output:
+
+```
+build/Release/RTRDemo.exe
+build/Release/data/
+```
+
+Verified on Windows with CMake 4.4.3, Conan 2.32.0 and MSVC 19.51.
