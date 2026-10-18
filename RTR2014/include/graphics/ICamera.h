@@ -15,9 +15,8 @@ enum class RenderMode
     Final,
     Color,
     Depth,
-    Normals,
-    Lights,
-	GodRay
+Normals,
+	Lights
 };
 
 struct SFeatureInfo
@@ -40,8 +39,6 @@ struct SFeatureInfo
     
     bool fxaaActive = true;
 
-	bool godRayActive  = true;
-    
     bool normalMappingActive = true;
 };
 

@@ -26,7 +26,6 @@ The original version of this project is preserved at the [`v1`](https://github.c
 * Omnidirectional shadows
 * Depth of field effect
 * FXAA
-* Screen space godray effect (experimental)
 
 # Building
 

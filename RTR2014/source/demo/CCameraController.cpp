@@ -335,9 +335,6 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
 			info.renderMode = RenderMode::Normals;
 			break;
 		case RenderMode::Normals:
-			info.renderMode = RenderMode::GodRay;
-			break;
-		case RenderMode::GodRay:
 			info.renderMode = RenderMode::Final;
 			break;
 		default:
@@ -386,11 +383,6 @@ void CCameraController::handleKeyEvent(EKeyEventType type, int keyCode)
     {
         info.normalMappingActive = !info.normalMappingActive;
     }
-
-	if (keyCode == GLFW_KEY_P)
-	{
-		info.godRayActive = !info.godRayActive;
-	}
 }
 
 void CCameraController::handleMouseMovementEvent(int x, int y)

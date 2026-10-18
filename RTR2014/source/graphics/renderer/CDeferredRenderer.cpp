@@ -877,32 +877,8 @@ void CDeferredRenderer::postProcessPass(const ICamera& camera, const IWindow& wi
     }
     // Processed scene in tex 0
 
-	if (camera.getFeatureInfo().godRayActive || camera.getFeatureInfo().renderMode == RenderMode::GodRay)
-	{
-		// TODO God ray pass disabled, not working as intended
-		// God ray pass 1
-		m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-		godRayPass1(window, manager, m_postProcessPassTexture0);
-		// God ray texture in tex 1
-
-		// Godray debug mode
-		if (camera.getFeatureInfo().renderMode == RenderMode::GodRay)
-		{
-			// Return generated godray texture
-			m_postProcessPassOutputTexture = m_postProcessPassTexture1;
-			return;
-		}
-
-		// God ray pass 2
-		m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-		godRayPass2(window, manager, m_postProcessPassTexture0, m_postProcessPassTexture1);
-	}
-	else
-	{
-		// Passthrough into tex 2
-		m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-		passthroughPass(window, manager, texture);
-	}
+	m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+    passthroughPass(window, manager, m_postProcessPassTexture0);
 
     // Set output texture
     m_postProcessPassOutputTexture = m_postProcessPassTexture2;
@@ -1159,83 +1135,6 @@ void CDeferredRenderer::passthroughPass(const IWindow& window,
     ARenderer::draw(quadMesh);
 }
 
-void CDeferredRenderer::godRayPass1(const IWindow& window, const IGraphicsResourceManager& manager,
-                                    const std::shared_ptr<CTexture>& texture)
-{
-    // Get shader
-    CShaderProgram* shader = manager.getShaderProgram(m_godRayPass1ShaderId);
-    if (shader == nullptr)
-    {
-        spdlog::error("Shader program for god ray 1 pass could not be retrieved.");
-        return;
-    }
-
-    // Get screen space quad
-    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-    if (quadMesh == nullptr)
-    {
-        spdlog::error("Mesh object for god ray 1 pass could not be retrieved.");
-        return;
-    }
-
-    // Input texture
-    texture->setActive(godRayPass1InputTextureUnit);
-    shader->setUniform(sceneTextureUniformName, godRayPass1InputTextureUnit);
-
-    // Depth texture
-    m_depthTexture->setActive(godRayPass1DepthTextureUnit);
-    shader->setUniform(depthTextureUniformName, godRayPass1DepthTextureUnit);
-
-    // Inverse projection
-    shader->setUniform(inverseProjectionMatrixUniformName,
-                       m_transformer.getInverseProjectionMatrix());
-
-    // Light position
-    shader->setUniform(lightPositionScreenUniformName, glm::vec2(0.5, 0.5));
-
-    /// Screen size
-    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
-
-    // Perform pass
-    ARenderer::draw(quadMesh);
-}
-
-void CDeferredRenderer::godRayPass2(const IWindow& window, const IGraphicsResourceManager& manager,
-                                    const std::shared_ptr<CTexture>& sceneTexture,
-                                    const std::shared_ptr<CTexture>& godrayTexture)
-{
-    // Get gauss shader
-    CShaderProgram* shader = manager.getShaderProgram(m_godRayPass2ShaderId);
-    if (shader == nullptr)
-    {
-        spdlog::error("Shader program for god ray 2 pass could not be retrieved.");
-        return;
-    }
-
-    // Get screen space quad
-    CMesh* quadMesh = manager.getMesh(m_postProcessScreenQuadId);
-    if (quadMesh == nullptr)
-    {
-        spdlog::error("Mesh object for god ray 2 pass could not be retrieved.");
-        return;
-    }
-
-    // Scene texture
-    sceneTexture->setActive(godRayPass2SceneTextureUnit);
-    shader->setUniform(sceneTextureUniformName, godRayPass2SceneTextureUnit);
-
-    // God ray texture
-    godrayTexture->setActive(godRayPass2GodRayTextureUnit);
-    shader->setUniform(godRayTextureUniformName, godRayPass2GodRayTextureUnit);
-
-    /// Screen size
-    shader->setUniform(screenWidthUniformName, (float)window.getWidth());
-    shader->setUniform(screenHeightUniformName, (float)window.getHeight());
-
-    // Perform pass
-    ARenderer::draw(quadMesh);
-}
 
 void CDeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow& window,
                                            const IGraphicsResourceManager& manager)
@@ -1744,20 +1643,6 @@ bool CDeferredRenderer::initPostProcessPass(IResourceManager* manager)
         return false;
     }
 
-	// Godray
-    if (!initGodRayPass1(manager))
-    {
-        spdlog::error("Failed to initialize god ray 1 pass.");
-        return false;
-    }
-
-	// Should actually compose by additive blending
-    if (!initGodRayPass2(manager))
-    {
-        spdlog::error("Failed to initialize god ray 2 pass.");
-        return false;
-    }
-
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
     m_postProcessScreenQuadId = manager->loadMesh(quadMesh);
@@ -1872,34 +1757,6 @@ bool CDeferredRenderer::initFogPass(IResourceManager* manager)
     if (m_fogPassShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.", fogShaderFile.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool CDeferredRenderer::initGodRayPass1(IResourceManager* manager)
-{
-    // Get shader
-    std::string shader = "data/shader/post/god_ray_1_pass.ini";
-    m_godRayPass1ShaderId = manager->loadShader(shader);
-    // Check if ok
-    if (m_godRayPass1ShaderId == invalidResource)
-    {
-        spdlog::error("Failed to initialize the shader from file {}.", shader.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool CDeferredRenderer::initGodRayPass2(IResourceManager* manager)
-{
-    // Get shader
-    std::string shader = "data/shader/post/god_ray_2_pass.ini";
-    m_godRayPass2ShaderId = manager->loadShader(shader);
-    // Check if ok
-    if (m_godRayPass2ShaderId == invalidResource)
-    {
-        spdlog::error("Failed to initialize the shader from file {}.", shader.c_str());
         return false;
     }
     return true;
