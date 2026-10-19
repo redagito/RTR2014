@@ -15,13 +15,13 @@
 class CDebugInfo : public spdlog::sinks::base_sink<std::mutex>
 {
    public:
-    const std::list<std::string>& getLog() const;
+    std::list<std::string> getLog() const;
 
     void setLogBufferSize(size_t size);
     size_t getLogBufferSize() const;
 
     void setValue(const std::string& key, const std::string& value);
-    const std::unordered_map<std::string, std::string>& getValues() const;
+    std::unordered_map<std::string, std::string> getValues() const;
 
    private:
     void sink_it_(const spdlog::details::log_msg& msg) override;

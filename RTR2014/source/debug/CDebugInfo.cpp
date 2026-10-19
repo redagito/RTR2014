@@ -18,7 +18,7 @@ void CDebugInfo::sink_it_(const spdlog::details::log_msg& msg)
     }
 }
 
-const std::list<std::string>& CDebugInfo::getLog() const { return m_logBuffer; }
+std::list<std::string> CDebugInfo::getLog() const { return m_logBuffer; }
 
 void CDebugInfo::setLogBufferSize(size_t size)
 {
@@ -36,7 +36,7 @@ void CDebugInfo::setValue(const std::string& key, const std::string& value)
     m_values[key] = value;
 }
 
-const std::unordered_map<std::string, std::string>& CDebugInfo::getValues() const
+std::unordered_map<std::string, std::string> CDebugInfo::getValues() const
 {
     return m_values;
 }
