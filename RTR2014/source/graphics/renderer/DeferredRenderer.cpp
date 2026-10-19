@@ -66,21 +66,20 @@ bool DeferredRenderer::init(IResourceManager* manager)
     }
 
     // Post process
-    // TODO Dediacted post processor?
-    if (!initPostProcessPass(manager))
+    if (!m_postProcessPass.init(manager))
     {
         spdlog::error("Failed to initialize post processing pass.");
         return false;
     }
 
     // Display pass
-    if (!initDisplayPass(manager))
+    if (!m_displayPass.init(manager))
     {
         spdlog::error("Failed to initialize display pass.");
         return false;
     }
 
-    if (!initVisualizeDepthPass(manager))
+    if (!m_depthVisualizationPass.init(manager))
     {
         spdlog::error("Failed to initialize depth visualization pass.");
         return false;
@@ -111,31 +110,33 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     illuminationPass(scene, camera, window, manager, *query);
 
     // Post processing pass
-    postProcessPass(camera, window, manager, m_illuminationPassTexture);
+    m_postProcessPass.render(camera, window, manager, m_illuminationPassTexture,
+                              m_geometryPass.getDepthTexture(),
+                              m_transformer.getInverseViewProjectionMatrix());
 
     FrameBuffer::setDefaultActive();
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // Select rendering mode
     if (camera.getFeatureInfo().renderMode == RenderMode::Color)
     {
-        displayPass(window, manager, m_geometryPass.getDiffuseGlowTexture());
+        m_displayPass.renderToScreen(window, manager, m_geometryPass.getDiffuseGlowTexture());
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
     {
-        visualizeDepthPass(camera, window, manager);
+        m_depthVisualizationPass.render(window, manager, m_geometryPass.getDepthTexture());
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {
-        displayPass(window, manager, m_lightPassTexture);
+        m_displayPass.renderToScreen(window, manager, m_lightPassTexture);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Normals)
     {
-        displayPass(window, manager, m_geometryPass.getNormalSpecularTexture());
+        m_displayPass.renderToScreen(window, manager, m_geometryPass.getNormalSpecularTexture());
     }
     else  // Final mode
     {
         // Final display pass
-        displayPass(window, manager, m_postProcessPassOutputTexture);
+        m_displayPass.renderToScreen(window, manager, m_postProcessPass.getOutputTexture());
     }
 
     // Post draw error check
