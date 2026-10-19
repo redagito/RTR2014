@@ -64,11 +64,35 @@ class ResourceManager : public IResourceManager
     void addResourceListener(IResourceListener* listener);
     void removeResourceListener(IResourceListener* listener);
 
-
+    /**
+    * \brief Loads meshes and the images of the given materials in parallel.
+    *
+    * The files are parsed and decoded on worker threads, but not published
+    * yet. Publishing happens when the resource is loaded for the first time,
+    * which must occur on the thread owning the graphics context.
+    */
+    void preload(const std::vector<std::string>& meshFiles,
+                 const std::vector<std::string>& materialFiles);
 
     void notifyResourceListeners(ResourceType type, ResourceId id, ListenerEvent event);
 
    private:
+    /**
+    * \brief Parses a mesh file without publishing it.
+    */
+    static bool parseMesh(const std::string& file, MeshData& data);
+
+    /**
+    * \brief Decodes an image file without publishing it.
+    */
+    static bool decodeImage(const std::string& file, ColorFormat format, Image& image);
+
+    /**
+    * \brief Returns the image files referenced by a material file.
+    */
+    static bool getMaterialImages(const std::string& file,
+                                  std::vector<std::pair<std::string, ColorFormat>>& images);
+
     ResourceId m_nextMeshId;     /**< Next free mesh id. */
     ResourceId m_nextImageId;    /**< Next free image id. */
     ResourceId m_nextMaterialId; /**< Next free material id. */
@@ -92,6 +116,11 @@ class ResourceManager : public IResourceManager
         m_textFiles; /**< Maps text file to string resource id. */
     std::unordered_map<std::string, ResourceId>
         m_shaderFiles; /**< Maps shader program file to shader resource id. */
+
+    std::unordered_map<std::string, MeshData>
+        m_pendingMeshes; /**< Preloaded meshes, not published yet. */
+    std::unordered_map<std::string, Image>
+        m_pendingImages; /**< Preloaded images, not published yet. */
 
     std::list<IResourceListener*> m_resourceListeners; /**< Registered listeners. */
 };

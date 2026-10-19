@@ -54,11 +54,17 @@ class SceneLoader
                                  AnimationWorld& animationWorld, SceneObjectId id,
                                  AnimationObjectType type);
 
-    bool load(const Json::Value& node, const std::string& name, float& f);
-    bool load(const Json::Value& node, const std::string& name, bool& b);
-    bool load(const Json::Value& node, const std::string& name, glm::vec3& vec);
-    bool load(const Json::Value& node, const std::string& name, std::string& str);
+      bool load(const Json::Value& node, const std::string& name, float& f);
+      bool load(const Json::Value& node, const std::string& name, bool& b);
+      bool load(const Json::Value& node, const std::string& name, glm::vec3& vec);
+      bool load(const Json::Value& node, const std::string& name, std::string& str);
 
-   private:
-    IResourceManager& m_resourceManager;
-};
+      /**
+      * \brief Collects the mesh and material files of the scene objects.
+      */
+      void collectResources(const Json::Value& node, std::vector<std::string>& meshes,
+                            std::vector<std::string>& materials);
+
+     private:
+      IResourceManager& m_resourceManager;
+  };

@@ -122,8 +122,18 @@ class IResourceManager
                            ResourceId& fragmentShaderString) const = 0;
 
     /**
-     * \brief Adds resource listener.
-     */
+    * \brief Loads meshes and the images of the given materials in parallel.
+    *
+    * The files are parsed and decoded on worker threads, but not published
+    * yet. Publishing happens when the resource is loaded for the first time,
+    * which must occur on the thread owning the graphics context.
+    */
+    virtual void preload(const std::vector<std::string>& meshFiles,
+                         const std::vector<std::string>& materialFiles) = 0;
+
+    /**
+    * \brief Adds resource listener.
+    */
     virtual void addResourceListener(IResourceListener* listener) = 0;
 
     /**

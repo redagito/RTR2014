@@ -50,6 +50,12 @@ bool SceneLoader::load(const std::string& file, IScene& scene, AnimationWorld& a
         return false;
     }
 
+    // Load the referenced resources in parallel before publishing them
+    std::vector<std::string> meshes;
+    std::vector<std::string> materials;
+    collectResources(root["scene_objects"], meshes, materials);
+    m_resourceManager.preload(meshes, materials);
+
     // Load scene objects
     if (!loadSceneObjects(root["scene_objects"], scene, animationWorld))
     {
@@ -107,6 +113,32 @@ bool SceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
         }
     }
     return true;
+}
+
+void SceneLoader::collectResources(const Json::Value& node, std::vector<std::string>& meshes,
+                                   std::vector<std::string>& materials)
+{
+    if (!node.isArray())
+    {
+        return;
+    }
+    for (unsigned int i = 0; i < node.size(); ++i)
+    {
+        if (!node[i].isObject())
+        {
+            continue;
+        }
+        std::string mesh;
+        if (node[i].isMember("mesh") && deserialize(node[i]["mesh"], mesh))
+        {
+            meshes.push_back(mesh);
+        }
+        std::string material;
+        if (node[i].isMember("material") && deserialize(node[i]["material"], material))
+        {
+            materials.push_back(material);
+        }
+    }
 }
 
 bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,

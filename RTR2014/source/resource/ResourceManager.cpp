@@ -1,8 +1,10 @@
 #include <spdlog/spdlog.h>
 #include "resource/ResourceManager.h"
 
+#include <atomic>
 #include <fstream>
 #include <sstream>
+#include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -11,6 +13,17 @@
 #include "resource/IResourceListener.h"
 
 #include "io/IniFile.h"
+
+namespace
+{
+// Texture slots of a material file and the color format they are stored in.
+constexpr int kMaterialTextureSlots = 5;
+const char* const kMaterialTextureSlotNames[kMaterialTextureSlots] = {"diffuse", "normal", "specular",
+                                                                      "glow", "alpha"};
+const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
+    ColorFormat::RGB24, ColorFormat::RGB24, ColorFormat::GreyScale8, ColorFormat::GreyScale8,
+    ColorFormat::GreyScale8};
+} // namespace
 
 
 ResourceManager::ResourceManager()
@@ -44,18 +57,51 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         return entry->second;
     }
 
+    // Publish a preloaded mesh
+    auto pending = m_pendingMeshes.find(file);
+    if (pending != m_pendingMeshes.end())
+    {
+        const MeshData& data = pending->second;
+        ResourceId meshId = createMesh(data.m_vertices, data.m_indices, data.m_normals, data.m_uvs,
+                                      data.m_type);
+        m_pendingMeshes.erase(pending);
+        if (meshId == -1)
+        {
+            spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
+            return -1;
+        }
+        m_meshFiles[file] = meshId;
+        return meshId;
+    }
+
+    MeshData data;
+    if (!parseMesh(file, data))
+    {
+        return -1;
+    }
+
+    ResourceId meshId =
+        createMesh(data.m_vertices, data.m_indices, data.m_normals, data.m_uvs, data.m_type);
+    if (meshId == -1)
+    {
+        spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
+        return -1;
+    }
+    m_meshFiles[file] = meshId;
+    return meshId;
+}
+
+bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
+{
     // Retrieve file extension
     auto pos = file.find_last_of('.');
     if (pos == std::string::npos)
     {
         spdlog::error("The mesh file {} does not have a file extension and could not be loaded.",
-                  file.c_str());
-        return -1;
+                   file.c_str());
+        return false;
     }
     std::string extension = file.substr(file.find_last_of('.') + 1);
-
-    // Mesh resource id
-    ResourceId meshId = -1;
 
     // Decide loading method based on extension
     // TODO Register loader functions for extensions
@@ -70,8 +116,8 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         // Load as obj
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str()))
         {
-            spdlog::error("{}.", err.c_str());
-            return -1;
+            spdlog::error("{}", err.c_str());
+            return false;
         }
         if (!warn.empty())
         {
@@ -81,16 +127,16 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         {
             spdlog::error("Mesh file {} contains multiple shapes, which is not supported.",
                        file.c_str());
-            return -1;
+            return false;
         }
         if (shapes.empty())
         {
             spdlog::error("No mesh data loaded from file {}.", file.c_str());
-            return -1;
+            return false;
         }
 
 // tinyobj keeps attributes in shared arrays indexed per corner
-std::vector<float> vertices;
+        std::vector<float> vertices;
         std::vector<float> normals;
         std::vector<float> uvs;
         bool hasNormals = true;
@@ -100,7 +146,7 @@ std::vector<float> vertices;
             if (index.vertex_index < 0)
             {
                 spdlog::error("Mesh file {} has a face corner without a position.", file.c_str());
-                return -1;
+                return false;
             }
             vertices.insert(vertices.end(), attrib.vertices.begin() + index.vertex_index * 3,
                             attrib.vertices.begin() + index.vertex_index * 3 + 3);
@@ -132,16 +178,9 @@ std::vector<float> vertices;
             uvs.clear();
         }
 
-        // Create mesh resource
-        meshId = createMesh(vertices, {}, normals, uvs, PrimitiveType::Triangle);
+        data = MeshData(vertices, {}, normals, uvs, PrimitiveType::Triangle);
     }
-    if (meshId == -1)
-    {
-        spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
-        return -1;
-    }
-    m_meshFiles[file] = meshId;
-    return meshId;
+    return true;
 }
 
 bool ResourceManager::getMesh(ResourceId id, std::vector<float>& vertices,
@@ -189,17 +228,47 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         return entry->second;
     }
 
-    // TODO Check extension, png format assumed
-    std::vector<unsigned char> data;
-    unsigned int width;
-    unsigned int height;
+    // Publish a preloaded image
+    auto pending = m_pendingImages.find(imageKey);
+    if (pending != m_pendingImages.end())
+    {
+        const Image& image = pending->second;
+        ResourceId imageId = createImage(image.m_data, image.m_width, image.m_height, image.m_format);
+        m_pendingImages.erase(pending);
+        if (imageId == -1)
+        {
+            spdlog::error("Failed to create image resource id from file {}.", file.c_str());
+            return -1;
+        }
+        m_imageFiles[imageKey] = imageId;
+        return imageId;
+    }
 
-	// PNG type check
-	if (file.find(".png") == std::string::npos)
-	{
-spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
-        return invalidResource;
-	}
+    Image image;
+    if (!decodeImage(file, format, image))
+    {
+        return -1;
+    }
+
+    ResourceId imageId = createImage(image.m_data, image.m_width, image.m_height, image.m_format);
+    if (imageId == -1)
+    {
+        spdlog::error("Failed to create image resource id from file {}.", file.c_str());
+        return -1;
+    }
+    m_imageFiles[imageKey] = imageId;
+    return imageId;
+}
+
+bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, Image& image)
+{
+    // TODO Check extension, png format assumed
+    // PNG type check
+    if (file.find(".png") == std::string::npos)
+    {
+        spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
+        return false;
+    }
 
     // Map to the desired channel count
     int channels;
@@ -216,7 +285,7 @@ spdlog::error("Unknown file format encountered while loading image file {}.", fi
         break;
     default:
         spdlog::error("Unknown color format encountered while loading image file {}.", file.c_str());
-        return -1;
+        return false;
         break;
     }
 
@@ -228,21 +297,14 @@ spdlog::error("Unknown file format encountered while loading image file {}.", fi
     {
         spdlog::error("An error occured while decoding the image file {}: {}", file.c_str(),
                    stbi_failure_reason());
-        return -1;
+        return false;
     }
-    data.assign(decoded, decoded + (decodedWidth * decodedHeight * channels));
+    std::vector<unsigned char> data(decoded, decoded + (decodedWidth * decodedHeight * channels));
     stbi_image_free(decoded);
-    width = static_cast<unsigned int>(decodedWidth);
-    height = static_cast<unsigned int>(decodedHeight);
 
-    ResourceId imageId = createImage(data, width, height, format);
-    if (imageId == -1)
-    {
-        spdlog::error("Failed to create image resource id from file {}.", file.c_str());
-        return -1;
-    }
-    m_imageFiles[imageKey] = imageId;
-    return imageId;
+    image = Image(data, static_cast<unsigned int>(decodedWidth),
+                  static_cast<unsigned int>(decodedHeight), format);
+    return true;
 }
 
 bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
@@ -287,7 +349,7 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         return entry->second;
     }
 
-	spdlog::debug("Loading material from file {}.", file.c_str());
+    spdlog::debug("Loading material from file {}.", file.c_str());
     IniFile ini;
     if (!ini.load(file))
     {
@@ -295,64 +357,19 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         return -1;
     }
 
-    ResourceId diffuseId = -1;
-    if (ini.hasKey("diffuse", "file"))
+    ResourceId textureIds[kMaterialTextureSlots] = {};
+    for (int i = 0; i < kMaterialTextureSlots; ++i)
     {
-        // Diffuse texture is RGB format, ignore alpha
-        diffuseId = loadImage(ini.getValue("diffuse", "file", "error"), ColorFormat::RGB24);
-        if (diffuseId == -1)
+        const char* slot = kMaterialTextureSlotNames[i];
+        if (!ini.hasKey(slot, "file"))
         {
-            spdlog::error("Failed to load diffuse texture specified in material file {}.",
-                      file.c_str());
-            return -1;
+            continue;
         }
-    }
-
-    ResourceId normalId = -1;
-    if (ini.hasKey("normal", "file"))
-    {
-        // Normal texture is RGB format
-        normalId = loadImage(ini.getValue("normal", "file", "error"), ColorFormat::RGB24);
-        if (normalId == -1)
+        textureIds[i] = loadImage(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i]);
+        if (textureIds[i] == -1)
         {
-            spdlog::error("Failed to load normal texture specified in material file {}.", file.c_str());
-            return -1;
-        }
-    }
-
-    ResourceId specularId = -1;
-    if (ini.hasKey("specular", "file"))
-    {
-        // Specular texture is grey-scale format
-        specularId = loadImage(ini.getValue("specular", "file", "error"), ColorFormat::GreyScale8);
-        if (specularId == -1)
-        {
-            spdlog::error("Failed to load specular texture specified in material file {}.",
-                      file.c_str());
-            return -1;
-        }
-    }
-
-    ResourceId glowId = -1;
-    if (ini.hasKey("glow", "file"))
-    {
-        // Glow texture is grey-scale format
-        glowId = loadImage(ini.getValue("glow", "file", "error"), ColorFormat::GreyScale8);
-        if (glowId == -1)
-        {
-            spdlog::error("Failed to load glow texture specified in material file {}.", file.c_str());
-            return -1;
-        }
-    }
-
-    ResourceId alphaId = -1;
-    if (ini.hasKey("alpha", "file"))
-    {
-        // Alpha texture is grey-scale format
-        alphaId = loadImage(ini.getValue("alpha", "file", "error"), ColorFormat::GreyScale8);
-        if (alphaId == -1)
-        {
-            spdlog::error("Failed to load alpha texture specified in material file {}.", file.c_str());
+            spdlog::error("Failed to load {} texture specified in material file {}.", slot,
+                       file.c_str());
             return -1;
         }
     }
@@ -365,13 +382,13 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         if (customShaderId == -1)
         {
             spdlog::error("Failed to load custom shader file specified in material file {}.",
-                      file.c_str());
+                       file.c_str());
             return -1;
         }
     }
 
-    ResourceId materialId =
-        createMaterial(diffuseId, normalId, specularId, glowId, alphaId, customShaderId);
+    ResourceId materialId = createMaterial(textureIds[0], textureIds[1], textureIds[2],
+                                           textureIds[3], textureIds[4], customShaderId);
     if (materialId == -1)
     {
         spdlog::error("Failed to create material resource id for material file {}.", file.c_str());
@@ -379,6 +396,28 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
     }
     m_materialFiles[file] = materialId;
     return materialId;
+}
+
+bool ResourceManager::getMaterialImages(const std::string& file,
+                                        std::vector<std::pair<std::string, ColorFormat>>& images)
+{
+    IniFile ini;
+    if (!ini.load(file))
+    {
+        spdlog::error("Failed to load material file {} as ini file.", file.c_str());
+        return false;
+    }
+
+    for (int i = 0; i < kMaterialTextureSlots; ++i)
+    {
+        const char* slot = kMaterialTextureSlotNames[i];
+        if (!ini.hasKey(slot, "file"))
+        {
+            continue;
+        }
+        images.emplace_back(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i]);
+    }
+    return true;
 }
 
 bool ResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal,
@@ -573,6 +612,109 @@ void ResourceManager::addResourceListener(IResourceListener* listener)
 {
     m_resourceListeners.push_back(listener);
     listener->onAttach(this);
+}
+
+void ResourceManager::preload(const std::vector<std::string>& meshFiles,
+                              const std::vector<std::string>& materialFiles)
+{
+    // Collect the image files of the materials
+    std::vector<std::pair<std::string, ColorFormat>> imageFiles;
+    for (const std::string& material : materialFiles)
+    {
+        getMaterialImages(material, imageFiles);
+    }
+
+    // Skip files that are already loaded
+    std::vector<std::string> meshes;
+    for (const std::string& file : meshFiles)
+    {
+        if (m_meshFiles.find(file) == m_meshFiles.end() && m_pendingMeshes.find(file) == m_pendingMeshes.end())
+        {
+            meshes.push_back(file);
+        }
+    }
+    std::vector<std::pair<std::string, ColorFormat>> images;
+    for (const auto& image : imageFiles)
+    {
+        std::string key = image.first + "|" + std::to_string(static_cast<int>(image.second));
+        if (m_imageFiles.find(key) == m_imageFiles.end() && m_pendingImages.find(key) == m_pendingImages.end())
+        {
+            images.push_back(image);
+        }
+    }
+
+    if (meshes.empty() && images.empty())
+    {
+        return;
+    }
+
+    // Parse and decode the files on worker threads
+    std::vector<MeshData> meshData(meshes.size());
+    std::vector<char> meshOk(meshes.size(), 0);
+    std::vector<Image> imageData(images.size());
+    std::vector<char> imageOk(images.size(), 0);
+
+    std::atomic<size_t> nextMesh = 0;
+    std::atomic<size_t> nextImage = 0;
+
+    auto meshWorker = [&]() {
+        while (true)
+        {
+            size_t i = nextMesh.fetch_add(1);
+            if (i >= meshes.size())
+            {
+                break;
+            }
+            meshOk[i] = parseMesh(meshes[i], meshData[i]) ? 1 : 0;
+        }
+    };
+    auto imageWorker = [&]() {
+        while (true)
+        {
+            size_t i = nextImage.fetch_add(1);
+            if (i >= images.size())
+            {
+                break;
+            }
+            imageOk[i] = decodeImage(images[i].first, images[i].second, imageData[i]) ? 1 : 0;
+        }
+    };
+
+    unsigned int threadCount = std::thread::hardware_concurrency();
+    if (threadCount == 0)
+    {
+        threadCount = 1;
+    }
+    threadCount = std::min<unsigned int>(threadCount,
+                                        static_cast<unsigned int>(meshes.size() + images.size()));
+
+    std::vector<std::thread> workers;
+    for (unsigned int i = 0; i < threadCount; ++i)
+    {
+        workers.emplace_back(meshWorker);
+        workers.emplace_back(imageWorker);
+    }
+    for (std::thread& worker : workers)
+    {
+        worker.join();
+    }
+
+    // Publish the preloaded resources when they are loaded for the first time
+    for (size_t i = 0; i < meshes.size(); ++i)
+    {
+        if (meshOk[i])
+        {
+            m_pendingMeshes[meshes[i]] = std::move(meshData[i]);
+        }
+    }
+    for (size_t i = 0; i < images.size(); ++i)
+    {
+        if (imageOk[i])
+        {
+            std::string key = images[i].first + "|" + std::to_string(static_cast<int>(images[i].second));
+            m_pendingImages[key] = std::move(imageData[i]);
+        }
+    }
 }
 
 void ResourceManager::removeResourceListener(IResourceListener* listener)
