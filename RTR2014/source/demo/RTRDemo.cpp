@@ -56,16 +56,20 @@ RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo()
 {
-    // GL objects must die while the context is still current, so release the
-    // renderers and resource managers before GLFW tears the context down.
+    // The demo controller and the camera controller hold raw pointers to objects
+    // owned here, so they have to be destroyed before those objects
     m_demoController.reset();
+    m_cameraController.reset();
+
+    // Graphics objects must die while the context is still current
     m_debugInfoDisplay.reset();
     m_renderer.reset();
     m_deferredRenderer.reset();
     m_forwardRenderer.reset();
     m_graphicsResourceManager.reset();
-    m_window.reset();
 
+    // The window owns the graphics context
+    m_window.reset();
     glfwTerminate();
 }
 
@@ -87,6 +91,9 @@ int RTRDemo::init(const std::string& configFile)
 
     m_debugInfo = std::make_shared<DebugInfo>();
     spdlog::default_logger()->sinks().push_back(m_debugInfo);
+
+    // Write the log as it happens, so it survives a crash or a forced exit
+    spdlog::flush_on(spdlog::level::info);
 
     if (!m_config.load(configFile))
     {
