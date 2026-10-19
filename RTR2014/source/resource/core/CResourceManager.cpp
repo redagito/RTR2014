@@ -11,7 +11,6 @@
 
 #include "io/CIniFile.h"
 #include "io/CObjModelLoader.h"
-#include "io/CShaderPreprocessor.h"
 
 
 CResourceManager::CResourceManager()
@@ -416,11 +415,6 @@ ResourceId CResourceManager::createString(const std::string& text)
     return id;
 }
 
-ResourceId CResourceManager::loadString(const std::string& file)
-{
-	return loadString(file, false);
-}
-
 bool CResourceManager::getString(ResourceId id, std::string& text) const
 {
     // Retrieve from map
@@ -498,7 +492,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
         return -1;
     }
 
-    ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"), true);
+    ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"));
     if (vertexId == -1)
     {
         spdlog::error(
@@ -508,7 +502,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
         return -1;
     }
 
-	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"), true);
+	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"));
     if (fragmentId == -1)
     {
         spdlog::error(
@@ -522,7 +516,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation control shader source
     if (ini.hasKey("tessellation_control", "file"))
     {
-		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"), true);
+		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"));
         if (tessCtrlId == -1)
         {
             spdlog::error(
@@ -537,7 +531,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation evaluation shader source
     if (ini.hasKey("tessellation_evaluation", "file"))
     {
-		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"), true);
+		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"));
         if (tessEvalId == -1)
         {
             spdlog::error(
@@ -552,7 +546,7 @@ ResourceId CResourceManager::loadShader(const std::string& file)
     // Check for and load geometry shader source
     if (ini.hasKey("geometry", "file"))
     {
-		geometryId = loadString(ini.getValue("geometry", "file", "error"), true);
+		geometryId = loadString(ini.getValue("geometry", "file", "error"));
         if (geometryId == -1)
         {
             spdlog::error(
@@ -596,7 +590,7 @@ void CResourceManager::notifyResourceListeners(EResourceType type, ResourceId id
     }
 }
 
-ResourceId CResourceManager::loadString(const std::string& file, bool preprocess)
+ResourceId CResourceManager::loadString(const std::string& file)
 {
 	auto iter = m_textFiles.find(file);
 	if (iter != m_textFiles.end())
@@ -618,17 +612,6 @@ ResourceId CResourceManager::loadString(const std::string& file, bool preprocess
 
 	ResourceId stringId = -1;
 
-	if (preprocess)
-	{
-		// Preprocessing of include statements for shader source files
-		CShaderPreprocessor preprocessor;
-		preprocessor.setIncludePath("data/shadersource/include/");
-		if (!preprocessor.preprocess(text, text))
-		{
-			spdlog::error("Failed to preprocess the text file {}.", file.c_str());
-			return -1;
-		}
-	}
 
 	// Create new string entry
 	stringId = createString(text);

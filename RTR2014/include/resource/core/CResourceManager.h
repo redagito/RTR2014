@@ -64,8 +64,7 @@ class CResourceManager : public IResourceManager
     void addResourceListener(IResourceListener* listener);
     void removeResourceListener(IResourceListener* listener);
 
-   protected:
-    ResourceId loadString(const std::string& file, bool doPreprocessing);
+
 
     void notifyResourceListeners(EResourceType type, ResourceId id, EListenerEvent event);
 
