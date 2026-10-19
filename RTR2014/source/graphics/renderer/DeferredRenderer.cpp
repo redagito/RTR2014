@@ -20,6 +20,7 @@
 #include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
 #include "graphics/renderer/RenderBuffer.h"
+#include "graphics/camera/StaticCamera.h"
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
@@ -253,29 +254,6 @@ void DeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     // Disable geometry buffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 }
-
-// TODO extract in own file(s)
-class StaticCamera : public ICamera
-{
-   public:
-    StaticCamera(const glm::mat4& view, const glm::mat4& proj, glm::vec3 position)
-    {
-        m_view = view;
-        m_proj = proj;
-        m_pos = position;
-    }
-
-    virtual const glm::mat4& getView() const { return m_view; }
-
-    virtual const glm::mat4& getProjection() const { return m_proj; }
-
-    virtual glm::vec3 getPosition() const { return m_pos; }
-
-   private:
-    glm::mat4 m_view;
-    glm::mat4 m_proj;
-    glm::vec3 m_pos;
-};
 
 void DeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
                                       const IWindow& window,
