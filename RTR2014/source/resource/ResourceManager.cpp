@@ -73,6 +73,10 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
             spdlog::error("{}.", err.c_str());
             return -1;
         }
+        if (!warn.empty())
+        {
+            spdlog::warn("While loading mesh file {}: {}", file.c_str(), warn);
+        }
         if (shapes.size() > 1)
         {
             spdlog::error("Mesh file {} contains multiple shapes, which is not supported.",
