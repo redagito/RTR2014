@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <thread>
 
@@ -114,7 +115,10 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
         std::string warn;
         std::string err;
         // Load as obj
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str()))
+        // The material file is resolved relative to the mesh file
+        std::string baseDir = file.substr(0, file.find_last_of('/') + 1);
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str(),
+                               baseDir.c_str()))
         {
             spdlog::error("{}", err.c_str());
             return false;
@@ -626,26 +630,42 @@ void ResourceManager::addResourceListener(IResourceListener* listener)
 void ResourceManager::preload(const std::vector<std::string>& meshFiles,
                               const std::vector<std::string>& materialFiles)
 {
-    // Collect the image files of the materials
-    std::vector<std::pair<std::string, ColorFormat>> imageFiles;
+    // Collect the image files of the materials, each material only once
+    std::set<std::string> uniqueMaterials;
     for (const std::string& material : materialFiles)
+    {
+        uniqueMaterials.insert(material);
+    }
+
+    std::vector<std::pair<std::string, ColorFormat>> imageFiles;
+    for (const std::string& material : uniqueMaterials)
     {
         getMaterialImages(material, imageFiles);
     }
 
-    // Skip files that are already loaded
+    // Skip files that are already loaded, each file only once
     std::vector<std::string> meshes;
+    std::set<std::string> uniqueMeshes;
     for (const std::string& file : meshFiles)
     {
+        if (!uniqueMeshes.insert(file).second)
+        {
+            continue;
+        }
         if (m_meshFiles.find(file) == m_meshFiles.end() && m_pendingMeshes.find(file) == m_pendingMeshes.end())
         {
             meshes.push_back(file);
         }
     }
     std::vector<std::pair<std::string, ColorFormat>> images;
+    std::set<std::string> uniqueImages;
     for (const auto& image : imageFiles)
     {
         std::string key = image.first + "|" + std::to_string(static_cast<int>(image.second));
+        if (!uniqueImages.insert(key).second)
+        {
+            continue;
+        }
         if (m_imageFiles.find(key) == m_imageFiles.end() && m_pendingImages.find(key) == m_pendingImages.end())
         {
             images.push_back(image);
@@ -663,7 +683,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::vector<Image> imageData(images.size());
     std::vector<char> imageOk(images.size(), 0);
 
-    // One queue for both kinds of work, so the slowest job starts immediately
+    // One queue for both kinds of work, so the slowest job starts immediately.
+    // The images are the slow part, so they go first.
     std::atomic<size_t> nextJob = 0;
     const size_t jobCount = meshes.size() + images.size();
 
@@ -675,15 +696,14 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
             {
                 break;
             }
-            if (i < meshes.size())
+            if (i < images.size())
             {
-                meshOk[i] = parseMesh(meshes[i], meshData[i]) ? 1 : 0;
+                imageOk[i] = decodeImage(images[i].first, images[i].second, imageData[i]) ? 1 : 0;
             }
             else
             {
-                size_t image = i - meshes.size();
-                imageOk[image] =
-                    decodeImage(images[image].first, images[image].second, imageData[image]) ? 1 : 0;
+                size_t mesh = i - images.size();
+                meshOk[mesh] = parseMesh(meshes[mesh], meshData[mesh]) ? 1 : 0;
             }
         }
     };
