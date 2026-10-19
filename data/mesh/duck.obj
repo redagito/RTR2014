@@ -1,6 +1,5 @@
 # Blender v2.71 (sub 0) OBJ File: ''
 # www.blender.org
-mtllib duck.mtl
 o Duck
 v -0.239364 0.115353 0.306125
 v -0.187264 0.101080 0.266814

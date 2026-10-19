@@ -1,6 +1,5 @@
 # Blender v2.71 (sub 0) OBJ File: 'cave.blend'
 # www.blender.org
-mtllib new_cave.mtl
 o Cave_Cylinder
 v -44.634731 9.266470 35.312332
 v 44.768227 4.189342 63.447403
