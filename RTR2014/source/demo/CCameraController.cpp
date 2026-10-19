@@ -1,20 +1,14 @@
 #include <fstream>
 #include <spdlog/spdlog.h>
-#include <fstream>
 #include "demo/CCameraController.h"
 
 
-#include <fstream>
 #include <GLFW/glfw3.h>
-#include <fstream>
 #include <json/json.h>
 
-#include <fstream>
 #include "graphics/camera/IControllableCamera.h"
 
-#include <fstream>
 #include "input/IInputProvider.h"
-#include <fstream>
 #include "io/JsonDeserializer.h"
 
 CCameraController::CCameraController() {}

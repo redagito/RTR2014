@@ -60,6 +60,6 @@ class CForwardRenderer : public ARenderer
 
     glm::mat4 m_currentView = glm::mat4(1.f);       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection = glm::mat4(1.f); /**< Stores the current projection matrix. */
-    ResourceId m_forwardShader;                     /**< Forward shader resource id. */
+    ResourceId m_forwardShader = invalidResource;                     /**< Forward shader resource id. */
     CShaderProgram* m_currentShader = nullptr;      /**< Currently active shader object. */
 };

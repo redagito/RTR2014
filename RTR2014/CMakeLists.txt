@@ -13,17 +13,19 @@ add_library(RTR2014 STATIC ${SOURCES} ${HEADERS})
 
 target_compile_features(RTR2014 PUBLIC cxx_std_23)
 
-target_compile_definitions(RTR2014 PUBLIC
-    GLFW_INCLUDE_NONE
-    $<$<CONFIG:Debug>:DEBUG>)
+# glad owns every GL entry point, so GLFW must not pull in the platform GL headers.
+# App includes glfw3.h directly, so this has to reach consumers.
+target_compile_definitions(RTR2014 PUBLIC GLFW_INCLUDE_NONE)
 
 target_include_directories(RTR2014 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(RTR2014 PUBLIC
-    glad::glad
-    glfw
-    glm::glm
-    JsonCpp::JsonCpp
-    lodepng::lodepng
-    tinyobjloader::tinyobjloader
-    spdlog::spdlog)
+target_link_libraries(RTR2014
+    PUBLIC
+        glad::glad
+        glfw
+        glm::glm
+        spdlog::spdlog
+    PRIVATE
+        JsonCpp::JsonCpp
+        lodepng::lodepng
+        tinyobjloader::tinyobjloader)

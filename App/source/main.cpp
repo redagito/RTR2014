@@ -1,6 +1,6 @@
 #include "demo/RTRDemo.h"
 
-int main(int argc, const char** argv)
+int main()
 {
     RTRDemo demo;
 
