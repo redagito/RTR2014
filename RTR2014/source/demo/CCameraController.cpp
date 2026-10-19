@@ -19,6 +19,15 @@ CCameraController::~CCameraController()
     {
         m_inputProvider->removeInputListener(this);
     }
+    if (m_window != nullptr)
+    {
+        m_window->removeListener(this);
+    }
+}
+
+void CCameraController::setWindow(CGlfwWindow* window)
+{
+    m_window = window;
 }
 
 void CCameraController::setCamera(std::shared_ptr<IControllableCamera> camera)

@@ -122,6 +122,7 @@ int RTRDemo::init(const std::string& configFile)
 
     m_debugInfoDisplay = std::make_shared<CDebugInfoDisplay>(m_resourceManager);
 
+    m_cameraController->setWindow(m_window.get());
     m_window->addListener(m_cameraController.get());
 
     return 0;

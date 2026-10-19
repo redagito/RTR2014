@@ -21,6 +21,7 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
 
     void setCamera(std::shared_ptr<IControllableCamera> camera);
     void setInputProvider(IInputProvider* provider);
+   void setWindow(CGlfwWindow* window);
 
     bool loadSequence(std::string file);
     
@@ -54,6 +55,7 @@ class CCameraController : public IInputListener, public IGlfwWindowListener
     float m_speed = 1.0f;
     std::shared_ptr<IControllableCamera> m_camera = nullptr;
     IInputProvider* m_inputProvider = nullptr;
+    CGlfwWindow* m_window = nullptr;
     int m_lastX = 0;
     int m_lastY = 0;
 };
