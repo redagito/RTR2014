@@ -18,6 +18,7 @@ int main()
         }
 
         result = demo.run();
+        spdlog::info("Demo exited with code {}.", result);
         spdlog::default_logger()->flush();
         return result;
     }

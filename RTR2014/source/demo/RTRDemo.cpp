@@ -56,6 +56,8 @@ RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo()
 {
+    spdlog::info("Shutting down demo.");
+
     // The demo controller and the camera controller hold raw pointers to objects
     // owned here, so they have to be destroyed before those objects
     m_demoController.reset();
@@ -71,6 +73,8 @@ RTRDemo::~RTRDemo()
     // The window owns the graphics context
     m_window.reset();
     glfwTerminate();
+
+    spdlog::info("Shutdown complete.");
 }
 
 int RTRDemo::init(const std::string& configFile)
