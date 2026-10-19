@@ -21,7 +21,12 @@ SceneLoader::SceneLoader(IResourceManager& resourceManager) : m_resourceManager(
     return;
 }
 
-bool SceneLoader::load(const std::string& file, IScene& scene, AnimationWorld& animationWorld)
+SceneLoader::~SceneLoader()
+{
+    return;
+}
+
+bool SceneLoader::prepare(const std::string& file)
 {
     Json::Reader reader;
     Json::Value root;
@@ -38,7 +43,7 @@ bool SceneLoader::load(const std::string& file, IScene& scene, AnimationWorld& a
     if (!reader.parse(ifs, root))
     {
         spdlog::error("Failed to load scene file {} with error {}.", file.c_str(),
-                  reader.getFormattedErrorMessages().c_str());
+                   reader.getFormattedErrorMessages().c_str());
         return false;
     }
     // Read done, close file
@@ -53,34 +58,51 @@ bool SceneLoader::load(const std::string& file, IScene& scene, AnimationWorld& a
     // Load the referenced resources in parallel before publishing them
     std::vector<std::string> meshes;
     std::vector<std::string> materials;
-    collectResources(root["scene_objects"], meshes, materials);
+    if (!collectResources(root["scene_objects"], meshes, materials))
+    {
+        spdlog::error("The scene file {} has an invalid scene objects node.", file.c_str());
+        return false;
+    }
     m_resourceManager.preload(meshes, materials);
+
+    m_root = std::make_unique<Json::Value>(std::move(root));
+    return true;
+}
+
+bool SceneLoader::load(IScene& scene, AnimationWorld& animationWorld)
+{
+    if (m_root == nullptr)
+    {
+        spdlog::error("The scene must be prepared before it can be loaded.");
+        return false;
+    }
+    const Json::Value& root = *m_root;
 
     // Load scene objects
     if (!loadSceneObjects(root["scene_objects"], scene, animationWorld))
     {
-        spdlog::error("Error while loading scene objects from scene file {}.", file.c_str());
+        spdlog::error("Error while loading scene objects from scene file.");
         return false;
     }
 
     // Load point lights
     if (!loadPointLights(root["point_lights"], scene, animationWorld))
     {
-        spdlog::error("Error while loading point lights from scene file {}.", file.c_str());
+        spdlog::error("Error while loading point lights from scene file.");
         return false;
     }
 
     // Load directional lights
     if (!loadDirectionalLights(root["directional_lights"], scene, animationWorld))
     {
-        spdlog::error("Error while loading ambient light from scene file &s.", file.c_str());
+        spdlog::error("Error while loading directional lights from scene file.");
         return false;
     }
 
     // Load ambient light
     if (!loadAmbientLight(root["ambient_light"], scene))
     {
-        spdlog::error("Error while loading ambient light from scene file &s.", file.c_str());
+        spdlog::error("Error while loading ambient light from scene file.");
         return false;
     }
 
@@ -115,18 +137,24 @@ bool SceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
     return true;
 }
 
-void SceneLoader::collectResources(const Json::Value& node, std::vector<std::string>& meshes,
+bool SceneLoader::collectResources(const Json::Value& node, std::vector<std::string>& meshes,
                                    std::vector<std::string>& materials)
 {
+    if (node.empty())
+    {
+        return true;
+    }
     if (!node.isArray())
     {
-        return;
+        spdlog::error("The node 'scene_objects' must be array type.");
+        return false;
     }
     for (unsigned int i = 0; i < node.size(); ++i)
     {
         if (!node[i].isObject())
         {
-            continue;
+            spdlog::error("A scene object must be an object node.");
+            return false;
         }
         std::string mesh;
         if (node[i].isMember("mesh") && deserialize(node[i]["mesh"], mesh))
@@ -139,6 +167,7 @@ void SceneLoader::collectResources(const Json::Value& node, std::vector<std::str
             materials.push_back(material);
         }
     }
+    return true;
 }
 
 bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,

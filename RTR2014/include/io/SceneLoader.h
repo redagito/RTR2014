@@ -26,11 +26,30 @@ class AnimationWorld;
 class SceneLoader
 {
    public:
-    /**
+     /**
     * \brief Create scene loader with resource manager.
     */
-    SceneLoader(IResourceManager& resourceManager);
-    bool load(const std::string& file, IScene& scene, AnimationWorld& animationWorld);
+     SceneLoader(IResourceManager& resourceManager);
+
+     /**
+    * \brief Releases the parsed scene file.
+    */
+     ~SceneLoader();
+
+     /**
+    * \brief Parses the scene file and decodes the resources it references.
+    *
+    * Does not touch the graphics context, so it can run on a worker thread.
+    */
+     bool prepare(const std::string& file);
+
+     /**
+    * \brief Loads the prepared scene.
+    *
+    * Creates the graphics resources, so it must run on the thread owning the
+    * graphics context.
+    */
+     bool load(IScene& scene, AnimationWorld& animationWorld);
 
    protected:
     bool loadSceneObjects(const Json::Value& node, IScene& scene, AnimationWorld& animationWorld);
@@ -62,9 +81,11 @@ class SceneLoader
       /**
       * \brief Collects the mesh and material files of the scene objects.
       */
-      void collectResources(const Json::Value& node, std::vector<std::string>& meshes,
+      bool collectResources(const Json::Value& node, std::vector<std::string>& meshes,
                             std::vector<std::string>& materials);
 
      private:
       IResourceManager& m_resourceManager;
+
+      std::unique_ptr<Json::Value> m_root; /**< Parsed scene file. */
   };

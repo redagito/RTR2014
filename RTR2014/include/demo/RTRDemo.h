@@ -27,6 +27,7 @@ class IDebugInfoDisplay;
 
 // Demo
 class DemoController;
+class SceneLoader;
 
 /**
 * \brief Demo application class.
@@ -55,6 +56,11 @@ class RTRDemo
     bool initRenderer();
     bool initScene();
 
+    /**
+    * \brief Presents a black frame and processes window events.
+    */
+    void drawLoadingFrame();
+
     IniFile m_config;
 
     std::shared_ptr<IResourceManager> m_resourceManager =
@@ -81,4 +87,8 @@ class RTRDemo
 
     // Platform independent demo logic
     std::unique_ptr<DemoController> m_demoController;
+
+    // Scene loading
+    std::unique_ptr<SceneLoader> m_sceneLoader;
+    std::string m_sceneFile; /**< Scene file to load. */
 };

@@ -36,7 +36,8 @@ TEST_CASE("SceneLoader rejects a scene object that is not an object node", "[io]
     Scene scene;
 
     SceneLoader loader(resourceManager);
-    REQUIRE_FALSE(loader.load(file.path(), scene, animationWorld));
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
 }
 
 TEST_CASE("SceneLoader rejects a scene whose root is an array", "[io]")
@@ -48,7 +49,8 @@ TEST_CASE("SceneLoader rejects a scene whose root is an array", "[io]")
     Scene scene;
 
     SceneLoader loader(resourceManager);
-    REQUIRE_FALSE(loader.load(file.path(), scene, animationWorld));
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
 }
 
 TEST_CASE("SceneLoader rejects a missing file", "[io]")
@@ -58,5 +60,6 @@ TEST_CASE("SceneLoader rejects a missing file", "[io]")
     Scene scene;
 
     SceneLoader loader(resourceManager);
-    REQUIRE_FALSE(loader.load("does_not_exist_scene.json", scene, animationWorld));
+    REQUIRE_FALSE(loader.prepare("does_not_exist_scene.json"));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
 }

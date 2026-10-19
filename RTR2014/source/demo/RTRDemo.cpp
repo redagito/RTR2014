@@ -1,3 +1,7 @@
+#include <chrono>
+#include <future>
+#include <thread>
+
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 #include "demo/RTRDemo.h"
@@ -38,6 +42,16 @@
 // Animation
 #include "animation/AnimationWorld.h"
 
+namespace
+{
+long elapsedMs(const std::chrono::steady_clock::time_point& start)
+{
+    return static_cast<long>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start)
+            .count());
+}
+} // namespace
+
 RTRDemo::RTRDemo() {}
 
 RTRDemo::~RTRDemo()
@@ -57,6 +71,8 @@ RTRDemo::~RTRDemo()
 
 int RTRDemo::init(const std::string& configFile)
 {
+    auto startTime = std::chrono::steady_clock::now();
+
     // Init log file
     std::string logFile = "log/" + createTimeStamp() + ".log";
     try
@@ -85,6 +101,9 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
+    // Show a black frame right away, so the window is not blank while loading
+    drawLoadingFrame();
+
     // Create resource manager
     m_resourceManager.reset(createResourceManager());
     if (m_resourceManager == nullptr)
@@ -101,19 +120,6 @@ int RTRDemo::init(const std::string& configFile)
     m_resourceManager->addResourceListener(manager);
     m_graphicsResourceManager.reset(manager);
 
-    // Create renderer
-    if (!initRenderer())
-    {
-        spdlog::error("Failed to initialize renderer.");
-        return 1;
-    }
-
-    if (!initScene())
-    {
-        spdlog::error("Failed to initialize scene.");
-        return 1;
-    }
-
     m_camera = std::make_shared<FirstPersonCamera>(
         glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
         4.f / 3.f, 0.01f, 1000.f);
@@ -127,18 +133,97 @@ int RTRDemo::init(const std::string& configFile)
     m_cameraController->setWindow(m_window.get());
     m_window->addListener(m_cameraController.get());
 
+    m_sceneFile = m_config.getValue("scene", "file", "data/scene/test/test_1.json");
+    m_sceneLoader = std::make_unique<SceneLoader>(*m_resourceManager);
+
+    spdlog::info("Initialized demo in {} ms.", elapsedMs(startTime));
+    return 0;
+}
+
+void RTRDemo::drawLoadingFrame()
+{
+    m_window->setActive();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, m_window->getWidth(), m_window->getHeight());
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_window->swapBuffer();
+    m_window->pollEvents();
+}
+
+int RTRDemo::run()
+{
+    double timeDiff = 0.0;
+
+    auto loadStart = std::chrono::steady_clock::now();
+
+    // Parse the scene file and decode the resources it references on a worker thread
+    std::future<bool> prepared = std::async(std::launch::async, [this]() {
+        return m_sceneLoader->prepare(m_sceneFile);
+    });
+
+    // Load the resources in steps, keeping the window alive and responsive
+    bool resourcesPrepared = false;
+    bool renderersCreated = false;
+    bool sceneLoaded = false;
+
+    while (!sceneLoaded)
+    {
+        // Present a frame and process window events
+        drawLoadingFrame();
+
+        if (!resourcesPrepared)
+        {
+            if (prepared.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+            {
+                if (!prepared.get())
+                {
+                    spdlog::error("Failed to prepare scene file {}.", m_sceneFile.c_str());
+                    return 1;
+                }
+                resourcesPrepared = true;
+                spdlog::info("Decoded scene resources in {} ms.", elapsedMs(loadStart));
+            }
+            else
+            {
+                // Do not spin while waiting
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
+            continue;
+        }
+
+        // Create the renderers, they load and compile the shaders
+        if (!renderersCreated)
+        {
+            auto rendererStart = std::chrono::steady_clock::now();
+            if (!initRenderer())
+            {
+                spdlog::error("Failed to initialize renderer.");
+                return 1;
+            }
+            renderersCreated = true;
+            spdlog::info("Created renderers in {} ms.", elapsedMs(rendererStart));
+            continue;
+        }
+
+        // Load the scene, this creates the graphics resources
+        auto sceneStart = std::chrono::steady_clock::now();
+        if (!initScene())
+        {
+            spdlog::error("Failed to initialize scene.");
+            return 1;
+        }
+        sceneLoaded = true;
+        spdlog::info("Loaded scene in {} ms.", elapsedMs(sceneStart));
+    }
+
     m_demoController = std::make_unique<DemoController>(
         m_deferredRenderer.get(), m_forwardRenderer.get(), m_scene.get(), m_camera.get(),
         m_cameraController.get(), m_inputProvider.get(), m_window.get(),
         m_graphicsResourceManager.get(), m_debugInfo.get(), m_debugInfoDisplay.get(),
         m_animationWorld.get());
 
-    return 0;
-}
-
-int RTRDemo::run()
-{
-    double timeDiff = 0.0;
+    spdlog::info("Startup completed in {} ms.", elapsedMs(loadStart));
 
     m_window->toggleMouseCapture();
 
@@ -256,14 +341,11 @@ bool RTRDemo::initRenderer()
 bool RTRDemo::initScene()
 {
     m_scene = std::make_shared<Scene>();
-    SceneLoader loader(*m_resourceManager);
 
-    // Get startup scene from config
-    std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test/test_1.json");
-    spdlog::info("Loading initial scene from file {}.", sceneFile.c_str());
-    if (!loader.load(sceneFile, *m_scene, *m_animationWorld))
+    spdlog::info("Loading initial scene from file {}.", m_sceneFile.c_str());
+    if (!m_sceneLoader->load(*m_scene, *m_animationWorld))
     {
-        spdlog::error("Failed to load scene file {}.", sceneFile.c_str());
+        spdlog::error("Failed to load scene file {}.", m_sceneFile.c_str());
         m_scene = nullptr;
         return false;
     }
