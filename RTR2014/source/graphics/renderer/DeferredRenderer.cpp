@@ -71,10 +71,6 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Draw init
     window.setActive();
 
-    // Camera state shared by the passes
-    m_transformer.setViewMatrix(camera.getView());
-    m_transformer.setProjectionMatrix(camera.getProjection());
-
     // Query visible scene objects and lights
     std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
@@ -93,8 +89,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
 
     // Post processing pass
     m_postProcessPass.render(camera, window, manager, m_illuminationPass.getOutputTexture(),
-                              m_geometryPass.getDepthTexture(),
-                              m_transformer.getInverseViewProjectionMatrix());
+                              m_geometryPass.getDepthTexture());
 
     FrameBuffer::setDefaultActive();
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

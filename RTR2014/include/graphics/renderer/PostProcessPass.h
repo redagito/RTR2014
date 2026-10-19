@@ -8,6 +8,7 @@
 #include "graphics/renderer/FxaaPass.h"
 #include "graphics/renderer/GaussBlurPass.h"
 #include "graphics/renderer/FrameBuffer.h"
+#include "graphics/renderer/Transformer.h"
 
 class IGraphicsResourceManager;
 class IResourceManager;
@@ -38,8 +39,7 @@ class PostProcessPass
     */
     void render(const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager, const std::shared_ptr<Texture>& texture,
-                const std::shared_ptr<Texture>& depthTexture,
-                const glm::mat4& inverseViewProjection);
+                const std::shared_ptr<Texture>& depthTexture);
 
     /**
     * \brief Returns the texture holding the post processed scene.
@@ -52,6 +52,8 @@ class PostProcessPass
     GaussBlurPass m_gaussBlurPass;
     DepthOfFieldPass m_depthOfFieldPass;
     DisplayPass m_displayPass;
+
+    Transformer m_transformer;
 
     FrameBuffer m_postProcessPassFrameBuffer0;
     FrameBuffer m_postProcessPassFrameBuffer1;

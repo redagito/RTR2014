@@ -25,9 +25,12 @@ PostProcessPass::~PostProcessPass()
 void PostProcessPass::render(const ICamera& camera, const IWindow& window,
                              const IGraphicsResourceManager& manager,
                              const std::shared_ptr<Texture>& texture,
-                             const std::shared_ptr<Texture>& depthTexture,
-                             const glm::mat4& inverseViewProjection)
+                             const std::shared_ptr<Texture>& depthTexture)
 {
+    // Set view and projection matrices
+    m_transformer.setViewMatrix(camera.getView());
+    m_transformer.setProjectionMatrix(camera.getProjection());
+
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
     // Resize frame buffer
@@ -68,7 +71,8 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
         // TODO DOF parameter
         m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
         m_depthOfFieldPass.render(camera, window, manager, m_postProcessPassTexture1,
-                                  m_postProcessPassTexture2, depthTexture, inverseViewProjection);
+                                  m_postProcessPassTexture2, depthTexture,
+                                  m_transformer.getInverseViewProjectionMatrix());
     }
     else
     {

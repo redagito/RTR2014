@@ -11,7 +11,6 @@
 #include "IlluminationPass.h"
 #include "LightPass.h"
 #include "PostProcessPass.h"
-#include "Transformer.h"
 
 #include "resource/ResourceConfig.h"
 
@@ -38,8 +37,6 @@ class DeferredRenderer : public Renderer
     static DeferredRenderer* create(IResourceManager* manager);
 
    private:
-    Transformer m_transformer; /**< Stores current transformation matrices. */
-
     // Geometry pass
     GeometryPass m_geometryPass;
 
