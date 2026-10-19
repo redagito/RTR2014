@@ -96,9 +96,12 @@ Mesh* GraphicsResourceManager::getMesh(ResourceId id) const
 	// Search for id
 	auto iter = m_meshes.find(id);
 
-	// Id must exist
 	// TODO Allow mesh loading if not found?
-	assert(iter != m_meshes.end());
+	if (iter == m_meshes.end())
+	{
+		spdlog::error("The requested mesh id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -112,9 +115,12 @@ Material* GraphicsResourceManager::getMaterial(ResourceId id) const
 	// Search for id
 	auto iter = m_materials.find(id);
 
-	// Id must exist
 	// TODO Allow material loading if not found?
-	assert(iter != m_materials.end());
+	if (iter == m_materials.end())
+	{
+		spdlog::error("The requested material id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -128,9 +134,12 @@ Texture* GraphicsResourceManager::getTexture(ResourceId id) const
 	// Search for id
 	auto iter = m_textures.find(id);
 
-	// Id must exist
 	// TODO Allow texture loading if not found?
-	assert(iter != m_textures.end());
+	if (iter == m_textures.end())
+	{
+		spdlog::error("The requested texture id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -190,9 +199,12 @@ ShaderObject<GL_VERTEX_SHADER>* GraphicsResourceManager::getVertexShaderObject(R
 	// Search for id
 	auto iter = m_vertexShader.find(id);
 
-	// Id must exist
-	// TODO Allow shader loading if not found?
-	assert(iter != m_vertexShader.end());
+	// TODO Allow vertex shader loading if not found?
+	if (iter == m_vertexShader.end())
+	{
+		spdlog::error("The requested vertex shader id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -206,9 +218,12 @@ ShaderObject<GL_TESS_CONTROL_SHADER>* GraphicsResourceManager::getTessControlSha
 	// Search for id
 	auto iter = m_tessConstrolShader.find(id);
 
-	// Id must exist
-	// TODO Allow shader loading if not found?
-	assert(iter != m_tessConstrolShader.end());
+	// TODO Allow tessellation control shader loading if not found?
+	if (iter == m_tessConstrolShader.end())
+	{
+		spdlog::error("The requested tessellation control shader id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -222,9 +237,12 @@ ShaderObject<GL_TESS_EVALUATION_SHADER>* GraphicsResourceManager::getTessEvalSha
 	// Search for id
 	auto iter = m_tessEvalShader.find(id);
 
-	// Id must exist
-	// TODO Allow shader loading if not found?
-	assert(iter != m_tessEvalShader.end());
+	// TODO Allow tessellation evaluation shader loading if not found?
+	if (iter == m_tessEvalShader.end())
+	{
+		spdlog::error("The requested tessellation evaluation shader id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -238,9 +256,12 @@ ShaderObject<GL_GEOMETRY_SHADER>* GraphicsResourceManager::getGeometryShaderObje
 	// Search for id
 	auto iter = m_geometryShader.find(id);
 
-	// Id must exist
-	// TODO Allow shader loading if not found?
-	assert(iter != m_geometryShader.end());
+	// TODO Allow geometry shader loading if not found?
+	if (iter == m_geometryShader.end())
+	{
+		spdlog::error("The requested geometry shader id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 
@@ -254,9 +275,12 @@ ShaderObject<GL_FRAGMENT_SHADER>* GraphicsResourceManager::getFragmentShaderObje
 	// Search for id
 	auto iter = m_fragmentShader.find(id);
 
-	// Id must exist
-	// TODO Allow shader loading if not found?
-	assert(iter != m_fragmentShader.end());
+	// TODO Allow fragment shader loading if not found?
+	if (iter == m_fragmentShader.end())
+	{
+		spdlog::error("The requested fragment shader id {} has not been loaded.", id);
+		return nullptr;
+	}
 	return iter->second.get();
 }
 

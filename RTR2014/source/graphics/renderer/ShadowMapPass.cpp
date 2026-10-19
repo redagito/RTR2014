@@ -94,6 +94,11 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
             // Resolve ids
             Mesh* mesh = manager.getMesh(meshId);
             Material* material = manager.getMaterial(materialId);
+            if (mesh == nullptr || material == nullptr)
+            {
+                // The graphics resource manager logged the missing resource
+                continue;
+            }
 
             // Set transformations
             transformer.setPosition(position);

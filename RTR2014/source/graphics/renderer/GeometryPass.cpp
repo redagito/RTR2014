@@ -90,6 +90,11 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
             // Resolve ids
             Mesh* mesh = manager.getMesh(meshId);
             Material* material = manager.getMaterial(materialId);
+            if (mesh == nullptr || material == nullptr)
+            {
+                // The graphics resource manager logged the missing resource
+                continue;
+            }
 
             // Set transformations
             m_transformer.setPosition(position);

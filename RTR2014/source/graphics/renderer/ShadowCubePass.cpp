@@ -109,6 +109,11 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
                 // Resolve ids
                 Mesh* mesh = manager.getMesh(meshId);
                 Material* material = manager.getMaterial(materialId);
+                if (mesh == nullptr || material == nullptr)
+                {
+                    // The graphics resource manager logged the missing resource
+                    continue;
+                }
 
                 Transformer transformer;
 
