@@ -32,9 +32,7 @@ void Renderer::draw(Mesh* mesh)
     if (mesh->hasIndexBuffer())
     {
         // Indexed draw, faster
-        mesh->getIndexBuffer()->setActive();
         glDrawElements(mode, mesh->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
-        mesh->getIndexBuffer()->setInactive();
     }
     else
     {

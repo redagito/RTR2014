@@ -16,9 +16,8 @@ bool RenderBuffer::init(unsigned int width, unsigned int height, GLenum format)
     {
         glDeleteRenderbuffers(1, &m_bufferId);
     }
-    glGenRenderbuffers(1, &m_bufferId);
-    setActive();
-    glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
+    glCreateRenderbuffers(1, &m_bufferId);
+    glNamedRenderbufferStorage(m_bufferId, format, width, height);
     m_width = width;
     m_height = height;
     m_format = format;
@@ -40,4 +39,3 @@ GLuint RenderBuffer::getId() const { return m_bufferId; }
 
 GLenum RenderBuffer::getFormat() const { return m_format; }
 
-void RenderBuffer::setActive() const { glBindRenderbuffer(GL_RENDERBUFFER, m_bufferId); }

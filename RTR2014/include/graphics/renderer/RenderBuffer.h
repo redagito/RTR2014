@@ -34,17 +34,12 @@ class RenderBuffer
     */
     GLuint getId() const;
 
-    /**
-    * \brief Returns renderbuffer format.
-    */
-    GLenum getFormat() const;
+      /**
+      * \brief Returns renderbuffer format.
+      */
+      GLenum getFormat() const;
 
-    /**
-    * \brief Sets the render buffer active.
-    */
-    void setActive() const;
-
-   private:
+     private:
     GLuint m_bufferId = 0;     /**< Render buffer id. */
     GLenum m_format = 0;        /**< Buffer format. */
     unsigned int m_width = 0;  /**< Buffer width. */

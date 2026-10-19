@@ -64,9 +64,27 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
     loadShader("data/shader/shader_display_overlay.ini", m_resourceManager, m_overlayShader);
 
     m_VAO.reset(new VertexArrayObject());
+    m_overlayVAO.reset(new VertexArrayObject());
     m_verticesBuffer.reset(new VertexBuffer(GL_STATIC_DRAW));
     m_uvsBuffer.reset(new VertexBuffer(GL_STATIC_DRAW));
     m_overlaysBuffer.reset(new VertexBuffer(GL_STATIC_DRAW));
+
+    // The vertex attributes are set up once, the buffers are refilled per frame
+    glVertexArrayVertexBuffer(m_VAO->getId(), 0, m_verticesBuffer->getId(), 0, 2 * sizeof(float));
+    glVertexArrayAttribFormat(m_VAO->getId(), 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(m_VAO->getId(), 0, 0);
+    glEnableVertexArrayAttrib(m_VAO->getId(), 0);
+
+    glVertexArrayVertexBuffer(m_VAO->getId(), 1, m_uvsBuffer->getId(), 0, 2 * sizeof(float));
+    glVertexArrayAttribFormat(m_VAO->getId(), 1, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(m_VAO->getId(), 1, 1);
+    glEnableVertexArrayAttrib(m_VAO->getId(), 1);
+
+    glVertexArrayVertexBuffer(m_overlayVAO->getId(), 0, m_overlaysBuffer->getId(), 0,
+                              2 * sizeof(float));
+    glVertexArrayAttribFormat(m_overlayVAO->getId(), 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(m_overlayVAO->getId(), 0, 0);
+    glEnableVertexArrayAttrib(m_overlayVAO->getId(), 0);
 
     // TODO this should not be called in constructor / move to init() method
     loadFont("data/images/font1.png");
@@ -150,7 +168,6 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
         return;
     }
 
-    m_VAO->setActive();
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -201,13 +218,9 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     m_overlayShader->setActive();
     m_overlayShader->setUniform("color", glm::vec4(0.0f, 0.0f, 0.0f, 0.6f));
     
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, m_overlaysBuffer->getId());
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) overlayVertices.size());
-    
-    glDisableVertexAttribArray(0);
+    m_overlayVAO->setActive();
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)overlayVertices.size());
+    m_overlayVAO->setInactive();
 
     // ===
     // render text
@@ -240,20 +253,9 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
 
     m_texture->setActive(0);
 
-    // vertices
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, m_verticesBuffer->getId());
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-    // UVs
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, m_uvsBuffer->getId());
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) vertices.size());
-
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    m_VAO->setActive();
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+    m_VAO->setInactive();
 
     // ===
     // finish
@@ -261,6 +263,4 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
 
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
-
-    m_VAO->setInactive();
 }

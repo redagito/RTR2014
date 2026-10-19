@@ -27,13 +27,6 @@ class VertexBuffer
     VertexBuffer& operator=(const VertexBuffer& rhs) = delete;
 
     /**
-    * \brief Sets the VBO as active object.
-    * Binds the VBO to GL_ARRAY_BUFFER.
-    */
-    void setActive() const;
-    void setInactive() const;
-
-    /**
     * \brief Returns buffer validity.
     */
     bool isValid() const;

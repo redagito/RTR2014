@@ -68,32 +68,39 @@ bool Mesh::init(const std::vector<float>& vertices, const std::vector<unsigned i
     // TODO The data data size (second param) should be deduced by the data type of the provided
     // vertex data
     //  basically we would need a std::vector<glm::vec3> instead of a std::vector<float> to deduce
-    //  the size
+    // the size
     // TODO Consider packing all vertex data into a single buffer for better performance
-    m_vertices->setActive();
-    glVertexAttribPointer(vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(vertexDataShaderLocation);
+    const GLuint vao = m_vao->getId();
 
-    // Set normal data attributes
+    // Vertex positions
+    glVertexArrayVertexBuffer(vao, 0, m_vertices->getId(), 0, 3 * sizeof(float));
+    glVertexArrayAttribFormat(vao, vertexDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, vertexDataShaderLocation, 0);
+    glEnableVertexArrayAttrib(vao, vertexDataShaderLocation);
+
+    // Vertex normals
     if (m_normals != nullptr)
     {
-        m_normals->setActive();
-        glVertexAttribPointer(normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        m_normals->setInactive();
-        glEnableVertexAttribArray(normalDataShaderLocation);
+        glVertexArrayVertexBuffer(vao, 1, m_normals->getId(), 0, 3 * sizeof(float));
+        glVertexArrayAttribFormat(vao, normalDataShaderLocation, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(vao, normalDataShaderLocation, 1);
+        glEnableVertexArrayAttrib(vao, normalDataShaderLocation);
     }
 
-    // Set uv data attributes
+    // Vertex texture coordinates
     if (m_uvs != nullptr)
     {
-        m_uvs->setActive();
-        glVertexAttribPointer(uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(uvDataShaderLocation);
+        glVertexArrayVertexBuffer(vao, 2, m_uvs->getId(), 0, 2 * sizeof(float));
+        glVertexArrayAttribFormat(vao, uvDataShaderLocation, 2, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(vao, uvDataShaderLocation, 2);
+        glEnableVertexArrayAttrib(vao, uvDataShaderLocation);
     }
 
-    // Disable vao
-    m_vao->setInactive();
-
+    // The index buffer is the element array buffer of the vertex array object
+    if (m_indices != nullptr)
+    {
+        glVertexArrayElementBuffer(vao, m_indices->getId());
+    }
 
     return true;
 }

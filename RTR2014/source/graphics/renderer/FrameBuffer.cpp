@@ -18,7 +18,7 @@ FrameBuffer::~FrameBuffer()
 bool FrameBuffer::init()
 {
     GLuint bufferId;
-    glGenFramebuffers(1, &bufferId);
+    glCreateFramebuffers(1, &bufferId);
 
     m_fboId = bufferId;
     m_valid = true;
@@ -30,8 +30,7 @@ std::string FrameBuffer::getState()
 {
     assert(m_valid);
     // Caller must rebind the framebuffer it was using; this leaves the default FBO bound.
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
-    GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    GLenum state = glCheckNamedFramebufferStatus(m_fboId, GL_FRAMEBUFFER);
 
     switch (state)
     {
@@ -74,7 +73,7 @@ void FrameBuffer::setActive(GLenum target)
     // Set draw buffers
     if (!m_drawBuffers.empty())
     {
-        glDrawBuffers((GLsizei)m_drawBuffers.size(), m_drawBuffers.data());
+        glNamedFramebufferDrawBuffers(m_fboId, (GLsizei)m_drawBuffers.size(), m_drawBuffers.data());
     }
 }
 
@@ -99,11 +98,9 @@ void FrameBuffer::resize(unsigned int width, unsigned int height)
 
 void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachment)
 {
-    // Bind
-    assert(m_valid);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     // Attach
-    glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
+    assert(m_valid);
+    glNamedFramebufferTexture(m_fboId, attachment, texture->getId(), 0);
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
         attachment != GL_DEPTH_STENCIL_ATTACHMENT)
@@ -111,7 +108,6 @@ void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachm
         m_drawBuffers.push_back(attachment);
     }
     m_textures[attachment] = texture;
-    setInactive(GL_FRAMEBUFFER);
 }
 
 void FrameBuffer::setDefaultActive()
@@ -121,11 +117,9 @@ void FrameBuffer::setDefaultActive()
 
 void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLenum attachment)
 {
-    // Bind
-    assert(m_valid);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     // Attach
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->getId());
+    assert(m_valid);
+    glNamedFramebufferRenderbuffer(m_fboId, attachment, GL_RENDERBUFFER, renderBuffer->getId());
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
         attachment != GL_DEPTH_STENCIL_ATTACHMENT)
@@ -133,5 +127,4 @@ void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLen
         m_drawBuffers.push_back(attachment);
     }
     m_renderBuffers[attachment] = renderBuffer;
-    setInactive(GL_FRAMEBUFFER);
 }

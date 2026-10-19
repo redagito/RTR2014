@@ -174,8 +174,7 @@ GLint ShaderProgram::getAttributeLocation(const std::string& attributeName) cons
 
 void ShaderProgram::setUniform(GLint location, int i)
 {
-    setActive();
-    glUniform1i(location, i);
+        glProgramUniform1i(m_programId, location, i);
 }
 
 void ShaderProgram::setUniform(const std::string& name, int i)
@@ -185,8 +184,7 @@ void ShaderProgram::setUniform(const std::string& name, int i)
 
 void ShaderProgram::setUniform(GLint location, float f)
 {
-    setActive();
-    glUniform1f(location, f);
+        glProgramUniform1f(m_programId, location, f);
 }
 
 void ShaderProgram::setUniform(const std::string& name, float f)
@@ -196,8 +194,7 @@ void ShaderProgram::setUniform(const std::string& name, float f)
 
 void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
 {
-	setActive();
-	glUniform2f(location, v.x, v.y);
+	glProgramUniform2f(m_programId, location, v.x, v.y);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
@@ -207,8 +204,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
 
 void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
 {
-    setActive();
-    glUniform3f(location, v.x, v.y, v.z);
+        glProgramUniform3f(m_programId, location, v.x, v.y, v.z);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
@@ -218,8 +214,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
 
 void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
 {
-    setActive();
-    glUniform4f(location, v.x, v.y, v.z, v.w);
+        glProgramUniform4f(m_programId, location, v.x, v.y, v.z, v.w);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
@@ -229,8 +224,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
 
 void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
 {
-    setActive();
-    glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(m));
+        glProgramUniformMatrix2fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
@@ -240,8 +234,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
 
 void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
 {
-    setActive();
-    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m));
+        glProgramUniformMatrix3fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
@@ -251,8 +244,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
 
 void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
 {
-    setActive();
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m));
+        glProgramUniformMatrix4fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat4& m)

@@ -66,9 +66,9 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
     for (unsigned int i = 0; i < 6; ++i)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                               cameraDirections[i].cubemapFace, m_shadowCubeTexture->getId(), 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glNamedFramebufferTextureLayer(m_shadowCubeBuffer.getId(), GL_COLOR_ATTACHMENT0,
+                                m_shadowCubeTexture->getId(), 0, cameraDirections[i].cubemapFace);
+        glNamedFramebufferDrawBuffer(m_shadowCubeBuffer.getId(), GL_COLOR_ATTACHMENT0);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -159,40 +159,30 @@ bool ShadowCubePass::init(IResourceManager* manager)
     m_shadowCubeDepthTexture = std::make_shared<Texture>();
     m_shadowCubeDepthTexture->init(1024, 1024, GL_DEPTH_COMPONENT24);
 
-    glBindTexture(GL_TEXTURE_2D, m_shadowCubeDepthTexture->getId());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureParameteri(m_shadowCubeDepthTexture->getId(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(m_shadowCubeDepthTexture->getId(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(m_shadowCubeDepthTexture->getId(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(m_shadowCubeDepthTexture->getId(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     GLuint textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &textureId);
+    glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    for (int i = 0; i < 6; i++)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, 1024, 1024, 0, GL_RED,
-                     GL_FLOAT, NULL);
-    }
+    // Allocate the storage of all six faces
+    glTextureStorage2D(textureId, 1, GL_R32F, 1024, 1024);
 
     m_shadowCubeTexture = std::make_shared<Texture>(textureId, false, 1024, 1024, GL_R32F,
                                                      GL_RED);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                           m_shadowCubeDepthTexture->getId(), 0);
+    glNamedFramebufferTexture(m_shadowCubeBuffer.getId(), GL_DEPTH_ATTACHMENT,
+                            m_shadowCubeDepthTexture->getId(), 0);
 
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    m_shadowCubeBuffer.setInactive(GL_FRAMEBUFFER);
+    glNamedFramebufferDrawBuffer(m_shadowCubeBuffer.getId(), GL_NONE);
+    glNamedFramebufferReadBuffer(m_shadowCubeBuffer.getId(), GL_NONE);
 
 
     spdlog::info("Shadow cube buffer state: {}.", m_shadowCubeBuffer.getState().c_str());

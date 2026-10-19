@@ -1,6 +1,6 @@
 #include "graphics/renderer/core/VertexArrayObject.h"
 
-VertexArrayObject::VertexArrayObject() { glGenVertexArrays(1, &m_vaoId); }
+VertexArrayObject::VertexArrayObject() { glCreateVertexArrays(1, &m_vaoId); }
 
 VertexArrayObject::~VertexArrayObject() { glDeleteVertexArrays(1, &m_vaoId); }
 

@@ -146,20 +146,18 @@ bool ShadowMapPass::init(IResourceManager* manager)
     m_shadowDepthTexture = std::make_shared<Texture>();
     m_shadowDepthTexture->init(4000, 4000, GL_DEPTH_COMPONENT24);
 
-    glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture->getId());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 
 
     // Total 96 bit per pixel
     m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
-    glDrawBuffer(GL_NONE);
+    glNamedFramebufferDrawBuffer(m_shadowMapBuffer.getId(), GL_NONE);
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
 
 

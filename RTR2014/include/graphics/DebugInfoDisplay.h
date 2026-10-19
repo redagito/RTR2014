@@ -29,6 +29,7 @@ class DebugInfoDisplay : public IDebugInfoDisplay
     std::unique_ptr<Texture> m_texture = nullptr;
 
     std::unique_ptr<VertexArrayObject> m_VAO = nullptr;
+    std::unique_ptr<VertexArrayObject> m_overlayVAO = nullptr;
     
     std::unique_ptr<VertexBuffer> m_verticesBuffer = nullptr;
     std::unique_ptr<VertexBuffer> m_uvsBuffer = nullptr;

@@ -1,7 +1,9 @@
 #include <spdlog/spdlog.h>
 #include "graphics/Texture.h"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <string>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -88,9 +90,8 @@ void Texture::resize(unsigned int width, unsigned int height)
         return;
     }
     spdlog::debug("Texture resize from {}, {} to {}, {}.", m_width, m_height, width, height);
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, m_externalType,
-                 nullptr);
+    // The storage is immutable, so it is re-allocated
+    glTextureStorage2D(m_textureId, m_levels, m_internalFormat, width, height);
     m_width = width;
     m_height = height;
 }
@@ -102,16 +103,14 @@ bool Texture::isValid() const { return m_valid; }
 void Texture::setActive(GLint textureUnit) const
 {
     assert(isValid());
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glBindTextureUnit(textureUnit, m_textureId);
 }
 
 void Texture::saveAsPng(const std::string& file)
 {
     std::vector<unsigned char> image;
     image.resize(m_width * m_height * 3);
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+    glGetTextureImage(m_textureId, 0, GL_RGB, GL_UNSIGNED_BYTE, image.size(), image.data());
     stbi_write_png(file.c_str(), static_cast<int>(m_width), static_cast<int>(m_height), 3, image.data(),
                    static_cast<int>(m_width * 3));
 }
@@ -131,6 +130,8 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
     m_hasMipmaps = createMipmaps;
     // External data type
     GLenum type = GL_UNSIGNED_BYTE;
+    // Sized internal format, required for immutable storage
+    GLenum internalFormat = format;
 
     // Set external format and type, based on texture format
     switch (format)
@@ -144,6 +145,10 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
         bytePerPixel = 2;
         break;
     case GL_RGB:  // RGB texture with values from 0-255
+        internalFormat = GL_RGB8;
+        m_externalFormat = GL_RGB;
+        bytePerPixel = 3;
+        break;
     case GL_RGB8:
         m_externalFormat = GL_RGB;
         bytePerPixel = 3;
@@ -154,6 +159,10 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
         bytePerPixel = 4;
         break;
     case GL_RGBA:  // RGB texture with alpha channel
+        internalFormat = GL_RGBA8;
+        m_externalFormat = GL_RGBA;
+        bytePerPixel = 4;
+        break;
     case GL_RGBA8:
         m_externalFormat = GL_RGBA;
         bytePerPixel = 4;
@@ -170,6 +179,7 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
         return false;
         break;
     }
+    m_externalType = type;
 
     // Image data is either empty or has correct size
     if (!image.empty() && (image.size() != width * height * bytePerPixel))
@@ -179,8 +189,17 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
 
     // Create id
     GLuint textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glCreateTextures(GL_TEXTURE_2D, 1, &textureId);
+
+    // Number of mipmap levels
+    unsigned int levels = 1;
+    if (createMipmaps && width != 1 && height != 1)
+    {
+        levels = 1 + (unsigned int)std::log2((float)std::max(width, height));
+    }
+
+    // Allocate the texture storage
+    glTextureStorage2D(textureId, levels, internalFormat, width, height);
 
     // TODO Filter should be based on arguments and mip map level
     // Set filters
@@ -188,53 +207,43 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
     {
         // Special case 1x1 texture
         // Needs nearest filtering otherwise texture is black?
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
     else
     {
 		if (m_hasMipmaps)
 		{
 			// Bilinear filtering
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		}
 		else
 		{
 			// Default value is linear filtering
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		}
     }
 
     // Set wrap mode
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 
 	// Load data
-	if (image.empty())
-	{
-		// No image data, only allocate texture space
-		// TODO As of OpenGL 4.3, glTexStorage should be used for this.
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type, nullptr);
-	}
-	else
+	if (!image.empty())
 	{
 		// Load image data
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, m_externalFormat, type,
+		glTextureSubImage2D(textureId, 0, 0, 0, width, height, m_externalFormat, type,
 			image.data());
 	}
 
 	// Mipmaps
 	// Do not generate for 1x1 images
-	if (width != 1 && height != 1 && createMipmaps)
+	if (levels > 1)
 	{
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glGenerateTextureMipmap(textureId);
 	}
-
-    // Unbind
-    glBindTexture(GL_TEXTURE_2D, 0);
-
 
     // Clean up previously created id
     if (m_textureId != 0)
@@ -244,6 +253,8 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
 
     // Set new texture id
     m_textureId = textureId;
+    m_internalFormat = internalFormat;
+    m_levels = levels;
     m_width = width;
     m_height = height;
     m_valid = true;

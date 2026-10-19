@@ -19,13 +19,6 @@ class IndexBuffer
     IndexBuffer& operator=(const IndexBuffer& rhs) = delete;
 
     /**
-    * \brief Sets the VBO as active object.
-    * Binds the VBO to GL_INDEX_ARRAY.
-    */
-    void setActive() const;
-    void setInactive() const;
-
-    /**
     * \brief Returns buffer validity.
     */
     bool isValid() const;

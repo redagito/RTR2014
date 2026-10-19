@@ -78,4 +78,6 @@ class Texture
     GLint m_format;
     GLenum m_externalFormat = GL_RGBA;
     GLenum m_externalType = GL_UNSIGNED_BYTE;
+    GLenum m_internalFormat = GL_RGBA8; /**< Sized internal format of the storage. */
+    unsigned int m_levels = 1;         /**< Number of allocated mipmap levels. */
 };
