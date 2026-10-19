@@ -182,7 +182,9 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
             uvs.clear();
         }
 
-        data = MeshData(vertices, {}, normals, uvs, PrimitiveType::Triangle);
+        // The bounds are computed here, on the worker thread that parses the mesh
+    data = MeshData(std::move(vertices), {}, std::move(normals), std::move(uvs),
+                    PrimitiveType::Triangle);
     }
     else
     {
@@ -208,6 +210,18 @@ bool ResourceManager::getMesh(ResourceId id, std::vector<float>& vertices,
     normals = iter->second.m_normals;
     uvs = iter->second.m_uvs;
     type = iter->second.m_type;
+    return true;
+}
+
+bool ResourceManager::getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) const
+{
+    // Retrieve from map
+    auto iter = m_meshes.find(id);
+    if (iter == m_meshes.end())
+    {
+        return false;
+    }
+    bounds = iter->second.m_bounds;
     return true;
 }
 

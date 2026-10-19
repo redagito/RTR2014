@@ -1,4 +1,4 @@
-#include "graphics/OrientedBoundingBox.h"
+#include "resource/OrientedBoundingBox.h"
 
 #include <algorithm>
 #include <cmath>
@@ -116,40 +116,25 @@ void eigenDecomposition(const glm::mat3& matrix, glm::vec3& eigenvalues, glm::ma
         }
     }
 }
-} // namespace
-
-OrientedBoundingBox::OrientedBoundingBox()
-    : m_center(0.0f), m_axes(1.0f), m_halfExtents(0.0f)
+template <typename PointAccessor>
+OrientedBoundingBox computeBounds(size_t count, PointAccessor point)
 {
-    return;
-}
-
-OrientedBoundingBox::OrientedBoundingBox(const glm::vec3& center, const glm::mat3& axes,
-                                         const glm::vec3& halfExtents)
-    : m_center(center), m_axes(axes), m_halfExtents(halfExtents)
-{
-    return;
-}
-
-OrientedBoundingBox OrientedBoundingBox::fromPoints(const std::vector<glm::vec3>& points)
-{
-    OrientedBoundingBox box;
-    if (points.empty())
+    if (count == 0)
     {
-        return box;
+        return OrientedBoundingBox();
     }
 
     glm::vec3 centroid(0.0f);
-    for (const glm::vec3& point : points)
+    for (size_t i = 0; i < count; ++i)
     {
-        centroid += point;
+        centroid += point(i);
     }
-    centroid /= static_cast<float>(points.size());
+    centroid /= static_cast<float>(count);
 
     glm::mat3 covariance(0.0f);
-    for (const glm::vec3& point : points)
+    for (size_t i = 0; i < count; ++i)
     {
-        glm::vec3 delta = point - centroid;
+        glm::vec3 delta = point(i) - centroid;
         covariance[0][0] += delta.x * delta.x;
         covariance[0][1] += delta.x * delta.y;
         covariance[0][2] += delta.x * delta.z;
@@ -167,14 +152,14 @@ OrientedBoundingBox OrientedBoundingBox::fromPoints(const std::vector<glm::vec3>
 
     glm::vec3 minimum(std::numeric_limits<float>::max());
     glm::vec3 maximum(std::numeric_limits<float>::lowest());
-    for (const glm::vec3& point : points)
+    for (size_t i = 0; i < count; ++i)
     {
-        glm::vec3 delta = point - centroid;
-        for (int i = 0; i < 3; ++i)
+        glm::vec3 delta = point(i) - centroid;
+        for (int a = 0; a < 3; ++a)
         {
-            float projection = glm::dot(delta, glm::vec3(axes[i]));
-            minimum[i] = std::min(minimum[i], projection);
-            maximum[i] = std::max(maximum[i], projection);
+            float projection = glm::dot(delta, glm::vec3(axes[a]));
+            minimum[a] = std::min(minimum[a], projection);
+            maximum[a] = std::max(maximum[a], projection);
         }
     }
 
@@ -186,10 +171,35 @@ OrientedBoundingBox OrientedBoundingBox::fromPoints(const std::vector<glm::vec3>
         halfExtents[i] = (maximum[i] - minimum[i]) * 0.5f;
     }
 
-    box.m_center = center;
-    box.m_axes = axes;
-    box.m_halfExtents = halfExtents;
-    return box;
+    return OrientedBoundingBox(center, axes, halfExtents);
+}
+} // namespace
+
+OrientedBoundingBox::OrientedBoundingBox()
+    : m_center(0.0f), m_axes(1.0f), m_halfExtents(0.0f)
+{
+    return;
+}
+
+OrientedBoundingBox::OrientedBoundingBox(const glm::vec3& center, const glm::mat3& axes,
+                                         const glm::vec3& halfExtents)
+    : m_center(center), m_axes(axes), m_halfExtents(halfExtents)
+{
+    return;
+}
+
+OrientedBoundingBox OrientedBoundingBox::fromPoints(const std::vector<glm::vec3>& points)
+{
+    return computeBounds(points.size(), [&points](size_t i) { return points[i]; });
+}
+
+OrientedBoundingBox OrientedBoundingBox::fromVertices(const std::vector<float>& vertices)
+{
+    return computeBounds(vertices.size() / 3,
+                         [&vertices](size_t i) {
+                             return glm::vec3(vertices[i * 3], vertices[i * 3 + 1],
+                                              vertices[i * 3 + 2]);
+                         });
 }
 
 OrientedBoundingBox OrientedBoundingBox::transformed(const glm::mat4& matrix) const

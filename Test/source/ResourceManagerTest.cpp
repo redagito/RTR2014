@@ -1,10 +1,14 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <cmath>
 #include <cstdio>
 #include <fstream>
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
+#include "resource/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 #include "resource/ResourceManager.h"
 
@@ -49,6 +53,20 @@ const char* kObj = "v 0 0 0\n"
                     "vn 0 0 1\n"
                     "vt 0 0\n"
                     "f 1/1/1 2/1/1 3/1/1\n";
+
+bool contains(const OrientedBoundingBox& box, const glm::vec3& point)
+{
+    glm::vec3 delta = point - box.getCenter();
+    for (int i = 0; i < 3; ++i)
+    {
+        glm::vec3 axis = glm::vec3(box.getAxes()[i]);
+        if (std::fabs(glm::dot(delta, axis)) > box.getHalfExtents()[i] + 0.0001f)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace
 
 TEST_CASE("loadImage rejects a file that is not a png", "[resource]")
@@ -138,4 +156,39 @@ TEST_CASE("a material without a texture slot reports an invalid id for it", "[re
     REQUIRE(specular == invalidResource);
     REQUIRE(glow == invalidResource);
     REQUIRE(alpha == invalidResource);
+}
+
+TEST_CASE("a mesh reports bounds that contain its vertices", "[resource]")
+{
+    TempObj file(kObj);
+
+    ResourceManager manager;
+    const ResourceId id = manager.loadMesh(file.path());
+
+    OrientedBoundingBox bounds;
+    REQUIRE(manager.getMeshBounds(id, bounds));
+
+    REQUIRE(contains(bounds, glm::vec3(0.f, 0.f, 0.f)));
+    REQUIRE(contains(bounds, glm::vec3(1.f, 0.f, 0.f)));
+    REQUIRE(contains(bounds, glm::vec3(0.f, 1.f, 0.f)));
+}
+
+TEST_CASE("a preloaded mesh reports the same bounds as a synchronously loaded mesh", "[resource]")
+{
+    TempObj file(kObj);
+
+    ResourceManager preloaded;
+    preloaded.preload({file.path()}, {});
+    const ResourceId preloadedId = preloaded.loadMesh(file.path());
+
+    ResourceManager synchronous;
+    const ResourceId synchronousId = synchronous.loadMesh(file.path());
+
+    OrientedBoundingBox preloadedBounds;
+    OrientedBoundingBox synchronousBounds;
+    REQUIRE(preloaded.getMeshBounds(preloadedId, preloadedBounds));
+    REQUIRE(synchronous.getMeshBounds(synchronousId, synchronousBounds));
+
+    REQUIRE(preloadedBounds.getCenter() == synchronousBounds.getCenter());
+    REQUIRE(preloadedBounds.getHalfExtents() == synchronousBounds.getHalfExtents());
 }

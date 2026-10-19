@@ -1,6 +1,6 @@
 #include "graphics/Frustum.h"
 
-#include "graphics/OrientedBoundingBox.h"
+#include "resource/OrientedBoundingBox.h"
 
 Frustum::Frustum(const glm::mat4& viewProjection)
 {

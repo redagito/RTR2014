@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "resource/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 
 /**
@@ -17,4 +18,5 @@ struct MeshData
     std::vector<float> m_normals;
     std::vector<float> m_uvs;
     PrimitiveType m_type;
+    OrientedBoundingBox m_bounds; /**< Extent of the mesh in mesh space. */
 };

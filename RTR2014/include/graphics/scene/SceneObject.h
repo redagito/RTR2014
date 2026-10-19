@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "graphics/OrientedBoundingBox.h"
+#include "resource/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 
 /**

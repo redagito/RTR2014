@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "graphics/Frustum.h"
-#include "graphics/OrientedBoundingBox.h"
+#include "resource/OrientedBoundingBox.h"
 #include "graphics/scene/Scene.h"
 #include "graphics/scene/SceneQuery.h"
 

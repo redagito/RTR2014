@@ -5,6 +5,7 @@
 #include <string>
 
 #include "ResourceConfig.h"
+#include "resource/OrientedBoundingBox.h"
 
 class IResourceListener; /**< Listener class. */
 
@@ -39,6 +40,11 @@ class IResourceManager
     virtual bool getMesh(ResourceId id, std::vector<float>& vertices,
                          std::vector<unsigned int>& indices, std::vector<float>& normals,
                          std::vector<float>& uvs, PrimitiveType& type) const = 0;
+
+    /**
+     * \brief Returns the extent of a mesh in mesh space.
+     */
+    virtual bool getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) const = 0;
 
     /**
      * \brief Creates texture object from image data and returns id.

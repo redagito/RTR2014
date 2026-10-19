@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "SceneConfig.h"
-#include "graphics/OrientedBoundingBox.h"
+#include "resource/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 
 class ICamera;

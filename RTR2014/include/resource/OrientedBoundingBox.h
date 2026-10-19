@@ -27,6 +27,11 @@ class OrientedBoundingBox
     static OrientedBoundingBox fromPoints(const std::vector<glm::vec3>& points);
 
     /**
+     * \brief Computes the box that contains a mesh, the vertices are stored as x, y and z triples.
+     */
+    static OrientedBoundingBox fromVertices(const std::vector<float>& vertices);
+
+    /**
      * \brief Returns the box in the space of the given matrix.
      */
     OrientedBoundingBox transformed(const glm::mat4& matrix) const;
