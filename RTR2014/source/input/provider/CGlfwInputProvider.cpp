@@ -47,7 +47,7 @@ void CGlfwInputProvider::glfwCursorPositionCallback(GLFWwindow* window, double x
     {
         for (IInputListener* listener : it->second->m_listeners)
         {
-            listener->handleMouseMovementEvent(xpos, ypos);
+            listener->handleMouseMovementEvent(static_cast<int>(xpos), static_cast<int>(ypos));
         }
     }
 }
@@ -59,7 +59,7 @@ void CGlfwInputProvider::glfwCursorPositionCallback(GLFWwindow* window, double x
 //    {
 //        for (IInputListener* listener : it->second.m_listeners)
 //        {
-//            listener->handleMouseMovementEvent(xpos, ypos);
+//            listener->handleMouseMovementEvent(static_cast<int>(xpos), static_cast<int>(ypos));
 //        }
 //    }
 //}

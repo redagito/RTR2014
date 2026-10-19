@@ -12,7 +12,6 @@ class CRenderBuffer
     * \brief Creates render buffer resource.
     */
     CRenderBuffer();
-    CRenderBuffer(unsigned int width, unsigned int height, GLenum format);
 
     /**
     * \brief Deletes render buffer resource.

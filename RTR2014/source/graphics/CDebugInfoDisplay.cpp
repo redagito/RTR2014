@@ -185,16 +185,16 @@ void CDebugInfoDisplay::draw(const CDebugInfo &info)
 	overlayVertices.push_back((float) hOffsetKeys);
 	overlayVertices.push_back((float) vOffsetKeyValues);
 	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
 	overlayVertices.push_back(800.f);
 	overlayVertices.push_back((float) vOffsetKeyValues);
     
     overlayVertices.push_back(800.f);
 	overlayVertices.push_back((float) vOffsetKeyValues);
 	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
     overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * info.getValues().size()));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
     
     m_overlaysBuffer->setData(overlayVertices);
     

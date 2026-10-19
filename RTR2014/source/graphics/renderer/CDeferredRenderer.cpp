@@ -1321,9 +1321,8 @@ bool CDeferredRenderer::initShadowCubePass(IResourceManager* manager)
                      GL_FLOAT, NULL);
     }
 
-    m_shadowCubeTexture = std::make_shared<CTexture>(textureId, false, 1024, 1024,
-                                                     GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT);
-
+    m_shadowCubeTexture = std::make_shared<CTexture>(textureId, false, 1024, 1024, GL_R32F,
+                                                     GL_RED);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,

@@ -21,9 +21,6 @@ class CFrameBuffer
     GLuint getId() const { return m_fboId; };
 
     bool init();
-
-    bool isValid() const;
-
     std::string getState();
 
     void setActive(GLenum target);

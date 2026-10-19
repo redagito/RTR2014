@@ -26,11 +26,10 @@ bool CFrameBuffer::init()
     return m_valid;
 }
 
-bool CFrameBuffer::isValid() const { return m_valid; }
-
 std::string CFrameBuffer::getState()
 {
     assert(m_valid);
+    // Caller must rebind the framebuffer it was using; this leaves the default FBO bound.
     glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
     GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -38,30 +37,30 @@ std::string CFrameBuffer::getState()
     {
     case GL_FRAMEBUFFER_UNDEFINED:
         return "The current FBO binding is 0, but no default framebuffer exists";
-        break;
+
     case GL_FRAMEBUFFER_COMPLETE:
         return "A user-defined FBO is bound and is complete. OK to render";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
         return "One of the buffers enabled for rendering is incomplete";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
         return "No buffers are attached to the FBO.";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
         return "One of the buffer attachments enabled for rendering does not have a buffer "
                "attached";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
         return "One of the buffer attachments enabled for reading does not have a buffer attached";
-        break;
+
     case GL_FRAMEBUFFER_UNSUPPORTED:
         return "The combination of internal buffer formats is not supported";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
         return "The number of samples or the value for TEXTURE_FIXED_SAMPLE_LOCATIONS for all "
                "buffers does not match";
-        break;
+
     case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
         return "Not all color attachments are layered textures or bound to the same target";
     }
