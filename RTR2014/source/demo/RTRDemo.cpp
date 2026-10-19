@@ -6,34 +6,34 @@
 #include <vector>
 
 // Debug
-#include "debug/CDebugInfo.h"
+#include "debug/DebugInfo.h"
 
 // Graphics
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
 #include <GLFW/glfw3.h>
 
-#include "graphics/camera/CFirstPersonCamera.h"
+#include "graphics/camera/FirstPersonCamera.h"
 
 // Renderer types
-#include "graphics/renderer/CForwardRenderer.h"
-#include "graphics/renderer/CDeferredRenderer.h"
+#include "graphics/renderer/ForwardRenderer.h"
+#include "graphics/renderer/DeferredRenderer.h"
 
 // Resource system
 #include "resource/Resource.h"
 
-#include "graphics/scene/CScene.h"
-#include "graphics/window/CGlfwWindow.h"
-#include "graphics/resource/CGraphicsResourceManager.h"
+#include "graphics/scene/Scene.h"
+#include "graphics/window/GlfwWindow.h"
+#include "graphics/GraphicsResourceManager.h"
 
 #include "util/TimeStamp.h"
-#include "graphics/CDebugInfoDisplay.h"
-#include "input/provider/CGlfwInputProvider.h"
-#include "io/CSceneLoader.h"
-#include "demo/CCameraController.h"
+#include "graphics/DebugInfoDisplay.h"
+#include "input/provider/GlfwInputProvider.h"
+#include "io/SceneLoader.h"
+#include "demo/CameraController.h"
 
 // Animation
-#include "animation/CAnimationWorld.h"
+#include "animation/AnimationWorld.h"
 
 RTRDemo::RTRDemo() {}
 
@@ -65,7 +65,7 @@ int RTRDemo::init(const std::string& configFile)
         spdlog::warn("Failed to create log file at {}: {}", logFile, ex.what());
     }
 
-    m_debugInfo = std::make_shared<CDebugInfo>();
+    m_debugInfo = std::make_shared<DebugInfo>();
     spdlog::default_logger()->sinks().push_back(m_debugInfo);
 
     if (!m_config.load(configFile))
@@ -81,7 +81,7 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
-	m_inputProvider = std::make_shared<CGlfwInputProvider>(m_window->getGlfwHandle());
+	m_inputProvider = std::make_shared<GlfwInputProvider>(m_window->getGlfwHandle());
 
     // Create resource manager
     m_resourceManager.reset(createResourceManager());
@@ -92,10 +92,10 @@ int RTRDemo::init(const std::string& configFile)
     }
 
 	// Create animation world
-	m_animationWorld = std::make_shared<CAnimationWorld>();
+	m_animationWorld = std::make_shared<AnimationWorld>();
 
     // Graphics resource manager, listens to resource manager
-    CGraphicsResourceManager* manager = new CGraphicsResourceManager;
+    GraphicsResourceManager* manager = new GraphicsResourceManager;
     m_resourceManager->addResourceListener(manager);
     m_graphicsResourceManager.reset(manager);
 
@@ -112,15 +112,15 @@ int RTRDemo::init(const std::string& configFile)
         return 1;
     }
 
-    m_camera = std::make_shared<CFirstPersonCamera>(
+    m_camera = std::make_shared<FirstPersonCamera>(
         glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
         4.f / 3.f, 0.01f, 1000.f);
 
-    m_cameraController = std::make_shared<CCameraController>();
+    m_cameraController = std::make_shared<CameraController>();
     m_cameraController->setCamera(m_camera);
     m_cameraController->setInputProvider(m_inputProvider.get());
 
-    m_debugInfoDisplay = std::make_shared<CDebugInfoDisplay>(m_resourceManager);
+    m_debugInfoDisplay = std::make_shared<DebugInfoDisplay>(m_resourceManager);
 
     m_cameraController->setWindow(m_window.get());
     m_window->addListener(m_cameraController.get());
@@ -249,7 +249,7 @@ bool RTRDemo::initWindow()
     spdlog::info("Window title: {}.", title.c_str());
 
     // Create window
-    CGlfwWindow* window = new CGlfwWindow;
+    GlfwWindow* window = new GlfwWindow;
     if (!window->init(width, height, title))
     {
         spdlog::error("Failed to initialize GLFW window wrapper.");
@@ -272,7 +272,7 @@ bool RTRDemo::initRenderer()
 
     // Initialize deferred renderer
     spdlog::info("Initializing deferred renderer.");
-    m_deferredRenderer.reset(CDeferredRenderer::create(m_resourceManager.get()));
+    m_deferredRenderer.reset(DeferredRenderer::create(m_resourceManager.get()));
     if (m_deferredRenderer == nullptr)
     {
         spdlog::error("Failed to initialize deferred renderer.");
@@ -281,7 +281,7 @@ bool RTRDemo::initRenderer()
 
     // Initialize forward renderer
     spdlog::info("Initializing forward renderer.");
-    m_forwardRenderer.reset(CForwardRenderer::create(m_resourceManager.get()));
+    m_forwardRenderer.reset(ForwardRenderer::create(m_resourceManager.get()));
     if (m_forwardRenderer == nullptr)
     {
         spdlog::error("Failed to initialize forward renderer.");
@@ -320,8 +320,8 @@ bool RTRDemo::initRenderer()
 
 bool RTRDemo::initScene()
 {
-    m_scene = std::make_shared<CScene>();
-    CSceneLoader loader(*m_resourceManager);
+    m_scene = std::make_shared<Scene>();
+    SceneLoader loader(*m_resourceManager);
 
     // Get startup scene from config
     std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test/test_1.json");

@@ -29,6 +29,6 @@ class IResourceListener
     /**
      * \brief Called on resource event.
      */
-    virtual void notify(EResourceType type, ResourceId id, EListenerEvent event,
+    virtual void notify(ResourceType type, ResourceId id, ListenerEvent event,
                         IResourceManager* resourceManager) = 0;
 };

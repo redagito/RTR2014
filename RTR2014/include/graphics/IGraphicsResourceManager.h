@@ -2,10 +2,10 @@
 
 #include "resource/ResourceConfig.h"
 
-class CMesh;
-class CMaterial;
-class CTexture;
-class CShaderProgram;
+class Mesh;
+class Material;
+class Texture;
+class ShaderProgram;
 
 /**
 * \brief Graphics resource manager interface.
@@ -22,29 +22,29 @@ public:
 	/**
 	* \brief Maps id to internal mesh object.
 	*/
-	virtual CMesh* getMesh(ResourceId) const = 0;
+	virtual Mesh* getMesh(ResourceId) const = 0;
 
 	/**
 	* \brief Maps id to internal material object.
 	*/
-	virtual CMaterial* getMaterial(ResourceId) const = 0;
+	virtual Material* getMaterial(ResourceId) const = 0;
 
 	/**
 	* \brief Maps id to internal texture object.
 	*/
-	virtual CTexture* getTexture(ResourceId) const = 0;
+	virtual Texture* getTexture(ResourceId) const = 0;
 
 	/**
 	* \brief Maps id to internal shader program object.
 	*/
-	virtual CShaderProgram* getShaderProgram(ResourceId) const = 0;
+	virtual ShaderProgram* getShaderProgram(ResourceId) const = 0;
 
 	/**
 	* \brief Returns respective default texture.
 	*/
-	virtual CTexture* getDefaultDiffuseTexture() const = 0;
-	virtual CTexture* getDefaultNormalTexture() const = 0;
-	virtual CTexture* getDefaultSpecularTexture() const = 0;
-	virtual CTexture* getDefaultGlowTexture() const = 0;
-	virtual CTexture* getDefaultAlphaTexture() const = 0;
+	virtual Texture* getDefaultDiffuseTexture() const = 0;
+	virtual Texture* getDefaultNormalTexture() const = 0;
+	virtual Texture* getDefaultSpecularTexture() const = 0;
+	virtual Texture* getDefaultGlowTexture() const = 0;
+	virtual Texture* getDefaultAlphaTexture() const = 0;
 };

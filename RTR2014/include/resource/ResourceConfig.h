@@ -8,7 +8,7 @@ static const ResourceId invalidResource = -1;
 /**
  * \brief Resource types.
  */
-enum class EResourceType
+enum class ResourceType
 {
     Mesh,
     Image,
@@ -21,7 +21,7 @@ enum class EResourceType
 * \brief Primitive type for vertex data.
 * NOTE GL_QUAD is deprecated.
 */
-enum class EPrimitiveType
+enum class PrimitiveType
 {
     Point = 1,
     Line = 2,
@@ -32,7 +32,7 @@ enum class EPrimitiveType
 /**
 * \brief Color format for texture data.
 */
-enum class EColorFormat
+enum class ColorFormat
 {
     GreyScale8 = 1,
     RGB24 = 3,
@@ -43,7 +43,7 @@ enum class EColorFormat
 /**
  * \brief Possible listener events.
  */
-enum class EListenerEvent
+enum class ListenerEvent
 {
     Create, /**< Specified resource was created. */
     Change, /**< Specified resource was changed. */

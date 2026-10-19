@@ -1,8 +1,8 @@
 #include "resource/Resource.h"
 
-#include "resource/core/CResourceManager.h"
+#include "resource/ResourceManager.h"
 
 IResourceManager* createResourceManager()
 {
-	return new CResourceManager;
+	return new ResourceManager;
 }

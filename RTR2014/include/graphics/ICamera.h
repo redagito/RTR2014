@@ -19,7 +19,7 @@ Normals,
 	Lights
 };
 
-struct SFeatureInfo
+struct FeatureInfo
 {
     FogType fogType = FogType::None;
 	bool fogActive = false; // TODO Use this flag instead FogType::NONE
@@ -63,9 +63,9 @@ class ICamera
     virtual glm::vec3 getPosition() const = 0;
 
     // TODO extract functionality to a better place
-    virtual SFeatureInfo& getFeatureInfoForWrite() { return m_info; } // TODO Rename
-    virtual const SFeatureInfo& getFeatureInfo() const { return m_info; }
+    virtual FeatureInfo& getFeatureInfoForWrite() { return m_info; } // TODO Rename
+    virtual const FeatureInfo& getFeatureInfo() const { return m_info; }
 
    private:
-    SFeatureInfo m_info;
+    FeatureInfo m_info;
 };

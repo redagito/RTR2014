@@ -26,7 +26,7 @@ class IResourceManager
     virtual ResourceId createMesh(const std::vector<float>& vertices,
                                   const std::vector<unsigned int>& indices,
                                   const std::vector<float>& normals, const std::vector<float>& uvs,
-                                  EPrimitiveType type) = 0;
+                                  PrimitiveType type) = 0;
 
     /**
     * \brief Loads mesh from file.
@@ -38,7 +38,7 @@ class IResourceManager
     */
     virtual bool getMesh(ResourceId id, std::vector<float>& vertices,
                          std::vector<unsigned int>& indices, std::vector<float>& normals,
-                         std::vector<float>& uvs, EPrimitiveType& type) const = 0;
+                         std::vector<float>& uvs, PrimitiveType& type) const = 0;
 
     /**
      * \brief Creates texture object from image data and returns id.
@@ -48,18 +48,18 @@ class IResourceManager
      * \parm format Image format of the provided data.
      */
     virtual ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
-                                   unsigned int height, EColorFormat format) = 0;
+                                   unsigned int height, ColorFormat format) = 0;
 
     /**
     * \brief Loads image from file.
     */
-    virtual ResourceId loadImage(const std::string& file, EColorFormat format) = 0;
+    virtual ResourceId loadImage(const std::string& file, ColorFormat format) = 0;
 
     /**
     * \brief Retrieves image data.
     */
     virtual bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
-                          unsigned int& height, EColorFormat& format) const = 0;
+                          unsigned int& height, ColorFormat& format) const = 0;
 
     /**
     * \brief Creates material.

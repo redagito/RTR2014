@@ -4,13 +4,13 @@
 #include <string>
 #include <vector>
 
-#include "io/CIniFile.h"
+#include "io/IniFile.h"
 
 // GLFW
 struct GLFWwindow;
 
 // Graphics
-class CGlfwWindow;
+class GlfwWindow;
 class IRenderer;
 class IScene;
 
@@ -20,13 +20,13 @@ class IResourceManager;
 // Animation
 class IInputProvider;
 class IControllableCamera;
-class CCameraController;
+class CameraController;
 class IGraphicsResourceManager;
-class CAnimationWorld;
+class AnimationWorld;
 
 // Debug
-class CDebugInfo;
-class CDebugInfoDisplay;
+class DebugInfo;
+class DebugInfoDisplay;
 
 /**
 * \brief Demo application class.
@@ -54,14 +54,14 @@ class RTRDemo
 
 	void updateAnimation(float timeDiff);
 
-    CIniFile m_config;
+    IniFile m_config;
 
     std::shared_ptr<IResourceManager> m_resourceManager =
         nullptr; /**< Resource loader and manager. */
     std::shared_ptr<IGraphicsResourceManager> m_graphicsResourceManager =
         nullptr; /**< Resource manager for graphics resources. */
     
-	std::shared_ptr<CGlfwWindow> m_window = nullptr;
+	std::shared_ptr<GlfwWindow> m_window = nullptr;
 	std::shared_ptr<IInputProvider> m_inputProvider = nullptr;
 
     std::shared_ptr<IRenderer> m_renderer = nullptr;                 /**< Active renderer. */
@@ -69,12 +69,12 @@ class RTRDemo
     std::shared_ptr<IRenderer> m_forwardRenderer = nullptr;          /**< Forward renderer. */
     std::shared_ptr<IScene> m_scene = nullptr;                       /**< Active scene. */
     std::shared_ptr<IControllableCamera> m_camera = nullptr;         /**< Active camera. */
-    std::shared_ptr<CCameraController> m_cameraController = nullptr; /**< Camera controller. */
+    std::shared_ptr<CameraController> m_cameraController = nullptr; /**< Camera controller. */
 
-    std::shared_ptr<CDebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
-    std::shared_ptr<CDebugInfoDisplay> m_debugInfoDisplay =
+    std::shared_ptr<DebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
+    std::shared_ptr<DebugInfoDisplay> m_debugInfoDisplay =
         nullptr; /**< Debug information renderer. */
 
 	// Animation
-	std::shared_ptr<CAnimationWorld> m_animationWorld;
+	std::shared_ptr<AnimationWorld> m_animationWorld;
 };
