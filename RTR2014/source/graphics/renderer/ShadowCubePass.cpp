@@ -166,14 +166,16 @@ bool ShadowCubePass::init(IResourceManager* manager)
 
     GLuint textureId;
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &textureId);
+
+    // Allocate the storage of all six faces
+    // The storage must exist before the parameters are set, a storage allocation resets them
+    glTextureStorage2D(textureId, 1, GL_R32F, 1024, 1024);
+
     glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    // Allocate the storage of all six faces
-    glTextureStorage2D(textureId, 1, GL_R32F, 1024, 1024);
 
     m_shadowCubeTexture = std::make_shared<Texture>(textureId, false, 1024, 1024, GL_R32F,
                                                      GL_RED);
