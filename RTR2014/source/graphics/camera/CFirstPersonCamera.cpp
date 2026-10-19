@@ -77,12 +77,23 @@ void CFirstPersonCamera::yaw(float amount)
 
 void CFirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up */)
 {
-    glm::vec3 forward = glm::normalize(target - m_position);
-    m_pitch = -std::asinf(forward.y / std::sqrt(2.f));
+    glm::vec3 direction = target - m_position;
+    if (glm::dot(direction, direction) < 1e-8f)
+    {
+        // Keep the current orientation when the target coincides with the eye.
+        return;
+    }
 
-    m_forward.x = forward.x;
-    m_forward.y = forward.z;
-    m_forward = glm::normalize(m_forward);
+    glm::vec3 forward = glm::normalize(direction);
+    m_pitch = -std::asin(glm::clamp(forward.y, -1.f, 1.f));
+
+    glm::vec2 flat(forward.x, forward.z);
+    if (glm::dot(flat, flat) < 1e-8f)
+    {
+        // Looking straight up or down leaves no horizontal heading to derive.
+        flat = glm::vec2(0.f, 1.f);
+    }
+    m_forward = glm::normalize(flat);
 
     updateView();
 }
