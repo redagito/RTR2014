@@ -34,6 +34,7 @@ The original version of this project is preserved at the [`v1`](https://github.c
 * CMake 3.28 or newer
 * Conan 2
 * A C++23 capable compiler
+* An OpenGL 4.6 capable GPU and driver
 
 ## Debug build
 
