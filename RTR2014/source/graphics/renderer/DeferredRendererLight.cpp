@@ -103,7 +103,7 @@ void DeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camera
             {
                 glm::mat4 shadowProj = glm::perspective(89.54f, 1.0f, 0.01f, radius * 1.5f);
                 StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
-                shadowCubePass(scene, shadowCamera, window, manager);
+                m_shadowCubePass.render(scene, shadowCamera, window, manager);
             }
 
             // Prepare light pass frame buffer
@@ -131,7 +131,7 @@ void DeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camera
 
             // Set shadow texture for shadow mapping
             glActiveTexture(GL_TEXTURE0 + lightPassShadowMapTextureUnit);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowCubeTexture->getId());
+            glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowCubePass.getShadowMap()->getId());
             pointLightPassShader->setUniform(shadowCubeTextureUniformName,
                                              lightPassShadowMapTextureUnit);
 

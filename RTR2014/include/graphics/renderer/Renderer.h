@@ -31,16 +31,15 @@ class Renderer : public IRenderer
     *
 	* Implemented in specialized rendering classes.
     */
-	virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) = 0;
+    virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) = 0;
 
-   protected:
     /**
     * \brief Performs GL draw call based on mesh data.
-	*
+    *
     * Sets vertex array object active and performs either indexed or non-indexed draw call.
     * Shader must be set by caller.
     */
-    void draw(Mesh* mesh);
+    static void draw(Mesh* mesh);
 
     /**
     * \brief Sends transformation matrices and material textures to the shader.
@@ -48,8 +47,8 @@ class Renderer : public IRenderer
     * Textures the material does not provide fall back to the manager's defaults.
     * Shader must be set active by caller.
     */
-    void bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
-                      const glm::mat4& rotation, const glm::mat4& scale,
-                      const IGraphicsResourceManager& manager);
+    static void bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
+                             const glm::mat4& rotation, const glm::mat4& scale,
+                             const IGraphicsResourceManager& manager);
 
 };

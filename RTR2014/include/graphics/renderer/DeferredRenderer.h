@@ -6,6 +6,7 @@
 #include "Renderer.h"
 
 #include "FrameBuffer.h"
+#include "ShadowCubePass.h"
 #include "Transformer.h"
 
 #include "resource/ResourceConfig.h"
@@ -44,12 +45,6 @@ class DeferredRenderer : public Renderer
     */
     void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
                        const IGraphicsResourceManager& manager);
-
-    /**
-     * \brief Performs shadow cube calculation.
-     */
-    void shadowCubePass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                        const IGraphicsResourceManager& manager);
 
     /**
     * \brief Writes light data into l-buffer.
@@ -151,13 +146,8 @@ class DeferredRenderer : public Renderer
     bool initShadowMapPass(IResourceManager* manager);
 
     /**
-     * \brief Initializes resources for shadow map pass
-     */
-    bool initShadowCubePass(IResourceManager* manager);
-
-    /**
-     * \brief Initializes post processing pass.
-     */
+    * \brief Initializes resources for post processing pass.
+    */
     bool initPostProcessPass(IResourceManager* manager);
 
     /**
@@ -218,11 +208,7 @@ class DeferredRenderer : public Renderer
     std::shared_ptr<Texture> m_shadowDepthTexture = nullptr;
 
     // Shadow cube pass
-    ResourceId m_shadowCubePassShaderId = -1;
-    ShaderProgram* m_shadowCubePassShader = nullptr;
-    FrameBuffer m_shadowCubeBuffer;
-    std::shared_ptr<Texture> m_shadowCubeDepthTexture = nullptr;
-    std::shared_ptr<Texture> m_shadowCubeTexture = nullptr;
+    ShadowCubePass m_shadowCubePass;
 
     // Light pass common resources
     // TODO Put into light pass class

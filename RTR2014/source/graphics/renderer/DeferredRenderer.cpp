@@ -38,7 +38,7 @@ bool DeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
-    if (!initShadowCubePass(manager))
+    if (!m_shadowCubePass.init(manager))
     {
         spdlog::error("Failed to intialize shadow map pass.");
         return false;
