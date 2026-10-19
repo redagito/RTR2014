@@ -76,5 +76,6 @@ class CTexture
     unsigned int m_width;
     unsigned int m_height;
     GLint m_format;
-    GLenum m_externalFormat;
+    GLenum m_externalFormat = GL_RGBA;
+    GLenum m_externalType = GL_UNSIGNED_BYTE;
 };

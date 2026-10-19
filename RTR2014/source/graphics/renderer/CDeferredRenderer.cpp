@@ -99,6 +99,7 @@ bool CDeferredRenderer::init(IResourceManager* manager)
     if (!initVisualizeDepthPass(manager))
     {
         spdlog::error("Failed to initialize depth visualization pass.");
+        return false;
     }
     return true;
 }
@@ -168,6 +169,9 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
                                      const IWindow& window, const IGraphicsResourceManager& manager,
                                      ISceneQuery& query)
 {
+    // Reset viewport
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+    m_geometryBuffer.resize(window.getWidth(), window.getHeight());
     // Set framebuffer
     m_geometryBuffer.setActive(GL_FRAMEBUFFER);
     // Clear buffer
@@ -196,9 +200,6 @@ void CDeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     // Winding order, standard is counter-clockwise
     glFrontFace(GL_CCW);
 
-    // Reset viewport
-    glViewport(0, 0, window.getWidth(), window.getHeight());
-    m_geometryBuffer.resize(window.getWidth(), window.getHeight());
 
     // Set view and projection matrices
     m_transformer.setViewMatrix(camera.getView());
@@ -1248,15 +1249,27 @@ bool CDeferredRenderer::initGeometryPass(IResourceManager* manager)
     // Init gbuffer
     // Diffuse texture, stores base color and glow mask.
     m_diffuseGlowTexture = std::make_shared<CTexture>();
-    m_diffuseGlowTexture->init(800, 600, GL_RGBA);
+    if (!m_diffuseGlowTexture->init(800, 600, GL_RGBA8))
+    {
+        spdlog::error("Failed to initialize the diffuse and glow texture.");
+        return false;
+    }
 
     // Normal texture, store x and y, z normals and specularity.
     m_normalSpecularTexture = std::make_shared<CTexture>();
-    m_normalSpecularTexture->init(800, 600, GL_RGBA16F);
+    if (!m_normalSpecularTexture->init(800, 600, GL_RGBA16F))
+    {
+        spdlog::error("Failed to initialize the normal and specular texture.");
+        return false;
+    }
 
     // Depth texture
     m_depthTexture = std::make_shared<CTexture>();
-    m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24);
+    if (!m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24))
+    {
+        spdlog::error("Failed to initialize the depth texture.");
+        return false;
+    }
 
 
     // Total 96 bit per pixel

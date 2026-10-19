@@ -587,11 +587,21 @@ void CGraphicsResourceManager::handleShaderEvent(ResourceId id, EListenerEvent e
 			return;
 		}
 
-		// Add create shader program
-		m_shaderPrograms[id] = std::move(std::unique_ptr<CShaderProgram>(new CShaderProgram(
+{
+			// Add create shader program
+			auto program = std::unique_ptr<CShaderProgram>(new CShaderProgram(
 			getVertexShaderObject(vertex), getTessControlShaderObject(tessControl),
 			getTessEvalShaderObject(tessEval), getGeometryShaderObject(geometry),
-			getFragmentShaderObject(fragment))));
+			getFragmentShaderObject(fragment)));
+
+		if (!program->isValid())
+		{
+			spdlog::error("Failed to link shader program with id {}.", id);
+			return;
+		}
+
+		m_shaderPrograms[id] = std::move(program);
+		}
 
 		break;
 

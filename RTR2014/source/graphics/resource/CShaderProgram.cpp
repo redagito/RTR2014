@@ -105,7 +105,7 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
     // Delete old shader object
     if (m_valid)
     {
-        glDeleteShader(m_programId);
+        glDeleteProgram(m_programId);
     }
     // Set new id
     m_programId = programId;

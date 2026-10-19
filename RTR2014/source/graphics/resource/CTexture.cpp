@@ -88,7 +88,7 @@ void CTexture::resize(unsigned int width, unsigned int height)
     }
     spdlog::debug("Texture resize from {}, {} to {}, {}.", m_width, m_height, width, height);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format, width, height, 0, m_externalFormat, m_externalType,
                  nullptr);
     m_width = width;
     m_height = height;
@@ -148,7 +148,8 @@ bool CTexture::init(const std::vector<unsigned char>& image, unsigned int width,
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
         m_externalFormat = GL_DEPTH_COMPONENT;
-        bytePerPixel = 3;
+        type = GL_UNSIGNED_INT;
+        bytePerPixel = 4;
         break;
     case GL_RGBA:  // RGB texture with alpha channel
     case GL_RGBA8:
