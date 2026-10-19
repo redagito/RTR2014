@@ -5,7 +5,7 @@
 #include "graphics/scene/SScenePointLight.h"
 #include "graphics/scene/SSceneDirectionalLight.h"
 
-CScene::CScene() {}
+CScene::CScene() : m_ambientColor(0.f), m_ambientIntensity(0.f) {}
 
 CScene::~CScene() {}
 

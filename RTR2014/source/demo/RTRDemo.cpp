@@ -324,7 +324,7 @@ bool RTRDemo::initScene()
     CSceneLoader loader(*m_resourceManager);
 
     // Get startup scene from config
-    std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test_1.json");
+    std::string sceneFile = m_config.getValue("scene", "file", "data/scene/test/test_1.json");
     spdlog::info("Loading initial scene from file {}.", sceneFile.c_str());
     if (!loader.load(sceneFile, *m_scene, *m_animationWorld))
     {

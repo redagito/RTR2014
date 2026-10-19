@@ -89,6 +89,7 @@ bool load(const Json::Value& node, const std::string& name, bool& b)
 
 bool CCameraController::loadSequence(std::string file)
 {
+    m_isRunningSequence = false;
     m_sequenceTime = 0;
     m_sequencePoints.clear();
 

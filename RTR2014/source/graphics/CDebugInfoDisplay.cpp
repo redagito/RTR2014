@@ -145,6 +145,11 @@ void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsi
 
 void CDebugInfoDisplay::draw(const CDebugInfo &info)
 {
+    if (m_overlayShader == nullptr || m_textShader == nullptr || m_texture == nullptr)
+    {
+        return;
+    }
+
     m_VAO->setActive();
 
     glEnable(GL_BLEND);

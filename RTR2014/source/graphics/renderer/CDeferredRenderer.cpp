@@ -565,9 +565,12 @@ void CDeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camer
             // fov should be 90.f instead of 89.54f, but this does not work, because the view is too
             // wide in this case. 89.54f is determined by testing. 89.53 is already too small and
             // 89.55 too big.
-            glm::mat4 shadowProj = glm::perspective(89.54f, 1.0f, 0.01f, radius * 1.5f);
-            StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
-            shadowCubePass(scene, shadowCamera, window, manager);
+            if (castsShadow)
+            {
+                glm::mat4 shadowProj = glm::perspective(89.54f, 1.0f, 0.01f, radius * 1.5f);
+                StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
+                shadowCubePass(scene, shadowCamera, window, manager);
+            }
 
             // Prepare light pass frame buffer
             glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -674,13 +677,16 @@ void CDeferredRenderer::directionalLightPass(const IScene& scene, const ICamera&
         else
         {
             // Create shadow camera
-            glm::mat4 shadowView =
-                glm::lookAt(glm::vec3(0), glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 shadowView = glm::lookAt(glm::vec3(0), glm::normalize(direction),
+                                               glm::vec3(0.0f, 1.0f, 0.0f));
             glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
 
             // Render shadow map
-            shadowMapPass(scene, shadowCamera, window, manager);
+            if (castsShadow)
+            {
+                shadowMapPass(scene, shadowCamera, window, manager);
+            }
 
             // Prepare light pass frame buffer
             m_lightPassFrameBuffer.setActive(GL_FRAMEBUFFER);
