@@ -4,7 +4,8 @@
 #include <cassert>
 #include <string>
 
-#include <lodepng.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 Texture::Texture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
@@ -111,7 +112,8 @@ void Texture::saveAsPng(const std::string& file)
     image.resize(m_width * m_height * 3);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
-    lodepng::encode(file, image, m_width, m_height, LCT_RGB);
+    stbi_write_png(file.c_str(), static_cast<int>(m_width), static_cast<int>(m_height), 3, image.data(),
+                   static_cast<int>(m_width * 3));
 }
 
 bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,

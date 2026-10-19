@@ -3,7 +3,7 @@ glm/1.0.1
 glfw/3.4
 glad/2.0.8
 jsoncpp/1.9.6
-lodepng/cci.20260102
+stb/cci.20240531
 tinyobjloader/1.0.7
 catch2/3.16.0
 spdlog/1.17.0

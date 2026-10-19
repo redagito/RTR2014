@@ -4,7 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "lodepng.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "tiny_obj_loader.h"
 
 #include "resource/IResourceListener.h"
@@ -200,18 +201,18 @@ spdlog::error("Unknown file format encountered while loading image file {}.", fi
         return invalidResource;
 	}
 
-    // Map color type
-    LodePNGColorType colorType;
+    // Map to the desired channel count
+    int channels;
     switch (format)
     {
     case ColorFormat::GreyScale8:
-        colorType = LCT_GREY;
+        channels = 1;
         break;
     case ColorFormat::RGB24:
-        colorType = LCT_RGB;
+        channels = 3;
         break;
     case ColorFormat::RGBA32:
-        colorType = LCT_RGBA;
+        channels = 4;
         break;
     default:
         spdlog::error("Unknown color format encountered while loading image file {}.", file.c_str());
@@ -220,13 +221,19 @@ spdlog::error("Unknown file format encountered while loading image file {}.", fi
     }
 
     // Decode image data
-    unsigned int err = lodepng::decode(data, width, height, file, colorType);
-    if (err != 0)
+    int decodedWidth = 0;
+    int decodedHeight = 0;
+    unsigned char* decoded = stbi_load(file.c_str(), &decodedWidth, &decodedHeight, nullptr, channels);
+    if (decoded == nullptr)
     {
         spdlog::error("An error occured while decoding the image file {}: {}", file.c_str(),
-                  lodepng_error_text(err));
+                   stbi_failure_reason());
         return -1;
     }
+    data.assign(decoded, decoded + (decodedWidth * decodedHeight * channels));
+    stbi_image_free(decoded);
+    width = static_cast<unsigned int>(decodedWidth);
+    height = static_cast<unsigned int>(decodedHeight);
 
     ResourceId imageId = createImage(data, width, height, format);
     if (imageId == -1)

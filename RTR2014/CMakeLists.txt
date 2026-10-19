@@ -2,7 +2,7 @@ find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
-find_package(lodepng CONFIG REQUIRED)
+find_package(stb CONFIG REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
@@ -27,5 +27,5 @@ target_link_libraries(RTR2014
         spdlog::spdlog
     PRIVATE
         JsonCpp::JsonCpp
-        lodepng::lodepng
+        stb::stb
         tinyobjloader::tinyobjloader)
