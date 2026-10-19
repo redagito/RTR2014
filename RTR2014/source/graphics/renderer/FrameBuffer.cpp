@@ -84,6 +84,8 @@ void FrameBuffer::resize(unsigned int width, unsigned int height)
     for (auto& entry : m_textures)
     {
         entry.second->resize(width, height);
+        // The storage reallocation invalidates the attachment
+        glNamedFramebufferTexture(m_fboId, entry.first, entry.second->getId(), 0);
     }
     for (auto& entry : m_renderBuffers)
     {
