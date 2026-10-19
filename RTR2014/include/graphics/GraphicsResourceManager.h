@@ -110,31 +110,6 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
     void initDefaultTextures();
 
     /**
-    * \brief Loads vertex shader from resource manager.
-    */
-    bool loadVertexShader(ResourceId id, IResourceManager* resourceManager);
-
-    /**
-    * \brief Loads tessellation control shader from resource manager.
-    */
-    bool loadTessControlShader(ResourceId id, IResourceManager* resourceManager);
-
-    /**
-    * \brief Loads tessellation evaluation shader from resource manager.
-    */
-    bool loadTessEvalShader(ResourceId id, IResourceManager* resourceManager);
-
-    /**
-    * \brief Loads geometry shader from resource manager.
-    */
-    bool loadGeometryShader(ResourceId id, IResourceManager* resourceManager);
-
-    /**
-    * \brief Loads fragment shader from resource manager.
-    */
-    bool loadFragmentShader(ResourceId id, IResourceManager* resourceManager);
-
-    /**
     * \brief Handles resource events for image resources.
     */
     void handleImageEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);

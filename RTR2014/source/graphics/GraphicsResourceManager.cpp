@@ -6,6 +6,71 @@
 
 #include "resource/IResourceManager.h"
 
+namespace
+{
+/**
+* \brief Compiles a shader stage from the source text of a string resource.
+*/
+template <GLenum Stage>
+bool loadShaderStage(
+	ResourceId id, IResourceManager* resourceManager,
+	std::unordered_map<ResourceId, std::unique_ptr<ShaderObject<Stage>>>& shaders)
+{
+	// Unused id
+	if (id == invalidResource)
+	{
+		return true;
+	}
+	// Already loaded
+	if (shaders.count(id) != 0)
+	{
+		return true;
+	}
+	// Load from resource manager
+	std::string text;
+	resourceManager->getString(id, text);
+	if (text.empty())
+	{
+		return false;
+	}
+	std::unique_ptr<ShaderObject<Stage>> shader(new ShaderObject<Stage>(text));
+	// Check compile error
+	if (!shader->isValid())
+	{
+		spdlog::error("{}", shader->getErrorString().c_str());
+		return false;
+	}
+	// Move to map
+	shaders[id] = std::move(shader);
+	return true;
+}
+
+/**
+* \brief Returns a compiled shader stage, or null if it was not loaded.
+*/
+template <GLenum Stage>
+ShaderObject<Stage>* getShaderStage(
+	const std::unordered_map<ResourceId, std::unique_ptr<ShaderObject<Stage>>>& shaders, ResourceId id,
+	const char* stageName)
+{
+	// Invalid id
+	if (id == invalidResource)
+	{
+		return nullptr;
+	}
+	// Search for id
+	auto iter = shaders.find(id);
+
+	// TODO Allow loading the shader stage if not found?
+	if (iter == shaders.end())
+	{
+		spdlog::error("The requested {} id {} has not been loaded.", stageName, id);
+		return nullptr;
+	}
+	return iter->second.get();
+}
+} // namespace
+
 GraphicsResourceManager::GraphicsResourceManager()
 {
 	// Create default textures
@@ -191,257 +256,27 @@ Texture* GraphicsResourceManager::getDefaultAlphaTexture() const
 
 ShaderObject<GL_VERTEX_SHADER>* GraphicsResourceManager::getVertexShaderObject(ResourceId id) const
 {
-	// Invalid id
-	if (id == -1)
-	{
-		return nullptr;
-	}
-	// Search for id
-	auto iter = m_vertexShader.find(id);
-
-	// TODO Allow vertex shader loading if not found?
-	if (iter == m_vertexShader.end())
-	{
-		spdlog::error("The requested vertex shader id {} has not been loaded.", id);
-		return nullptr;
-	}
-	return iter->second.get();
+	return getShaderStage<GL_VERTEX_SHADER>(m_vertexShader, id, "vertex shader");
 }
 
 ShaderObject<GL_TESS_CONTROL_SHADER>* GraphicsResourceManager::getTessControlShaderObject(ResourceId id) const
 {
-	// Invalid id
-	if (id == -1)
-	{
-		return nullptr;
-	}
-	// Search for id
-	auto iter = m_tessConstrolShader.find(id);
-
-	// TODO Allow tessellation control shader loading if not found?
-	if (iter == m_tessConstrolShader.end())
-	{
-		spdlog::error("The requested tessellation control shader id {} has not been loaded.", id);
-		return nullptr;
-	}
-	return iter->second.get();
+	return getShaderStage<GL_TESS_CONTROL_SHADER>(m_tessConstrolShader, id, "tessellation control shader");
 }
 
 ShaderObject<GL_TESS_EVALUATION_SHADER>* GraphicsResourceManager::getTessEvalShaderObject(ResourceId id) const
 {
-	// Invalid id
-	if (id == -1)
-	{
-		return nullptr;
-	}
-	// Search for id
-	auto iter = m_tessEvalShader.find(id);
-
-	// TODO Allow tessellation evaluation shader loading if not found?
-	if (iter == m_tessEvalShader.end())
-	{
-		spdlog::error("The requested tessellation evaluation shader id {} has not been loaded.", id);
-		return nullptr;
-	}
-	return iter->second.get();
+	return getShaderStage<GL_TESS_EVALUATION_SHADER>(m_tessEvalShader, id, "tessellation evaluation shader");
 }
 
 ShaderObject<GL_GEOMETRY_SHADER>* GraphicsResourceManager::getGeometryShaderObject(ResourceId id) const
 {
-	// Invalid id
-	if (id == -1)
-	{
-		return nullptr;
-	}
-	// Search for id
-	auto iter = m_geometryShader.find(id);
-
-	// TODO Allow geometry shader loading if not found?
-	if (iter == m_geometryShader.end())
-	{
-		spdlog::error("The requested geometry shader id {} has not been loaded.", id);
-		return nullptr;
-	}
-	return iter->second.get();
+	return getShaderStage<GL_GEOMETRY_SHADER>(m_geometryShader, id, "geometry shader");
 }
 
 ShaderObject<GL_FRAGMENT_SHADER>* GraphicsResourceManager::getFragmentShaderObject(ResourceId id) const
 {
-	// Invalid id
-	if (id == -1)
-	{
-		return nullptr;
-	}
-	// Search for id
-	auto iter = m_fragmentShader.find(id);
-
-	// TODO Allow fragment shader loading if not found?
-	if (iter == m_fragmentShader.end())
-	{
-		spdlog::error("The requested fragment shader id {} has not been loaded.", id);
-		return nullptr;
-	}
-	return iter->second.get();
-}
-
-bool GraphicsResourceManager::loadVertexShader(ResourceId id, IResourceManager* resourceManager)
-{
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_vertexShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<ShaderObject<GL_VERTEX_SHADER>> shader(
-		new ShaderObject<GL_VERTEX_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		spdlog::error("{}", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_vertexShader[id] = std::move(shader);
-	return true;
-}
-
-bool GraphicsResourceManager::loadTessControlShader(ResourceId id, IResourceManager* resourceManager)
-{
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_tessConstrolShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<ShaderObject<GL_TESS_CONTROL_SHADER>> shader(
-		new ShaderObject<GL_TESS_CONTROL_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		spdlog::error("{}", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_tessConstrolShader[id] = std::move(shader);
-	return true;
-}
-
-bool GraphicsResourceManager::loadTessEvalShader(ResourceId id, IResourceManager* resourceManager)
-{
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_tessEvalShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<ShaderObject<GL_TESS_EVALUATION_SHADER>> shader(
-		new ShaderObject<GL_TESS_EVALUATION_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		spdlog::error("{}", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_tessEvalShader[id] = std::move(shader);
-	return true;
-}
-
-bool GraphicsResourceManager::loadGeometryShader(ResourceId id, IResourceManager* resourceManager)
-{
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_geometryShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<ShaderObject<GL_GEOMETRY_SHADER>> shader(
-		new ShaderObject<GL_GEOMETRY_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		spdlog::error("{}", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_geometryShader[id] = std::move(shader);
-	return true;
-}
-
-bool GraphicsResourceManager::loadFragmentShader(ResourceId id, IResourceManager* resourceManager)
-{
-	// Unused id
-	if (id == -1)
-	{
-		return true;
-	}
-	// Already loaded
-	if (m_fragmentShader.count(id) != 0)
-	{
-		return true;
-	}
-	// Load from resoucre manager
-	std::string text;
-	resourceManager->getString(id, text);
-	if (text.empty())
-	{
-		return false;
-	}
-	std::unique_ptr<ShaderObject<GL_FRAGMENT_SHADER>> shader(
-		new ShaderObject<GL_FRAGMENT_SHADER>(text));
-	// Check compile error
-	if (!shader->isValid())
-	{
-		spdlog::error("{}", shader->getErrorString().c_str());
-		return false;
-	}
-	// Move to map
-	m_fragmentShader[id] = std::move(shader);
-	return true;
+	return getShaderStage<GL_FRAGMENT_SHADER>(m_fragmentShader, id, "fragment shader");
 }
 
 void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent event,
@@ -600,16 +435,17 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 			assert(false && "Failed to access shader resource");
 		}
 
-		// Load shader objects from source
-		if (!loadVertexShader(vertex, resourceManager) ||
-			!loadTessControlShader(tessControl, resourceManager) ||
-			!loadTessEvalShader(tessEval, resourceManager) ||
-			!loadGeometryShader(geometry, resourceManager) ||
-			!loadFragmentShader(fragment, resourceManager))
-		{
-			// TODO Log error
-			return;
-		}
+	// Load shader objects from source
+	if (!loadShaderStage<GL_VERTEX_SHADER>(vertex, resourceManager, m_vertexShader) ||
+		!loadShaderStage<GL_TESS_CONTROL_SHADER>(tessControl, resourceManager,
+												  m_tessConstrolShader) ||
+		!loadShaderStage<GL_TESS_EVALUATION_SHADER>(tessEval, resourceManager, m_tessEvalShader) ||
+		!loadShaderStage<GL_GEOMETRY_SHADER>(geometry, resourceManager, m_geometryShader) ||
+		!loadShaderStage<GL_FRAGMENT_SHADER>(fragment, resourceManager, m_fragmentShader))
+	{
+		// TODO Log error
+		return;
+	}
 
 {
 			// Add create shader program
