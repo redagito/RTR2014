@@ -36,6 +36,8 @@ class GlfwWindow : public IWindow
      */
     void swapBuffer() override;
 
+    void setVSync(bool enabled) override;
+
     /**
      * \brief Toggles mouse capture state.
      */

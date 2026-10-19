@@ -57,10 +57,12 @@ class DemoController
     AnimationWorld* m_animationWorld = nullptr;
 
     bool m_displayDebugInfo = false;
+    bool m_vSync = true;
 
     double m_f1Cooldown = 0.0;
     double m_f2Cooldown = 0.0;
     double m_f3Cooldown = 0.0;
+    double m_f4Cooldown = 0.0;
     double m_f5Cooldown = 0.0;
     double m_k1Cooldown = 0.0;
 

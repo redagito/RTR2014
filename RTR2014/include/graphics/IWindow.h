@@ -54,9 +54,14 @@ class IWindow
     virtual bool isOpen() const = 0;
 
     /**
-    * \brief Swaps back and front buffers.
-    */
+     * \brief Swaps the front and back buffers.
+     */
     virtual void swapBuffer() = 0;
+
+    /**
+     * \brief Enables or disables the synchronization with the display refresh.
+     */
+    virtual void setVSync(bool enabled) = 0;
 
     /**
     * \brief Toggles mouse capture state.

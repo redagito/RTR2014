@@ -60,6 +60,7 @@ void DemoController::updateInput(float timeDiff)
     m_f1Cooldown -= timeDiff;
     m_f2Cooldown -= timeDiff;
     m_f3Cooldown -= timeDiff;
+    m_f4Cooldown -= timeDiff;
     m_f5Cooldown -= timeDiff;
     m_k1Cooldown -= timeDiff;
     m_fpsCoolDown -= timeDiff;
@@ -96,6 +97,13 @@ void DemoController::updateInput(float timeDiff)
         m_renderer = m_forwardRenderer;
     }
 
+    if (m_inputProvider->isKeyPressed(GLFW_KEY_F4) && m_f4Cooldown <= 0.f)
+    {
+        m_f4Cooldown = 0.3f;
+        m_vSync = !m_vSync;
+        m_window->setVSync(m_vSync);
+    }
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F5) && m_f5Cooldown <= 0.f)
     {
         m_f5Cooldown = 0.3f;
@@ -115,6 +123,7 @@ void DemoController::updateDebugInfo(float timeDiff)
     m_debugInfo->setValue("Camera y", std::to_string(m_camera->getPosition().y));
     m_debugInfo->setValue("Camera z", std::to_string(m_camera->getPosition().z));
     m_debugInfo->setValue("FPS", std::to_string(m_lastFrameCount));
+    m_debugInfo->setValue("VSync", m_vSync ? "on" : "off");
 
     m_debugInfoDisplay->draw(*m_debugInfo);
 }

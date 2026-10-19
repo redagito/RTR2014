@@ -97,6 +97,7 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
 
     glfwMakeContextCurrent(m_window);
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSwapInterval(1);
 
 if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
@@ -132,6 +133,8 @@ void GlfwWindow::setActive() const { glfwMakeContextCurrent(m_window); }
 bool GlfwWindow::isOpen() const { return !glfwWindowShouldClose(m_window); }
 
 void GlfwWindow::swapBuffer() { glfwSwapBuffers(m_window); }
+
+void GlfwWindow::setVSync(bool enabled) { glfwSwapInterval(enabled ? 1 : 0); }
 
 void GlfwWindow::toggleMouseCapture()
 {

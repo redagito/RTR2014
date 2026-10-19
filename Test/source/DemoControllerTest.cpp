@@ -43,6 +43,7 @@ class FakeWindow : public IWindow
     void setActive() const override {}
     bool isOpen() const override { return true; }
     void swapBuffer() override {}
+    void setVSync(bool enabled) override { vSync = enabled; }
     void toggleMouseCapture() override { ++mouseCaptureToggles; }
     void pollEvents() override {}
     double getTime() const override { return 0.0; }
@@ -50,6 +51,7 @@ class FakeWindow : public IWindow
     void removeListener(IWindowListener* listener) override {}
 
     int mouseCaptureToggles = 0;
+    bool vSync = true;
 };
 
 class FakeInputProvider : public IInputProvider
@@ -166,4 +168,16 @@ TEST_CASE("Demo controller toggles mouse capture on F1", "[demo]")
     f.inputProvider.press(GLFW_KEY_F1);
     f.controller->update(0.016f);
     REQUIRE(f.window.mouseCaptureToggles == 1);
+}
+
+TEST_CASE("Demo controller toggles vsync on F4", "[demo]")
+{
+    Fixture f;
+
+    f.controller->update(0.016f);
+    REQUIRE(f.window.vSync == true);
+
+    f.inputProvider.press(GLFW_KEY_F4);
+    f.controller->update(0.016f);
+    REQUIRE(f.window.vSync == false);
 }
