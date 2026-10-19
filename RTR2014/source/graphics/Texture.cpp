@@ -45,6 +45,7 @@ Texture::Texture(GLint id, bool hasMipmaps, unsigned int width, unsigned int hei
     m_height = height;
     m_format = format;
     m_externalFormat = externalFormat;
+    m_internalFormat = format;
 }
 
 Texture::~Texture()
@@ -90,10 +91,49 @@ void Texture::resize(unsigned int width, unsigned int height)
         return;
     }
     spdlog::debug("Texture resize from {}, {} to {}, {}.", m_width, m_height, width, height);
-    // The storage is immutable, so it is re-allocated
-    glTextureStorage2D(m_textureId, m_levels, m_internalFormat, width, height);
+    // The storage of a texture is immutable, it cannot be re-allocated. A new texture object
+    // is created instead and the frame buffer attachment is updated by the caller.
+    GLuint textureId;
+    glCreateTextures(GL_TEXTURE_2D, 1, &textureId);
+    glTextureStorage2D(textureId, m_levels, m_internalFormat, width, height);
+    applyParameters(textureId, width, height);
+
+    glDeleteTextures(1, &m_textureId);
+    m_textureId = textureId;
     m_width = width;
     m_height = height;
+}
+
+void Texture::applyParameters(GLuint textureId, unsigned int width, unsigned int height) const
+{
+    // TODO Filter should be based on arguments and mip map level
+    // Set filters
+    if (width == 1 && height == 1)
+    {
+        // Special case 1x1 texture
+        // Needs nearest filtering otherwise texture is black?
+        glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+    else
+    {
+        if (m_hasMipmaps)
+        {
+            // Bilinear filtering
+            glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        }
+        else
+        {
+            // Default value is linear filtering
+            glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        }
+    }
+
+    // Set wrap mode
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 }
 
 GLuint Texture::getId() const { return m_textureId; }
@@ -201,34 +241,7 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
     // Allocate the texture storage
     glTextureStorage2D(textureId, levels, internalFormat, width, height);
 
-    // TODO Filter should be based on arguments and mip map level
-    // Set filters
-    if (width == 1 && height == 1)
-    {
-        // Special case 1x1 texture
-        // Needs nearest filtering otherwise texture is black?
-        glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    }
-    else
-    {
-		if (m_hasMipmaps)
-		{
-			// Bilinear filtering
-			glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		}
-		else
-		{
-			// Default value is linear filtering
-			glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		}
-    }
-
-    // Set wrap mode
-    glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    applyParameters(textureId, width, height);
 
 	// Load data
 	if (!image.empty())

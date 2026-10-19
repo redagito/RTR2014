@@ -70,6 +70,11 @@ class Texture
               GLint format, bool createMipmaps);
 
    private:
+    /**
+     * \brief Applies the filtering and wrap parameters to a texture object.
+     */
+    void applyParameters(GLuint textureId, unsigned int width, unsigned int height) const;
+
     bool m_valid;
     bool m_hasMipmaps = false;
     GLuint m_textureId;
