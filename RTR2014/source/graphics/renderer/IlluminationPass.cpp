@@ -41,6 +41,7 @@ void IlluminationPass::render(const IWindow& window, const IGraphicsResourceMana
         spdlog::error("Shader program for illumination pass could not be retrieved.");
         return;
     }
+    illuminationShader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);

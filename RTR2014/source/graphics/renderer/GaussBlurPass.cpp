@@ -34,6 +34,7 @@ void GaussBlurPass::renderVertical(const IWindow& window, const IGraphicsResourc
         spdlog::error("Shader program for vertical gauss blur pass could not be retrieved.");
         return;
     }
+    shader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
@@ -68,6 +69,7 @@ void GaussBlurPass::renderHorizontal(const IWindow& window, const IGraphicsResou
         spdlog::error("Shader program for horizontal gauss blur pass could not be retrieved.");
         return;
     }
+    shader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);

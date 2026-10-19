@@ -39,6 +39,7 @@ void DepthOfFieldPass::render(const ICamera& camera, const IWindow& window,
         spdlog::error("Shader program for depth-of-field pass could not be retrieved.");
         return;
     }
+    shader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);

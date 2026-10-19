@@ -95,6 +95,8 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
             // Cull front facing faces
             glCullFace(GL_FRONT);
 
+            pointLightPassShader->setActive();
+
             // Set textures for point light pass
             // Set depth texture
             depthTexture->setActive(lightPassDepthTextureUnit);
@@ -106,7 +108,8 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
                                              lightPassNormalSpecularTextureUnit);
 
             // Set shadow texture for shadow mapping
-    glBindTextureUnit(lightPassShadowMapTextureUnit, m_shadowCubePass.getShadowMap()->getId());
+            glBindTextureUnit(lightPassShadowMapTextureUnit,
+                              m_shadowCubePass.getShadowMap()->getId());
             pointLightPassShader->setUniform(shadowCubeTextureUniformName,
                                              lightPassShadowMapTextureUnit);
 

@@ -34,6 +34,7 @@ void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResour
         spdlog::error("Shader program for depth visualization pass could not be retrieved.");
         return;
     }
+    shader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);

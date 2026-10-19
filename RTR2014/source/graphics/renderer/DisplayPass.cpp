@@ -38,6 +38,7 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
         spdlog::error("Shader program for display pass could not be retrieved.");
         return;
     }
+    displayShader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);

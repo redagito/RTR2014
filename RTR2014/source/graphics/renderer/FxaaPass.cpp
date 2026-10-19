@@ -34,6 +34,7 @@ void FxaaPass::render(const IWindow& window, const IGraphicsResourceManager& man
         spdlog::error("Shader program for fxaa pass could not be retrieved.");
         return;
     }
+    fxaaShader->setActive();
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
