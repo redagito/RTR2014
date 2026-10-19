@@ -6,6 +6,7 @@
 #include "Renderer.h"
 
 #include "FrameBuffer.h"
+#include "GeometryPass.h"
 #include "ShadowCubePass.h"
 #include "Transformer.h"
 
@@ -34,12 +35,6 @@ class DeferredRenderer : public Renderer
     static DeferredRenderer* create(IResourceManager* manager);
 
    protected:
-    /**
-    * \brief Writes geometry data into g-buffer.
-    */
-    void geometryPass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                      const IGraphicsResourceManager& manager, ISceneQuery& query);
-
     /**
     * \brief Performs shadow map calculation.
     */
@@ -121,11 +116,6 @@ class DeferredRenderer : public Renderer
                             const IGraphicsResourceManager& manager);
 
     /**
-    * \brief Initializes resources for geometry pass.
-    */
-    bool initGeometryPass(IResourceManager* manager);
-
-    /**
     * \brief Initializes resources for point light pass.
     */
     bool initPointLightPass(IResourceManager* manager);
@@ -184,22 +174,11 @@ class DeferredRenderer : public Renderer
 
     bool initVisualizeDepthPass(IResourceManager* manager);
 
-    void draw(Mesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
-              const glm::mat4& scale, Material* material, const IGraphicsResourceManager& manager,
-              ShaderProgram* shader);
-
    private:
     Transformer m_transformer; /**< Stores current transformation matrices. */
 
     // Geometry pass
-    // TODO Put into geometry pass class
-    FrameBuffer m_geometryBuffer;                      /**< GBuffer. */
-    std::shared_ptr<Texture> m_depthTexture = nullptr; /**< Depth texture attachment. */
-    std::shared_ptr<Texture> m_diffuseGlowTexture =
-        nullptr; /**< Diffuse texture with glow as alpha. */
-    std::shared_ptr<Texture>
-        m_normalSpecularTexture; /**< Normal texture with specularity as alpha. */
-    ResourceId m_geometryPassShaderId = -1;
+    GeometryPass m_geometryPass;
 
     // Shadow map pass
     ResourceId m_shadowMapPassShaderId = -1;

@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics/renderer/DeferredRenderer.h"
+#include "graphics/renderer/GeometryPass.h"
 
 #include <string>
 
@@ -7,7 +7,6 @@
 
 #include "resource/IResourceManager.h"
 
-#include <glm/ext/matrix_transform.hpp>
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
@@ -15,13 +14,22 @@
 #include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
+#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Transformer.h"
+#include "graphics/renderer/Renderer.h"
 
+GeometryPass::GeometryPass()
+{
+    return;
+}
 
-void DeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
-                                     const IWindow& window, const IGraphicsResourceManager& manager,
-                                     ISceneQuery& query)
+GeometryPass::~GeometryPass()
+{
+    return;
+}
+
+void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera& camera,
+                          const IWindow& window, const IGraphicsResourceManager& manager)
 {
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -54,15 +62,9 @@ void DeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     // Winding order, standard is counter-clockwise
     glFrontFace(GL_CCW);
 
-
-    // Set view and projection matrices
-    m_transformer.setViewMatrix(camera.getView());
-    m_transformer.setProjectionMatrix(camera.getProjection());
-
     // Send view/projection to default shader
-    geometryPassShader->setUniform(viewMatrixUniformName, m_transformer.getViewMatrix());
-    geometryPassShader->setUniform(projectionMatrixUniformName,
-                                   m_transformer.getProjectionMatrix());
+    geometryPassShader->setUniform(viewMatrixUniformName, camera.getView());
+    geometryPassShader->setUniform(projectionMatrixUniformName, camera.getProjection());
 
     // Traverse visible objects
     while (query.hasNextObject())
@@ -102,8 +104,12 @@ void DeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
             else
             {
                 // Forward draw call
-                draw(mesh, m_transformer.getTranslationMatrix(), m_transformer.getRotationMatrix(),
-                     m_transformer.getScaleMatrix(), material, manager, geometryPassShader);
+                geometryPassShader->setActive();
+                Renderer::bindMaterial(geometryPassShader, material,
+                                       m_transformer.getTranslationMatrix(),
+                                       m_transformer.getRotationMatrix(),
+                                       m_transformer.getScaleMatrix(), manager);
+                Renderer::draw(mesh);
             }
         }
     }
@@ -114,23 +120,7 @@ void DeferredRenderer::geometryPass(const IScene& scene, const ICamera& camera,
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 }
 
-void DeferredRenderer::draw(Mesh* mesh, const glm::mat4& translation, const glm::mat4& rotation,
-                             const glm::mat4& scale, Material* material,
-                             const IGraphicsResourceManager& manager, ShaderProgram* shader)
-{
-
-    shader->setActive();
-
-    bindMaterial(shader, material, translation, rotation, scale, manager);
-
-    // Draw mesh
-    // TODO Consider custom shader bindings for meshes
-    Renderer::draw(mesh);
-
-    // TODO Cleanup?
-}
-
-bool DeferredRenderer::initGeometryPass(IResourceManager* manager)
+bool GeometryPass::init(IResourceManager* manager)
 {
     // Init geometry pass shader
     // TODO Read file name from config?
@@ -185,3 +175,17 @@ bool DeferredRenderer::initGeometryPass(IResourceManager* manager)
     return true;
 }
 
+const std::shared_ptr<Texture>& GeometryPass::getDepthTexture() const
+{
+    return m_depthTexture;
+}
+
+const std::shared_ptr<Texture>& GeometryPass::getDiffuseGlowTexture() const
+{
+    return m_diffuseGlowTexture;
+}
+
+const std::shared_ptr<Texture>& GeometryPass::getNormalSpecularTexture() const
+{
+    return m_normalSpecularTexture;
+}

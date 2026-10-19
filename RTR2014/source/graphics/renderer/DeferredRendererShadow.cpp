@@ -103,8 +103,12 @@ void DeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
             else
             {
                 // Forward draw call
-                draw(mesh, transformer.getTranslationMatrix(), transformer.getRotationMatrix(),
-                     transformer.getScaleMatrix(), material, manager, m_shadowMapPassShader);
+                m_shadowMapPassShader->setActive();
+                Renderer::bindMaterial(m_shadowMapPassShader, material,
+                                       transformer.getTranslationMatrix(),
+                                       transformer.getRotationMatrix(),
+                                       transformer.getScaleMatrix(), manager);
+                Renderer::draw(mesh);
             }
         }
     }

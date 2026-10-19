@@ -121,11 +121,11 @@ void DeferredRenderer::pointLightPass(const IScene& scene, const ICamera& camera
 
             // Set textures for point light pass
             // Set depth texture
-            m_depthTexture->setActive(lightPassDepthTextureUnit);
+            m_geometryPass.getDepthTexture()->setActive(lightPassDepthTextureUnit);
             pointLightPassShader->setUniform(depthTextureUniformName, lightPassDepthTextureUnit);
 
             // Set texture with world space normal and specular power
-            m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+            m_geometryPass.getNormalSpecularTexture()->setActive(lightPassNormalSpecularTextureUnit);
             pointLightPassShader->setUniform(normalSpecularTextureUniformName,
                                              lightPassNormalSpecularTextureUnit);
 
@@ -240,12 +240,12 @@ void DeferredRenderer::directionalLightPass(const IScene& scene, const ICamera& 
 
             // Set textures for point light pass
             // Set depth texture
-            m_depthTexture->setActive(lightPassDepthTextureUnit);
+            m_geometryPass.getDepthTexture()->setActive(lightPassDepthTextureUnit);
             directionalLightPassShader->setUniform(depthTextureUniformName,
                                                    lightPassDepthTextureUnit);
 
             // Set texture with world space normal and specular power
-            m_normalSpecularTexture->setActive(lightPassNormalSpecularTextureUnit);
+            m_geometryPass.getNormalSpecularTexture()->setActive(lightPassNormalSpecularTextureUnit);
             directionalLightPassShader->setUniform(normalSpecularTextureUniformName,
                                                    lightPassNormalSpecularTextureUnit);
 
@@ -318,12 +318,12 @@ void DeferredRenderer::illuminationPass(const IScene& scene, const ICamera& came
     illuminationShader->setUniform(lightTextureUniformName, illuminationPassLightTextureUnit);
 
     // G-buffer diffuse glow texture
-    m_diffuseGlowTexture->setActive(illuminationPassDiffuseGlowTextureUnit);
+    m_geometryPass.getDiffuseGlowTexture()->setActive(illuminationPassDiffuseGlowTextureUnit);
     illuminationShader->setUniform(diffuseGlowTextureUniformName,
                                    illuminationPassDiffuseGlowTextureUnit);
 
     // G-buffer depth texture
-    m_depthTexture->setActive(illuminationPassDepthTextureUnit);
+    m_geometryPass.getDepthTexture()->setActive(illuminationPassDepthTextureUnit);
     illuminationShader->setUniform(depthTextureUniformName, illuminationPassDepthTextureUnit);
 
     // Screen parameters

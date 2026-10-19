@@ -24,7 +24,7 @@ bool DeferredRenderer::init(IResourceManager* manager)
 
 
     // Init geometry pass resources
-    if (!initGeometryPass(manager))
+    if (!m_geometryPass.init(manager))
     {
         spdlog::error("Failed to intialize geometry pass.");
         return false;
@@ -94,11 +94,15 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Draw init
     window.setActive();
 
+    // Camera state shared by the passes
+    m_transformer.setViewMatrix(camera.getView());
+    m_transformer.setProjectionMatrix(camera.getProjection());
+
     // Query visible scene objects and lights
     std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Geometry pass fills gbuffer
-    geometryPass(scene, camera, window, manager, *query);
+    m_geometryPass.render(scene, *query, camera, window, manager);
 
     // Light pass fills lbuffer
     lightPass(scene, camera, window, manager, *query);
@@ -114,7 +118,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Select rendering mode
     if (camera.getFeatureInfo().renderMode == RenderMode::Color)
     {
-        displayPass(window, manager, m_diffuseGlowTexture);
+        displayPass(window, manager, m_geometryPass.getDiffuseGlowTexture());
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
     {
@@ -126,7 +130,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Normals)
     {
-        displayPass(window, manager, m_normalSpecularTexture);
+        displayPass(window, manager, m_geometryPass.getNormalSpecularTexture());
     }
     else  // Final mode
     {

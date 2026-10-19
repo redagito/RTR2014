@@ -136,7 +136,7 @@ void DeferredRenderer::fogPass(const ICamera& camera, const IWindow& window,
     texture->setActive(fogPassSceneTextureUnit);
     fogShader->setUniform(sceneTextureUniformName, fogPassSceneTextureUnit);
 
-    m_depthTexture->setActive(fogPassDepthTextureUnit);
+    m_geometryPass.getDepthTexture()->setActive(fogPassDepthTextureUnit);
     fogShader->setUniform(depthTextureUniformName, fogPassDepthTextureUnit);
 
     fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
@@ -265,7 +265,7 @@ void DeferredRenderer::depthOfFieldPass(const ICamera& camera, const IWindow& wi
     shader->setUniform(blurTextureUniformName, depthOfFieldPassBlurTextureUnit);
 
     // Input depth texture
-    m_depthTexture->setActive(depthOfFieldPassDepthTextureUnit);
+    m_geometryPass.getDepthTexture()->setActive(depthOfFieldPassDepthTextureUnit);
     shader->setUniform(depthTextureUniformName, depthOfFieldPassDepthTextureUnit);
 
     // Depth-of-field parameters
@@ -351,7 +351,7 @@ void DeferredRenderer::visualizeDepthPass(const ICamera& camera, const IWindow& 
     }
 
     // Depth texture
-    m_depthTexture->setActive(visualizeDepthPassDepthTextureUnit);
+    m_geometryPass.getDepthTexture()->setActive(visualizeDepthPassDepthTextureUnit);
     shader->setUniform(depthTextureUniformName, visualizeDepthPassDepthTextureUnit);
 
     /// Screen size
