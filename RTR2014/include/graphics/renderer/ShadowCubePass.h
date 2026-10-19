@@ -51,7 +51,7 @@ class ShadowCubePass
     */
     struct CameraDirection
     {
-        GLenum cubemapFace;
+        int cubemapFace; /**< Cube map face layer index, 0 to 5. */
         glm::vec3 target;
         glm::vec3 up;
     };
