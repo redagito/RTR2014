@@ -75,7 +75,9 @@ ResourceId CResourceManager::loadMesh(const std::string& file)
         }
         if (shapes.size() > 1)
         {
-            spdlog::warn("Multple meshes in obj files not supported.");
+            spdlog::error("Mesh file {} contains multiple shapes, which is not supported.",
+                       file.c_str());
+            return -1;
         }
         if (shapes.empty())
         {
@@ -189,7 +191,8 @@ ResourceId CResourceManager::createImage(const std::vector<unsigned char>& image
 
 ResourceId CResourceManager::loadImage(const std::string& file, EColorFormat format)
 {
-    auto entry = m_imageFiles.find(file);
+    std::string imageKey = file + "|" + std::to_string(static_cast<int>(format));
+    auto entry = m_imageFiles.find(imageKey);
     if (entry != m_imageFiles.end())
     {
         return entry->second;
@@ -241,7 +244,7 @@ spdlog::error("Unknown file format encountered while loading image file {}.", fi
         spdlog::error("Failed to create image resource id from file {}.", file.c_str());
         return -1;
     }
-    m_imageFiles[file] = imageId;
+    m_imageFiles[imageKey] = imageId;
     return imageId;
 }
 

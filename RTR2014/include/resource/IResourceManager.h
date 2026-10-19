@@ -76,9 +76,9 @@ class IResourceManager
     /**
     * \brief Returns material data.
     */
-    virtual bool getMaterial(ResourceId id, ResourceId& diffuseImage, ResourceId& alphaImage,
-                             ResourceId& normalImage, ResourceId& specularImage,
-                             ResourceId& glowImage, ResourceId& customShader) const = 0;
+    virtual bool getMaterial(ResourceId id, ResourceId& diffuseImage, ResourceId& normalImage,
+                             ResourceId& specularImage, ResourceId& glowImage,
+                             ResourceId& alphaImage, ResourceId& customShader) const = 0;
 
     /**
      * \brief Creates string resource.

@@ -26,7 +26,7 @@ class CResourceManager : public IResourceManager
                           const std::vector<float>& normals, const std::vector<float>& uvs,
                           EPrimitiveType type);
 
-    ResourceId loadMesh(const std::string& file);
+    ResourceId loadMesh(const std::string& file) override;
 
     bool getMesh(ResourceId id, std::vector<float>& vertices, std::vector<unsigned int>& indices,
                  std::vector<float>& normals, std::vector<float>& uvs, EPrimitiveType& type) const;
@@ -34,7 +34,7 @@ class CResourceManager : public IResourceManager
     ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
                            unsigned int height, EColorFormat format);
 
-    ResourceId loadImage(const std::string& file, EColorFormat format);
+    ResourceId loadImage(const std::string& file, EColorFormat format) override;
 
     bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
                   unsigned int& height, EColorFormat& format) const;
@@ -42,7 +42,7 @@ class CResourceManager : public IResourceManager
     ResourceId createMaterial(ResourceId diffuse, ResourceId normal, ResourceId specular,
                               ResourceId glow, ResourceId alpha, ResourceId customShader);
 
-    ResourceId loadMaterial(const std::string& file);
+    ResourceId loadMaterial(const std::string& file) override;
 
     bool getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal, ResourceId& specular,
                      ResourceId& glow, ResourceId& alpha, ResourceId& customShader) const;
@@ -56,7 +56,7 @@ class CResourceManager : public IResourceManager
     ResourceId createShader(ResourceId vertex, ResourceId tessCtrl, ResourceId tessEval,
                             ResourceId geometry, ResourceId fragment);
 
-    ResourceId loadShader(const std::string& file);
+    ResourceId loadShader(const std::string& file) override;
 
     bool getShader(ResourceId id, ResourceId& vertex, ResourceId& tessCtrl, ResourceId& tessEval,
                    ResourceId& geometry, ResourceId& fragment) const;
