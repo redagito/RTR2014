@@ -6,14 +6,14 @@
 
 #include <glm/glm.hpp>
 
-#include "graphics/window/GlfwWindow.h"
+#include "graphics/IWindow.h"
 
 #include "input/IInputListener.h"
 
 class IControllableCamera;
 class IInputProvider;
 
-class CameraController : public IInputListener, public IGlfwWindowListener
+class CameraController : public IInputListener, public IWindowListener
 {
    public:
     CameraController();
@@ -21,7 +21,7 @@ class CameraController : public IInputListener, public IGlfwWindowListener
 
     void setCamera(std::shared_ptr<IControllableCamera> camera);
     void setInputProvider(IInputProvider* provider);
-   void setWindow(GlfwWindow* window);
+   void setWindow(IWindow* window);
 
     bool loadSequence(std::string file);
     
@@ -55,7 +55,7 @@ class CameraController : public IInputListener, public IGlfwWindowListener
     float m_speed = 1.0f;
     std::shared_ptr<IControllableCamera> m_camera = nullptr;
     IInputProvider* m_inputProvider = nullptr;
-    GlfwWindow* m_window = nullptr;
+    IWindow* m_window = nullptr;
     int m_lastX = 0;
     int m_lastY = 0;
 };

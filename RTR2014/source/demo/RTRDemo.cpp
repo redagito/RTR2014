@@ -25,12 +25,15 @@
 #include "graphics/scene/Scene.h"
 #include "graphics/window/GlfwWindow.h"
 #include "graphics/GraphicsResourceManager.h"
+#include "graphics/IDebugInfoDisplay.h"
+#include "graphics/IWindow.h"
 
 #include "util/TimeStamp.h"
 #include "graphics/DebugInfoDisplay.h"
 #include "input/provider/GlfwInputProvider.h"
 #include "io/SceneLoader.h"
 #include "demo/CameraController.h"
+#include "demo/DemoController.h"
 
 // Animation
 #include "animation/AnimationWorld.h"
@@ -41,6 +44,7 @@ RTRDemo::~RTRDemo()
 {
     // GL objects must die while the context is still current, so release the
     // renderers and resource managers before GLFW tears the context down.
+    m_demoController.reset();
     m_debugInfoDisplay.reset();
     m_renderer.reset();
     m_deferredRenderer.reset();
@@ -80,8 +84,6 @@ int RTRDemo::init(const std::string& configFile)
         spdlog::error("Failed to initialize window.");
         return 1;
     }
-
-	m_inputProvider = std::make_shared<GlfwInputProvider>(m_window->getGlfwHandle());
 
     // Create resource manager
     m_resourceManager.reset(createResourceManager());
@@ -125,106 +127,35 @@ int RTRDemo::init(const std::string& configFile)
     m_cameraController->setWindow(m_window.get());
     m_window->addListener(m_cameraController.get());
 
+    m_demoController = std::make_unique<DemoController>(
+        m_deferredRenderer.get(), m_forwardRenderer.get(), m_scene.get(), m_camera.get(),
+        m_cameraController.get(), m_inputProvider.get(), m_window.get(),
+        m_graphicsResourceManager.get(), m_debugInfo.get(), m_debugInfoDisplay.get(),
+        m_animationWorld.get());
+
     return 0;
 }
 
 int RTRDemo::run()
 {
-    double f1Cooldown = 0.0;
-    double f2Cooldown = 0.0;
-    double f3Cooldown = 0.0;
-    double f5Cooldown = 0.0;
-    double k1Cooldown = 0.0;
     double timeDiff = 0.0;
 
-    double fpsCoolDown = 1.f;
-    unsigned int lastFrameCount = 0;
-    unsigned int currentFrameCount = 0;
-
-    bool displayDebugInfo = false;
-
     m_window->toggleMouseCapture();
-    
+
     do
     {
-        double startTime = glfwGetTime();
+        double startTime = m_window->getTime();
 
-        // Cooldowns
-        f1Cooldown -= timeDiff;
-        f2Cooldown -= timeDiff;
-        f3Cooldown -= timeDiff;
-        f5Cooldown -= timeDiff;
-        k1Cooldown -= timeDiff;
-        fpsCoolDown -= timeDiff;
-
-        if (fpsCoolDown < 0)
-        {
-            fpsCoolDown += 1.f;
-            lastFrameCount = currentFrameCount;
-            currentFrameCount = 0;
-        }
-
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_1) == GLFW_PRESS && k1Cooldown <= 0.f)
-        {
-            k1Cooldown = 0.3f;
-            displayDebugInfo = !displayDebugInfo;
-        }
-
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F2) == GLFW_PRESS && f2Cooldown <= 0.f)
-        {
-            f2Cooldown = 0.3f;
-            m_renderer = m_deferredRenderer;
-        }
-
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F3) == GLFW_PRESS && f3Cooldown <= 0.f)
-        {
-            f3Cooldown = 0.3f;
-            m_renderer = m_forwardRenderer;
-        }
-        
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F5) == GLFW_PRESS && f5Cooldown <= 0.f)
-        {
-            f5Cooldown = 0.3f;
-            m_cameraController->loadSequence("data/democam.json");
-        }
-
-        m_cameraController->animate((float)timeDiff);
-
-        m_renderer->draw(*m_scene.get(), *m_camera.get(), *m_window.get(),
-                         *m_graphicsResourceManager.get());
-
-        if (displayDebugInfo)
-        {
-            m_debugInfo->setValue("TimeDiff", std::to_string(timeDiff));
-            m_debugInfo->setValue("Camera x", std::to_string(m_camera->getPosition().x));
-            m_debugInfo->setValue("Camera y", std::to_string(m_camera->getPosition().y));
-            m_debugInfo->setValue("Camera z", std::to_string(m_camera->getPosition().z));
-            m_debugInfo->setValue("FPS", std::to_string(lastFrameCount));
-
-            m_debugInfoDisplay->draw(*m_debugInfo.get());
-        }
-
-		// Perform animation update
-		m_animationWorld->update((float) timeDiff);
+        m_demoController->update((float)timeDiff);
 
         m_window->swapBuffer();
 
         // Update input
-        glfwPollEvents();
+        m_window->pollEvents();
 
-        if (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_F1) == GLFW_PRESS && f1Cooldown <= 0.f)
-        {
-            // Reset cooldown
-            f1Cooldown = 0.5f;
-            // Capure/uncapture mouse
-            m_window->toggleMouseCapture();
-        }
+        timeDiff = m_window->getTime() - startTime;
 
-        timeDiff = glfwGetTime() - startTime;
-        ++currentFrameCount;
-
-    } while (glfwGetKey(m_window->getGlfwHandle(), GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-             glfwWindowShouldClose(m_window->getGlfwHandle()) == 0);
+    } while (!m_inputProvider->isKeyPressed(GLFW_KEY_ESCAPE) && m_window->isOpen());
 
     return 0;
 }
@@ -259,6 +190,10 @@ bool RTRDemo::initWindow()
 
     // Set pointer
     m_window.reset(window);
+
+    // Input is read from the window handle
+    m_inputProvider = std::make_shared<GlfwInputProvider>(window->getGlfwHandle());
+
     return true;
 }
 

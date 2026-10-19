@@ -6,11 +6,8 @@
 
 #include "io/IniFile.h"
 
-// GLFW
-struct GLFWwindow;
-
 // Graphics
-class GlfwWindow;
+class IWindow;
 class IRenderer;
 class IScene;
 
@@ -26,10 +23,16 @@ class AnimationWorld;
 
 // Debug
 class DebugInfo;
-class DebugInfoDisplay;
+class IDebugInfoDisplay;
+
+// Demo
+class DemoController;
 
 /**
 * \brief Demo application class.
+*
+* Hosts the platform objects (window, input, renderers) and drives the
+* platform independent demo logic.
 */
 class RTRDemo
 {
@@ -42,17 +45,15 @@ class RTRDemo
 	*/
     int init(const std::string& configFile);
 
-	/**
-	* \brief Run demo.
-	*/
+    /**
+    * \brief Run demo.
+    */
     int run();
 
    private:
     bool initWindow();
     bool initRenderer();
     bool initScene();
-
-	void updateAnimation(float timeDiff);
 
     IniFile m_config;
 
@@ -61,8 +62,8 @@ class RTRDemo
     std::shared_ptr<IGraphicsResourceManager> m_graphicsResourceManager =
         nullptr; /**< Resource manager for graphics resources. */
     
-	std::shared_ptr<GlfwWindow> m_window = nullptr;
-	std::shared_ptr<IInputProvider> m_inputProvider = nullptr;
+	std::shared_ptr<IWindow> m_window = nullptr;
+    std::shared_ptr<IInputProvider> m_inputProvider = nullptr;
 
     std::shared_ptr<IRenderer> m_renderer = nullptr;                 /**< Active renderer. */
     std::shared_ptr<IRenderer> m_deferredRenderer = nullptr;         /**< Deferred renderer. */
@@ -72,9 +73,12 @@ class RTRDemo
     std::shared_ptr<CameraController> m_cameraController = nullptr; /**< Camera controller. */
 
     std::shared_ptr<DebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
-    std::shared_ptr<DebugInfoDisplay> m_debugInfoDisplay =
+    std::shared_ptr<IDebugInfoDisplay> m_debugInfoDisplay =
         nullptr; /**< Debug information renderer. */
 
 	// Animation
-	std::shared_ptr<AnimationWorld> m_animationWorld;
+    std::shared_ptr<AnimationWorld> m_animationWorld;
+
+    // Platform independent demo logic
+    std::unique_ptr<DemoController> m_demoController;
 };

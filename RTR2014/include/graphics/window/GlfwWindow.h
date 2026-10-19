@@ -10,12 +10,6 @@
 
 struct GLFWwindow;
 
-class IGlfwWindowListener
-{
-   public:
-    virtual void handleResizeEvent(int width, int height) = 0;
-};
-
 /**
  * \brief GLFW based implementation of the window interface.
  */
@@ -30,27 +24,31 @@ class GlfwWindow : public IWindow
     void setWidth(unsigned int width);
     void setHeight(unsigned int height);
 
-    unsigned int getWidth() const;
-    unsigned int getHeight() const;
+    unsigned int getWidth() const override;
+    unsigned int getHeight() const override;
 
-    void setActive() const;
+    void setActive() const override;
 
-    bool isOpen() const;
+    bool isOpen() const override;
 
     /**
      * \brief Swaps back and front buffers.
      */
-    void swapBuffer();
+    void swapBuffer() override;
 
     /**
-    * \brief Toggles mouse capture state.
-    */
-    void toggleMouseCapture();
+     * \brief Toggles mouse capture state.
+     */
+    void toggleMouseCapture() override;
+
+    void pollEvents() override;
+
+    double getTime() const override;
 
     GLFWwindow* getGlfwHandle() const;
     
-    void addListener(IGlfwWindowListener* l);
-    void removeListener(IGlfwWindowListener* l);
+    void addListener(IWindowListener* l) override;
+    void removeListener(IWindowListener* l) override;
 
    private:
     static void resizeCallback(GLFWwindow* window, int width, int height);
@@ -65,5 +63,5 @@ class GlfwWindow : public IWindow
 
     bool m_mouseCaptured; /**< Current mouse capture state. */
     
-    std::set<IGlfwWindowListener*> m_listeners;
+    std::set<IWindowListener*> m_listeners;
 };

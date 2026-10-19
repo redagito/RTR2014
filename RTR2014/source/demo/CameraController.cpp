@@ -25,7 +25,7 @@ CameraController::~CameraController()
     }
 }
 
-void CameraController::setWindow(GlfwWindow* window)
+void CameraController::setWindow(IWindow* window)
 {
     m_window = window;
 }

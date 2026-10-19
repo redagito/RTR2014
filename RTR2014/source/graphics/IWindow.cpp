@@ -1,3 +1,11 @@
 #include "graphics/IWindow.h"
 
-IWindow::~IWindow() { return; }
+IWindow::~IWindow()
+{
+	return;
+}
+
+IWindowListener::~IWindowListener()
+{
+	return;
+}

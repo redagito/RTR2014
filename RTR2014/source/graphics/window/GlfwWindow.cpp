@@ -143,9 +143,13 @@ void GlfwWindow::toggleMouseCapture()
 
 GLFWwindow* GlfwWindow::getGlfwHandle() const { return m_window; }
 
-void GlfwWindow::addListener(IGlfwWindowListener* l) { m_listeners.insert(l); }
+void GlfwWindow::pollEvents() { glfwPollEvents(); }
 
-void GlfwWindow::removeListener(IGlfwWindowListener* l) { m_listeners.erase(l); }
+double GlfwWindow::getTime() const { return glfwGetTime(); }
+
+void GlfwWindow::addListener(IWindowListener* l) { m_listeners.insert(l); }
+
+void GlfwWindow::removeListener(IWindowListener* l) { m_listeners.erase(l); }
 
 void GlfwWindow::resizeCallback(GLFWwindow* window, int width, int height)
 {

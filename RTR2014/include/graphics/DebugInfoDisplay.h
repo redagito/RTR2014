@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "graphics/IDebugInfoDisplay.h"
+
 class DebugInfo;
 class ShaderProgram;
 class Texture;
@@ -11,13 +13,13 @@ class VertexArrayObject;
 class VertexBuffer;
 class IResourceManager;
 
-class DebugInfoDisplay
+class DebugInfoDisplay : public IDebugInfoDisplay
 {
    public:
     DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceManager);
 
     bool loadFont(const std::string& path);
-    void draw(const DebugInfo& info);
+    void draw(const DebugInfo& info) override;
 
    private:
     std::shared_ptr<IResourceManager> m_resourceManager;
