@@ -117,6 +117,8 @@ void DeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
     glCullFace(GL_BACK);
 }
 
+namespace
+{
 struct CameraDirection
 {
     GLenum cubemapFace;
@@ -124,13 +126,14 @@ struct CameraDirection
     glm::vec3 up;
 };
 
-CameraDirection g_cameraDirections[6] = {
+static const CameraDirection cameraDirections[6] = {
     {GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
     {GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
     {GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)},
     {GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)},
     {GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
     {GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)}};
+} // namespace
 
 void DeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camera,
                                        const IWindow& window,
@@ -164,7 +167,7 @@ void DeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camera
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                               g_cameraDirections[i].cubemapFace, m_shadowCubeTexture->getId(), 0);
+                               cameraDirections[i].cubemapFace, m_shadowCubeTexture->getId(), 0);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -173,8 +176,8 @@ void DeferredRenderer::shadowCubePass(const IScene& scene, const ICamera& camera
 
         // Send view/projection to default shader
         glm::mat4 view =
-            glm::lookAt(camera.getPosition(), camera.getPosition() + g_cameraDirections[i].target,
-                        g_cameraDirections[i].up);
+            glm::lookAt(camera.getPosition(), camera.getPosition() + cameraDirections[i].target,
+                        cameraDirections[i].up);
 
         m_shadowCubePassShader->setUniform(projectionMatrixUniformName, camera.getProjection());
         m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
