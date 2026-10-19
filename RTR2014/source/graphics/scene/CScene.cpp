@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include "graphics/scene/CScene.h"
 
 #include "graphics/scene/CSceneQuery.h"
@@ -38,7 +40,11 @@ void CScene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
                        const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 {
     // TODO Needs to be changed for better data structures
-    assert(id >= 0 && ((unsigned int)id) < m_objects.size() && "Invalid scene object id");
+    if (id < 0 || static_cast<size_t>(id) >= m_objects.size())
+    {
+        spdlog::error("Invalid objects id {}.", id);
+        return;
+    }
 
     // Write data
     m_objects[id].m_mesh = mesh;
@@ -78,7 +84,11 @@ void CScene::setPointLight(SceneObjectId id, const glm::vec3& position, float ra
                            const glm::vec3& color, float intensity, bool castsShadow)
 {
     // TODO Needs to be changed for better data structures
-    assert(id >= 0 && ((unsigned int)id) < m_pointLights.size() && "Invalid scene object id");
+    if (id < 0 || static_cast<size_t>(id) >= m_pointLights.size())
+    {
+        spdlog::error("Invalid point lights id {}.", id);
+        return;
+    }
 
     // Write data
     m_pointLights[id].m_position = position;
@@ -117,7 +127,11 @@ void CScene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction,
                                  const glm::vec3& color, float intensity, bool castsShadow)
 {
     // TODO Needs to be changed for better data structures
-    assert(id >= 0 && ((unsigned int)id) < m_directionalLights.size() && "Invalid scene object id");
+    if (id < 0 || static_cast<size_t>(id) >= m_directionalLights.size())
+    {
+        spdlog::error("Invalid directional lights id {}.", id);
+        return;
+    }
 
     // Write data
     m_directionalLights[id].m_direction = direction;

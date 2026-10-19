@@ -22,6 +22,11 @@ CShaderProgram::~CShaderProgram()
 {
     if (m_valid)
     {
+        if (s_activeShaderProgram == m_programId)
+        {
+            // The name is about to be reusable; the cache must not outlive it.
+            s_activeShaderProgram = 0;
+        }
         glDeleteProgram(m_programId);
     }
 }
@@ -102,9 +107,13 @@ bool CShaderProgram::init(TShaderObject<GL_VERTEX_SHADER>* vertex,
         return false;
     }
     // New shader program linked successfully
-    // Delete old shader object
+    // Delete old shader program
     if (m_valid)
     {
+        if (s_activeShaderProgram == m_programId)
+        {
+            s_activeShaderProgram = 0;
+        }
         glDeleteProgram(m_programId);
     }
     // Set new id
