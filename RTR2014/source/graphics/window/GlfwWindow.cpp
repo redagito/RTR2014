@@ -37,7 +37,7 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
         break;
     }
 
-    if (type == GL_DEBUG_TYPE_ERROR)
+    if (type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
     {
         std::abort();
     }
