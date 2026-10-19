@@ -654,29 +654,28 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::vector<Image> imageData(images.size());
     std::vector<char> imageOk(images.size(), 0);
 
-    std::atomic<size_t> nextMesh = 0;
-    std::atomic<size_t> nextImage = 0;
+    // One queue for both kinds of work, so the slowest job starts immediately
+    std::atomic<size_t> nextJob = 0;
+    const size_t jobCount = meshes.size() + images.size();
 
-    auto meshWorker = [&]() {
+    auto worker = [&]() {
         while (true)
         {
-            size_t i = nextMesh.fetch_add(1);
-            if (i >= meshes.size())
+            size_t i = nextJob.fetch_add(1);
+            if (i >= jobCount)
             {
                 break;
             }
-            meshOk[i] = parseMesh(meshes[i], meshData[i]) ? 1 : 0;
-        }
-    };
-    auto imageWorker = [&]() {
-        while (true)
-        {
-            size_t i = nextImage.fetch_add(1);
-            if (i >= images.size())
+            if (i < meshes.size())
             {
-                break;
+                meshOk[i] = parseMesh(meshes[i], meshData[i]) ? 1 : 0;
             }
-            imageOk[i] = decodeImage(images[i].first, images[i].second, imageData[i]) ? 1 : 0;
+            else
+            {
+                size_t image = i - meshes.size();
+                imageOk[image] =
+                    decodeImage(images[image].first, images[image].second, imageData[image]) ? 1 : 0;
+            }
         }
     };
 
@@ -685,18 +684,16 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     {
         threadCount = 1;
     }
-    threadCount = std::min<unsigned int>(threadCount,
-                                        static_cast<unsigned int>(meshes.size() + images.size()));
+    threadCount = std::min<unsigned int>(threadCount, static_cast<unsigned int>(jobCount));
 
     std::vector<std::thread> workers;
     for (unsigned int i = 0; i < threadCount; ++i)
     {
-        workers.emplace_back(meshWorker);
-        workers.emplace_back(imageWorker);
+        workers.emplace_back(worker);
     }
-    for (std::thread& worker : workers)
+    for (std::thread& w : workers)
     {
-        worker.join();
+        w.join();
     }
 
     // Publish the preloaded resources when they are loaded for the first time
