@@ -63,7 +63,8 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
     transformer.setProjectionMatrix(camera.getProjection());
 
     // Query visible scene objects
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+    std::unique_ptr<ISceneQuery> query(
+        std::move(scene.createQuery(camera.getProjection() * camera.getView())));
 
     // Send view/projection to default shader
     m_shadowMapPassShader->setUniform(viewMatrixUniformName, transformer.getViewMatrix());

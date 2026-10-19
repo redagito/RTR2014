@@ -221,7 +221,8 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
     }
 
     // Create object in scene
-    SceneObjectId objectId = scene.createObject(meshId, materialId, position, rotation, scale);
+    SceneObjectId objectId = scene.createObject(meshId, materialId, position, rotation, scale,
+                                               getMeshBounds(meshId));
 
     // Load optional animation controllers
 	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
@@ -520,3 +521,37 @@ bool SceneLoader::load(const Json::Value& node, const std::string& name, std::st
     }
     return true;
 }
+
+const OrientedBoundingBox& SceneLoader::getMeshBounds(ResourceId meshId)
+{
+    auto iter = m_meshBounds.find(meshId);
+    if (iter != m_meshBounds.end())
+    {
+        return iter->second;
+    }
+
+    OrientedBoundingBox bounds;
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<float> normals;
+    std::vector<float> uvs;
+    PrimitiveType type;
+    if (m_resourceManager.getMesh(meshId, vertices, indices, normals, uvs, type))
+    {
+        std::vector<glm::vec3> points;
+        points.reserve(vertices.size() / 3);
+        for (size_t i = 0; i + 2 < vertices.size(); i += 3)
+        {
+            points.emplace_back(vertices[i], vertices[i + 1], vertices[i + 2]);
+        }
+        bounds = OrientedBoundingBox::fromPoints(points);
+    }
+    else
+    {
+        spdlog::error("Failed to retrieve the vertices of mesh {}.", meshId);
+    }
+
+    return m_meshBounds.emplace(meshId, bounds).first->second;
+}
+

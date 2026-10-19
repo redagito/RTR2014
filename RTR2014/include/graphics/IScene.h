@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "SceneConfig.h"
+#include "graphics/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 
 class ICamera;
@@ -22,10 +23,13 @@ class IScene
 
     /**
      * \brief Creates object in scene and returns id.
+     *
+     * The bounds are the extent of the mesh in mesh space, they are used for culling.
      */
     virtual SceneObjectId createObject(ResourceId mesh, ResourceId material,
                                        const glm::vec3& position, const glm::vec3& rotation,
-                                       const glm::vec3& scale) = 0;
+                                       const glm::vec3& scale,
+                                       const OrientedBoundingBox& localBounds) = 0;
 
     /**
      * \brief Returns scene object data.
@@ -84,8 +88,10 @@ class IScene
 	virtual bool getAmbientLight(glm::vec3& color, float& intensity) const = 0;
 
     /**
-     * \brief Creates scene query for specified camera.
-     * Returns heap allocated query object. Control is transfered to the calling function.
+     * \brief Creates scene query for the given view projection.
+     *
+     * Objects outside the view frustum are not part of the query. Returns heap allocated query
+     * object. Control is transfered to the calling function.
      */
-    virtual ISceneQuery* createQuery(const ICamera& camera) const = 0;
+    virtual ISceneQuery* createQuery(const glm::mat4& viewProjection) const = 0;
 };

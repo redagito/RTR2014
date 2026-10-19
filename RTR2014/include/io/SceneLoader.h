@@ -3,11 +3,14 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
 #include "animation/Animation.h"
+#include "graphics/OrientedBoundingBox.h"
 #include "graphics/SceneConfig.h"
+#include "resource/ResourceConfig.h"
 
 namespace Json
 {
@@ -84,8 +87,17 @@ class SceneLoader
       bool collectResources(const Json::Value& node, std::vector<std::string>& meshes,
                             std::vector<std::string>& materials);
 
+      /**
+      * \brief Returns the bounds of a mesh in mesh space.
+      *
+      * The bounds are computed from the mesh vertices and cached, a mesh is only measured once.
+      */
+      const OrientedBoundingBox& getMeshBounds(ResourceId meshId);
+
      private:
       IResourceManager& m_resourceManager;
 
       std::unique_ptr<Json::Value> m_root; /**< Parsed scene file. */
+
+      std::unordered_map<ResourceId, OrientedBoundingBox> m_meshBounds; /**< Cached mesh bounds. */
   };

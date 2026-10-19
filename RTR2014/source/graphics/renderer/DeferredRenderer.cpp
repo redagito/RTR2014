@@ -76,7 +76,8 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     window.setActive();
 
     // Query visible scene objects and lights
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+    std::unique_ptr<ISceneQuery> query(
+        std::move(scene.createQuery(camera.getProjection() * camera.getView())));
 
     // Geometry pass fills gbuffer
     {

@@ -2,6 +2,7 @@
 
 #include "graphics/scene/Scene.h"
 
+#include "graphics/Frustum.h"
 #include "graphics/scene/SceneQuery.h"
 #include "graphics/scene/SceneObject.h"
 #include "graphics/scene/ScenePointLight.h"
@@ -12,9 +13,10 @@ Scene::Scene() : m_ambientColor(0.f), m_ambientIntensity(0.f) {}
 Scene::~Scene() {}
 
 SceneObjectId Scene::createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
-                                   const glm::vec3& rotation, const glm::vec3& scale)
+                                   const glm::vec3& rotation, const glm::vec3& scale,
+                                   const OrientedBoundingBox& localBounds)
 {
-    m_objects.push_back(SceneObject(mesh, material, position, rotation, scale));
+    m_objects.push_back(SceneObject(mesh, material, position, rotation, scale, localBounds));
     return m_objects.size() - 1;
 }
 
@@ -52,6 +54,7 @@ void Scene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
     m_objects[id].m_position = position;
     m_objects[id].m_rotation = rotation;
     m_objects[id].m_scale = scale;
+    m_objects[id].updateWorldBounds();
     return;
 }
 
@@ -154,19 +157,22 @@ bool Scene::getAmbientLight(glm::vec3& color, float& intensity) const
     return true;
 }
 
-ISceneQuery* Scene::createQuery(const ICamera& camera) const
+ISceneQuery* Scene::createQuery(const glm::mat4& viewProjection) const
 {
-    // TODO Extract frustum planes from camera
-
     // New query with max storage
     // TODO Allocate less storage, needs experiments on how much is actually needed
     SceneQuery* query =
         new SceneQuery((unsigned int)m_objects.size(), (unsigned int)m_pointLights.size());
 
-    // TODO Frustum culling, occlusion culling, better data structure for objects
-    // For now add all objects
+    Frustum frustum(viewProjection);
+
+    // TODO Occlusion culling, better data structure for objects
     for (unsigned int i = 0; i < m_objects.size(); ++i)
     {
+        if (!frustum.intersects(m_objects[i].m_worldBounds))
+        {
+            continue;
+        }
         // Counter variable is object id
         query->addObject(i);
     }

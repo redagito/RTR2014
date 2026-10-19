@@ -21,7 +21,8 @@ class Scene : public IScene
     ~Scene();
 
     SceneObjectId createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
-                               const glm::vec3& rotation, const glm::vec3& scale);
+                               const glm::vec3& rotation, const glm::vec3& scale,
+                               const OrientedBoundingBox& localBounds);
 
     bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, glm::vec3& position,
                    glm::vec3& rotation, glm::vec3& scale) const;
@@ -51,7 +52,7 @@ class Scene : public IScene
 
     bool getAmbientLight(glm::vec3& color, float& intensity) const;
 
-    ISceneQuery* createQuery(const ICamera& camera) const;
+    ISceneQuery* createQuery(const glm::mat4& viewProjection) const;
 
    private:
     glm::vec3 m_ambientColor; /**< Global ambient light color. */

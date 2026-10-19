@@ -40,7 +40,8 @@ void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const
     m_currentProjection = camera.getProjection();
 
     // Query visible scene objects
-    std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
+    std::unique_ptr<ISceneQuery> query(
+        std::move(scene.createQuery(camera.getProjection() * camera.getView())));
 
     // Send view/projection to default shader
     m_currentShader->setUniform(viewMatrixUniformName, m_currentView);
