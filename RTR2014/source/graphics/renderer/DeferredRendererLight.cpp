@@ -219,7 +219,7 @@ void DeferredRenderer::directionalLightPass(const IScene& scene, const ICamera& 
             // Render shadow map
             if (castsShadow)
             {
-                shadowMapPass(scene, shadowCamera, window, manager);
+                m_shadowMapPass.render(scene, shadowCamera, window, manager);
             }
 
             // Prepare light pass frame buffer
@@ -250,7 +250,7 @@ void DeferredRenderer::directionalLightPass(const IScene& scene, const ICamera& 
                                                    lightPassNormalSpecularTextureUnit);
 
             // Set shadow texture for shadow mapping
-            m_shadowDepthTexture->setActive(lightPassShadowMapTextureUnit);
+            m_shadowMapPass.getShadowMap()->setActive(lightPassShadowMapTextureUnit);
             directionalLightPassShader->setUniform(shadowMapTextureUniformName,
                                                    lightPassShadowMapTextureUnit);
 

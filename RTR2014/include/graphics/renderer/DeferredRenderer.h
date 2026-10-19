@@ -8,6 +8,7 @@
 #include "FrameBuffer.h"
 #include "GeometryPass.h"
 #include "ShadowCubePass.h"
+#include "ShadowMapPass.h"
 #include "Transformer.h"
 
 #include "resource/ResourceConfig.h"
@@ -35,12 +36,6 @@ class DeferredRenderer : public Renderer
     static DeferredRenderer* create(IResourceManager* manager);
 
    protected:
-    /**
-    * \brief Performs shadow map calculation.
-    */
-    void shadowMapPass(const IScene& scene, const ICamera& camera, const IWindow& window,
-                       const IGraphicsResourceManager& manager);
-
     /**
     * \brief Writes light data into l-buffer.
     */
@@ -131,11 +126,6 @@ class DeferredRenderer : public Renderer
     bool initIlluminationPass(IResourceManager* manager);
 
     /**
-     * \brief Initializes resources for shadow map pass
-     */
-    bool initShadowMapPass(IResourceManager* manager);
-
-    /**
     * \brief Initializes resources for post processing pass.
     */
     bool initPostProcessPass(IResourceManager* manager);
@@ -181,10 +171,7 @@ class DeferredRenderer : public Renderer
     GeometryPass m_geometryPass;
 
     // Shadow map pass
-    ResourceId m_shadowMapPassShaderId = -1;
-    ShaderProgram* m_shadowMapPassShader = nullptr;
-    FrameBuffer m_shadowMapBuffer;
-    std::shared_ptr<Texture> m_shadowDepthTexture = nullptr;
+    ShadowMapPass m_shadowMapPass;
 
     // Shadow cube pass
     ShadowCubePass m_shadowCubePass;

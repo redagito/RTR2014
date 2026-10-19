@@ -1,5 +1,5 @@
 #include <spdlog/spdlog.h>
-#include "graphics/renderer/DeferredRenderer.h"
+#include "graphics/renderer/ShadowMapPass.h"
 
 #include <string>
 
@@ -7,8 +7,6 @@
 
 #include "resource/IResourceManager.h"
 
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
@@ -18,14 +16,21 @@
 #include "graphics/Mesh.h"
 #include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
-#include "graphics/camera/StaticCamera.h"
-#include "graphics/renderer/RenderBuffer.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/Transformer.h"
 
+ShadowMapPass::ShadowMapPass()
+{
+    return;
+}
 
-void DeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
-                                      const IWindow& window,
-                                      const IGraphicsResourceManager& manager)
+ShadowMapPass::~ShadowMapPass()
+{
+    return;
+}
+
+void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
+                           const IGraphicsResourceManager& manager)
 {
     m_shadowMapPassShader = manager.getShaderProgram(m_shadowMapPassShaderId);
 
@@ -121,7 +126,7 @@ void DeferredRenderer::shadowMapPass(const IScene& scene, const ICamera& camera,
     glCullFace(GL_BACK);
 }
 
-bool DeferredRenderer::initShadowMapPass(IResourceManager* manager)
+bool ShadowMapPass::init(IResourceManager* manager)
 {
     std::string shaderFile("data/shader/shadow_map_pass.ini");
     m_shadowMapPassShaderId = manager->loadShader(shaderFile);
@@ -161,3 +166,7 @@ bool DeferredRenderer::initShadowMapPass(IResourceManager* manager)
     return true;
 }
 
+const std::shared_ptr<Texture>& ShadowMapPass::getShadowMap() const
+{
+    return m_shadowDepthTexture;
+}

@@ -32,7 +32,7 @@ bool DeferredRenderer::init(IResourceManager* manager)
 
     // Shadow mapping
     // TODO Should be done in directional light pass
-    if (!initShadowMapPass(manager))
+    if (!m_shadowMapPass.init(manager))
     {
         spdlog::error("Failed to intialize shadow map pass.");
         return false;

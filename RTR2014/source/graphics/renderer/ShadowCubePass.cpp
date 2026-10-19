@@ -58,7 +58,6 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
 
     // Reset viewport
     glViewport(0, 0, 1024, 1024);
-    // m_shadowMapBuffer.resize(1024, 1024);
 
     m_shadowCubePassShader->setUniform(lightPositionUniformName, camera.getPosition());
 
