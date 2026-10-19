@@ -10,7 +10,6 @@
 #include "resource/IResourceListener.h"
 
 #include "io/IniFile.h"
-#include "io/ObjModelLoader.h"
 
 
 ResourceManager::ResourceManager()
@@ -135,19 +134,6 @@ std::vector<float> vertices;
         // Create mesh resource
         meshId = createMesh(vertices, {}, normals, uvs, PrimitiveType::Triangle);
     }
-    else if (extension == "oni")
-    {
-        // Load without building index buffer
-        ObjModelLoader objLoader;
-        if (!objLoader.load(file))
-        {
-            spdlog::error("Failed to load mesh file {} as non-indexed obj file.", file.c_str());
-            return -1;
-        }
-        meshId = createMesh(objLoader.getVertices(), {}, objLoader.getNormals(), objLoader.getUV(),
-                            PrimitiveType::Triangle);
-    }
-
     if (meshId == -1)
     {
         spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
