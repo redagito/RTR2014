@@ -30,41 +30,19 @@ bool DeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
-    // Shadow mapping
-    // TODO Should be done in directional light pass
-    if (!m_shadowMapPass.init(manager))
-    {
-        spdlog::error("Failed to intialize shadow map pass.");
-        return false;
-    }
-
-    if (!m_shadowCubePass.init(manager))
-    {
-        spdlog::error("Failed to intialize shadow map pass.");
-        return false;
-    }
-
     // Init light pass resources
-    if (!initPointLightPass(manager))
+    if (!m_lightPass.init(manager))
     {
-        spdlog::error("Failed to initialize point light pass.");
-        return false;
-    }
-
-    // Init directional light pass
-    if (!initDirectionalLightPass(manager))
-    {
-        spdlog::error("Failed to initialize directional light pass.");
+        spdlog::error("Failed to initialize light pass.");
         return false;
     }
 
     // Init illumination pass
-    if (!initIlluminationPass(manager))
+    if (!m_illuminationPass.init(manager))
     {
         spdlog::error("Failed to initialize illumination pass.");
         return false;
     }
-
     // Post process
     if (!m_postProcessPass.init(manager))
     {
@@ -104,13 +82,17 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     m_geometryPass.render(scene, *query, camera, window, manager);
 
     // Light pass fills lbuffer
-    lightPass(scene, camera, window, manager, *query);
+    m_lightPass.render(scene, camera, window, manager, *query,
+                       m_geometryPass.getDepthTexture(),
+                       m_geometryPass.getNormalSpecularTexture());
 
     // Illumination pass renders lit scene from lbuffer and gbuffer
-    illuminationPass(scene, camera, window, manager, *query);
+    m_illuminationPass.render(window, manager, m_lightPass.getLightTexture(),
+                              m_geometryPass.getDiffuseGlowTexture(),
+                              m_geometryPass.getDepthTexture());
 
     // Post processing pass
-    m_postProcessPass.render(camera, window, manager, m_illuminationPassTexture,
+    m_postProcessPass.render(camera, window, manager, m_illuminationPass.getOutputTexture(),
                               m_geometryPass.getDepthTexture(),
                               m_transformer.getInverseViewProjectionMatrix());
 
@@ -127,7 +109,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {
-        m_displayPass.renderToScreen(window, manager, m_lightPassTexture);
+        m_displayPass.renderToScreen(window, manager, m_lightPass.getLightTexture());
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Normals)
     {
