@@ -1,13 +1,11 @@
 #pragma once
 
 #include <memory>
-#include <list>
 
 // Required by inheritance
 #include "ARenderer.h"
 
 #include "CFrameBuffer.h"
-#include "SRenderRequest.h"
 #include "CTransformer.h"
 
 #include "resource/ResourceConfig.h"
@@ -277,5 +275,4 @@ class CDeferredRenderer : public ARenderer
 
     // Fullscreen draw pass
     CScreenQuadPass m_screenQuadPass;
-    std::list<SRenderRequest> m_customShaderMeshes; /**< Render requests with custom shaders. */
 };
