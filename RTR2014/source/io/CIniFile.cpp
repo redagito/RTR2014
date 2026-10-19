@@ -28,7 +28,7 @@ bool CIniFile::load(const std::string& file)
         }
         else if (line.at(0) == '[')  // Group
         {
-            unsigned int pos = line.find(']');
+            std::string::size_type pos = line.find(']');
             if (pos == std::string::npos)
             {
                 d_entries.clear();
@@ -40,7 +40,7 @@ bool CIniFile::load(const std::string& file)
         }
         else  // Key/value pair
         {
-            unsigned int pos = line.find('=');
+            std::string::size_type pos = line.find('=');
             if (pos == std::string::npos)
             {
                 d_entries.clear();
