@@ -180,6 +180,11 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
 
         data = MeshData(vertices, {}, normals, uvs, PrimitiveType::Triangle);
     }
+    else
+    {
+        spdlog::error("Unsupported mesh file format {} for file {}.", extension, file.c_str());
+        return false;
+    }
     return true;
 }
 
@@ -357,7 +362,11 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         return -1;
     }
 
-    ResourceId textureIds[kMaterialTextureSlots] = {};
+    ResourceId textureIds[kMaterialTextureSlots];
+    for (int i = 0; i < kMaterialTextureSlots; ++i)
+    {
+        textureIds[i] = invalidResource;
+    }
     for (int i = 0; i < kMaterialTextureSlots; ++i)
     {
         const char* slot = kMaterialTextureSlotNames[i];

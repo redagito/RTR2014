@@ -26,6 +26,22 @@ class TempObj
     std::string m_path = "rtr2014_tmp_preload.obj";
 };
 
+class TempIni
+{
+   public:
+    explicit TempIni(const std::string& content)
+    {
+        std::ofstream ofs(m_path);
+        ofs << content;
+    }
+    ~TempIni() { std::remove(m_path.c_str()); }
+
+    std::string path() const { return m_path; }
+
+   private:
+    std::string m_path = "rtr2014_tmp_preload.ini";
+};
+
 // The same object loaded with and without preloading must yield the same data.
 const char* kObj = "v 0 0 0\n"
                     "v 1 0 0\n"
@@ -98,4 +114,28 @@ TEST_CASE("preloading an unknown material file does not publish it", "[resource]
     manager.preload({}, {"no_such_material.ini"});
 
     REQUIRE(manager.loadMaterial("no_such_material.ini") == invalidResource);
+}
+
+TEST_CASE("a material without a texture slot reports an invalid id for it", "[resource]")
+{
+    TempIni material("[custom]\nkey=value\n");
+
+    ResourceManager manager;
+    const ResourceId materialId = manager.loadMaterial(material.path());
+    REQUIRE(materialId != invalidResource);
+
+    ResourceId diffuse = 0;
+    ResourceId normal = 0;
+    ResourceId specular = 0;
+    ResourceId glow = 0;
+    ResourceId alpha = 0;
+    ResourceId customShader = 0;
+    REQUIRE(manager.getMaterial(materialId, diffuse, normal, specular, glow, alpha, customShader));
+
+    // An absent slot must not resolve to a valid resource id
+    REQUIRE(diffuse == invalidResource);
+    REQUIRE(normal == invalidResource);
+    REQUIRE(specular == invalidResource);
+    REQUIRE(glow == invalidResource);
+    REQUIRE(alpha == invalidResource);
 }
