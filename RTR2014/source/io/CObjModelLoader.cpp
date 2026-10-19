@@ -22,6 +22,10 @@ bool CObjModelLoader::load(const std::string& file)
     }
 
     // Temp data
+    d_vertices.clear();
+    d_normals.clear();
+    d_uv.clear();
+
     std::vector<float> tempVert;
     std::vector<float> tempUV;
     std::vector<float> tempNorm;
@@ -30,7 +34,11 @@ bool CObjModelLoader::load(const std::string& file)
     std::string line;
     while (std::getline(ifs, line))
     {
-        parseLine(line, tempVert, tempNorm, tempUV);
+        if (!parseLine(line, tempVert, tempNorm, tempUV))
+        {
+            spdlog::error("Failed to parse line '{}' in mesh file {}.", line, file.c_str());
+            return false;
+        }
     }
     spdlog::info("Loaded obj model {} with {} triangles.", file.c_str(), d_vertices.size() / 3);
     return true;
@@ -44,36 +52,42 @@ const std::vector<float>& CObjModelLoader::getNormals() const { return d_normals
 const std::vector<float>& CObjModelLoader::getUV() const { return d_uv; }
 
 // Parsing logic
-void CObjModelLoader::parseLine(const std::string& line, std::vector<float>& tempVert,
+bool CObjModelLoader::parseLine(const std::string& line, std::vector<float>& tempVert,
                                 std::vector<float>& tempNorm, std::vector<float>& tempUV)
 {
-    if (line[0] == '#')
+    if (line.empty() || line[0] == '#')
     {
-        // Ignore comments
+        // Skip empty lines and comments
+        return true;
     }
-    else if (line[0] == 'v')
+    if (line[0] == 'v')
     {
-        if (line[1] == ' ')
+        if (line.size() > 1 && line[1] == ' ')
         {
-            // Parse as vertex
             parseVertex(line.substr(2), tempVert);
+            return true;
         }
-        else if (line[1] == 't')
+        if (line.size() > 2 && line[1] == 't')
         {
-            // Parse as texture coord
             parseUV(line.substr(3), tempUV);
+            return true;
         }
-        else if (line[1] == 'n')
+        if (line.size() > 2 && line[1] == 'n')
         {
-            // Parse as normal
             parseNormal(line.substr(3), tempNorm);
+            return true;
         }
+        return false;
     }
-    else if (line[0] == 'f')
+    if (line[0] == 'f')
     {
-        // Parse as indices
-        parseIndex(line.substr(2), tempVert, tempNorm, tempUV);
+        if (line.size() < 2)
+        {
+            return false;
+        }
+        return parseIndex(line.substr(2), tempVert, tempNorm, tempUV);
     }
+    return true;
 }
 
 void CObjModelLoader::parseVertex(const std::string& line, std::vector<float>& vert)
@@ -116,20 +130,31 @@ void CObjModelLoader::parseUV(const std::string& line, std::vector<float>& uv)
     return;
 }
 
-void CObjModelLoader::parseIndex(const std::string& line, const std::vector<float>& vert,
+bool CObjModelLoader::parseIndex(const std::string& line, const std::vector<float>& vert,
                                  const std::vector<float>& norm, const std::vector<float>& uv)
 {
-    int v, t, n;
+    int v = 0;
+    int t = 0;
+    int n = 0;
     char c;
     std::stringstream ss;
     ss << line;
+
+    auto inRange = [](int index, size_t stride, size_t count) {
+        return index >= 1 && static_cast<size_t>(index - 1) * stride + stride <= count;
+    };
+
     for (int i = 0; i < 3; ++i)
     {
-        ss >> v;
-        ss >> c;
-        ss >> t;
-        ss >> c;
-        ss >> n;
+        if (!(ss >> v >> c >> t >> c >> n))
+        {
+            return false;
+        }
+        if (!inRange(v, 3, vert.size()) || !inRange(t, 2, uv.size()) ||
+            !inRange(n, 3, norm.size()))
+        {
+            return false;
+        }
 
         // Create data
         d_vertices.push_back(vert[(v - 1) * 3]);
@@ -141,5 +166,5 @@ void CObjModelLoader::parseIndex(const std::string& line, const std::vector<floa
         d_normals.push_back(norm[(n - 1) * 3 + 1]);
         d_normals.push_back(norm[(n - 1) * 3 + 2]);
     }
-    return;
+    return true;
 }

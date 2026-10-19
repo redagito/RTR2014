@@ -39,13 +39,13 @@ class CObjModelLoader
 
    private:
     // Parse single line
-    void parseLine(const std::string&, std::vector<float>& vert, std::vector<float>& norm,
+    bool parseLine(const std::string&, std::vector<float>& vert, std::vector<float>& norm,
                    std::vector<float>& uv);
     // Parse data
     void parseVertex(const std::string&, std::vector<float>&);
     void parseUV(const std::string&, std::vector<float>&);
     void parseNormal(const std::string&, std::vector<float>&);
-    void parseIndex(const std::string&, const std::vector<float>&, const std::vector<float>&,
+    bool parseIndex(const std::string&, const std::vector<float>&, const std::vector<float>&,
                     const std::vector<float>&);
 
     std::vector<float> d_vertices; /**< Vertices. */
