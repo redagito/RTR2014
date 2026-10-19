@@ -90,12 +90,6 @@ bool CDeferredRenderer::init(IResourceManager* manager)
         return false;
     }
 
-    if (!m_screenQuadPass.init(manager))
-    {
-        spdlog::error("Failed to initialize screen quad pass.");
-        return false;
-    }
-
     if (!initVisualizeDepthPass(manager))
     {
         spdlog::error("Failed to initialize depth visualization pass.");

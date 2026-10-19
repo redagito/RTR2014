@@ -10,8 +10,8 @@
 
 #include "resource/ResourceConfig.h"
 
-#include "pass/CScreenQuadPass.h"
 
+class CMaterial;
 class CShaderProgram;
 class IResourceManager;
 class ISceneQuery;
@@ -274,5 +274,4 @@ class CDeferredRenderer : public ARenderer
     ResourceId m_visualizeDepthPassShaderId = -1;
 
     // Fullscreen draw pass
-    CScreenQuadPass m_screenQuadPass;
 };
