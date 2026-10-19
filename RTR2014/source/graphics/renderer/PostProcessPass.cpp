@@ -5,6 +5,8 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
+#include "util/Profiler.h"
+
 #include "resource/IResourceManager.h"
 
 #include "graphics/ICamera.h"
@@ -40,20 +42,26 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
 
     // Pass 1: fxaa
     m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-    if (camera.getFeatureInfo().fxaaActive)
     {
-        m_fxaaPass.render(window, manager, texture);
-    }
-    else
-    {
-        // Passthrough
-        m_displayPass.render(window, manager, texture);
+        ScopedTimer timer(profiler(), "post: fxaa");
+        if (camera.getFeatureInfo().fxaaActive)
+        {
+            m_fxaaPass.render(window, manager, texture);
+        }
+        else
+        {
+            // Passthrough
+            m_displayPass.render(window, manager, texture);
+        }
     }
 
     // Pass 2: fog
     // TODO Fog parameter
     m_postProcessPassFrameBuffer1.setActive(GL_FRAMEBUFFER);
-    m_fogPass.render(camera, window, manager, m_postProcessPassTexture0, depthTexture);
+    {
+        ScopedTimer timer(profiler(), "post: fog");
+        m_fogPass.render(camera, window, manager, m_postProcessPassTexture0, depthTexture);
+    }
     // Foggy scene in tex1
 
     // Pass 3: dof
@@ -61,18 +69,24 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
     if (camera.getFeatureInfo().dofActive)
     {
         // Pass 3.1: gauss blur
-        m_gaussBlurPass.renderVertical(window, manager, m_postProcessPassTexture1);
-        // Blurred in tex0
+        {
+            ScopedTimer timer(profiler(), "post: blur");
+            m_gaussBlurPass.renderVertical(window, manager, m_postProcessPassTexture1);
+            // Blurred in tex0
 
-        m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-        m_gaussBlurPass.renderHorizontal(window, manager, m_postProcessPassTexture0);
-        // Blurred in tex 2
+            m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+            m_gaussBlurPass.renderHorizontal(window, manager, m_postProcessPassTexture0);
+            // Blurred in tex 2
+        }
 
         // TODO DOF parameter
         m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
-        m_depthOfFieldPass.render(camera, window, manager, m_postProcessPassTexture1,
-                                  m_postProcessPassTexture2, depthTexture,
-                                  m_transformer.getInverseViewProjectionMatrix());
+        {
+            ScopedTimer timer(profiler(), "post: depth of field");
+            m_depthOfFieldPass.render(camera, window, manager, m_postProcessPassTexture1,
+                                      m_postProcessPassTexture2, depthTexture,
+                                      m_transformer.getInverseViewProjectionMatrix());
+        }
     }
     else
     {

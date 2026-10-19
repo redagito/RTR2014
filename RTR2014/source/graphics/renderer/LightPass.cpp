@@ -3,6 +3,8 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
+#include "util/Profiler.h"
+
 #include "resource/IResourceManager.h"
 
 #include "graphics/IScene.h"
@@ -51,12 +53,18 @@ void LightPass::render(const IScene& scene, const ICamera& camera, const IWindow
     glBlendFunc(GL_ONE, GL_ONE);
 
     // Draw point light volumes
-    m_pointLightPass.render(scene, camera, window, manager, query, m_lightPassFrameBuffer,
-                             depthTexture, normalSpecularTexture);
+    {
+        ScopedTimer timer(profiler(), "pointLightPass");
+        m_pointLightPass.render(scene, camera, window, manager, query, m_lightPassFrameBuffer,
+                                depthTexture, normalSpecularTexture);
+    }
 
     // Draw directional lights
-    m_directionalLightPass.render(scene, camera, window, manager, query, m_lightPassFrameBuffer,
-                                  depthTexture, normalSpecularTexture);
+    {
+        ScopedTimer timer(profiler(), "directionalLightPass");
+        m_directionalLightPass.render(scene, camera, window, manager, query, m_lightPassFrameBuffer,
+                                      depthTexture, normalSpecularTexture);
+    }
 
     // Reset state and cleanup
     glDisable(GL_BLEND);

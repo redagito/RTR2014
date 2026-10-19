@@ -12,6 +12,8 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
+#include "util/Profiler.h"
+
 #include "resource/IResourceManager.h"
 
 
@@ -59,7 +61,10 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
 
-    m_forwardRenderPass.render(scene, camera, window, manager);
+    {
+        ScopedTimer timer(profiler(), "forwardRenderPass");
+        m_forwardRenderPass.render(scene, camera, window, manager);
+    }
 
     // Post draw error check
 }

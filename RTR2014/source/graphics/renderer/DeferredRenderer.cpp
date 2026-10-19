@@ -5,6 +5,8 @@
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
+#include "util/Profiler.h"
+
 #include "resource/IResourceManager.h"
 
 #include "graphics/IScene.h"
@@ -68,6 +70,8 @@ bool DeferredRenderer::init(IResourceManager* manager)
 void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& window,
                              const IGraphicsResourceManager& manager)
 {
+    ScopedTimer frameTimer(profiler(), "frame");
+
     // Draw init
     window.setActive();
 
@@ -75,21 +79,33 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     std::unique_ptr<ISceneQuery> query(std::move(scene.createQuery(camera)));
 
     // Geometry pass fills gbuffer
-    m_geometryPass.render(scene, *query, camera, window, manager);
+    {
+        ScopedTimer timer(profiler(), "geometryPass");
+        m_geometryPass.render(scene, *query, camera, window, manager);
+    }
 
     // Light pass fills lbuffer
-    m_lightPass.render(scene, camera, window, manager, *query,
-                       m_geometryPass.getDepthTexture(),
-                       m_geometryPass.getNormalSpecularTexture());
+    {
+        ScopedTimer timer(profiler(), "lightPass");
+        m_lightPass.render(scene, camera, window, manager, *query,
+                           m_geometryPass.getDepthTexture(),
+                           m_geometryPass.getNormalSpecularTexture());
+    }
 
     // Illumination pass renders lit scene from lbuffer and gbuffer
-    m_illuminationPass.render(window, manager, m_lightPass.getLightTexture(),
-                              m_geometryPass.getDiffuseGlowTexture(),
-                              m_geometryPass.getDepthTexture());
+    {
+        ScopedTimer timer(profiler(), "illuminationPass");
+        m_illuminationPass.render(window, manager, m_lightPass.getLightTexture(),
+                                  m_geometryPass.getDiffuseGlowTexture(),
+                                  m_geometryPass.getDepthTexture());
+    }
 
     // Post processing pass
-    m_postProcessPass.render(camera, window, manager, m_illuminationPass.getOutputTexture(),
-                              m_geometryPass.getDepthTexture());
+    {
+        ScopedTimer timer(profiler(), "postProcessPass");
+        m_postProcessPass.render(camera, window, manager, m_illuminationPass.getOutputTexture(),
+                                  m_geometryPass.getDepthTexture());
+    }
 
     FrameBuffer::setDefaultActive();
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
