@@ -14,6 +14,13 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 {
     std::string text = (length > 0) ? std::string(message, length) : std::string(message);
 
+    // Performance hints are not errors, whatever severity the driver reports
+    if (type == GL_DEBUG_TYPE_PERFORMANCE)
+    {
+        spdlog::info("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
+        return;
+    }
+
     switch (severity)
     {
     case GL_DEBUG_SEVERITY_HIGH:

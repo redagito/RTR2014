@@ -21,17 +21,15 @@ class ResourceManager : public IResourceManager
    public:
     ResourceManager();
 
-    ResourceId createMesh(const std::vector<float>& vertices,
-                          const std::vector<unsigned int>& indices,
-                          const std::vector<float>& normals, const std::vector<float>& uvs,
-                          PrimitiveType type);
+    ResourceId createMesh(std::vector<float> vertices, std::vector<unsigned int> indices,
+                          std::vector<float> normals, std::vector<float> uvs, PrimitiveType type);
 
     ResourceId loadMesh(const std::string& file) override;
 
     bool getMesh(ResourceId id, std::vector<float>& vertices, std::vector<unsigned int>& indices,
                  std::vector<float>& normals, std::vector<float>& uvs, PrimitiveType& type) const;
 
-    ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
+    ResourceId createImage(std::vector<unsigned char> imageData, unsigned int width,
                            unsigned int height, ColorFormat format);
 
     ResourceId loadImage(const std::string& file, ColorFormat format) override;

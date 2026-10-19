@@ -33,17 +33,17 @@ ResourceManager::ResourceManager()
     return;
 }
 
-ResourceId ResourceManager::createMesh(const std::vector<float>& vertices,
-                                        const std::vector<unsigned int>& indices,
-                                        const std::vector<float>& normals,
-                                        const std::vector<float>& uvs, PrimitiveType type)
+ResourceId ResourceManager::createMesh(std::vector<float> vertices,
+                                        std::vector<unsigned int> indices,
+                                        std::vector<float> normals,
+                                        std::vector<float> uvs, PrimitiveType type)
 {
     // Create mesh id
     ResourceId id = m_nextMeshId;
     ++m_nextMeshId;
 
     // Add mesh
-    m_meshes[id] = MeshData(vertices, indices, normals, uvs, type);
+    m_meshes[id] = MeshData(std::move(vertices), std::move(indices), std::move(normals), std::move(uvs), type);
 
     // Notify listener with create event
     notifyResourceListeners(ResourceType::Mesh, id, ListenerEvent::Create);
@@ -62,9 +62,9 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
     auto pending = m_pendingMeshes.find(file);
     if (pending != m_pendingMeshes.end())
     {
-        const MeshData& data = pending->second;
-        ResourceId meshId = createMesh(data.m_vertices, data.m_indices, data.m_normals, data.m_uvs,
-                                      data.m_type);
+        MeshData& data = pending->second;
+        ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
+                                      std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
         m_pendingMeshes.erase(pending);
         if (meshId == -1)
         {
@@ -81,8 +81,8 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         return -1;
     }
 
-    ResourceId meshId =
-        createMesh(data.m_vertices, data.m_indices, data.m_normals, data.m_uvs, data.m_type);
+    ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
+                                  std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
     if (meshId == -1)
     {
         spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
@@ -211,7 +211,7 @@ bool ResourceManager::getMesh(ResourceId id, std::vector<float>& vertices,
     return true;
 }
 
-ResourceId ResourceManager::createImage(const std::vector<unsigned char>& imageData,
+ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData,
                                          unsigned int width, unsigned int height,
                                          ColorFormat format)
 {
@@ -221,7 +221,7 @@ ResourceId ResourceManager::createImage(const std::vector<unsigned char>& imageD
 
     // TODO Sanity check if mesh id exists?
     // Add mesh
-    m_images[id] = Image(imageData, width, height, format);
+    m_images[id] = Image(std::move(imageData), width, height, format);
 
     // Notify listener with create event
     notifyResourceListeners(ResourceType::Image, id, ListenerEvent::Create);
@@ -241,8 +241,9 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
     auto pending = m_pendingImages.find(imageKey);
     if (pending != m_pendingImages.end())
     {
-        const Image& image = pending->second;
-        ResourceId imageId = createImage(image.m_data, image.m_width, image.m_height, image.m_format);
+        Image& image = pending->second;
+        ResourceId imageId =
+            createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
         m_pendingImages.erase(pending);
         if (imageId == -1)
         {
@@ -259,7 +260,8 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         return -1;
     }
 
-    ResourceId imageId = createImage(image.m_data, image.m_width, image.m_height, image.m_format);
+    ResourceId imageId = createImage(std::move(image.m_data), image.m_width, image.m_height,
+                                     image.m_format);
     if (imageId == -1)
     {
         spdlog::error("Failed to create image resource id from file {}.", file.c_str());

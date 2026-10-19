@@ -21,11 +21,11 @@ class IResourceManager
     virtual ~IResourceManager();
 
     /**
-     * \brief Creates mesh and returns id.
-     */
-    virtual ResourceId createMesh(const std::vector<float>& vertices,
-                                  const std::vector<unsigned int>& indices,
-                                  const std::vector<float>& normals, const std::vector<float>& uvs,
+    * \brief Creates mesh and returns id.
+    */
+    virtual ResourceId createMesh(std::vector<float> vertices,
+                                  std::vector<unsigned int> indices,
+                                  std::vector<float> normals, std::vector<float> uvs,
                                   PrimitiveType type) = 0;
 
     /**
@@ -47,7 +47,7 @@ class IResourceManager
      * \parm height Image height.
      * \parm format Image format of the provided data.
      */
-    virtual ResourceId createImage(const std::vector<unsigned char>& imageData, unsigned int width,
+    virtual ResourceId createImage(std::vector<unsigned char> imageData, unsigned int width,
                                    unsigned int height, ColorFormat format) = 0;
 
     /**
