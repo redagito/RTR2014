@@ -44,6 +44,12 @@ bool CSceneLoader::load(const std::string& file, IScene& scene, CAnimationWorld&
     // Read done, close file
     ifs.close();
 
+    if (!root.isObject())
+    {
+        spdlog::error("The root of scene file {} must be an object.", file.c_str());
+        return false;
+    }
+
     // Load scene objects
     if (!loadSceneObjects(root["scene_objects"], scene, animationWorld))
     {
@@ -396,6 +402,11 @@ bool CSceneLoader::loadAnimationController(const Json::Value& node, IScene& scen
 
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, float& f)
 {
+    if (!node.isObject())
+    {
+        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
+        return false;
+    }
     if (!deserialize(node[name], f))
     {
         spdlog::error("Failed to load '{}' parameter.", name.c_str());
@@ -406,6 +417,11 @@ bool CSceneLoader::load(const Json::Value& node, const std::string& name, float&
 
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, bool& b)
 {
+    if (!node.isObject())
+    {
+        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
+        return false;
+    }
     if (!deserialize(node[name], b))
     {
         spdlog::error("Failed to load '{}' parameter.", name.c_str());
@@ -416,6 +432,11 @@ bool CSceneLoader::load(const Json::Value& node, const std::string& name, bool& 
 
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, glm::vec3& vec)
 {
+    if (!node.isObject())
+    {
+        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
+        return false;
+    }
     if (!deserialize(node[name], vec))
     {
         spdlog::error("Failed to load '{}' parameter.", name.c_str());
@@ -426,6 +447,11 @@ bool CSceneLoader::load(const Json::Value& node, const std::string& name, glm::v
 
 bool CSceneLoader::load(const Json::Value& node, const std::string& name, std::string& str)
 {
+    if (!node.isObject())
+    {
+        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
+        return false;
+    }
     if (!deserialize(node[name], str))
     {
         spdlog::error("Failed to load '{}' parameter.", name.c_str());
