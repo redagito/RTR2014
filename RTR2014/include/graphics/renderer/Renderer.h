@@ -3,11 +3,15 @@
 #include <memory>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+
 // Required for inheritance
 #include "graphics/IRenderer.h"
 
 class IGraphicsResourceManager;
+class Material;
 class Mesh;
+class ShaderProgram;
 
 /**
 * \brief Abstract renderer base class.
@@ -37,5 +41,15 @@ class Renderer : public IRenderer
     * Shader must be set by caller.
     */
     void draw(Mesh* mesh);
+
+    /**
+    * \brief Sends transformation matrices and material textures to the shader.
+    *
+    * Textures the material does not provide fall back to the manager's defaults.
+    * Shader must be set active by caller.
+    */
+    void bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
+                      const glm::mat4& rotation, const glm::mat4& scale,
+                      const IGraphicsResourceManager& manager);
 
 };

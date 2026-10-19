@@ -1152,71 +1152,7 @@ void DeferredRenderer::draw(Mesh* mesh, const glm::mat4& translation, const glm:
 
     shader->setActive();
 
-
-
-    // Transformation matrices
-    shader->setUniform(translationMatrixUniformName, translation);
-    shader->setUniform(rotationMatrixUniformName, rotation);
-    shader->setUniform(scaleMatrixUniformName, scale);
-    shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
-
-
-    // Send material textures to shader
-    if (material->hasDiffuse())
-    {
-        material->getDiffuse()->setActive(diffuseTextureUnit);
-    }
-    else
-    {
-        manager.getDefaultDiffuseTexture()->setActive(diffuseTextureUnit);
-    }
-    shader->setUniform(diffuseTextureUniformName, diffuseTextureUnit);
-
-    if (material->hasNormal())
-    {
-        material->getNormal()->setActive(normalTextureUnit);
-    }
-    else
-    {
-        // Use default texture
-        manager.getDefaultNormalTexture()->setActive(normalTextureUnit);
-    }
-    shader->setUniform(normalTextureUniformName, normalTextureUnit);
-
-    if (material->hasSpecular())
-    {
-        material->getSpecular()->setActive(specularTextureUnit);
-    }
-    else
-    {
-        // Use default texture
-        manager.getDefaultSpecularTexture()->setActive(specularTextureUnit);
-    }
-    shader->setUniform(specularTextureUniformName, specularTextureUnit);
-
-    if (material->hasGlow())
-    {
-        material->getGlow()->setActive(glowTextureUnit);
-    }
-    else
-    {
-        // Use default texture
-        manager.getDefaultGlowTexture()->setActive(glowTextureUnit);
-    }
-    shader->setUniform(glowTextureUniformName, glowTextureUnit);
-
-    // TODO Sort materials with alpha texture for blending.
-    if (material->hasAlpha())
-    {
-        material->getAlpha()->setActive(alphaTextureUnit);
-    }
-    else
-    {
-        // Use default texture
-        manager.getDefaultAlphaTexture()->setActive(alphaTextureUnit);
-    }
-    shader->setUniform(alphaTextureUniformName, alphaTextureUnit);
-
+    bindMaterial(shader, material, translation, rotation, scale, manager);
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes

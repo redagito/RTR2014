@@ -4,7 +4,10 @@
 #include <string>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/Material.h"
 #include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
 
 
 Renderer::Renderer()
@@ -39,4 +42,67 @@ void Renderer::draw(Mesh* mesh)
         glDrawArrays(mode, 0, mesh->getVertexBuffer()->getSize() / primitiveSize);
     }
     mesh->getVertexArray()->setInactive();
+}
+
+void Renderer::bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
+                            const glm::mat4& rotation, const glm::mat4& scale,
+                            const IGraphicsResourceManager& manager)
+{
+    // Transformation matrices
+    shader->setUniform(translationMatrixUniformName, translation);
+    shader->setUniform(rotationMatrixUniformName, rotation);
+    shader->setUniform(scaleMatrixUniformName, scale);
+    shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
+
+    // Send material textures to shader
+    if (material->hasDiffuse())
+    {
+        material->getDiffuse()->setActive(diffuseTextureUnit);
+    }
+    else
+    {
+        manager.getDefaultDiffuseTexture()->setActive(diffuseTextureUnit);
+    }
+    shader->setUniform(diffuseTextureUniformName, diffuseTextureUnit);
+
+    if (material->hasNormal())
+    {
+        material->getNormal()->setActive(normalTextureUnit);
+    }
+    else
+    {
+        manager.getDefaultNormalTexture()->setActive(normalTextureUnit);
+    }
+    shader->setUniform(normalTextureUniformName, normalTextureUnit);
+
+    if (material->hasSpecular())
+    {
+        material->getSpecular()->setActive(specularTextureUnit);
+    }
+    else
+    {
+        manager.getDefaultSpecularTexture()->setActive(specularTextureUnit);
+    }
+    shader->setUniform(specularTextureUniformName, specularTextureUnit);
+
+    if (material->hasGlow())
+    {
+        material->getGlow()->setActive(glowTextureUnit);
+    }
+    else
+    {
+        manager.getDefaultGlowTexture()->setActive(glowTextureUnit);
+    }
+    shader->setUniform(glowTextureUniformName, glowTextureUnit);
+
+    // TODO Sort materials with alpha texture for blending.
+    if (material->hasAlpha())
+    {
+        material->getAlpha()->setActive(alphaTextureUnit);
+    }
+    else
+    {
+        manager.getDefaultAlphaTexture()->setActive(alphaTextureUnit);
+    }
+    shader->setUniform(alphaTextureUniformName, alphaTextureUnit);
 }
