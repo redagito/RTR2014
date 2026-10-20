@@ -223,6 +223,11 @@ Material* GraphicsResourceManager::getMaterial(ResourceId id) const
 
 Texture* GraphicsResourceManager::getTexture(ResourceId id) const
 {
+	return findTexture(id).get();
+}
+
+std::shared_ptr<Texture> GraphicsResourceManager::findTexture(ResourceId id) const
+{
 	// Invalid id
 	if (id == -1)
 	{
@@ -237,10 +242,15 @@ Texture* GraphicsResourceManager::getTexture(ResourceId id) const
 		spdlog::error("The requested texture id {} has not been loaded.", id);
 		return nullptr;
 	}
-	return iter->second.get();
+	return iter->second;
 }
 
 ShaderProgram* GraphicsResourceManager::getShaderProgram(ResourceId id) const
+{
+	return findShaderProgram(id).get();
+}
+
+std::shared_ptr<ShaderProgram> GraphicsResourceManager::findShaderProgram(ResourceId id) const
 {
 	// Invalid id
 	if (id == invalidResource)
@@ -257,7 +267,7 @@ ShaderProgram* GraphicsResourceManager::getShaderProgram(ResourceId id) const
 		spdlog::error("The requested shader program id {} has not been loaded.", id);
 		return nullptr;
 	}
-	return iter->second.get();
+	return iter->second;
 }
 
 
@@ -336,7 +346,7 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 			return;
 		}
 		// Create new texture
-		m_textures[id] = std::make_unique<Texture>(data, width, height, format);
+		m_textures[id] = std::make_shared<Texture>(data, width, height, format);
 		break;
 
 	case ListenerEvent::Change:
@@ -453,8 +463,8 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 
 		// Create new material
 		m_materials[id] = std::make_unique<Material>(
-			getTexture(diffuse), getTexture(normal), getTexture(specular), getTexture(glow),
-			getTexture(alpha), getShaderProgram(customShader));
+			findTexture(diffuse), findTexture(normal), findTexture(specular), findTexture(glow),
+			findTexture(alpha), findShaderProgram(customShader));
 		break;
 
 	case ListenerEvent::Change:
@@ -473,9 +483,9 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 		}
 
 		// Reinitialize material on change
-		material->second->init(getTexture(diffuse), getTexture(normal), getTexture(specular),
-			getTexture(glow), getTexture(alpha),
-			getShaderProgram(customShader));
+		material->second->init(findTexture(diffuse), findTexture(normal), findTexture(specular),
+			findTexture(glow), findTexture(alpha),
+			findShaderProgram(customShader));
 		break;
 	}
 
@@ -539,10 +549,10 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 
 {
 			// Add create shader program
-			auto program = std::unique_ptr<ShaderProgram>(new ShaderProgram(
+			auto program = std::make_shared<ShaderProgram>(
 			getVertexShaderObject(vertex), getTessControlShaderObject(tessControl),
 			getTessEvalShaderObject(tessEval), getGeometryShaderObject(geometry),
-			getFragmentShaderObject(fragment)));
+			getFragmentShaderObject(fragment));
 
 		if (!program->isValid())
 		{

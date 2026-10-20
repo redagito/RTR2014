@@ -106,6 +106,16 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
 
    private:
     /**
+    * \brief Returns the texture of an image id, or null if there is none.
+    */
+    std::shared_ptr<Texture> findTexture(ResourceId id) const;
+
+    /**
+    * \brief Returns the shader program of a shader id, or null if there is none.
+    */
+    std::shared_ptr<ShaderProgram> findShaderProgram(ResourceId id) const;
+
+    /**
     * \brief Initializes default textures for materials.
     */
     void initDefaultTextures();
@@ -141,7 +151,7 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
     std::unordered_map<ResourceId, std::unique_ptr<Mesh>>
         m_meshes; /**< Maps mesh id from resource manager to GPU side mesh. */
 
-    std::unordered_map<ResourceId, std::unique_ptr<Texture>>
+    std::unordered_map<ResourceId, std::shared_ptr<Texture>>
         m_textures; /**< Maps image id from resource manager to GPU side texture. */
 
     std::unordered_map<ResourceId, std::unique_ptr<Material>>
@@ -164,7 +174,7 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
     std::unordered_map<ResourceId, std::unique_ptr<ShaderObject<GL_FRAGMENT_SHADER>>>
         m_fragmentShader; /**< Maps string resource ids to compiled fragment shader objects. */
 
-    std::unordered_map<ResourceId, std::unique_ptr<ShaderProgram>>
+    std::unordered_map<ResourceId, std::shared_ptr<ShaderProgram>>
         m_shaderPrograms; /**< Maps resource ids to linked shader programs. */
 
     std::unique_ptr<Texture> m_defaultDiffuseTexture = nullptr;  /**< Default diffuse texture. */

@@ -13,11 +13,13 @@
 class Material
 {
    public:
-    Material(const Texture* diffuse, const Texture* normal, const Texture* specular,
-              const Texture* glow, const Texture* alpha, ShaderProgram* customShader);
+    Material(std::shared_ptr<Texture> diffuse, std::shared_ptr<Texture> normal,
+             std::shared_ptr<Texture> specular, std::shared_ptr<Texture> glow,
+             std::shared_ptr<Texture> alpha, std::shared_ptr<ShaderProgram> customShader);
 
-    bool init(const Texture* diffuse, const Texture* normal, const Texture* specular,
-              const Texture* glow, const Texture* alpha, ShaderProgram* customShader);
+    bool init(std::shared_ptr<Texture> diffuse, std::shared_ptr<Texture> normal,
+              std::shared_ptr<Texture> specular, std::shared_ptr<Texture> glow,
+              std::shared_ptr<Texture> alpha, std::shared_ptr<ShaderProgram> customShader);
 
     bool hasDiffuse() const;
     bool hasNormal() const;
@@ -34,10 +36,12 @@ class Material
     ShaderProgram* getCustomShader() const;
 
    private:
-    const Texture* m_diffuseTexture;  /**< Base color. */
-    const Texture* m_normalTexture;   /**< Normal map. */
-    const Texture* m_specularTexture; /**< Specular highlights. */
-    const Texture* m_glowTexture;     /**< Glow map. */
-    const Texture* m_alphaTexture;    /**< Alpha map. */
-    ShaderProgram* m_customShader;    /**< Custom shader. */
+    // The textures and the shader are shared with the graphics resource
+    // manager, the material keeps them alive.
+    std::shared_ptr<Texture> m_diffuseTexture;  /**< Base color. */
+    std::shared_ptr<Texture> m_normalTexture;   /**< Normal map. */
+    std::shared_ptr<Texture> m_specularTexture; /**< Specular highlights. */
+    std::shared_ptr<Texture> m_glowTexture;     /**< Glow map. */
+    std::shared_ptr<Texture> m_alphaTexture;    /**< Alpha map. */
+    std::shared_ptr<ShaderProgram> m_customShader; /**< Custom shader. */
 };
