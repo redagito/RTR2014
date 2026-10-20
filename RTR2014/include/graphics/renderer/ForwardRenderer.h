@@ -33,13 +33,13 @@ class ForwardRenderer : public Renderer
 	void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager);
 
     /**
-    * \brief Performs resource aqucisition and initialization.
-    */
+     * \brief Performs resource aqucisition and initialization.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Creates and initializes forward renderer.
-    */
+     * \brief Creates and initializes forward renderer.
+     */
     static ForwardRenderer* create(IResourceManager* manager);
 
    private:

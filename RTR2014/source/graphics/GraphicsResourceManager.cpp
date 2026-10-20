@@ -2,6 +2,7 @@
 #include "graphics/GraphicsResourceManager.h"
 
 #include <cassert>
+#include <cstdlib>
 #include <string>
 
 #include "resource/IResourceManager.h"
@@ -9,8 +10,30 @@
 namespace
 {
 /**
-* \brief Compiles a shader stage from the source text of a string resource.
-*/
+ * \brief Returns the name of a shader stage.
+ */
+const char* shaderStageName(GLenum stage)
+{
+    switch (stage)
+    {
+    case GL_VERTEX_SHADER:
+        return "vertex";
+    case GL_TESS_CONTROL_SHADER:
+        return "tessellation control";
+    case GL_TESS_EVALUATION_SHADER:
+        return "tessellation evaluation";
+    case GL_GEOMETRY_SHADER:
+        return "geometry";
+    case GL_FRAGMENT_SHADER:
+        return "fragment";
+    default:
+        return "unknown";
+    }
+}
+
+/**
+ * \brief Compiles a shader stage from the source text of a string resource.
+ */
 template <GLenum Stage>
 bool loadShaderStage(
 	ResourceId id, IResourceManager* resourceManager,
@@ -28,16 +51,23 @@ bool loadShaderStage(
 	}
 	// Load from resource manager
 	std::string text;
-	resourceManager->getString(id, text);
+	if (!resourceManager->getString(id, text))
+	{
+		spdlog::error("The source of the {} shader {} could not be retrieved.",
+		              shaderStageName(Stage), id);
+		return false;
+	}
 	if (text.empty())
 	{
+		spdlog::error("The source of the {} shader {} is empty.", shaderStageName(Stage), id);
 		return false;
 	}
 	std::unique_ptr<ShaderObject<Stage>> shader(new ShaderObject<Stage>(text));
 	// Check compile error
 	if (!shader->isValid())
 	{
-		spdlog::error("{}", shader->getErrorString().c_str());
+		spdlog::error("Failed to compile the {} shader {}: {}", shaderStageName(Stage), id,
+		              shader->getErrorString());
 		return false;
 	}
 	// Move to map
@@ -451,8 +481,18 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 		!loadShaderStage<GL_GEOMETRY_SHADER>(geometry, resourceManager, m_geometryShader) ||
 		!loadShaderStage<GL_FRAGMENT_SHADER>(fragment, resourceManager, m_fragmentShader))
 	{
-		// TODO Log error
-		return;
+		// A shader program without all its stages cannot be used, the renderer
+		// would draw nothing without ever saying why.
+		std::string file;
+		if (resourceManager->getShaderFile(id, file))
+		{
+			spdlog::error("The shader program from file {} could not be built.", file);
+		}
+		else
+		{
+			spdlog::error("The shader program with id {} could not be built.", id);
+		}
+		std::abort();
 	}
 
 {
@@ -464,8 +504,8 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 
 		if (!program->isValid())
 		{
-			spdlog::error("Failed to link shader program with id {}.", id);
-			return;
+			spdlog::error("Failed to link the shader program with id {}.", id);
+			std::abort();
 		}
 
 		m_shaderPrograms[id] = std::move(program);

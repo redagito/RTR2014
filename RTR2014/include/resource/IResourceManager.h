@@ -118,7 +118,7 @@ class IResourceManager
     /**
      * \brief Creates shader resource.
      */
-    virtual ResourceId createShader(ResourceId vertexShaderString,
+    virtual ResourceId createShader(const std::string& file, ResourceId vertexShaderString,
                                     ResourceId tessellationControlShaderString,
                                     ResourceId tessellationEvaluationShaderString,
                                     ResourceId geometryShaderString,
@@ -133,13 +133,18 @@ class IResourceManager
     virtual ResourceId loadShader(const std::string& shaderIniFile) = 0;
 
     /**
-    * \brief Creates shader resource.
-    */
+     * \brief Retrieves shader resource.
+     */
     virtual bool getShader(ResourceId id, ResourceId& vertexShaderString,
                            ResourceId& tessellationControlShaderString,
                            ResourceId& tessellationEvaluationShaderString,
                            ResourceId& geometryShaderString,
                            ResourceId& fragmentShaderString) const = 0;
+
+    /**
+     * \brief Returns the file a shader program was loaded from.
+     */
+    virtual bool getShaderFile(ResourceId id, std::string& file) const = 0;
 
     /**
     * \brief Loads meshes, the images of the given materials and sounds in parallel.

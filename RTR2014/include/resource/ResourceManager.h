@@ -58,13 +58,15 @@ class ResourceManager : public IResourceManager
 
     bool getString(ResourceId id, std::string& text) const;
 
-    ResourceId createShader(ResourceId vertex, ResourceId tessCtrl, ResourceId tessEval,
-                            ResourceId geometry, ResourceId fragment);
+    ResourceId createShader(const std::string& file, ResourceId vertex, ResourceId tessCtrl,
+                            ResourceId tessEval, ResourceId geometry, ResourceId fragment);
 
     ResourceId loadShader(const std::string& file) override;
 
     bool getShader(ResourceId id, ResourceId& vertex, ResourceId& tessCtrl, ResourceId& tessEval,
                    ResourceId& geometry, ResourceId& fragment) const;
+
+    bool getShaderFile(ResourceId id, std::string& file) const override;
 
     void addResourceListener(IResourceListener* listener);
     void removeResourceListener(IResourceListener* listener);

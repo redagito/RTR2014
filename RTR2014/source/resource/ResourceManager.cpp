@@ -607,9 +607,9 @@ bool ResourceManager::getString(ResourceId id, std::string& text) const
     return true;
 }
 
-ResourceId ResourceManager::createShader(ResourceId vertex, ResourceId tessCtrl,
-                                          ResourceId tessEval, ResourceId geometry,
-                                          ResourceId fragment)
+ResourceId ResourceManager::createShader(const std::string& file, ResourceId vertex,
+                                          ResourceId tessCtrl, ResourceId tessEval,
+                                          ResourceId geometry, ResourceId fragment)
 {
     // Create shader
     ResourceId id = m_nextShaderId;
@@ -617,6 +617,13 @@ ResourceId ResourceManager::createShader(ResourceId vertex, ResourceId tessCtrl,
 
     // Add shader
     m_shaders[id] = Shader(vertex, tessCtrl, tessEval, geometry, fragment);
+
+    // The file has to be known before the listeners are notified, they report
+    // compilation errors with it.
+    if (!file.empty())
+    {
+        m_shaderFiles[file] = id;
+    }
 
     // Notify listener with create event
     notifyResourceListeners(ResourceType::Shader, id, ListenerEvent::Create);
@@ -640,6 +647,19 @@ bool ResourceManager::getShader(ResourceId id, ResourceId& vertex, ResourceId& t
     geometry = iter->second.m_geometry;
     fragment = iter->second.m_fragment;
     return true;
+}
+
+bool ResourceManager::getShaderFile(ResourceId id, std::string& file) const
+{
+    for (const auto& entry : m_shaderFiles)
+    {
+        if (entry.second == id)
+        {
+            file = entry.first;
+            return true;
+        }
+    }
+    return false;
 }
 
 ResourceId ResourceManager::loadShader(const std::string& file)
@@ -738,13 +758,12 @@ ResourceId ResourceManager::loadShader(const std::string& file)
 
     ResourceId shaderId = -1;
     // Create new entry
-    shaderId = createShader(vertexId, tessCtrlId, tessEvalId, geometryId, fragmentId);
+    shaderId = createShader(file, vertexId, tessCtrlId, tessEvalId, geometryId, fragmentId);
     if (shaderId == -1)
     {
         spdlog::error("Failed to create reasource id for shader file {}.", file.c_str());
         return -1;
     }
-    m_shaderFiles[file] = shaderId;
     return shaderId;
 }
 

@@ -68,6 +68,23 @@ class TempSound
     std::string m_path = "rtr2014_tmp_sound.mp3";
 };
 
+class TempFile
+{
+   public:
+    TempFile(const std::string& name, const std::string& content)
+    {
+        m_path = name;
+        std::ofstream ofs(m_path);
+        ofs << content;
+    }
+    ~TempFile() { std::remove(m_path.c_str()); }
+
+    std::string path() const { return m_path; }
+
+   private:
+    std::string m_path;
+};
+
 class SoundListener : public IResourceListener
 {
    public:
@@ -79,6 +96,30 @@ class SoundListener : public IResourceListener
     }
 
     std::vector<std::tuple<ResourceType, ResourceId, ListenerEvent>> m_events;
+};
+
+// Records the file of a shader program while the listener is notified, which
+// is when the graphics manager reports a compilation error.
+class ShaderFileListener : public IResourceListener
+{
+   public:
+    void onAttach(IResourceManager*) override {}
+    void onDetach(IResourceManager*) override {}
+    void notify(ResourceType type, ResourceId id, ListenerEvent event,
+                IResourceManager* manager) override
+    {
+        if (type != ResourceType::Shader || event != ListenerEvent::Create)
+        {
+            return;
+        }
+        std::string file;
+        if (manager->getShaderFile(id, file))
+        {
+            m_file = file;
+        }
+    }
+
+    std::string m_file;
 };
 
 // The same object loaded with and without preloading must yield the same data.
@@ -167,6 +208,46 @@ TEST_CASE("preloading an unknown material file does not publish it", "[resource]
     manager.preload({}, {"no_such_material.ini"}, {});
 
     REQUIRE(manager.loadMaterial("no_such_material.ini") == invalidResource);
+}
+
+TEST_CASE("a loaded shader program reports the file it was loaded from", "[resource]")
+{
+    TempFile vertexSource("rtr2014_tmp_vertex.glsl", "void main() {}\n");
+    TempFile fragmentSource("rtr2014_tmp_fragment.glsl", "void main() {}\n");
+    TempIni shaderProgram("[vertex]\nfile=" + vertexSource.path() +
+                          "\n[fragment]\nfile=" + fragmentSource.path() + "\n");
+
+    ResourceManager manager;
+    const ResourceId id = manager.loadShader(shaderProgram.path());
+    REQUIRE(id != invalidResource);
+
+    std::string file;
+    REQUIRE(manager.getShaderFile(id, file));
+    REQUIRE(file == shaderProgram.path());
+}
+
+TEST_CASE("an unknown shader program has no file", "[resource]")
+{
+    ResourceManager manager;
+
+    std::string file;
+    REQUIRE_FALSE(manager.getShaderFile(invalidResource, file));
+}
+
+TEST_CASE("the shader program file is known when the listeners are notified", "[resource]")
+{
+    TempFile vertexSource("rtr2014_tmp_vertex.glsl", "void main() {}\n");
+    TempFile fragmentSource("rtr2014_tmp_fragment.glsl", "void main() {}\n");
+    TempIni shaderProgram("[vertex]\nfile=" + vertexSource.path() +
+                          "\n[fragment]\nfile=" + fragmentSource.path() + "\n");
+
+    ResourceManager manager;
+    ShaderFileListener listener;
+    manager.addResourceListener(&listener);
+
+    const ResourceId id = manager.loadShader(shaderProgram.path());
+    REQUIRE(id != invalidResource);
+    REQUIRE(listener.m_file == shaderProgram.path());
 }
 
 TEST_CASE("a material without a texture slot reports an invalid id for it", "[resource]")

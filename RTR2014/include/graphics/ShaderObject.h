@@ -96,7 +96,7 @@ bool ShaderObject<ShaderType>::init(const std::string& source)
             std::vector<GLchar> log(size + 1);
             // Get log
             glGetShaderInfoLog(objectId, size, NULL, log.data());
-            m_infoLog.assign(log.data(), size);
+            m_infoLog.assign(log.data());
         }
         // Clean up temp id
         glDeleteShader(objectId);

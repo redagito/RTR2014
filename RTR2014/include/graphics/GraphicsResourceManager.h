@@ -3,6 +3,7 @@
 #include <memory>
 #include <list>
 #include <unordered_map>
+#include <vector>
 
 #include "resource/IResourceListener.h"
 #include "graphics/IGraphicsResourceManager.h"
@@ -64,8 +65,8 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
     Texture* getTexture(ResourceId) const;
 
     /**
-    * \brief Maps id to internal shader program object.
-    */
+     * \brief Maps id to internal shader program object.
+     */
     ShaderProgram* getShaderProgram(ResourceId) const;
 
     /**
