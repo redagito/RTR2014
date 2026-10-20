@@ -1,17 +1,29 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <memory>
+
 #include <spdlog/spdlog.h>
 
 #include "debug/DebugInfo.h"
 
+namespace
+{
+// A logger of its own, so the tests do not change the sinks of the default
+// logger that the rest of the program uses.
+std::shared_ptr<spdlog::logger> makeLogger(const std::shared_ptr<DebugInfo>& debugInfo)
+{
+    auto logger = std::make_shared<spdlog::logger>("debug_info_test");
+    logger->sinks().push_back(debugInfo);
+    return logger;
+}
+} // namespace
+
 TEST_CASE("DebugInfo sink captures formatted log messages", "[debug]")
 {
-    spdlog::default_logger()->sinks().clear();
-
     auto debugInfo = std::make_shared<DebugInfo>();
-    spdlog::default_logger()->sinks().push_back(debugInfo);
+    const auto logger = makeLogger(debugInfo);
 
-    spdlog::error("disk {} is {}", "full", 42);
+    logger->error("disk {} is {}", "full", 42);
 
     const auto log = debugInfo->getLog();
     REQUIRE(log.size() == 1);
@@ -20,15 +32,13 @@ TEST_CASE("DebugInfo sink captures formatted log messages", "[debug]")
 
 TEST_CASE("DebugInfo ring buffer keeps only the configured number of entries", "[debug]")
 {
-    spdlog::default_logger()->sinks().clear();
-
     auto debugInfo = std::make_shared<DebugInfo>();
     debugInfo->setLogBufferSize(2);
-    spdlog::default_logger()->sinks().push_back(debugInfo);
+    const auto logger = makeLogger(debugInfo);
 
-    spdlog::info("one");
-    spdlog::info("two");
-    spdlog::info("three");
+    logger->info("one");
+    logger->info("two");
+    logger->info("three");
 
     const auto log = debugInfo->getLog();
     REQUIRE(log.size() == 2);

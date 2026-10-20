@@ -34,15 +34,17 @@ TEST_CASE("FirstPersonCamera lookAt keeps a horizontal target level", "[camera]"
     REQUIRE(pitchDegrees(camera) == Catch::Approx(0.f).margin(0.01f));
 }
 
-TEST_CASE("FirstPersonCamera lookAt preserves the elevation of the target", "[camera]")
+TEST_CASE("FirstPersonCamera lookAt clamps the elevation of the target", "[camera]")
 {
     auto camera = makeCamera();
 
-    camera.lookAt(glm::vec3(0.f), glm::vec3(0.f, 1.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
-    REQUIRE(pitchDegrees(camera) == Catch::Approx(45.f).margin(0.1f));
-
+    // Within the range the camera allows the elevation is kept.
     camera.lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.5f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     REQUIRE(pitchDegrees(camera) == Catch::Approx(26.565f).margin(0.1f));
+
+    // Beyond it the camera is limited to 45 degrees, the same limit pitch has.
+    camera.lookAt(glm::vec3(0.f), glm::vec3(0.f, 2.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
+    REQUIRE(pitchDegrees(camera) == Catch::Approx(45.f).margin(0.1f));
 }
 
 TEST_CASE("FirstPersonCamera lookAt survives a target straight above", "[camera]")

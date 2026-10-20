@@ -18,6 +18,26 @@ std::string readFile(const std::string& path)
     buffer << in.rdbuf();
     return buffer.str();
 }
+
+// Returns the count the report lists for a section, or -1 if it is missing.
+int countOf(const std::string& report, const std::string& section)
+{
+    std::istringstream stream(report);
+    std::string line;
+    while (std::getline(stream, line))
+    {
+        if (line.rfind(section, 0) != 0)
+        {
+            continue;
+        }
+        std::istringstream lineStream(line);
+        std::string name;
+        int count = -1;
+        lineStream >> name >> count;
+        return count;
+    }
+    return -1;
+}
 } // namespace
 
 TEST_CASE("Profiler records the count and total of a section", "[util]")
@@ -38,10 +58,9 @@ TEST_CASE("Profiler records the count and total of a section", "[util]")
     const std::string report = readFile(path);
     std::remove(path.c_str());
 
-    REQUIRE(report.find("section") != std::string::npos);
-    REQUIRE(report.find("other") != std::string::npos);
     // Both visits of "section" are counted together
-    REQUIRE(report.find("2") != std::string::npos);
+    REQUIRE(countOf(report, "section") == 2);
+    REQUIRE(countOf(report, "other") == 1);
 }
 
 TEST_CASE("Profiler accepts timings from several threads", "[util]")
@@ -68,5 +87,5 @@ TEST_CASE("Profiler accepts timings from several threads", "[util]")
     std::remove(path.c_str());
 
     // 8 threads with 100 visits each
-    REQUIRE(report.find("800") != std::string::npos);
+    REQUIRE(countOf(report, "parallel") == 800);
 }
