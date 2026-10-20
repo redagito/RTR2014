@@ -11,10 +11,14 @@ uniform float screen_height;
 
 uniform int fog_type;
 
+// The near and far plane of the camera, the depth is linearized with them
+uniform float camera_z_near;
+uniform float camera_z_far;
+
 vec3 applyFog(vec3 color, float d)
 {
-    float n = 0.01f;
-    float f = 1000.0f;
+    float n = camera_z_near;
+    float f = camera_z_far;
     float z = (2.0 * n * f) / (f + n - d * (f-n));
     
     float fogN = 0.0f;

@@ -116,16 +116,8 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
     {
-        float zNear = 0.01f;
-        float zFar = 1000.f;
-        if (const IControllableCamera* controllable =
-                dynamic_cast<const IControllableCamera*>(&camera))
-        {
-            zNear = controllable->getZNear();
-            zFar = controllable->getZFar();
-        }
-        m_depthVisualizationPass.render(window, manager, m_geometryPass.getDepthTexture(), zNear,
-                                        zFar);
+        m_depthVisualizationPass.render(window, manager, m_geometryPass.getDepthTexture(),
+                                        camera.getZNear(), camera.getZFar());
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {

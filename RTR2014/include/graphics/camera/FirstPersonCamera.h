@@ -33,7 +33,6 @@ class FirstPersonCamera : public IControllableCamera
     float getFieldOfView() const override;
     float getZNear() const override;
     float getZFar() const override;
-
     void setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar) override;
 
    private:

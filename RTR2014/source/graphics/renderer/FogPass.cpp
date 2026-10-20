@@ -56,6 +56,10 @@ void FogPass::render(const ICamera& camera, const IWindow& window,
     fogShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     fogShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
+    // The depth is linearized with the planes of the camera.
+    fogShader->setUniform(cameraZNearUniformName, camera.getZNear());
+    fogShader->setUniform(cameraZFarUniformName, camera.getZFar());
+
     int fogType = 0;
     switch (camera.getFeatureInfo().fogType)
     {

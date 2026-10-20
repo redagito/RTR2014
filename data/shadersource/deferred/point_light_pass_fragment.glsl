@@ -58,7 +58,8 @@ void main(void)
 	// Calculate distance-based light attenuation
 	// Linear for now
 	// TODO Needs better model?
-	float light_attenuation = max(0.0, (light_radius - fragment_light_distance) / light_radius);
+	// The radius guards the division, a light without one would be infinite.
+	float light_attenuation = max(0.0, (light_radius - fragment_light_distance) / max(light_radius, 1e-6));
 	// Calculate intensity with attenuation
 	float attenuated_intensity = light_intensity * light_attenuation;
 	

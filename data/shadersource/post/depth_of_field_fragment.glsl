@@ -47,12 +47,12 @@ void main(void)
 	// Apply blur
 	if (distance < focus_near)
 	{
-		float a = min(1.0, blur_near / distance);
+		float a = min(1.0, blur_near / max(distance, 1e-4));
 		color = mix(texture(scene_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
 	else if (distance > focus_far)
 	{
-		float a = min(1.0, (distance - focus_far) / (blur_far - focus_far));
+		float a = min(1.0, (distance - focus_far) / max(blur_far - focus_far, 1e-4));
 		color = mix(texture(scene_texture, normalized_screen_coordinates).xyz, texture(blur_texture, normalized_screen_coordinates).xyz, a);
 	}
 	else

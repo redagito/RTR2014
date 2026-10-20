@@ -60,6 +60,16 @@ class ICamera
     */
     virtual const glm::mat4& getProjection() const = 0;
 
+    /**
+    * \brief Returns the distance of the near plane.
+    */
+    virtual float getZNear() const = 0;
+
+    /**
+    * \brief Returns the distance of the far plane.
+    */
+    virtual float getZFar() const = 0;
+
     virtual glm::vec3 getPosition() const = 0;
 
     // TODO extract functionality to a better place
