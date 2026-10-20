@@ -41,11 +41,11 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
     return mat3( T * invmax, B * invmax, N );
 }
 
-vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord )
+vec3 perturb_normal( vec3 N, vec3 position, vec2 texcoord )
 {
     vec3 map = texture( normal_texture, texcoord ).xyz;
-    map = map * 255./127. - 128./127.;
-    mat3 TBN = cotangent_frame( N, -V, texcoord );
+    map = map * 2.0 - 1.0;
+    mat3 TBN = cotangent_frame( N, position, texcoord );
     return normalize( TBN * map );
 }
 
