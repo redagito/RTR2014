@@ -84,9 +84,19 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
             glm::vec3 shadowUp =
                 (std::abs(lightDir.y) > 0.999f) ? glm::vec3(0.0f, 0.0f, 1.0f)
                                                  : glm::vec3(0.0f, 1.0f, 0.0f);
-            glm::mat4 shadowView = glm::lookAt(glm::vec3(0), lightDir, shadowUp);
-            glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
-            StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
+            // The shadow volume covers the scene, so that everything that
+            // casts a shadow is inside it.
+            glm::vec3 sceneCenter(0.0f);
+            float sceneRadius = 0.0f;
+            scene.getSceneBounds(sceneCenter, sceneRadius);
+            const float radius = std::max(sceneRadius, 1.0f) * 1.1f;
+            // The light shines along its direction, so the shadow camera looks
+            // at the scene from the side the light comes from.
+            const glm::vec3 shadowEye = sceneCenter - lightDir * radius;
+            glm::mat4 shadowView = glm::lookAt(shadowEye, sceneCenter, shadowUp);
+            glm::mat4 shadowProj =
+                glm::ortho(-radius, radius, -radius, radius, 0.0f, 2.0f * radius);
+            StaticCamera shadowCamera(shadowView, shadowProj, shadowEye);
 
             // Render shadow map
             if (castsShadow && camera.getFeatureInfo().shadowsActive)

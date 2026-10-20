@@ -173,8 +173,37 @@ TEST_CASE("Scene query only returns objects inside the view frustum", "[scene]")
     REQUIRE_FALSE(query->hasNextObject());
 }
 
-TEST_CASE("Scene query follows an object that moves", "[scene]")
+TEST_CASE("the scene bounds hold every object", "[scene]")
 {
+    Scene scene;
+    auto bounds = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f), glm::vec3(1.f)));
+
+    scene.createObject(-1, -1, glm::vec3(-30.f, 0.f, -10.f), glm::vec3(0.f), glm::vec3(1.f),
+                       bounds);
+    scene.createObject(-1, -1, glm::vec3(30.f, 0.f, -10.f), glm::vec3(0.f), glm::vec3(1.f),
+                       bounds);
+
+    glm::vec3 center;
+    float radius = 0.f;
+    REQUIRE(scene.getSceneBounds(center, radius));
+
+    // Every object has to be inside the sphere around the center.
+    REQUIRE(glm::length(glm::vec3(-30.f, 0.f, -10.f) - center) <= radius);
+    REQUIRE(glm::length(glm::vec3(30.f, 0.f, -10.f) - center) <= radius);
+    // The object itself has to fit in it as well.
+    REQUIRE(radius >= glm::length(bounds.getHalfExtents()));
+}
+
+TEST_CASE("a scene without objects has no bounds", "[scene]")
+{
+    Scene scene;
+
+    glm::vec3 center;
+    float radius = 0.f;
+    REQUIRE_FALSE(scene.getSceneBounds(center, radius));
+}
+
+TEST_CASE("Scene query follows an object that moves", "[scene]"){
     Scene scene;
     glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     glm::mat4 projection = glm::perspective(glm::radians(60.f), 1.33f, 0.1f, 100.f);

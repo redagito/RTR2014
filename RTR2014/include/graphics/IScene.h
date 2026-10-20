@@ -88,6 +88,13 @@ class IScene
 	virtual bool getAmbientLight(glm::vec3& color, float& intensity) const = 0;
 
     /**
+     * \brief Returns the bounding sphere of the scene objects.
+     *
+     * Returns false if the scene has no objects.
+     */
+    virtual bool getSceneBounds(glm::vec3& center, float& radius) const = 0;
+
+    /**
      * \brief Creates scene query for the given view projection.
      *
      * Objects outside the view frustum are not part of the query. Returns heap allocated query

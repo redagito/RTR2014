@@ -52,6 +52,8 @@ class Scene : public IScene
 
     bool getAmbientLight(glm::vec3& color, float& intensity) const override;
 
+    bool getSceneBounds(glm::vec3& center, float& radius) const override;
+
     ISceneQuery* createQuery(const glm::mat4& viewProjection) const override;
 
    private:

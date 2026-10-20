@@ -157,6 +157,38 @@ bool Scene::getAmbientLight(glm::vec3& color, float& intensity) const
     return true;
 }
 
+bool Scene::getSceneBounds(glm::vec3& center, float& radius) const
+{
+    if (m_objects.empty())
+    {
+        center = glm::vec3(0.f);
+        radius = 0.f;
+        return false;
+    }
+
+    // The center is the middle of the object centers, the radius reaches the
+    // object that is furthest away from it.
+    glm::vec3 minimum = m_objects.front().m_worldBounds.getCenter();
+    glm::vec3 maximum = minimum;
+    for (const SceneObject& object : m_objects)
+    {
+        const glm::vec3 objectCenter = object.m_worldBounds.getCenter();
+        minimum = glm::min(minimum, objectCenter);
+        maximum = glm::max(maximum, objectCenter);
+    }
+    center = (minimum + maximum) * 0.5f;
+
+    radius = 0.f;
+    for (const SceneObject& object : m_objects)
+    {
+        const glm::vec3 objectCenter = object.m_worldBounds.getCenter();
+        // The half extents of the box are the radii of the sphere around it.
+        const float objectRadius = glm::length(object.m_worldBounds.getHalfExtents());
+        radius = std::max(radius, glm::length(objectCenter - center) + objectRadius);
+    }
+    return true;
+}
+
 ISceneQuery* Scene::createQuery(const glm::mat4& viewProjection) const
 {
     // New query with max storage

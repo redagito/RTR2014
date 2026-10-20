@@ -42,6 +42,12 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
     // Set framebuffer
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
 
+    // Reset viewport
+    glViewport(0, 0, 4000, 4000);
+    // The size is set before the clear, resizing reallocates the depth
+    // storage, which is cleared to zero instead of one.
+    m_shadowMapBuffer.resize(4000, 4000);
+
     // Clear
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -55,10 +61,6 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
 
     // Winding order, standard is counter-clockwise
     glFrontFace(GL_CCW);
-
-    // Reset viewport
-    glViewport(0, 0, 4000, 4000);
-    m_shadowMapBuffer.resize(4000, 4000);
 
     // Stores active transformations
     Transformer transformer;
