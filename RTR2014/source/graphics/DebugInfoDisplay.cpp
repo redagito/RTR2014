@@ -60,8 +60,15 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
     // TODO move this to an init() method
 
     // TODO remove hardcoded paths here
-    loadShader("data/shader/shader_display_text.ini", m_resourceManager, m_textShader);
-    loadShader("data/shader/shader_display_overlay.ini", m_resourceManager, m_overlayShader);
+    if (!loadShader("data/shader/shader_display_text.ini", m_resourceManager, m_textShader))
+    {
+        spdlog::error("The debug info display is not available, its shader could not be loaded.");
+    }
+    if (!loadShader("data/shader/shader_display_overlay.ini", m_resourceManager, m_overlayShader))
+    {
+        spdlog::error("The debug info display is not available, its overlay shader could not be "
+                      "loaded.");
+    }
 
     m_VAO.reset(new VertexArrayObject());
     m_overlayVAO.reset(new VertexArrayObject());
@@ -87,7 +94,10 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
     glEnableVertexArrayAttrib(m_overlayVAO->getId(), 0);
 
     // TODO this should not be called in constructor / move to init() method
-    loadFont("data/images/font1.png");
+    if (!loadFont("data/images/font1.png"))
+    {
+        spdlog::error("The debug info display is not available, its font could not be loaded.");
+    }
 }
 
 bool DebugInfoDisplay::loadFont(const std::string &path)
@@ -136,7 +146,8 @@ void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsi
         vertices.push_back(vertex_down_left.x);
         vertices.push_back(vertex_down_left.y);
 
-        char character = text[i];
+        // The font atlas is indexed by the unsigned byte value.
+        const unsigned char character = static_cast<unsigned char>(text[i]);
         float uv_x = (character % 16) / 16.0f;
         float uv_y = (character / 16) / 16.0f;
 
@@ -168,10 +179,17 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
         return;
     }
 
+    // The state of the renderer is restored when the overlay is done.
+    const bool depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+    const bool blendEnabled = glIsEnabled(GL_BLEND);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
+
+    // The values are read once, the getters copy them.
+    const std::list<std::string> log = info.getLog();
+    const std::unordered_map<std::string, std::string> values = info.getValues();
 
     int hOffsetLog = 0;
     int vOffsetLog = (int) info.getLogBufferSize() * m_fontSize;
@@ -202,16 +220,16 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
 	overlayVertices.push_back((float) hOffsetKeys);
 	overlayVertices.push_back((float) vOffsetKeyValues);
 	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
 	overlayVertices.push_back(800.f);
 	overlayVertices.push_back((float) vOffsetKeyValues);
     
     overlayVertices.push_back(800.f);
 	overlayVertices.push_back((float) vOffsetKeyValues);
 	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
     overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(info.getValues().size())));
+	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
     
     m_overlaysBuffer->setData(overlayVertices);
     
@@ -230,14 +248,14 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     std::vector<float> UVs;
 
     int lineCount = 0;
-    for (const std::string &line : info.getLog())
+    for (const std::string &line : log)
     {
         textToBuffers(line, hOffsetLog, vOffsetLog - m_fontSize * ++lineCount, m_fontSize, vertices,
                       UVs);
     }
 
     int valueCount = 0;
-    for (const auto &keyValuePair : info.getValues())
+    for (const auto &keyValuePair : values)
     {
         ++valueCount;
         textToBuffers(keyValuePair.first, hOffsetKeys, vOffsetKeyValues - m_fontSize * valueCount,
@@ -262,5 +280,12 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     // ===
 
     glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
+    if (depthTestEnabled)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    if (blendEnabled)
+    {
+        glEnable(GL_BLEND);
+    }
 }

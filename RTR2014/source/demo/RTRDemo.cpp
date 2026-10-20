@@ -174,6 +174,13 @@ int RTRDemo::run()
         // Present a frame and process window events
         drawLoadingFrame();
 
+        // The window can be closed while the resources are loading.
+        if (!m_window->isOpen())
+        {
+            spdlog::info("The window was closed while the scene was loading.");
+            return 0;
+        }
+
         if (!resourcesPrepared)
         {
             if (prepared.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
@@ -261,9 +268,15 @@ bool RTRDemo::initWindow()
     spdlog::info("Initializing application window.");
 
     // Read config values
-    unsigned int width = m_config.getValue("window", "width", 800);
-    unsigned int height = m_config.getValue("window", "height", 600);
+    int width = m_config.getValue("window", "width", 800);
+    int height = m_config.getValue("window", "height", 600);
     std::string title = m_config.getValue("window", "title", "Demo");
+
+    if (width <= 0 || height <= 0)
+    {
+        spdlog::error("The window size {}x{} is not valid.", width, height);
+        return false;
+    }
 
     spdlog::info("Window width: {}.", width);
     spdlog::info("Window height: {}.", height);

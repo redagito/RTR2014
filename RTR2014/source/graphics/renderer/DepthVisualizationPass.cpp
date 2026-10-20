@@ -28,6 +28,9 @@ void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResour
                                     const std::shared_ptr<Texture>& depthTexture, float zNear,
                                     float zFar)
 {
+    // The pass draws to the screen, the viewport has to match it.
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+
     // Get shader
     ShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
     if (shader == nullptr)

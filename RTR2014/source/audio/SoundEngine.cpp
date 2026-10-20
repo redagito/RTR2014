@@ -154,6 +154,9 @@ bool SoundEngine::addEmitter(ResourceId id, const glm::vec3& position, float rad
     }
 
     ma_sound_set_attenuation_model(&emitter.m_sound, ma_attenuation_model_linear);
+    // The gain falls off from the source to the radius, without a minimum
+    // distance it would stay at full volume around the emitter.
+    ma_sound_set_min_distance(&emitter.m_sound, 0.0f);
     ma_sound_set_max_distance(&emitter.m_sound, radius);
     ma_sound_set_position(&emitter.m_sound, position.x, position.y, position.z);
 
