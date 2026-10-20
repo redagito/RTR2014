@@ -18,7 +18,7 @@ class IniFile
     /**
     * \brief Loads file data.
     */
-    bool load(const std::string& file);
+    [[nodiscard]] bool load(const std::string& file);
 
     /**
     * \brief Saves file data.
@@ -44,12 +44,12 @@ class IniFile
     /**
     * \brief Returns whether the group exists or not.
     */
-    bool hasGroup(const std::string& group) const;
+    [[nodiscard]] bool hasGroup(const std::string& group) const;
 
     /**
     * \brief Returns whether a key in the specified group exist.
     */
-    bool hasKey(const std::string& group, const std::string& key) const;
+    [[nodiscard]] bool hasKey(const std::string& group, const std::string& key) const;
 
    private:
     std::map<std::string, std::map<std::string, std::string>> d_entries; /**< Ini file entries. */

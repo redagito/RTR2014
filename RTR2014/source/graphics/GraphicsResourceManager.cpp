@@ -579,8 +579,7 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 	}
 }
 
-void GraphicsResourceManager::handleStringEvent(ResourceId id, ListenerEvent event,
-	IResourceManager* resourceManager)
+void GraphicsResourceManager::handleStringEvent(ResourceId, ListenerEvent, IResourceManager*)
 {
 	// Does not need processing, shader events handle source loading
 }

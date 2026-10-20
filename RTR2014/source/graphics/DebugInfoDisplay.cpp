@@ -27,9 +27,9 @@ bool loadShader(const std::string &path, std::shared_ptr<IResourceManager> &reso
 
     // Load from resoucre manager
     std::string vertexShaderText, fragmentShaderText;
-    resourceManager->getString(vertexShaderId, vertexShaderText);
-    resourceManager->getString(fragmentShaderId, fragmentShaderText);
-    if (vertexShaderText.empty() || fragmentShaderText.empty())
+    if (!resourceManager->getString(vertexShaderId, vertexShaderText) ||
+        !resourceManager->getString(fragmentShaderId, fragmentShaderText) ||
+        vertexShaderText.empty() || fragmentShaderText.empty())
     {
         spdlog::error("Error on retrieving shader code.");
         return false;

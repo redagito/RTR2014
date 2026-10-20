@@ -180,6 +180,8 @@ bool SceneLoader::load(IScene& scene, AnimationWorld& animationWorld)
         m_musicResourceId = m_resourceManager.loadSound(m_musicFile);
     }
 
+    // The emitters of a previous load are replaced.
+    m_emitters.clear();
     for (const PendingSoundEmitter& pending : m_pendingEmitters)
     {
         ResourceId id = m_resourceManager.loadSound(pending.m_file);

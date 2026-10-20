@@ -20,7 +20,7 @@ Renderer::~Renderer()
 	return;
 }
 
-void Renderer::draw(Mesh* mesh)
+void Renderer::draw(const Mesh* mesh)
 {
     mesh->getVertexArray()->setActive();
 
@@ -48,9 +48,9 @@ void Renderer::draw(Mesh* mesh)
     mesh->getVertexArray()->setInactive();
 }
 
-void Renderer::bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
-                            const glm::mat4& rotation, const glm::mat4& scale,
-                            const IGraphicsResourceManager& manager)
+void Renderer::bindMaterial(ShaderProgram* shader, const Material* material,
+                            const glm::mat4& translation, const glm::mat4& rotation,
+                            const glm::mat4& scale, const IGraphicsResourceManager& manager)
 {
     // Transformation matrices
     shader->setUniform(translationMatrixUniformName, translation);

@@ -35,7 +35,7 @@ class Renderer : public IRenderer
     * Sets vertex array object active and performs either indexed or non-indexed draw call.
     * Shader must be set by caller.
     */
-    static void draw(Mesh* mesh);
+    static void draw(const Mesh* mesh);
 
     /**
     * \brief Sends transformation matrices and material textures to the shader.
@@ -43,8 +43,8 @@ class Renderer : public IRenderer
     * Textures the material does not provide fall back to the manager's defaults.
     * Shader must be set active by caller.
     */
-    static void bindMaterial(ShaderProgram* shader, Material* material, const glm::mat4& translation,
-                             const glm::mat4& rotation, const glm::mat4& scale,
-                             const IGraphicsResourceManager& manager);
+    static void bindMaterial(ShaderProgram* shader, const Material* material,
+                             const glm::mat4& translation, const glm::mat4& rotation,
+                             const glm::mat4& scale, const IGraphicsResourceManager& manager);
 
 };
