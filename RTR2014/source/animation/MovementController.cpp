@@ -11,6 +11,11 @@ MovementController::MovementController(SceneObjectId id, AnimationObjectType typ
     m_endTime = glm::length(m_direction) * 2;
 }
 
+float MovementController::offsetOfPhase(float phase) const
+{
+    return phase <= m_endTime / 2.0f ? phase : m_endTime - phase;
+}
+
 void MovementController::update(float timeStep)
 {
     if (m_endTime <= 0.0f)
@@ -19,16 +24,20 @@ void MovementController::update(float timeStep)
         return;
     }
 
+    const float previousPhase = m_currentTimePoint;
     m_currentTimePoint += timeStep;
-    // A single subtraction is not enough if timeStep exceeded the period.
-    while (m_currentTimePoint > m_endTime) {
+    // The phase is within the cycle, a single subtraction is not enough if
+    // timeStep exceeded the period.
+    while (m_currentTimePoint >= m_endTime) {
         m_currentTimePoint -= m_endTime;
     }
-    glm::vec3 diff = glm::normalize(m_direction) * timeStep;
-    if (m_currentTimePoint > m_endTime / 2) {
-        diff *= -1.0f;
-    }
-    
+
+    // The distance from the start of the cycle grows to the middle of it and
+    // shrinks back afterwards. Deriving it from the phase instead of adding
+    // up the steps keeps the object at its start position after a whole cycle.
+    const glm::vec3 diff =
+        glm::normalize(m_direction) * (offsetOfPhase(m_currentTimePoint) - offsetOfPhase(previousPhase));
+
     if (m_type == AnimationObjectType::Model)
     {
         ResourceId mesh;

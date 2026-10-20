@@ -17,6 +17,11 @@ class MovementController : public IAnimationController
     void update(float timeStep) override;
 
    private:
+    /**
+    * \brief Returns the distance from the start of the cycle at a phase.
+    */
+    float offsetOfPhase(float phase) const;
+
     SceneObjectId m_objectId = -1;
     AnimationObjectType m_type;
     IScene& m_scene;

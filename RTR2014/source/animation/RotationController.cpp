@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <glm/trigonometric.hpp>
+
 #include "graphics/IScene.h"
 
 RotationController::RotationController(SceneObjectId id, AnimationObjectType type, IScene& scene, const glm::vec3& rotation)
@@ -30,6 +32,9 @@ void RotationController::update(float timeStep)
 			return;
 		}
 		rotation += m_rotation * timeStep;
+		// The angles are kept in a single turn, they would lose precision
+		// otherwise.
+		rotation = glm::mod(rotation, glm::vec3(2.f * 3.14159265358979323846f));
 		m_scene.setObject(m_objectId, mesh, material, position, rotation, scale);
 	}
 	else if (m_type == AnimationObjectType::PointLight)
