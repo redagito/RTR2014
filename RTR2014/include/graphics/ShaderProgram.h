@@ -100,9 +100,14 @@ class ShaderProgram
     void setUniform(const std::string& uniformName, const glm::mat4& m);
 
    private:
+    /**
+    * \brief Looks up the locations of the uniforms the program actually uses.
+    */
+    void collectUniformLocations();
+
     static GLuint s_activeShaderProgram; /**< Stores currently active shader id to prevent
-                                                                             unnecessary calls to
-                                            setActive. */
+                                                                              unnecessary calls to
+                                             setActive. */
     mutable std::unordered_map<std::string, GLint>
         m_uniformLocations; /**< Caches uniform location ids. */
     std::string m_infoLog;

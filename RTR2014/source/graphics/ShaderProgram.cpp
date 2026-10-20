@@ -122,9 +122,29 @@ bool ShaderProgram::init(ShaderObject<GL_VERTEX_SHADER>* vertex,
     m_valid = true;
     // Clear uniform location cache
     m_uniformLocations.clear();
+    // Collect the active uniforms, a name that is not among them is a mistake
+    // in the code that sets it.
+    collectUniformLocations();
 
 
     return true;
+}
+
+void ShaderProgram::collectUniformLocations()
+{
+    GLint uniformCount = 0;
+    glGetProgramiv(m_programId, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+    for (GLint i = 0; i < uniformCount; ++i)
+    {
+        GLchar name[256];
+        GLsizei length = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        glGetActiveUniform(m_programId, i, sizeof(name), &length, &size, &type, name);
+        m_uniformLocations[std::string(name, length)] =
+            glGetUniformLocation(m_programId, std::string(name, length).c_str());
+    }
 }
 
 void ShaderProgram::setActive()
@@ -168,6 +188,12 @@ GLint ShaderProgram::getUniformLocation(const std::string& uniformName) const
         // Cache location
         GLint location = glGetUniformLocation(m_programId, uniformName.data());
         m_uniformLocations[uniformName] = location;
+        if (location < 0)
+        {
+            // The name is not known to the program, setting it would do
+            // nothing. It is reported once, the result is cached.
+            spdlog::error("The shader program has no active uniform named {}.", uniformName);
+        }
         return location;
     }
     // Found
@@ -186,7 +212,12 @@ void ShaderProgram::setUniform(GLint location, int i)
 
 void ShaderProgram::setUniform(const std::string& name, int i)
 {
-    setUniform(getUniformLocation(name), i);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, i);
 }
 
 void ShaderProgram::setUniform(GLint location, float f)
@@ -196,7 +227,12 @@ void ShaderProgram::setUniform(GLint location, float f)
 
 void ShaderProgram::setUniform(const std::string& name, float f)
 {
-    setUniform(getUniformLocation(name), f);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, f);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
@@ -206,7 +242,12 @@ void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
 {
-	setUniform(getUniformLocation(name), v);
+	const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
@@ -216,7 +257,12 @@ void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
 {
-    setUniform(getUniformLocation(name), v);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
@@ -226,7 +272,12 @@ void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
 {
-    setUniform(getUniformLocation(name), v);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
@@ -236,7 +287,12 @@ void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
 {
-    setUniform(getUniformLocation(name), m);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
@@ -246,7 +302,12 @@ void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
 {
-    setUniform(getUniformLocation(name), m);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
@@ -256,5 +317,10 @@ void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat4& m)
 {
-    setUniform(getUniformLocation(name), m);
+    const GLint location = getUniformLocation(name);
+	if (location < 0)
+	{
+		return;
+	}
+	setUniform(location, m);
 }

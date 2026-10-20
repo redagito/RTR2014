@@ -20,8 +20,6 @@ const std::string screenHeightUniformName = "screen_height";
 
 // Camera parameters
 const std::string cameraPositionUniformName = "camera_position";
-const std::string cameraDirectionUniformName = "camera_direction";
-const std::string viewDistanceUniformName = "view_distance"; // TODO Rename, same as z-far?
 const std::string cameraZNearUniformName = "camera_z_near";
 const std::string cameraZFarUniformName = "camera_z_far";
 
@@ -39,9 +37,7 @@ const std::string fogPassTypeUniformName = "fog_type";
 
 // View and perspective matrix uniform names
 const std::string viewMatrixUniformName = "view";
-const std::string inverseViewMatrixUniformName = "inverse_view";
 const std::string projectionMatrixUniformName = "projection";
-const std::string viewProjectionMatrixUniformName = "view_projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
 const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
 
@@ -76,7 +72,6 @@ const GLint lightPassShadowMapTextureUnit = 2; // Should be lightPassShadowTextu
 // Texture units for illumination pass
 const GLint illuminationPassLightTextureUnit = 0;
 const GLint illuminationPassDiffuseGlowTextureUnit = 1;
-const GLint illuminationPassDepthTextureUnit = 2;
 
 // Texture units for fog pass
 const GLint fogPassSceneTextureUnit = 0;
@@ -119,10 +114,6 @@ const std::string blurTextureUniformName = "blur_texture";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";
-const std::string texture1UniformName = "texture1";
-const std::string texture2UniformName = "texture2";
-const std::string texture3UniformName = "texture3";
-const std::string texture4UniformName = "texture4";
 
 // Generic texture units
 const GLint texture0TextureUnit = 0;

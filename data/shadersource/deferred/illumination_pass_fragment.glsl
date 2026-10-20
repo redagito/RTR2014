@@ -2,7 +2,6 @@
 
 // G-buffer textures
 uniform sampler2D diffuse_glow_texture;
-uniform sampler2D depth_texture;
 
 // L-buffer texture
 uniform sampler2D light_texture;

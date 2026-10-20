@@ -98,8 +98,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     {
         ScopedTimer timer(profiler(), "illuminationPass");
         m_illuminationPass.render(window, manager, m_lightPass.getLightTexture(),
-                                  m_geometryPass.getDiffuseGlowTexture(),
-                                  m_geometryPass.getDepthTexture());
+                                  m_geometryPass.getDiffuseGlowTexture());
     }
 
     // Post processing pass

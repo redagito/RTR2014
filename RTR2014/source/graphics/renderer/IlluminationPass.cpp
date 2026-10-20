@@ -26,8 +26,7 @@ IlluminationPass::~IlluminationPass()
 
 void IlluminationPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
                               const std::shared_ptr<Texture>& lightTexture,
-                              const std::shared_ptr<Texture>& diffuseGlowTexture,
-                              const std::shared_ptr<Texture>& depthTexture)
+                              const std::shared_ptr<Texture>& diffuseGlowTexture)
 {
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -60,10 +59,6 @@ void IlluminationPass::render(const IWindow& window, const IGraphicsResourceMana
     diffuseGlowTexture->setActive(illuminationPassDiffuseGlowTextureUnit);
     illuminationShader->setUniform(diffuseGlowTextureUniformName,
                                    illuminationPassDiffuseGlowTextureUnit);
-
-    // G-buffer depth texture
-    depthTexture->setActive(illuminationPassDepthTextureUnit);
-    illuminationShader->setUniform(depthTextureUniformName, illuminationPassDepthTextureUnit);
 
     // Screen parameters
     illuminationShader->setUniform(screenWidthUniformName, (float)window.getWidth());
