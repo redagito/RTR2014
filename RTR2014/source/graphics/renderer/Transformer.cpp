@@ -114,9 +114,10 @@ const glm::mat4& Transformer::getInverseRotationMatrix() const
 {
     if (m_rotation.m_inverseDirty)
     {
-        m_rotation.m_inverse = glm::rotate(glm::mat4(1.0f), -m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f)) *
+        // Inverse of Rx*Ry*Rz is Rz(-z)*Ry(-y)*Rx(-x), order reversed
+        m_rotation.m_inverse = glm::rotate(glm::mat4(1.0f), -m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f)) *
                                glm::rotate(glm::mat4(1.0f), -m_rotationVector.y, glm::vec3(0.f, 1.f, 0.f)) *
-                               glm::rotate(glm::mat4(1.0f), -m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f));
+                               glm::rotate(glm::mat4(1.0f), -m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f));
         m_rotation.m_inverseDirty = false;
     }
     return m_rotation.m_inverse;

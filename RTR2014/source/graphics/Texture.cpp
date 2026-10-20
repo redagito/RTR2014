@@ -134,6 +134,7 @@ void Texture::applyParameters(GLuint textureId, unsigned int width, unsigned int
     // Set wrap mode
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 }
 
 GLuint Texture::getId() const { return m_textureId; }

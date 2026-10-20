@@ -15,14 +15,14 @@
 #include "graphics/IWindow.h"
 #include "input/IInputProvider.h"
 
-DemoController::DemoController(IRenderer* deferredRenderer, IRenderer* forwardRenderer,
-                               IScene* scene, IControllableCamera* camera,
-                               CameraController* cameraController, IInputProvider* inputProvider,
-                               IWindow* window,
+DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRenderer,
+                               IRenderer* forwardRenderer, IScene* scene,
+                               IControllableCamera* camera, CameraController* cameraController,
+                               IInputProvider* inputProvider, IWindow* window,
                                IGraphicsResourceManager* graphicsResourceManager,
                                DebugInfo* debugInfo, IDebugInfoDisplay* debugInfoDisplay,
                                AnimationWorld* animationWorld)
-    : m_renderer(deferredRenderer),
+    : m_renderer(initialRenderer != nullptr ? initialRenderer : deferredRenderer),
       m_deferredRenderer(deferredRenderer),
       m_forwardRenderer(forwardRenderer),
       m_scene(scene),

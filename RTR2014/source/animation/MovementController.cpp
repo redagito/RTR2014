@@ -1,5 +1,7 @@
 #include "animation/MovementController.h"
 
+#include <spdlog/spdlog.h>
+
 #include "graphics/IScene.h"
 
 MovementController::MovementController(SceneObjectId id, AnimationObjectType type, IScene& scene,
@@ -11,8 +13,15 @@ MovementController::MovementController(SceneObjectId id, AnimationObjectType typ
 
 void MovementController::update(float timeStep)
 {
+    if (m_endTime <= 0.0f)
+    {
+        // Zero-length direction: nothing to animate, normalize would produce NaN.
+        return;
+    }
+
     m_currentTimePoint += timeStep;
-    if (m_currentTimePoint > m_endTime) {
+    // A single subtraction is not enough if timeStep exceeded the period.
+    while (m_currentTimePoint > m_endTime) {
         m_currentTimePoint -= m_endTime;
     }
     glm::vec3 diff = glm::normalize(m_direction) * timeStep;
@@ -54,7 +63,7 @@ void MovementController::update(float timeStep)
     }
     else
     {
-        // Error
+        spdlog::error("Movement controller does not support object type.");
     }
     return;
 }

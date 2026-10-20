@@ -34,6 +34,11 @@ void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const
 {
     // Set forward shader as active
     m_currentShader = manager.getShaderProgram(m_forwardShader);
+    if (m_currentShader == nullptr)
+    {
+        spdlog::error("Shader program for forward render pass could not be retrieved.");
+        return;
+    }
 
     // Set view and projection matrices
     m_currentView = camera.getView();

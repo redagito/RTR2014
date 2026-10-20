@@ -223,7 +223,11 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
 
     // Create object in scene
     OrientedBoundingBox bounds;
-    m_resourceManager.getMeshBounds(meshId, bounds);
+    if (!m_resourceManager.getMeshBounds(meshId, bounds))
+    {
+        spdlog::error("Failed to get bounds of mesh file {}.", mesh.c_str());
+        return false;
+    }
     SceneObjectId objectId =
         scene.createObject(meshId, materialId, position, rotation, scale, bounds);
 
@@ -289,13 +293,20 @@ bool SceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
     {
         return false;
     }
+    if (radius <= 0.f)
+    {
+        spdlog::error("Point light radius must be positive, got {}.", radius);
+        return false;
+    }
 
     if (!load(node, "intensity", intensity))
     {
         return false;
     }
 
-    if (!load(node, "casts_shadow", castsShadow))
+    // Optional; older scenes omit it and defaulted to shadow-casting lights.
+    castsShadow = true;
+    if (node.isMember("casts_shadow") && !load(node, "casts_shadow", castsShadow))
     {
         return false;
     }
@@ -365,7 +376,9 @@ bool SceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene,
         return false;
     }
 
-    if (!load(node, "casts_shadow", castsShadow))
+    // Optional; older scenes omit it and defaulted to shadow-casting lights.
+    castsShadow = true;
+    if (node.isMember("casts_shadow") && !load(node, "casts_shadow", castsShadow))
     {
         return false;
     }
@@ -458,7 +471,7 @@ bool SceneLoader::loadAnimationController(const Json::Value& node, IScene& scene
     }
     else
     {
-        // Unknown controller type
+        spdlog::error("Unknown animation controller type '{}'.", controllerType.c_str());
         return false;
     }
 

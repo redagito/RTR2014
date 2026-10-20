@@ -13,6 +13,10 @@ uniform sampler2D glow_texture;
 // Actually not needed here
 uniform sampler2D alpha_texture;
 
+// When disabled, the geometric world-space normal is written instead of the
+// normal-map perturbed one.
+uniform int normal_mapping_active;
+
 // Diffuse color and glow value
 layout(location = 0) out vec4 diffuse_glow;
 // Normals and specular value
@@ -59,6 +63,10 @@ void main(void)
 	diffuse_glow.a = glow;
 	
 	// normal.rgb = textureNormal;
-    normal_specular.rgb = perturb_normal(normalVectorWorldSpace, vertexWorldSpace, uv);
+	if (normal_mapping_active != 0) {
+		normal_specular.rgb = perturb_normal(normalVectorWorldSpace, vertexWorldSpace, uv);
+	} else {
+		normal_specular.rgb = normalVectorWorldSpace;
+	}
 	normal_specular.a = specular;
 }

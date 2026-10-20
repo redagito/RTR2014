@@ -27,6 +27,11 @@ class DebugInfo : public spdlog::sinks::base_sink<std::mutex>
     void sink_it_(const spdlog::details::log_msg& msg) override;
     void flush_() override {}
 
+    // Guards the members below against concurrent log-sink writes and
+    // render-thread reads. Distinct from base_sink's mutex_, which is not
+    // mutable and so cannot be locked from the const getters.
+    mutable std::mutex m_mutex;
+
     size_t m_logBufferSize = 10;        /**< Maximum number of log events stored. */
     std::list<std::string> m_logBuffer; /**< Log buffer with latest log events. */
     std::unordered_map<std::string, std::string> m_values; /**< Stores debug key/value pairs. */

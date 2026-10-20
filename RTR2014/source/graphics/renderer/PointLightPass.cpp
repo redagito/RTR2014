@@ -4,6 +4,7 @@
 #include <string>
 
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/trigonometric.hpp>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
@@ -72,12 +73,11 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
         }
         else
         {
-            // fov should be 90.f instead of 89.54f, but this does not work, because the view is too
-            // wide in this case. 89.54f is determined by testing. 89.53 is already too small and
-            // 89.55 too big.
-            if (castsShadow)
+            // Slightly over 90 degrees so adjacent cube faces overlap and no
+            // seam gaps appear at the face borders.
+            if (castsShadow && camera.getFeatureInfo().shadowsActive)
             {
-                glm::mat4 shadowProj = glm::perspective(89.54f, 1.0f, 0.01f, radius * 1.5f);
+                glm::mat4 shadowProj = glm::perspective(glm::radians(90.5f), 1.0f, 0.01f, radius * 1.5f);
                 StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
                 m_shadowCubePass.render(scene, shadowCamera, window, manager);
             }
@@ -112,6 +112,9 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
                               m_shadowCubePass.getShadowMap()->getId());
             pointLightPassShader->setUniform(shadowCubeTextureUniformName,
                                              lightPassShadowMapTextureUnit);
+            pointLightPassShader->setUniform(
+                lightCastsShadowUniformName,
+                (castsShadow && camera.getFeatureInfo().shadowsActive) ? 1 : 0);
 
             // Set screen size
             pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());

@@ -94,11 +94,11 @@ struct Fixture
         cameraController->setInputProvider(&inputProvider);
         cameraController->setWindow(&window);
 
-        controller = std::make_unique<DemoController>(&deferredRenderer, &forwardRenderer, &scene,
-                                                      camera.get(), cameraController.get(),
-                                                      &inputProvider, &window, nullptr,
-                                                      &debugInfo, &debugInfoDisplay,
-                                                      &animationWorld);
+        controller = std::make_unique<DemoController>(&deferredRenderer, &deferredRenderer,
+                                                      &forwardRenderer, &scene, camera.get(),
+                                                      cameraController.get(), &inputProvider,
+                                                      &window, nullptr, &debugInfo,
+                                                      &debugInfoDisplay, &animationWorld);
     }
 
     ~Fixture()
@@ -121,7 +121,7 @@ struct Fixture
 };
 } // namespace
 
-TEST_CASE("Demo controller draws the deferred renderer by default", "[demo]")
+TEST_CASE("Demo controller draws the initial renderer", "[demo]")
 {
     Fixture f;
 
@@ -129,6 +129,21 @@ TEST_CASE("Demo controller draws the deferred renderer by default", "[demo]")
 
     REQUIRE(f.deferredRenderer.drawCount == 1);
     REQUIRE(f.forwardRenderer.drawCount == 0);
+}
+
+TEST_CASE("Demo controller respects a forward renderer passed as initial", "[demo]")
+{
+    Fixture f;
+
+    DemoController controller(&f.forwardRenderer, &f.deferredRenderer, &f.forwardRenderer,
+                              &f.scene, f.camera.get(), f.cameraController.get(), &f.inputProvider,
+                              &f.window, nullptr, &f.debugInfo, &f.debugInfoDisplay,
+                              &f.animationWorld);
+
+    controller.update(0.016f);
+
+    REQUIRE(f.forwardRenderer.drawCount == 1);
+    REQUIRE(f.deferredRenderer.drawCount == 0);
 }
 
 TEST_CASE("Demo controller switches renderer on F2 and F3", "[demo]")

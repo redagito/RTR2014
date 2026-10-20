@@ -46,7 +46,7 @@ void GaussBlurPass::renderVertical(const IWindow& window, const IGraphicsResourc
 
     // Input texture
     texture->setActive(gaussBlurVerticalPassInputTextureUnit);
-    shader->setUniform(sceneTextureUniformName, gaussBlurVerticalPassInputTextureUnit);
+    shader->setUniform(texture0UniformName, gaussBlurVerticalPassInputTextureUnit);
 
     // Blur parameter
     shader->setUniform(blurStrengthUniformName, 3.f);
@@ -81,7 +81,7 @@ void GaussBlurPass::renderHorizontal(const IWindow& window, const IGraphicsResou
 
     // Input texture
     texture->setActive(gaussBlurHoriontalPassInputTextureUnit);
-    shader->setUniform(sceneTextureUniformName, gaussBlurHoriontalPassInputTextureUnit);
+    shader->setUniform(texture0UniformName, gaussBlurHoriontalPassInputTextureUnit);
 
     // Blur parameter
     shader->setUniform(blurStrengthUniformName, 3.f);

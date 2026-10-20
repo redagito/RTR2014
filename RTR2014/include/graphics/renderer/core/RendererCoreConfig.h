@@ -58,6 +58,8 @@ const std::string lightDirectionUniformName = "light_direction";
 const std::string lightRadiusUniformName = "light_radius";
 const std::string lightIntensityUniformName = "light_intensity";
 const std::string lightColorUniformName = "light_color";
+const std::string lightCastsShadowUniformName = "casts_shadow";
+const std::string normalMappingActiveUniformName = "normal_mapping_active";
 
 // Texture units for geometry pass material textures
 const GLint diffuseTextureUnit = 0;

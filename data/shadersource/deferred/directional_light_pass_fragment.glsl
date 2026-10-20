@@ -6,6 +6,7 @@ layout(location = 0) out vec4 light_data;
 uniform vec3 light_direction;
 uniform vec3 light_color;
 uniform float light_intensity;
+uniform int casts_shadow;
 
 // Screen size
 uniform float screen_width;
@@ -57,12 +58,21 @@ void main(void)
 	float specular = temp.w;
 
 	// Lambertian factor based on surface normal
-	float lambert_factor = max(0.0, dot(surface_normal_world, -light_direction));
+	float lambert_factor = max(0.0, dot(surface_normal_world, -normalize(light_direction)));
 	float bias = 0.005f;
 
     // apply shadow map
-    vec4 shadow_coordinates = shadow_view_projection_bias * vec4(fragment_world_position, 1);
-    float visibility = texture(shadow_map, vec3(shadow_coordinates.xy, (shadow_coordinates.z - bias) / shadow_coordinates.w));
+    float visibility = 1.0;
+    if (casts_shadow != 0) {
+        vec4 shadow_coordinates = shadow_view_projection_bias * vec4(fragment_world_position, 1);
+        // Outside the shadow volume there is no occlusion information; skip the
+        // lookup so the edge texel does not fake shadows.
+        if (all(greaterThanEqual(shadow_coordinates.xy, vec2(0.0))) &&
+            all(lessThanEqual(shadow_coordinates.xy, vec2(1.0))) &&
+            shadow_coordinates.w > 0.0) {
+            visibility = texture(shadow_map, vec3(shadow_coordinates.xy, (shadow_coordinates.z - bias) / shadow_coordinates.w));
+        }
+    }
 
 	// Calculate diffuse light contribution
 	vec3 diffuse_light = lambert_factor * light_color * light_intensity;

@@ -41,6 +41,11 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
                              const IGraphicsResourceManager& manager)
 {
     m_shadowCubePassShader = manager.getShaderProgram(m_shadowCubePassShaderId);
+    if (m_shadowCubePassShader == nullptr)
+    {
+        spdlog::error("Shader program for shadow cube pass could not be retrieved.");
+        return;
+    }
     m_shadowCubePassShader->setActive();
 
     // Depth

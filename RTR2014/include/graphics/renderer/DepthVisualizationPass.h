@@ -27,9 +27,10 @@ class DepthVisualizationPass
 
     /**
     * \brief Renders the depth buffer to the screen.
+    * zNear/zFar are the camera clipping planes used to linearize the depth values.
     */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
-                const std::shared_ptr<Texture>& depthTexture);
+                const std::shared_ptr<Texture>& depthTexture, float zNear, float zFar);
 
    private:
     ResourceId m_visualizeDepthPassShaderId = -1;

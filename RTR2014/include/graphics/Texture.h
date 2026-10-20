@@ -32,6 +32,9 @@ class Texture
 
     ~Texture();
 
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
+
     /**
     * \brief Initializes texture data.
     */

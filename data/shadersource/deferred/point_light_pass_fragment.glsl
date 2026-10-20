@@ -7,6 +7,7 @@ uniform vec3 light_position;
 uniform float light_radius;
 uniform vec3 light_color;
 uniform float light_intensity;
+uniform int casts_shadow;
 
 // Camera parameter
 uniform vec3 camera_position;
@@ -51,8 +52,8 @@ void main(void)
 	vec3 light_direction = light_position - fragment_world_position;
 	// Store distance
 	float fragment_light_distance = length(light_direction);
-	// Normalize
-	light_direction /= fragment_light_distance;
+	// Normalize; epsilon guards the fragment sitting exactly on the light
+	light_direction /= max(fragment_light_distance, 1e-6);
 	
 	// Calculate distance-based light attenuation
 	// Linear for now
@@ -64,11 +65,13 @@ void main(void)
 	// Lambertian factor based on surface normal
 	float lambert_factor = max(0.0, dot(surface_normal_world, light_direction));
 	
-    // applay shadow cube
-    float d = texture(shadow_cube, -light_direction).r;
+    // apply shadow cube
     float visibility = 1.0f;
-    if (fragment_light_distance >= d + 0.001) {
-        visibility = 0.0f;
+    if (casts_shadow != 0) {
+        float d = texture(shadow_cube, -light_direction).r;
+        if (fragment_light_distance >= d + 0.001) {
+            visibility = 0.0f;
+        }
     }
     
 	// Calculate diffuse light contribution

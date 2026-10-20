@@ -194,7 +194,13 @@ bool deserialize(const Json::Value& node, uint64_t& val)
 		spdlog::error("Node data type is not numeric.");
 		return false;
 	}
-	val = (uint64_t)node.asInt64();
+	const int64_t raw = node.asInt64();
+	if (raw < 0)
+	{
+		spdlog::error("Node value {} does not fit in uint64_t.", raw);
+		return false;
+	}
+	val = static_cast<uint64_t>(raw);
 	return true;
 }
 

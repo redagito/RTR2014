@@ -33,6 +33,11 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
                            const IGraphicsResourceManager& manager)
 {
     m_shadowMapPassShader = manager.getShaderProgram(m_shadowMapPassShaderId);
+    if (m_shadowMapPassShader == nullptr)
+    {
+        spdlog::error("Shader program for shadow map pass could not be retrieved.");
+        return;
+    }
 
     // Set framebuffer
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);

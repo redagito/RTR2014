@@ -2,6 +2,7 @@
 #include "graphics/renderer/DirectionalLightPass.h"
 
 #include <string>
+#include <cmath>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -77,14 +78,18 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
         }
         else
         {
-            // Create shadow camera
-            glm::mat4 shadowView = glm::lookAt(glm::vec3(0), glm::normalize(direction),
-                                               glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::vec3 lightDir = glm::normalize(direction);
+            // A light pointing straight up/down makes the default up vector
+            // degenerate for lookAt; swap in a different up in that case.
+            glm::vec3 shadowUp =
+                (std::abs(lightDir.y) > 0.999f) ? glm::vec3(0.0f, 0.0f, 1.0f)
+                                                 : glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::mat4 shadowView = glm::lookAt(glm::vec3(0), lightDir, shadowUp);
             glm::mat4 shadowProj = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, -150.0f, 150.0f);
             StaticCamera shadowCamera = StaticCamera(shadowView, shadowProj, camera.getPosition());
 
             // Render shadow map
-            if (castsShadow)
+            if (castsShadow && camera.getFeatureInfo().shadowsActive)
             {
                 m_shadowMapPass.render(scene, shadowCamera, window, manager);
             }
@@ -120,6 +125,9 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
             m_shadowMapPass.getShadowMap()->setActive(lightPassShadowMapTextureUnit);
             directionalLightPassShader->setUniform(shadowMapTextureUniformName,
                                                    lightPassShadowMapTextureUnit);
+            directionalLightPassShader->setUniform(
+                lightCastsShadowUniformName,
+                (castsShadow && camera.getFeatureInfo().shadowsActive) ? 1 : 0);
 
             // Set screen size
             directionalLightPassShader->setUniform(screenWidthUniformName,
@@ -140,7 +148,7 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
                                                    shadowViewProjBiasMatrix);
 
             // Set directional light parameters
-            directionalLightPassShader->setUniform(lightDirectionUniformName, direction);
+            directionalLightPassShader->setUniform(lightDirectionUniformName, lightDir);
             directionalLightPassShader->setUniform(lightColorUniformName, color);
             directionalLightPassShader->setUniform(lightIntensityUniformName, intensity);
             Renderer::draw(quadMesh);

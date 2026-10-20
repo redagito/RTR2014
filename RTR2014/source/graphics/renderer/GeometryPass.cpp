@@ -40,7 +40,9 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
     // TODO Should be retrieved as scene parameters
     // Diffuse, glow
     GLfloat diffuseGlow[] = {0.f, 0.f, 0.f, 0.f};
-    GLfloat normalSpecular[] = {0.5f, 0.5f, 1.f, 0.f};
+    // Normals are stored as raw float [-1,1], so the clear value is a plain
+    // straight-up normal, not an 8-bit-encoded one.
+    GLfloat normalSpecular[] = {0.f, 0.f, 1.f, 0.f};
     glClearBufferfv(GL_COLOR, 0, diffuseGlow);
     // Normal, specular
     glClearBufferfv(GL_COLOR, 1, normalSpecular);
@@ -50,6 +52,11 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
 
     // Geometry pass, uses gbuffer fbo
     ShaderProgram* geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
+    if (geometryPassShader == nullptr)
+    {
+        spdlog::error("Shader program for geometry pass could not be retrieved.");
+        return;
+    }
 
     // Depth
     glEnable(GL_DEPTH_TEST);
@@ -65,6 +72,8 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
     // Send view/projection to default shader
     geometryPassShader->setUniform(viewMatrixUniformName, camera.getView());
     geometryPassShader->setUniform(projectionMatrixUniformName, camera.getProjection());
+    geometryPassShader->setUniform(normalMappingActiveUniformName,
+                                   camera.getFeatureInfo().normalMappingActive ? 1 : 0);
 
     // Traverse visible objects
     while (query.hasNextObject())

@@ -1,5 +1,7 @@
 #include "animation/RotationController.h"
 
+#include <spdlog/spdlog.h>
+
 #include "graphics/IScene.h"
 
 RotationController::RotationController(SceneObjectId id, AnimationObjectType type, IScene& scene, const glm::vec3& rotation)
@@ -36,7 +38,7 @@ void RotationController::update(float timeStep)
 	}
 	else
 	{
-		// Error
+		spdlog::error("Rotation controller does not support object type.");
 	}
 	return;
 }

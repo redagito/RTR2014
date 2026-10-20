@@ -116,7 +116,7 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
         std::string err;
         // Load as obj
         // The material file is resolved relative to the mesh file
-        std::string baseDir = file.substr(0, file.find_last_of('/') + 1);
+        std::string baseDir = file.substr(0, file.find_last_of("/\\") + 1);
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str(),
                                baseDir.c_str()))
         {
@@ -327,7 +327,7 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
     std::vector<unsigned char> data(decoded, decoded + (decodedWidth * decodedHeight * channels));
     stbi_image_free(decoded);
 
-    image = Image(data, static_cast<unsigned int>(decodedWidth),
+    image = Image(std::move(data), static_cast<unsigned int>(decodedWidth),
                   static_cast<unsigned int>(decodedHeight), format);
     return true;
 }
@@ -656,7 +656,10 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::vector<std::pair<std::string, ColorFormat>> imageFiles;
     for (const std::string& material : uniqueMaterials)
     {
-        getMaterialImages(material, imageFiles);
+        if (!getMaterialImages(material, imageFiles))
+        {
+            spdlog::error("Failed to read material file {} during preload.", material.c_str());
+        }
     }
 
     // Skip files that are already loaded, each file only once

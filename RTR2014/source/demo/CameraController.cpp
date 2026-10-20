@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <fstream>
 #include <spdlog/spdlog.h>
 #include "demo/CameraController.h"
@@ -178,6 +179,13 @@ bool CameraController::loadSequence(std::string file)
             break;
         }
 
+        if (glm::dot(orientation, orientation) < 1e-8f)
+        {
+            spdlog::error("Zero-length orientation for element #{}.", i);
+            success = false;
+            break;
+        }
+
         SequencePoint sp{position, glm::normalize(orientation), timestamp, fxaaActive, fogActive};
         m_sequencePoints.push_back(sp);
     }
@@ -229,9 +237,20 @@ void CameraController::animateSequence(float dt) {
     }
     
     m_sequenceTime += (dt * timeModifier);
+    // Rewinding can push the time below zero; clamp so keyframe lookup works.
+    if (m_sequenceTime < 0.0f)
+    {
+        m_sequenceTime = 0.0f;
+    }
     
     if (m_sequenceTime > m_sequencePoints.back().timestamp)
     {
+        // Snap to the final keyframe pose instead of stopping short.
+        const SequencePoint& last = m_sequencePoints.back();
+        m_camera->lookAt(last.position, last.position + last.orientation, glm::vec3(0,1,0));
+        m_camera->getFeatureInfoForWrite().fogType =
+            (last.fogActive ? FogType::Exp2 : FogType::None);
+        m_camera->getFeatureInfoForWrite().fxaaActive = last.fxaaActive;
         m_isRunningSequence = false;
         return;
     }
@@ -391,6 +410,16 @@ void CameraController::handleKeyEvent(KeyEventType type, int keyCode)
 
 void CameraController::handleMouseMovementEvent(int x, int y)
 {
+    // A jump this large is a cursor warp (e.g. entering capture mode), not
+    // real motion; re-baseline instead of pitching/yawing by the full jump.
+    const int warpThreshold = 200;
+    if (std::abs(x - m_lastX) > warpThreshold || std::abs(y - m_lastY) > warpThreshold)
+    {
+        m_lastX = x;
+        m_lastY = y;
+        return;
+    }
+
     m_camera->pitch((y - m_lastY) * m_speed / 1000);
     m_camera->yaw(-(x - m_lastX) * m_speed / 1000);
 
@@ -405,6 +434,10 @@ void CameraController::handleMouseButtonEvent(MouseButtonEventType type, int but
 
 void CameraController::handleResizeEvent(int width, int height)
 {
+    if (width <= 0 || height <= 0)
+    {
+        return;
+    }
     m_camera->setProjection(m_camera->getFieldOfView(), (float)width / height, m_camera->getZNear(),
                             m_camera->getZFar());
 }

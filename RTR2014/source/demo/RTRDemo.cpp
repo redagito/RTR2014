@@ -218,8 +218,8 @@ int RTRDemo::run()
     }
 
     m_demoController = std::make_unique<DemoController>(
-        m_deferredRenderer.get(), m_forwardRenderer.get(), m_scene.get(), m_camera.get(),
-        m_cameraController.get(), m_inputProvider.get(), m_window.get(),
+        m_renderer.get(), m_deferredRenderer.get(), m_forwardRenderer.get(), m_scene.get(),
+        m_camera.get(), m_cameraController.get(), m_inputProvider.get(), m_window.get(),
         m_graphicsResourceManager.get(), m_debugInfo.get(), m_debugInfoDisplay.get(),
         m_animationWorld.get());
 

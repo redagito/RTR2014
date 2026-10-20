@@ -21,11 +21,12 @@ class IWindow;
 class DemoController
 {
    public:
-    DemoController(IRenderer* deferredRenderer, IRenderer* forwardRenderer, IScene* scene,
-                   IControllableCamera* camera, CameraController* cameraController,
-                   IInputProvider* inputProvider, IWindow* window,
-                   IGraphicsResourceManager* graphicsResourceManager, DebugInfo* debugInfo,
-                   IDebugInfoDisplay* debugInfoDisplay, AnimationWorld* animationWorld);
+    DemoController(IRenderer* initialRenderer, IRenderer* deferredRenderer,
+                   IRenderer* forwardRenderer, IScene* scene, IControllableCamera* camera,
+                   CameraController* cameraController, IInputProvider* inputProvider,
+                   IWindow* window, IGraphicsResourceManager* graphicsResourceManager,
+                   DebugInfo* debugInfo, IDebugInfoDisplay* debugInfoDisplay,
+                   AnimationWorld* animationWorld);
 
     /**
     * \brief Performs the per frame update.

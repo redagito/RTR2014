@@ -18,6 +18,9 @@ class RenderBuffer
     */
     ~RenderBuffer();
 
+    RenderBuffer(const RenderBuffer&) = delete;
+    RenderBuffer& operator=(const RenderBuffer&) = delete;
+
     /**
     * \brief Initializes with dimensions and format.
     */

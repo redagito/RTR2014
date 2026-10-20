@@ -19,6 +19,9 @@ class GlfwWindow : public IWindow
     GlfwWindow();
     ~GlfwWindow();
 
+    GlfwWindow(const GlfwWindow&) = delete;
+    GlfwWindow& operator=(const GlfwWindow&) = delete;
+
     bool init(unsigned int width, unsigned int height, const std::string& name);
 
     void setWidth(unsigned int width);

@@ -1,5 +1,6 @@
 #include "graphics/renderer/FrameBuffer.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "graphics/Texture.h"
@@ -105,7 +106,8 @@ void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachm
     glNamedFramebufferTexture(m_fboId, attachment, texture->getId(), 0);
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
-        attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+        attachment != GL_DEPTH_STENCIL_ATTACHMENT &&
+        std::find(m_drawBuffers.begin(), m_drawBuffers.end(), attachment) == m_drawBuffers.end())
     {
         m_drawBuffers.push_back(attachment);
     }
@@ -124,7 +126,8 @@ void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLen
     glNamedFramebufferRenderbuffer(m_fboId, attachment, GL_RENDERBUFFER, renderBuffer->getId());
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
-        attachment != GL_DEPTH_STENCIL_ATTACHMENT)
+        attachment != GL_DEPTH_STENCIL_ATTACHMENT &&
+        std::find(m_drawBuffers.begin(), m_drawBuffers.end(), attachment) == m_drawBuffers.end())
     {
         m_drawBuffers.push_back(attachment);
     }

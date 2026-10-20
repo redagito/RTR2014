@@ -219,7 +219,7 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     m_overlayShader->setUniform("color", glm::vec4(0.0f, 0.0f, 0.0f, 0.6f));
     
     m_overlayVAO->setActive();
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)overlayVertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(overlayVertices.size() / 2));
     m_overlayVAO->setInactive();
 
     // ===
@@ -254,7 +254,7 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     m_texture->setActive(0);
 
     m_VAO->setActive();
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(vertices.size() / 2));
     m_VAO->setInactive();
 
     // ===

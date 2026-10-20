@@ -18,6 +18,9 @@ class FrameBuffer
     FrameBuffer();
     ~FrameBuffer();
 
+    FrameBuffer(const FrameBuffer&) = delete;
+    FrameBuffer& operator=(const FrameBuffer&) = delete;
+
     GLuint getId() const { return m_fboId; };
 
     bool init();

@@ -31,6 +31,9 @@ class ShaderProgram
     */
     ~ShaderProgram();
 
+    ShaderProgram(const ShaderProgram&) = delete;
+    ShaderProgram& operator=(const ShaderProgram&) = delete;
+
     /**
     * \brief Initializes the program with new shader objects.
     * \return True for success and false for error.

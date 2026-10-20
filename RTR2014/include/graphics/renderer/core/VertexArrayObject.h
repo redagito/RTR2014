@@ -19,6 +19,9 @@ class VertexArrayObject
     */
     ~VertexArrayObject();
 
+    VertexArrayObject(const VertexArrayObject&) = delete;
+    VertexArrayObject& operator=(const VertexArrayObject&) = delete;
+
     /**
     * \brief Set as active vertex array object.
     */

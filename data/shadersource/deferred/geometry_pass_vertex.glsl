@@ -24,12 +24,15 @@ smooth out vec3 vertexWorldSpace;
 
 void main(void)
 {
-	// Calculate vertex position in camera space
+	// Clip space position
 	gl_Position = projection * view * model * vec4(vertexPositionModelSpace, 1.f);
 	
 	// Forward texture coordinates
 	uv = vertexUV;
     
-    vertexWorldSpace = normalize(rotation * vec4(vertexPositionModelSpace, 0.f)).xyz;
+    // World space position; the cotangent frame for normal mapping derives its
+    // tangent basis from screen-space derivatives of this value, so it must be
+    // the true transformed position, not a rotation-only direction.
+    vertexWorldSpace = vec3(model * vec4(vertexPositionModelSpace, 1.f));
     normalVectorWorldSpace = normalize(rotation * vec4(vertexNormalModelSpace, 0.f)).xyz;
 }

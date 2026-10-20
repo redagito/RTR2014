@@ -294,7 +294,8 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 
 		if (!resourceManager->getImage(id, data, width, height, format))
 		{
-			assert(false && "Failed to access image resource");
+			spdlog::error("Failed to access image resource {}.", id);
+			return;
 		}
 		// Create new texture
 		m_textures[id] =
@@ -306,7 +307,8 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 
 		if (!resourceManager->getImage(id, data, width, height, format))
 		{
-			assert(false && "Failed to access image resource");
+			spdlog::error("Failed to access image resource {}.", id);
+			return;
 		}
 		// Reinitialize texture on change
 		m_textures.at(id)->init(data, width, height, format);
@@ -328,7 +330,7 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 	std::vector<unsigned int> indices;
 	std::vector<float> normals;
 	std::vector<float> uvs;
-	PrimitiveType type;
+	PrimitiveType type = PrimitiveType::Invalid;
 
 	switch (event)
 	{
@@ -337,7 +339,8 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 
 		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
 		{
-			assert(false && "Failed to access mesh resource");
+			spdlog::error("Failed to access mesh resource {}.", id);
+			return;
 		}
 		// Create new texture
 		m_meshes[id] =
@@ -349,7 +352,8 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 
 		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
 		{
-			assert(false && "Failed to access mesh resource");
+			spdlog::error("Failed to access mesh resource {}.", id);
+			return;
 		}
 		// Reinitialize mesh on change
 		m_meshes.at(id)->init(vertices, indices, normals, uvs, type);
@@ -367,12 +371,12 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent event,
 	IResourceManager* resourceManager)
 {
-	ResourceId diffuse;
-	ResourceId normal;
-	ResourceId specular;
-	ResourceId glow;
-	ResourceId alpha;
-	ResourceId customShader;
+	ResourceId diffuse = invalidResource;
+	ResourceId normal = invalidResource;
+	ResourceId specular = invalidResource;
+	ResourceId glow = invalidResource;
+	ResourceId alpha = invalidResource;
+	ResourceId customShader = invalidResource;
 
 	switch (event)
 	{
@@ -381,7 +385,8 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 
 		if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
 		{
-			assert(false && "Failed to access material resource");
+			spdlog::error("Failed to access material resource {}.", id);
+			return;
 		}
 
 		// Create new material
@@ -395,7 +400,8 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 
 		if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
 		{
-			assert(false && "Failed to access material resource");
+			spdlog::error("Failed to access material resource {}.", id);
+			return;
 		}
 
 		// Reinitialize material on change
@@ -416,11 +422,11 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent event,
 	IResourceManager* resourceManager)
 {
-	ResourceId vertex;
-	ResourceId tessControl;
-	ResourceId tessEval;
-	ResourceId geometry;
-	ResourceId fragment;
+	ResourceId vertex = invalidResource;
+	ResourceId tessControl = invalidResource;
+	ResourceId tessEval = invalidResource;
+	ResourceId geometry = invalidResource;
+	ResourceId fragment = invalidResource;
 
 	switch (event)
 	{
@@ -431,8 +437,8 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 		// Load shader source ids
 		if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
 		{
-			// TODO Replace assert with log statement and global error handler
-			assert(false && "Failed to access shader resource");
+			spdlog::error("Failed to access shader resource {}.", id);
+			return;
 		}
 
 	// Load shader objects from source
@@ -466,7 +472,8 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 		break;
 
 	case ListenerEvent::Change:
-		// TODO Implement
+		// TODO Implement hot-reload; without it, keep the existing program.
+		break;
 
 	case ListenerEvent::Delete:
 		// TODO Keep shader?

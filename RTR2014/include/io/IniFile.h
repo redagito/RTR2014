@@ -34,9 +34,10 @@ class IniFile
 
     /**
     * \brief Returns value for group and key.
+    * Returned by value: the default argument may be a temporary.
     */
-    const std::string& getValue(const std::string& group, const std::string& key,
-                                const std::string& defaultValue) const;
+    std::string getValue(const std::string& group, const std::string& key,
+                         const std::string& defaultValue) const;
     int getValue(const std::string& group, const std::string& key, int defaultValue) const;
     float getValue(const std::string& group, const std::string& key, float defaultValue) const;
 

@@ -19,6 +19,9 @@ class ShaderObject
     ShaderObject(const std::string& source);
     ~ShaderObject();
 
+    ShaderObject(const ShaderObject&) = delete;
+    ShaderObject& operator=(const ShaderObject&) = delete;
+
     /**
     * \brief Initializes shader with new source code.
     */

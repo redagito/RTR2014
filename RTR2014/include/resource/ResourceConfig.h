@@ -3,7 +3,7 @@
 #include <cstdint>
 
 typedef int64_t ResourceId;
-static const ResourceId invalidResource = -1;
+constexpr ResourceId invalidResource = -1;
 
 /**
  * \brief Resource types.

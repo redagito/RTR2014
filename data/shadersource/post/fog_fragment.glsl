@@ -32,7 +32,7 @@ vec3 applyFog(vec3 color, float d)
         fogFactor = exp(-pow(fogD*z, 2.0f));
     }
     
-    return mix(color, vec3(0.7, 0.6, 0.5), 1.0f - clamp(fogFactor, 0.5f, 1.0f));
+    return mix(color, vec3(0.7, 0.6, 0.5), 1.0f - clamp(fogFactor, 0.0f, 1.0f));
 }
 
 void main(void)

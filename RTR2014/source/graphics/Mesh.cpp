@@ -127,7 +127,7 @@ GLenum Mesh::toGLPrimitive(PrimitiveType type)
         return GL_POINTS;
         break;
     case PrimitiveType::Line:
-        return GL_LINE;
+        return GL_LINES;
         break;
     case PrimitiveType::Triangle:
         return GL_TRIANGLES;

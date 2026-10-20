@@ -92,8 +92,8 @@ bool ShaderProgram::init(ShaderObject<GL_VERTEX_SHADER>* vertex,
     if (result == GL_FALSE)
     {
         // Set info log size
-        GLint size;
-        glGetShaderiv(programId, GL_INFO_LOG_LENGTH, &size);
+        GLint size = 0;
+        glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &size);
         if (size > 0)
         {
             // Create buffer

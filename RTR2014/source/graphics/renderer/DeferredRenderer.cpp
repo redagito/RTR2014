@@ -12,6 +12,7 @@
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
 #include "graphics/ICamera.h"
+#include "graphics/camera/IControllableCamera.h"
 #include "graphics/IWindow.h"
 #include "graphics/IGraphicsResourceManager.h"
 
@@ -117,7 +118,16 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
     {
-        m_depthVisualizationPass.render(window, manager, m_geometryPass.getDepthTexture());
+        float zNear = 0.01f;
+        float zFar = 1000.f;
+        if (const IControllableCamera* controllable =
+                dynamic_cast<const IControllableCamera*>(&camera))
+        {
+            zNear = controllable->getZNear();
+            zFar = controllable->getZFar();
+        }
+        m_depthVisualizationPass.render(window, manager, m_geometryPass.getDepthTexture(), zNear,
+                                        zFar);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Lights)
     {

@@ -101,8 +101,12 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
 
 if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
-        glfwTerminate();
         spdlog::error("Failed to initialize glad.");
+        // Destroy this window before glfwTerminate wipes all windows, so the
+        // destructor does not touch an already-destroyed handle later.
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
+        glfwTerminate();
         return false;
     }
 
@@ -163,8 +167,11 @@ void GlfwWindow::removeListener(IWindowListener* l) { m_listeners.erase(l); }
 
 void GlfwWindow::resizeCallback(GLFWwindow* window, int width, int height)
 {
-    assert(width > 0);
-    assert(height > 0);
+    // Minimized windows deliver a 0x0 framebuffer size; nothing to resize to.
+    if (width <= 0 || height <= 0)
+    {
+        return;
+    }
     if (s_windows.count(window) != 0)
     {
         GlfwWindow* win = s_windows.at(window);

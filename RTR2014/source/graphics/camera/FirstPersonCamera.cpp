@@ -4,6 +4,7 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/trigonometric.hpp>
 
 FirstPersonCamera::FirstPersonCamera(const glm::vec3& position, const glm::vec3& target,
                                        const glm::vec3& up, float fieldOfView, float aspectRatio,
@@ -81,11 +82,16 @@ void FirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up *
     if (glm::dot(direction, direction) < 1e-8f)
     {
         // Keep the current orientation when the target coincides with the eye.
+        updateView();
         return;
     }
 
     glm::vec3 forward = glm::normalize(direction);
+    // Clamp to the same range as pitch() so a vertical target cannot align
+    // forward with the view up vector and degenerate glm::lookAt.
     m_pitch = -std::asin(glm::clamp(forward.y, -1.f, 1.f));
+    m_pitch = fmin(m_pitch, glm::pi<float>() / 4);
+    m_pitch = fmax(m_pitch, -glm::pi<float>() / 4);
 
     glm::vec2 flat(forward.x, forward.z);
     if (glm::dot(flat, flat) < 1e-8f)
@@ -121,7 +127,8 @@ void FirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, floa
     m_aspectRatio = aspectRatio;
     m_zNear = zNear;
     m_zFar = zFar;
-    m_proj = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
+    // The public API takes degrees, glm::perspective wants radians.
+    m_proj = glm::perspective(glm::radians(fieldOfView), aspectRatio, zNear, zFar);
 }
 
 void FirstPersonCamera::updateView()

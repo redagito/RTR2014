@@ -25,7 +25,8 @@ DepthVisualizationPass::~DepthVisualizationPass()
 }
 
 void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
-                                    const std::shared_ptr<Texture>& depthTexture)
+                                    const std::shared_ptr<Texture>& depthTexture, float zNear,
+                                    float zFar)
 {
     // Get shader
     ShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
@@ -53,9 +54,8 @@ void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResour
     shader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
     // camera parameters
-    // TODO Replace
-    shader->setUniform(cameraZNearUniformName, 0.01f);
-    shader->setUniform(cameraZFarUniformName, 1000.f);
+    shader->setUniform(cameraZNearUniformName, zNear);
+    shader->setUniform(cameraZFarUniformName, zFar);
 
     // Perform pass
     Renderer::draw(quadMesh);

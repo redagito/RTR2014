@@ -1,5 +1,7 @@
 #include "io/IniFile.h"
 
+#include <spdlog/spdlog.h>
+
 #include <fstream>
 #include <sstream>
 
@@ -97,8 +99,8 @@ void IniFile::setValue(const std::string& group, const std::string& key, float v
     setValue(group, key, ss.str());
 }
 
-const std::string& IniFile::getValue(const std::string& group, const std::string& key,
-                                      const std::string& defaultValue) const
+std::string IniFile::getValue(const std::string& group, const std::string& key,
+                              const std::string& defaultValue) const
 {
     if (hasKey(group, key))
     {
@@ -113,11 +115,18 @@ int IniFile::getValue(const std::string& group, const std::string& key, int defa
     {
         try
         {
-            return std::stoi(d_entries.at(group).at(key));
+            size_t pos = 0;
+            int value = std::stoi(d_entries.at(group).at(key), &pos);
+            if (pos != d_entries.at(group).at(key).size())
+            {
+                spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
+                             key.c_str());
+            }
+            return value;
         }
         catch (const std::exception&)
         {
-            // Conversion error
+            spdlog::warn("Failed to parse int ini value for [{}] {}.", group.c_str(), key.c_str());
         }
     }
     return defaultValue;
@@ -129,11 +138,19 @@ float IniFile::getValue(const std::string& group, const std::string& key, float 
     {
         try
         {
-            return std::stof(d_entries.at(group).at(key));
+            size_t pos = 0;
+            float value = std::stof(d_entries.at(group).at(key), &pos);
+            if (pos != d_entries.at(group).at(key).size())
+            {
+                spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
+                             key.c_str());
+            }
+            return value;
         }
         catch (const std::exception&)
         {
-            // Conversion error
+            spdlog::warn("Failed to parse float ini value for [{}] {}.", group.c_str(),
+                         key.c_str());
         }
     }
     return defaultValue;
