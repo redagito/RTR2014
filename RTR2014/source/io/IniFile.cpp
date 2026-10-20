@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 
 #include <fstream>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 
 namespace
@@ -88,7 +90,8 @@ bool IniFile::save(const std::string& file)
         }
         ofs << std::endl;
     }
-    return true;
+    // The write can fail after the file was opened, a full disk for example.
+    return ofs.good();
 }
 
 void IniFile::setValue(const std::string& group, const std::string& key, const std::string& value)
@@ -107,63 +110,84 @@ void IniFile::setValue(const std::string& group, const std::string& key, int val
 void IniFile::setValue(const std::string& group, const std::string& key, float value)
 {
     std::stringstream ss;
-    ss << value;
+    // The full precision is needed, the value has to survive a round trip.
+    ss << std::setprecision(std::numeric_limits<float>::max_digits10) << value;
     setValue(group, key, ss.str());
 }
 
 std::string IniFile::getValue(const std::string& group, const std::string& key,
                               const std::string& defaultValue) const
 {
-    if (hasKey(group, key))
+    const auto groupEntry = d_entries.find(group);
+    if (groupEntry == d_entries.end())
     {
-        return d_entries.at(group).at(key);
+        return defaultValue;
     }
-    return defaultValue;
+    const auto keyEntry = groupEntry->second.find(key);
+    if (keyEntry == groupEntry->second.end())
+    {
+        return defaultValue;
+    }
+    return keyEntry->second;
 }
 
 int IniFile::getValue(const std::string& group, const std::string& key, int defaultValue) const
 {
-    if (hasKey(group, key))
+    const auto groupEntry = d_entries.find(group);
+    if (groupEntry == d_entries.end())
     {
-        try
+        return defaultValue;
+    }
+    const auto keyEntry = groupEntry->second.find(key);
+    if (keyEntry == groupEntry->second.end())
+    {
+        return defaultValue;
+    }
+    try
+    {
+        size_t pos = 0;
+        int value = std::stoi(keyEntry->second, &pos);
+        if (pos != keyEntry->second.size())
         {
-            size_t pos = 0;
-            int value = std::stoi(d_entries.at(group).at(key), &pos);
-            if (pos != d_entries.at(group).at(key).size())
-            {
-                spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
-                             key.c_str());
-            }
-            return value;
+            spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
+                         key.c_str());
         }
-        catch (const std::exception&)
-        {
-            spdlog::warn("Failed to parse int ini value for [{}] {}.", group.c_str(), key.c_str());
-        }
+        return value;
+    }
+    catch (const std::exception&)
+    {
+        spdlog::warn("Failed to parse int ini value for [{}] {}.", group.c_str(), key.c_str());
     }
     return defaultValue;
 }
 
 float IniFile::getValue(const std::string& group, const std::string& key, float defaultValue) const
 {
-    if (hasKey(group, key))
+    const auto groupEntry = d_entries.find(group);
+    if (groupEntry == d_entries.end())
     {
-        try
+        return defaultValue;
+    }
+    const auto keyEntry = groupEntry->second.find(key);
+    if (keyEntry == groupEntry->second.end())
+    {
+        return defaultValue;
+    }
+    try
+    {
+        size_t pos = 0;
+        float value = std::stof(keyEntry->second, &pos);
+        if (pos != keyEntry->second.size())
         {
-            size_t pos = 0;
-            float value = std::stof(d_entries.at(group).at(key), &pos);
-            if (pos != d_entries.at(group).at(key).size())
-            {
-                spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
-                             key.c_str());
-            }
-            return value;
-        }
-        catch (const std::exception&)
-        {
-            spdlog::warn("Failed to parse float ini value for [{}] {}.", group.c_str(),
+            spdlog::warn("Trailing characters in ini value for [{}] {}.", group.c_str(),
                          key.c_str());
         }
+        return value;
+    }
+    catch (const std::exception&)
+    {
+        spdlog::warn("Failed to parse float ini value for [{}] {}.", group.c_str(),
+                     key.c_str());
     }
     return defaultValue;
 }

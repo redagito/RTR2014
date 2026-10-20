@@ -114,6 +114,22 @@ TEST_CASE("IniFile ignores whitespace around a key and a value", "[io]")
     REQUIRE(ini.getValue("group", "key", "fallback") == "value");
 }
 
+TEST_CASE("IniFile keeps the precision of a float value", "[io]")
+{
+    TempIni file("[group]\n");
+    IniFile ini;
+
+    REQUIRE(ini.load(file.path()));
+
+    const float value = 1.2345678f;
+    ini.setValue("group", "key", value);
+    REQUIRE(ini.save(file.path()));
+
+    IniFile reloaded;
+    REQUIRE(reloaded.load(file.path()));
+    REQUIRE(reloaded.getValue("group", "key", 0.f) == value);
+}
+
 TEST_CASE("IniFile reads the material files shipped with the project", "[io]")
 {
     // The shipped ini files use windows line endings, the paths they contain

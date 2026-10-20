@@ -29,12 +29,12 @@ void Profiler::add(const std::string& name, double milliseconds)
     m_sections.push_back(section);
 }
 
-void Profiler::writeReport(const std::string& file) const
+bool Profiler::writeReport(const std::string& file) const
 {
     std::ofstream out(file);
     if (!out.is_open())
     {
-        return;
+        return false;
     }
 
     const std::lock_guard<std::mutex> lock(m_mutex);
@@ -52,6 +52,7 @@ void Profiler::writeReport(const std::string& file) const
             << std::setw(12) << average << std::setw(12) << section.min << std::setw(12) << section.max
             << "\n";
     }
+    return out.good();
 }
 
 ScopedTimer::ScopedTimer(Profiler& profiler, const std::string& name)

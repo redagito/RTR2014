@@ -28,6 +28,13 @@ const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
     ColorFormat::RGB24, ColorFormat::RGB24, ColorFormat::GreyScale8, ColorFormat::GreyScale8,
     ColorFormat::GreyScale8};
 
+// The key an image file is cached under, the color format is part of it
+// because the same file can be loaded with different formats.
+std::string imageKey(const std::string& file, ColorFormat format)
+{
+    return file + "|" + std::to_string(static_cast<int>(format));
+}
+
 // Releases a miniaudio decoder when the scope ends, also when an exception
 // leaves it.
 class DecoderGuard
@@ -89,10 +96,10 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         m_pendingMeshes.erase(pending);
         ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
                                       std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
-        if (meshId == -1)
+        if (meshId == invalidResource)
         {
             spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
-            return -1;
+            return invalidResource;
         }
         m_meshFiles[file] = meshId;
         return meshId;
@@ -101,15 +108,15 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
     MeshData data;
     if (!parseMesh(file, data))
     {
-        return -1;
+        return invalidResource;
     }
 
     ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
                                   std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
-    if (meshId == -1)
+    if (meshId == invalidResource)
     {
         spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
-        return -1;
+        return invalidResource;
     }
     m_meshFiles[file] = meshId;
     return meshId;
@@ -286,15 +293,15 @@ ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData,
 
 ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat format)
 {
-    std::string imageKey = file + "|" + std::to_string(static_cast<int>(format));
-    auto entry = m_imageFiles.find(imageKey);
+    const std::string key = imageKey(file, format);
+    auto entry = m_imageFiles.find(key);
     if (entry != m_imageFiles.end())
     {
         return entry->second;
     }
 
     // Publish a preloaded image
-    auto pending = m_pendingImages.find(imageKey);
+    auto pending = m_pendingImages.find(key);
     if (pending != m_pendingImages.end())
     {
         // The pending entry is removed before the resource is created, so that
@@ -304,29 +311,29 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         m_pendingImages.erase(pending);
         ResourceId imageId =
             createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
-        if (imageId == -1)
+        if (imageId == invalidResource)
         {
             spdlog::error("Failed to create image resource id from file {}.", file.c_str());
-            return -1;
+            return invalidResource;
         }
-        m_imageFiles[imageKey] = imageId;
+        m_imageFiles[key] = imageId;
         return imageId;
     }
 
     Image image;
     if (!decodeImage(file, format, image))
     {
-        return -1;
+        return invalidResource;
     }
 
     ResourceId imageId = createImage(std::move(image.m_data), image.m_width, image.m_height,
                                      image.m_format);
-    if (imageId == -1)
+    if (imageId == invalidResource)
     {
         spdlog::error("Failed to create image resource id from file {}.", file.c_str());
-        return -1;
+        return invalidResource;
     }
-    m_imageFiles[imageKey] = imageId;
+    m_imageFiles[key] = imageId;
     return imageId;
 }
 
@@ -334,7 +341,8 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
 {
     // TODO Check extension, png format assumed
     // PNG type check
-    if (file.find(".png") == std::string::npos)
+    const size_t extension = file.find_last_of('.');
+    if (extension == std::string::npos || file.substr(extension + 1) != "png")
     {
         spdlog::error("Unknown file format encountered while loading image file {}.", file.c_str());
         return false;
@@ -369,7 +377,10 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
                    stbi_failure_reason());
         return false;
     }
-    std::vector<unsigned char> data(decoded, decoded + (decodedWidth * decodedHeight * channels));
+    const size_t sampleCount =
+        static_cast<size_t>(decodedWidth) * static_cast<size_t>(decodedHeight) *
+        static_cast<size_t>(channels);
+    std::vector<unsigned char> data(decoded, decoded + sampleCount);
     stbi_image_free(decoded);
 
     image = Image(std::move(data), static_cast<unsigned int>(decodedWidth),
@@ -513,7 +524,7 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
     if (!ini.load(file))
     {
         spdlog::error("Failed to load material file {} as ini file.", file.c_str());
-        return -1;
+        return invalidResource;
     }
 
     ResourceId textureIds[kMaterialTextureSlots];
@@ -529,33 +540,33 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
             continue;
         }
         textureIds[i] = loadImage(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i]);
-        if (textureIds[i] == -1)
+        if (textureIds[i] == invalidResource)
         {
             spdlog::error("Failed to load {} texture specified in material file {}.", slot,
                        file.c_str());
-            return -1;
+            return invalidResource;
         }
     }
 
-    ResourceId customShaderId = -1;
+    ResourceId customShaderId = invalidResource;
     if (ini.hasKey("shader", "file"))
     {
         // Has custom shader file specified
         customShaderId = loadShader(ini.getValue("shader", "file", "error"));
-        if (customShaderId == -1)
+        if (customShaderId == invalidResource)
         {
             spdlog::error("Failed to load custom shader file specified in material file {}.",
                        file.c_str());
-            return -1;
+            return invalidResource;
         }
     }
 
     ResourceId materialId = createMaterial(textureIds[0], textureIds[1], textureIds[2],
                                            textureIds[3], textureIds[4], customShaderId);
-    if (materialId == -1)
+    if (materialId == invalidResource)
     {
         spdlog::error("Failed to create material resource id for material file {}.", file.c_str());
-        return -1;
+        return invalidResource;
     }
     m_materialFiles[file] = materialId;
     return materialId;
@@ -701,7 +712,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
     if (!ini.load(file))
     {
         spdlog::error("Failed to load shader program file {}", file.c_str());
-        return -1;
+        return invalidResource;
     }
 
     // Requires vertex and fragment shader files
@@ -711,81 +722,81 @@ ResourceId ResourceManager::loadShader(const std::string& file)
             "The shader program file {} is missing a vertex and/or fragment shader source file "
             "specifier.",
             file.c_str());
-        return -1;
+        return invalidResource;
     }
 
     ResourceId vertexId = loadString(ini.getValue("vertex", "file", "error"));
-    if (vertexId == -1)
+    if (vertexId == invalidResource)
     {
         spdlog::error(
             "The vertex shader source file {}, specified in the shader program file {} could not "
             "be loaded.",
             ini.getValue("vertex", "file", "error").c_str(), file.c_str());
-        return -1;
+        return invalidResource;
     }
 
 	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"));
-    if (fragmentId == -1)
+    if (fragmentId == invalidResource)
     {
         spdlog::error(
             "The fragment shader source file {}, specified in the shader program file {} could not "
             "be loaded.",
             ini.getValue("fragment", "file", "error").c_str(), file.c_str());
-        return -1;
+        return invalidResource;
     }
 
-    ResourceId tessCtrlId = -1;
+    ResourceId tessCtrlId = invalidResource;
     // Check for and load tessellation control shader source
     if (ini.hasKey("tessellation_control", "file"))
     {
 		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"));
-        if (tessCtrlId == -1)
+        if (tessCtrlId == invalidResource)
         {
             spdlog::error(
                 "The tessellation control shader source file {}, specified in the shader program "
                 "file {} could not be loaded.",
                 ini.getValue("tessellation_control", "file", "error").c_str(), file.c_str());
-            return -1;
+            return invalidResource;
         }
     }
 
-    ResourceId tessEvalId = -1;
+    ResourceId tessEvalId = invalidResource;
     // Check for and load tessellation evaluation shader source
     if (ini.hasKey("tessellation_evaluation", "file"))
     {
 		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"));
-        if (tessEvalId == -1)
+        if (tessEvalId == invalidResource)
         {
             spdlog::error(
                 "The tessellation evaluation shader source file {}, specified in the shader "
                 "program file {} could not be loaded.",
                 ini.getValue("tessellation_evaluation", "file", "error").c_str(), file.c_str());
-            return -1;
+            return invalidResource;
         }
     }
 
-    ResourceId geometryId = -1;
+    ResourceId geometryId = invalidResource;
     // Check for and load geometry shader source
     if (ini.hasKey("geometry", "file"))
     {
 		geometryId = loadString(ini.getValue("geometry", "file", "error"));
-        if (geometryId == -1)
+        if (geometryId == invalidResource)
         {
             spdlog::error(
                 "The geometry shader source file {}, specified in the shader program file {} could "
                 "not be loaded.",
                 ini.getValue("geometry", "file", "error").c_str(), file.c_str());
-            return -1;
+            return invalidResource;
         }
     }
 
-    ResourceId shaderId = -1;
+    ResourceId shaderId = invalidResource;
     // Create new entry
     shaderId = createShader(file, vertexId, tessCtrlId, tessEvalId, geometryId, fragmentId);
-    if (shaderId == -1)
+    if (shaderId == invalidResource)
     {
         spdlog::error("Failed to create reasource id for shader file {}.", file.c_str());
-        return -1;
+        return invalidResource;
     }
     return shaderId;
 }
@@ -834,7 +845,7 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::set<std::string> uniqueImages;
     for (const auto& image : imageFiles)
     {
-        std::string key = image.first + "|" + std::to_string(static_cast<int>(image.second));
+        const std::string key = imageKey(image.first, image.second);
         if (!uniqueImages.insert(key).second)
         {
             continue;
@@ -930,7 +941,7 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     {
         if (imageOk[i])
         {
-            std::string key = images[i].first + "|" + std::to_string(static_cast<int>(images[i].second));
+            const std::string key = imageKey(images[i].first, images[i].second);
             m_pendingImages[key] = std::move(imageData[i]);
         }
     }
@@ -974,22 +985,22 @@ ResourceId ResourceManager::loadString(const std::string& file)
 	if (!ifs.is_open())
 	{
 		spdlog::error("Failed to open the text file {}.", file.c_str());
-		return -1;
+		return invalidResource;
 	}
 
 	// Load file
 	std::string text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 	ifs.close();
 
-	ResourceId stringId = -1;
+	ResourceId stringId = invalidResource;
 
 
 	// Create new string entry
 	stringId = createString(text);
-	if (stringId == -1)
+	if (stringId == invalidResource)
 	{
 		spdlog::error("Failed to create string id for text file {}.", file.c_str());
-		return -1;
+		return invalidResource;
 	}
 
 	m_textFiles[file] = stringId;

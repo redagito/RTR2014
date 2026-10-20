@@ -11,8 +11,14 @@ namespace
 void writeProfile()
 {
     const std::string file = "log/profile_" + createTimeStamp() + ".txt";
-    profiler().writeReport(file);
-    spdlog::info("Wrote profile to {}.", file);
+    if (profiler().writeReport(file))
+    {
+        spdlog::info("Wrote profile to {}.", file);
+    }
+    else
+    {
+        spdlog::error("Failed to write the profile to {}.", file);
+    }
 }
 } // namespace
 

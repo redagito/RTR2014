@@ -84,7 +84,8 @@ class ResourceManager : public IResourceManager
                  const std::vector<std::string>& materialFiles,
                  const std::vector<std::string>& soundFiles);
 
-    void notifyResourceListeners(ResourceType type, ResourceId id, ListenerEvent event);
+    ResourceManager(const ResourceManager&) = delete;
+    ResourceManager& operator=(const ResourceManager&) = delete;
 
    private:
     /**
@@ -107,6 +108,11 @@ class ResourceManager : public IResourceManager
     */
     static bool getMaterialImages(const std::string& file,
                                   std::vector<std::pair<std::string, ColorFormat>>& images);
+
+    /**
+    * \brief Notifies the listeners about a resource event.
+    */
+    void notifyResourceListeners(ResourceType type, ResourceId id, ListenerEvent event);
 
     ResourceId m_nextMeshId;     /**< Next free mesh id. */
     ResourceId m_nextImageId;    /**< Next free image id. */

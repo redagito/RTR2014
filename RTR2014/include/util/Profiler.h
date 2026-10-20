@@ -22,8 +22,10 @@ class Profiler
 
     /**
     * \brief Writes the collected timings to a file.
+    *
+    * Returns false if the file could not be written.
     */
-    void writeReport(const std::string& file) const;
+    bool writeReport(const std::string& file) const;
 
    private:
     struct Section
