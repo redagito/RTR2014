@@ -24,6 +24,23 @@ class TempIni
    private:
     std::string m_path = "rtr2014_tmp_test.ini";
 };
+
+// Writes the content byte for byte, so the line endings are not translated.
+class TempIniBytes
+{
+   public:
+    explicit TempIniBytes(const std::string& content)
+    {
+        std::ofstream ofs(m_path, std::ios::binary);
+        ofs << content;
+    }
+    ~TempIniBytes() { std::remove(m_path.c_str()); }
+
+    std::string path() const { return m_path; }
+
+   private:
+    std::string m_path = "rtr2014_tmp_test_bytes.ini";
+};
 } // namespace
 
 TEST_CASE("IniFile parses groups and key value pairs", "[io]")
@@ -71,4 +88,38 @@ TEST_CASE("IniFile parses int and float values", "[io]")
     REQUIRE(ini.load(file.path()));
     REQUIRE(ini.getValue("group", "count", 0) == 7);
     REQUIRE(ini.getValue("group", "scale", 0.f) == Catch::Approx(1.5f));
+}
+
+TEST_CASE("IniFile parses a file with windows line endings", "[io]")
+{
+    TempIniBytes crlfFile("[group]\r\nkey=value\r\n");
+    TempIniBytes lfFile("[group]\nkey=value\n");
+    IniFile crlfIni;
+    IniFile lfIni;
+
+    REQUIRE(crlfIni.load(crlfFile.path()));
+    REQUIRE(lfIni.load(lfFile.path()));
+    REQUIRE(crlfIni.getValue("group", "key", "fallback") ==
+            lfIni.getValue("group", "key", "fallback"));
+    REQUIRE(crlfIni.getValue("group", "key", "fallback") == "value");
+}
+
+TEST_CASE("IniFile ignores whitespace around a key and a value", "[io]")
+{
+    TempIniBytes file("[group]\r\n  key  =  value  \r\n");
+    IniFile ini;
+
+    REQUIRE(ini.load(file.path()));
+    REQUIRE(ini.hasKey("group", "key"));
+    REQUIRE(ini.getValue("group", "key", "fallback") == "value");
+}
+
+TEST_CASE("IniFile reads the material files shipped with the project", "[io]")
+{
+    // The shipped ini files use windows line endings, the paths they contain
+    // must not carry a carriage return.
+    IniFile ini;
+
+    REQUIRE(ini.load(std::string(RTR_PROJECT_DATA_DIR) + "/material/brick_1_diffuse.ini"));
+    REQUIRE(ini.getValue("diffuse", "file", "") == "data/images/brick_1_diffuse.png");
 }

@@ -5,11 +5,25 @@
 #include <fstream>
 #include <sstream>
 
+namespace
+{
+std::string trim(const std::string& text)
+{
+    const size_t first = text.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos)
+    {
+        return "";
+    }
+    const size_t last = text.find_last_not_of(" \t\r\n");
+    return text.substr(first, last - first + 1);
+}
+} // namespace
+
 bool IniFile::load(const std::string& file)
 {
     d_entries.clear();
 
-    std::ifstream ifs(file);
+    std::ifstream ifs(file, std::ios::binary);
     if (!ifs.is_open())
     {
         return false;
@@ -18,6 +32,7 @@ bool IniFile::load(const std::string& file)
     std::string group;
     while (std::getline(ifs, line))
     {
+        line = trim(line);
         if (line.empty())
         {
             // Empty line
@@ -34,11 +49,10 @@ bool IniFile::load(const std::string& file)
             if (pos == std::string::npos)
             {
                 d_entries.clear();
-                ifs.close();
                 return false;
             }
             // Set current group
-            group = line.substr(1, pos - 1);
+            group = trim(line.substr(1, pos - 1));
         }
         else  // Key/value pair
         {
@@ -46,13 +60,11 @@ bool IniFile::load(const std::string& file)
             if (pos == std::string::npos)
             {
                 d_entries.clear();
-                ifs.close();
                 return false;
             }
-            d_entries[group][line.substr(0, pos)] = line.substr(pos + 1);
+            d_entries[group][trim(line.substr(0, pos))] = trim(line.substr(pos + 1));
         }
     }
-    ifs.close();
     return true;
 }
 
