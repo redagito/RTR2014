@@ -15,11 +15,11 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Accumulates the scene lighting into the light buffer.
-*
-* The buffer is initialised with the ambient light, then every point and
-* directional light is added on top with additive blending.
-*/
+ * \brief Accumulates the scene lighting into the light buffer.
+ *
+ * The buffer is initialised with the ambient light, then every point and
+ * directional light is added on top with additive blending.
+ */
 class LightPass
 {
    public:
@@ -27,21 +27,21 @@ class LightPass
     ~LightPass();
 
     /**
-    * \brief Initializes the light pass resources.
-    */
+     * \brief Initializes the light pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders all scene lights into the light buffer.
-    */
+     * \brief Renders all scene lights into the light buffer.
+     */
     void render(const IScene& scene, const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager, ISceneQuery& query,
                 const std::shared_ptr<Texture>& depthTexture,
                 const std::shared_ptr<Texture>& normalSpecularTexture);
 
     /**
-    * \brief Returns the light buffer texture.
-    */
+     * \brief Returns the light buffer texture.
+     */
     const std::shared_ptr<Texture>& getLightTexture() const;
 
    private:

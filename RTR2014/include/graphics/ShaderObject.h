@@ -1,21 +1,22 @@
 #pragma once
 
 #include <spdlog/spdlog.h>
+
 #include <string>
 #include <vector>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
 /**
-* \brief Represents a compiled shader object.
-*/
+ * \brief Represents a compiled shader object.
+ */
 template <GLenum ShaderType>
 class ShaderObject
 {
    public:
     /**
-    * \brief Creates shader object from shader type and source code.
-    */
+     * \brief Creates shader object from shader type and source code.
+     */
     ShaderObject(const std::string& source);
     ~ShaderObject();
 
@@ -23,23 +24,23 @@ class ShaderObject
     ShaderObject& operator=(const ShaderObject&) = delete;
 
     /**
-    * \brief Initializes shader with new source code.
-    */
+     * \brief Initializes shader with new source code.
+     */
     bool init(const std::string& source);
 
     /**
-    * \brief Returns compile error string if a previous call to init returned false.
-    */
+     * \brief Returns compile error string if a previous call to init returned false.
+     */
     const std::string& getErrorString() const;
 
     /**
-    * \brief Returns shader object id.
-    */
+     * \brief Returns shader object id.
+     */
     GLuint getId() const;
 
     /**
-    * \brief Returns validity flag.
-    */
+     * \brief Returns validity flag.
+     */
     bool isValid() const;
 
    private:
@@ -49,8 +50,7 @@ class ShaderObject
 };
 
 template <GLenum ShaderType>
-ShaderObject<ShaderType>::ShaderObject(const std::string& source)
-    : m_objectId(0), m_valid(false)
+ShaderObject<ShaderType>::ShaderObject(const std::string& source) : m_objectId(0), m_valid(false)
 {
     init(source);
 }
@@ -113,7 +113,6 @@ bool ShaderObject<ShaderType>::init(const std::string& source)
     m_objectId = objectId;
     // Set validity flag
     m_valid = true;
-
 
     return true;
 }

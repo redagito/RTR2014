@@ -1,6 +1,3 @@
 #include "graphics/IGraphicsResourceManager.h"
 
-IGraphicsResourceManager::~IGraphicsResourceManager()
-{
-	return;
-}
+IGraphicsResourceManager::~IGraphicsResourceManager() { return; }

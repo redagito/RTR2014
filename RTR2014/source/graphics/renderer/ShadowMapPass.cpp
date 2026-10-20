@@ -1,33 +1,26 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/ShadowMapPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/Transformer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-ShadowMapPass::ShadowMapPass()
-{
-    return;
-}
+ShadowMapPass::ShadowMapPass() { return; }
 
-ShadowMapPass::~ShadowMapPass()
-{
-    return;
-}
+ShadowMapPass::~ShadowMapPass() { return; }
 
 void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
                            const IGraphicsResourceManager& manager)
@@ -127,10 +120,9 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
             {
                 // Forward draw call
                 m_shadowMapPassShader->setActive();
-                Renderer::bindMaterial(m_shadowMapPassShader, material,
-                                       transformer.getTranslationMatrix(),
-                                       transformer.getRotationMatrix(),
-                                       transformer.getScaleMatrix(), manager);
+                Renderer::bindMaterial(
+                    m_shadowMapPassShader, material, transformer.getTranslationMatrix(),
+                    transformer.getRotationMatrix(), transformer.getScaleMatrix(), manager);
                 Renderer::draw(mesh);
             }
         }
@@ -166,13 +158,11 @@ bool ShadowMapPass::init(IResourceManager* manager)
     // The shadow map is sampled with a comparison.
     m_shadowDepthTexture->setCompareMode(true);
 
-
     // Total 96 bit per pixel
     m_shadowMapBuffer.attach(m_shadowDepthTexture, GL_DEPTH_ATTACHMENT);
     m_shadowMapBuffer.setActive(GL_FRAMEBUFFER);
     glNamedFramebufferDrawBuffer(m_shadowMapBuffer.getId(), GL_NONE);
     m_shadowMapBuffer.setInactive(GL_FRAMEBUFFER);
-
 
     spdlog::info("Shadow map buffer state: {}.", m_shadowMapBuffer.getState().c_str());
 
@@ -182,7 +172,4 @@ bool ShadowMapPass::init(IResourceManager* manager)
     return true;
 }
 
-const std::shared_ptr<Texture>& ShadowMapPass::getShadowMap() const
-{
-    return m_shadowDepthTexture;
-}
+const std::shared_ptr<Texture>& ShadowMapPass::getShadowMap() const { return m_shadowDepthTexture; }

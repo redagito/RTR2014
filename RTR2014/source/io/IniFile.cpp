@@ -19,7 +19,7 @@ std::string trim(const std::string& text)
     const size_t last = text.find_last_not_of(" \t\r\n");
     return text.substr(first, last - first + 1);
 }
-} // namespace
+}  // namespace
 
 bool IniFile::load(const std::string& file)
 {
@@ -186,8 +186,7 @@ float IniFile::getValue(const std::string& group, const std::string& key, float 
     }
     catch (const std::exception&)
     {
-        spdlog::warn("Failed to parse float ini value for [{}] {}.", group.c_str(),
-                     key.c_str());
+        spdlog::warn("Failed to parse float ini value for [{}] {}.", group.c_str(), key.c_str());
     }
     return defaultValue;
 }

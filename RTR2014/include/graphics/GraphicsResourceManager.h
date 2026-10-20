@@ -1,37 +1,36 @@
 #pragma once
 
-#include <memory>
 #include <list>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
-#include "resource/IResourceListener.h"
 #include "graphics/IGraphicsResourceManager.h"
-
-#include "graphics/Texture.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
 #include "graphics/ShaderObject.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "resource/IResourceListener.h"
 
 class GraphicsResourceManager : public IGraphicsResourceManager, public IResourceListener
 {
    public:
     /**
-    * \brief Sets resource callbacks.
-    */
+     * \brief Sets resource callbacks.
+     */
     GraphicsResourceManager();
 
     /**
-    * \brief Cleans up resource callbacks.
-    */
+     * \brief Cleans up resource callbacks.
+     */
     ~GraphicsResourceManager();
 
     /**
-    * \brief On attach callback.
-    * Implements the attach callback for the resource listener interface.
-    * TODO Currently stubbed, renderer attaches itself to resource manager in constructor.
-    */
+     * \brief On attach callback.
+     * Implements the attach callback for the resource listener interface.
+     * TODO Currently stubbed, renderer attaches itself to resource manager in constructor.
+     */
     void onAttach(IResourceManager* resourceManager) override;
 
     /**
@@ -80,72 +79,72 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
 
    protected:
     /**
-    * \brief Maps id to internal vertex shader object.
-    */
+     * \brief Maps id to internal vertex shader object.
+     */
     ShaderObject<GL_VERTEX_SHADER>* getVertexShaderObject(ResourceId) const;
 
     /**
-    * \brief Maps id to internal tessellation control shader object.
-    */
+     * \brief Maps id to internal tessellation control shader object.
+     */
     ShaderObject<GL_TESS_CONTROL_SHADER>* getTessControlShaderObject(ResourceId) const;
 
     /**
-    * \brief Maps id to internal tessellation evaluation shader object.
-    */
+     * \brief Maps id to internal tessellation evaluation shader object.
+     */
     ShaderObject<GL_TESS_EVALUATION_SHADER>* getTessEvalShaderObject(ResourceId) const;
 
     /**
-    * \brief Maps id to internal geometry shader object.
-    */
+     * \brief Maps id to internal geometry shader object.
+     */
     ShaderObject<GL_GEOMETRY_SHADER>* getGeometryShaderObject(ResourceId) const;
 
     /**
-    * \brief Maps id to internal fragment shader object.
-    */
+     * \brief Maps id to internal fragment shader object.
+     */
     ShaderObject<GL_FRAGMENT_SHADER>* getFragmentShaderObject(ResourceId) const;
 
    private:
     /**
-    * \brief Returns the texture of an image id, or null if there is none.
-    */
+     * \brief Returns the texture of an image id, or null if there is none.
+     */
     std::shared_ptr<Texture> findTexture(ResourceId id) const;
 
     /**
-    * \brief Returns the shader program of a shader id, or null if there is none.
-    */
+     * \brief Returns the shader program of a shader id, or null if there is none.
+     */
     std::shared_ptr<ShaderProgram> findShaderProgram(ResourceId id) const;
 
     /**
-    * \brief Initializes default textures for materials.
-    */
+     * \brief Initializes default textures for materials.
+     */
     void initDefaultTextures();
 
     /**
-    * \brief Handles resource events for image resources.
-    */
+     * \brief Handles resource events for image resources.
+     */
     void handleImageEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);
 
     /**
-    * \brief Handles resource events for mesh resources.
-    */
+     * \brief Handles resource events for mesh resources.
+     */
     void handleMeshEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);
 
     /**
-    * \brief Handles resource events for material resources.
-    */
+     * \brief Handles resource events for material resources.
+     */
     void handleMaterialEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);
 
     /**
-    * \brief Handles resource events for shader resources.
-    */
+     * \brief Handles resource events for shader resources.
+     */
     void handleShaderEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);
 
     /**
-    * \brief Handles resource events for string resources.
-    * Stubbed as the renderer does not need string events.
-    * TODO Consider hot reloading of shader source code and on-the-fly
-    * recompiling of shader objects/programs
-    */
+     * \brief Handles resource events for string resources.
+     * Stubbed as the renderer does not need string events.
+     * TODO Consider hot reloading of shader source code and on-the-fly
+     * recompiling of shader objects/programs
+     */
     void handleStringEvent(ResourceId, ListenerEvent event, IResourceManager* resourceManager);
 
     std::unordered_map<ResourceId, std::unique_ptr<Mesh>>

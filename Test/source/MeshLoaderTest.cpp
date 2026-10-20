@@ -1,5 +1,4 @@
 #include <catch2/catch_test_macros.hpp>
-
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -45,14 +44,15 @@ LoadedMesh loadMesh(const std::string& file)
     REQUIRE(manager.getMesh(id, mesh.vertices, mesh.indices, mesh.normals, mesh.uvs, mesh.type));
     return mesh;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("a triangle face keeps its three corners", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 0 1 0\n"
-                 "f 1 2 3\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 0 1 0\n"
+        "f 1 2 3\n");
 
     const LoadedMesh mesh = loadMesh(file.path());
 
@@ -62,11 +62,12 @@ TEST_CASE("a triangle face keeps its three corners", "[mesh]")
 
 TEST_CASE("a quad face is triangulated into two triangles", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 1 1 0\n"
-                 "v 0 1 0\n"
-                 "f 1 2 3 4\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "v 0 1 0\n"
+        "f 1 2 3 4\n");
 
     const LoadedMesh mesh = loadMesh(file.path());
 
@@ -76,12 +77,13 @@ TEST_CASE("a quad face is triangulated into two triangles", "[mesh]")
 
 TEST_CASE("a pentagon face is triangulated into three triangles", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 2 1 0\n"
-                 "v 1 2 0\n"
-                 "v 0 2 0\n"
-                 "f 1 2 3 4 5\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 2 1 0\n"
+        "v 1 2 0\n"
+        "v 0 2 0\n"
+        "f 1 2 3 4 5\n");
 
     const LoadedMesh mesh = loadMesh(file.path());
 
@@ -91,11 +93,12 @@ TEST_CASE("a pentagon face is triangulated into three triangles", "[mesh]")
 
 TEST_CASE("the vertices of a triangulated face keep their source order", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 1 1 0\n"
-                 "v 0 1 0\n"
-                 "f 1 2 3 4\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "v 0 1 0\n"
+        "f 1 2 3 4\n");
 
     const LoadedMesh mesh = loadMesh(file.path());
 
@@ -106,10 +109,11 @@ TEST_CASE("the vertices of a triangulated face keep their source order", "[mesh]
 
 TEST_CASE("a face with relative indices is resolved", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 0 1 0\n"
-                 "f -3 -2 -1\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 0 1 0\n"
+        "f -3 -2 -1\n");
 
     const LoadedMesh mesh = loadMesh(file.path());
 
@@ -118,9 +122,10 @@ TEST_CASE("a face with relative indices is resolved", "[mesh]")
 
 TEST_CASE("a mesh file without any face is rejected", "[mesh]")
 {
-    TempObj file("v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "f 1 2\n");
+    TempObj file(
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "f 1 2\n");
 
     ResourceManager manager;
 

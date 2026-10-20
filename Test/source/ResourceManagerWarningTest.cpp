@@ -1,13 +1,12 @@
-#include <catch2/catch_test_macros.hpp>
+#include <spdlog/sinks/base_sink.h>
+#include <spdlog/spdlog.h>
 
+#include <catch2/catch_test_macros.hpp>
 #include <cstdio>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <spdlog/sinks/base_sink.h>
-#include <spdlog/spdlog.h>
 
 #include "resource/ResourceManager.h"
 
@@ -57,16 +56,17 @@ class CapturingSink : public spdlog::sinks::base_sink<std::mutex>
     mutable std::mutex m_mutex;
     std::vector<std::string> m_messages;
 };
-} // namespace
+}  // namespace
 
 TEST_CASE("loadMesh reports a warning without failing the load", "[resource]")
 {
     // References an mtl that is not present, which tinyobj reports as a warning.
-    TempObj file("mtllib does_not_exist.mtl\n"
-                 "v 0 0 0\n"
-                 "v 1 0 0\n"
-                 "v 0 1 0\n"
-                 "f 1 2 3\n");
+    TempObj file(
+        "mtllib does_not_exist.mtl\n"
+        "v 0 0 0\n"
+        "v 1 0 0\n"
+        "v 0 1 0\n"
+        "f 1 2 3\n");
 
     const auto sink = std::make_shared<CapturingSink>();
     spdlog::default_logger()->sinks().push_back(sink);

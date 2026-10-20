@@ -1,35 +1,27 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/PointLightPass.h"
 
-#include <string>
+#include <spdlog/spdlog.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/trigonometric.hpp>
+#include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/camera/StaticCamera.h"
 #include "graphics/renderer/Renderer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-PointLightPass::PointLightPass()
-{
-    return;
-}
+PointLightPass::PointLightPass() { return; }
 
-PointLightPass::~PointLightPass()
-{
-    return;
-}
+PointLightPass::~PointLightPass() { return; }
 
 void PointLightPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
                             const IGraphicsResourceManager& manager, ISceneQuery& query,
@@ -69,7 +61,8 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
 
         if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
         {
-            spdlog::error("Failed to retrieve point light data from point light id {}.", pointLightId);
+            spdlog::error("Failed to retrieve point light data from point light id {}.",
+                          pointLightId);
         }
         else
         {
@@ -77,7 +70,8 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
             // seam gaps appear at the face borders.
             if (castsShadow && camera.getFeatureInfo().shadowsActive)
             {
-                glm::mat4 shadowProj = glm::perspective(glm::radians(90.5f), 1.0f, 0.01f, radius * 1.5f);
+                glm::mat4 shadowProj =
+                    glm::perspective(glm::radians(90.5f), 1.0f, 0.01f, radius * 1.5f);
                 StaticCamera shadowCamera = StaticCamera(glm::mat4(), shadowProj, position);
                 m_shadowCubePass.render(scene, shadowCamera, window, manager);
             }
@@ -119,8 +113,8 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
             pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
             pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-			// Camera position
-			pointLightPassShader->setUniform(cameraPositionUniformName, camera.getPosition());
+            // Camera position
+            pointLightPassShader->setUniform(cameraPositionUniformName, camera.getPosition());
 
             // Inverse view-projection
             pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
@@ -159,7 +153,7 @@ bool PointLightPass::init(IResourceManager* manager)
     if (m_pointLightPassShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
-                   pointLightPassShaderFile.c_str());
+                      pointLightPassShaderFile.c_str());
         return false;
     }
 

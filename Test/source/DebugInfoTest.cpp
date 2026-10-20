@@ -1,8 +1,7 @@
-#include <catch2/catch_test_macros.hpp>
-
-#include <memory>
-
 #include <spdlog/spdlog.h>
+
+#include <catch2/catch_test_macros.hpp>
+#include <memory>
 
 #include "debug/DebugInfo.h"
 
@@ -16,7 +15,7 @@ std::shared_ptr<spdlog::logger> makeLogger(const std::shared_ptr<DebugInfo>& deb
     logger->sinks().push_back(debugInfo);
     return logger;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("DebugInfo sink captures formatted log messages", "[debug]")
 {

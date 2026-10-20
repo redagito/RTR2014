@@ -1,31 +1,25 @@
-#include <spdlog/spdlog.h>
 #include "io/SceneLoader.h"
 
-#include <fstream>
-
 #include <json/json.h>
+#include <spdlog/spdlog.h>
+
+#include <fstream>
 #include <glm/glm.hpp>
 
+#include "animation/AnimationWorld.h"
+#include "animation/MovementController.h"
+#include "animation/RotationController.h"
 #include "graphics/IScene.h"
+#include "io/JsonDeserializer.h"
 #include "resource/IResourceManager.h"
 #include "resource/OrientedBoundingBox.h"
-
-#include "io/JsonDeserializer.h"
-
-
-#include "animation/AnimationWorld.h"
-#include "animation/RotationController.h"
-#include "animation/MovementController.h"
 
 SceneLoader::SceneLoader(IResourceManager& resourceManager) : m_resourceManager(resourceManager)
 {
     return;
 }
 
-SceneLoader::~SceneLoader()
-{
-    return;
-}
+SceneLoader::~SceneLoader() { return; }
 
 bool SceneLoader::prepare(const std::string& file)
 {
@@ -44,7 +38,7 @@ bool SceneLoader::prepare(const std::string& file)
     if (!reader.parse(ifs, root))
     {
         spdlog::error("Failed to load scene file {} with error {}.", file.c_str(),
-                   reader.getFormattedErrorMessages().c_str());
+                      reader.getFormattedErrorMessages().c_str());
         return false;
     }
     // Read done, close file
@@ -78,7 +72,8 @@ bool SceneLoader::prepare(const std::string& file)
     }
 
     std::vector<PendingSoundEmitter> pendingEmitters;
-    if (root.isMember("sound_emitters") && !parseSoundEmitters(root["sound_emitters"], pendingEmitters))
+    if (root.isMember("sound_emitters") &&
+        !parseSoundEmitters(root["sound_emitters"], pendingEmitters))
     {
         spdlog::error("The scene file {} has an invalid sound emitters node.", file.c_str());
         return false;
@@ -197,18 +192,12 @@ bool SceneLoader::load(IScene& scene, AnimationWorld& animationWorld)
     return true;
 }
 
-ResourceId SceneLoader::getMusicResourceId() const
-{
-    return m_musicResourceId;
-}
+ResourceId SceneLoader::getMusicResourceId() const { return m_musicResourceId; }
 
-const std::vector<SoundEmitter>& SceneLoader::getSoundEmitters() const
-{
-    return m_emitters;
-}
+const std::vector<SoundEmitter>& SceneLoader::getSoundEmitters() const { return m_emitters; }
 
 bool SceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
-                                    AnimationWorld& animationWorld)
+                                   AnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
@@ -269,7 +258,7 @@ bool SceneLoader::collectResources(const Json::Value& node, std::vector<std::str
 }
 
 bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
-                                   AnimationWorld& animationWorld)
+                                  AnimationWorld& animationWorld)
 {
     std::string mesh;
     std::string material;
@@ -336,7 +325,7 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
         scene.createObject(meshId, materialId, position, rotation, scale, bounds, castsShadow);
 
     // Load optional animation controllers
-	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
+    if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
                                   AnimationObjectType::Model))
     {
         spdlog::error("Failed to load animation controller.");
@@ -347,7 +336,7 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
 }
 
 bool SceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
-                                   AnimationWorld& animationWorld)
+                                  AnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
@@ -366,7 +355,7 @@ bool SceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
     // Load scene point lights
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-		if (!loadPointLight(node[i], scene, animationWorld))
+        if (!loadPointLight(node[i], scene, animationWorld))
         {
             return false;
         }
@@ -375,7 +364,7 @@ bool SceneLoader::loadPointLights(const Json::Value& node, IScene& scene,
 }
 
 bool SceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
-                                  AnimationWorld& animationWorld)
+                                 AnimationWorld& animationWorld)
 {
     glm::vec3 position;
     glm::vec3 color;
@@ -420,7 +409,7 @@ bool SceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
         scene.createPointLight(position, radius, color, intensity, castsShadow);
 
     // Load optional animation controllers
-	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
+    if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
                                   AnimationObjectType::PointLight))
     {
         spdlog::error("Failed to load animation controller.");
@@ -430,12 +419,13 @@ bool SceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
 }
 
 bool SceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene,
-                                         AnimationWorld& animationWorld)
+                                        AnimationWorld& animationWorld)
 {
     // Node empty?
     if (node.empty())
     {
-        spdlog::info("Missing or empty 'directional_lights' node. No directional lights are loaded.");
+        spdlog::info(
+            "Missing or empty 'directional_lights' node. No directional lights are loaded.");
         return true;
     }
 
@@ -449,7 +439,7 @@ bool SceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene,
     // Load scene directional lights
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-		if (!loadDirectionalLight(node[i], scene, animationWorld))
+        if (!loadDirectionalLight(node[i], scene, animationWorld))
         {
             return false;
         }
@@ -458,7 +448,7 @@ bool SceneLoader::loadDirectionalLights(const Json::Value& node, IScene& scene,
 }
 
 bool SceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene,
-                                        AnimationWorld& animationWorld)
+                                       AnimationWorld& animationWorld)
 {
     glm::vec3 direction;
     glm::vec3 color;
@@ -518,12 +508,13 @@ bool SceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
 }
 
 bool SceneLoader::loadAnimationControllers(const Json::Value& node, IScene& scene,
-                                            AnimationWorld& animationWorld, SceneObjectId id,
-                                            AnimationObjectType type)
+                                           AnimationWorld& animationWorld, SceneObjectId id,
+                                           AnimationObjectType type)
 {
     if (node.empty())
     {
-        // spdlog::info("Missing or empty 'animations' node. No animation controllers where loaded.");
+        // spdlog::info("Missing or empty 'animations' node. No animation controllers where
+        // loaded.");
         return true;
     }
 
@@ -537,7 +528,7 @@ bool SceneLoader::loadAnimationControllers(const Json::Value& node, IScene& scen
     // Load animation controllers for object
     for (unsigned int i = 0; i < node.size(); ++i)
     {
-		if (!loadAnimationController(node[i], scene, animationWorld, id, type))
+        if (!loadAnimationController(node[i], scene, animationWorld, id, type))
         {
             return false;
         }
@@ -546,8 +537,8 @@ bool SceneLoader::loadAnimationControllers(const Json::Value& node, IScene& scen
 }
 
 bool SceneLoader::loadAnimationController(const Json::Value& node, IScene& scene,
-                                           AnimationWorld& animationWorld, SceneObjectId id,
-                                           AnimationObjectType type)
+                                          AnimationWorld& animationWorld, SceneObjectId id,
+                                          AnimationObjectType type)
 {
     std::string controllerType;
     if (!load(node, "type", controllerType))
@@ -562,7 +553,8 @@ bool SceneLoader::loadAnimationController(const Json::Value& node, IScene& scene
         {
             return false;
         }
-		animationWorld.addAnimationController(std::make_shared<RotationController>(id, type, scene, rotation));
+        animationWorld.addAnimationController(
+            std::make_shared<RotationController>(id, type, scene, rotation));
     }
     else if (controllerType == "movement")
     {
@@ -571,7 +563,8 @@ bool SceneLoader::loadAnimationController(const Json::Value& node, IScene& scene
         {
             return false;
         }
-		animationWorld.addAnimationController(std::make_shared<MovementController>(id, type, scene, direction));
+        animationWorld.addAnimationController(
+            std::make_shared<MovementController>(id, type, scene, direction));
     }
     else
     {
@@ -601,4 +594,3 @@ bool SceneLoader::load(const Json::Value& node, const std::string& name, std::st
 {
     return loadParam(node, name, str);
 }
-

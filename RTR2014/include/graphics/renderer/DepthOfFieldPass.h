@@ -1,8 +1,7 @@
 #pragma once
 
-#include <memory>
-
 #include <glm/glm.hpp>
+#include <memory>
 
 #include "resource/ResourceConfig.h"
 
@@ -14,8 +13,8 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Blends a scene texture with a blurred copy based on depth.
-*/
+ * \brief Blends a scene texture with a blurred copy based on depth.
+ */
 class DepthOfFieldPass
 {
    public:
@@ -23,13 +22,13 @@ class DepthOfFieldPass
     ~DepthOfFieldPass();
 
     /**
-    * \brief Initializes the depth-of-field pass resources.
-    */
+     * \brief Initializes the depth-of-field pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Combines the sharp scene texture with the blurred one.
-    */
+     * \brief Combines the sharp scene texture with the blurred one.
+     */
     void render(const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager,
                 const std::shared_ptr<Texture>& sceneTexture,

@@ -1,16 +1,17 @@
-#include <spdlog/spdlog.h>
 #include "graphics/window/GlfwWindow.h"
+
+#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 #include <cassert>
 #include <cstdlib>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
-#include <GLFW/glfw3.h>
 
 namespace
 {
-void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
-                             GLsizei length, const GLchar* message, const void* userParam)
+void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                            const GLchar* message, const void* userParam)
 {
     std::string text = (length > 0) ? std::string(message, length) : std::string(message);
 
@@ -42,8 +43,7 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
         std::abort();
     }
 }
-} // namespace
-
+}  // namespace
 
 std::unordered_map<GLFWwindow*, GlfwWindow*> GlfwWindow::s_windows; /**< Window mapping. */
 
@@ -86,12 +86,12 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
         glfwTerminate();
         return false;
     }
-    
+
     int framebufferWidth;
     int framebufferHeight;
-    
+
     glfwGetFramebufferSize(m_window, &framebufferWidth, &framebufferHeight);
-    
+
     m_width = framebufferWidth;
     m_height = framebufferHeight;
 
@@ -99,7 +99,7 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
     glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSwapInterval(1);
 
-if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
+    if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
         spdlog::error("Failed to initialize glad.");
         // Destroy this window before glfwTerminate wipes all windows, so the

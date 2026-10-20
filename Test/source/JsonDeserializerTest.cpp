@@ -1,9 +1,8 @@
-#include <catch2/catch_test_macros.hpp>
+#include <json/json.h>
 
+#include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 #include <limits>
-
-#include <json/json.h>
 
 #include "io/JsonDeserializer.h"
 

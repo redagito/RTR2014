@@ -1,28 +1,20 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/PostProcessPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
+#include "resource/IResourceManager.h"
 #include "util/Profiler.h"
 
-#include "resource/IResourceManager.h"
+PostProcessPass::PostProcessPass() { return; }
 
-#include "graphics/ICamera.h"
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Texture.h"
-
-PostProcessPass::PostProcessPass()
-{
-    return;
-}
-
-PostProcessPass::~PostProcessPass()
-{
-    return;
-}
+PostProcessPass::~PostProcessPass() { return; }
 
 void PostProcessPass::render(const ICamera& camera, const IWindow& window,
                              const IGraphicsResourceManager& manager,
@@ -65,7 +57,7 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
     // Foggy scene in tex1
 
     // Pass 3: dof
-	m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
+    m_postProcessPassFrameBuffer0.setActive(GL_FRAMEBUFFER);
     if (camera.getFeatureInfo().dofActive)
     {
         // Pass 3.1: gauss blur
@@ -95,12 +87,12 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
     }
     // Processed scene in tex 0
 
-	m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
+    m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
     m_displayPass.render(window, manager, m_postProcessPassTexture0);
 
     // Set output texture
     m_postProcessPassOutputTexture = m_postProcessPassTexture2;
-	return;
+    return;
 }
 
 bool PostProcessPass::init(IResourceManager* manager)

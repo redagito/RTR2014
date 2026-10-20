@@ -38,8 +38,8 @@ class SceneQuery : public ISceneQuery
     void addPointLight(SceneObjectId id);
 
     /**
-    * \brief Adds directional light id.
-    */
+     * \brief Adds directional light id.
+     */
     void addDirectionalLight(SceneObjectId id);
 
    private:

@@ -12,14 +12,14 @@ class MovementController : public IAnimationController
 {
    public:
     MovementController(SceneObjectId id, AnimationObjectType type, IScene& scene,
-                        const glm::vec3& direction);
+                       const glm::vec3& direction);
 
     void update(float timeStep) override;
 
    private:
     /**
-    * \brief Returns the distance from the start of the cycle at a phase.
-    */
+     * \brief Returns the distance from the start of the cycle at a phase.
+     */
     float offsetOfPhase(float phase) const;
 
     SceneObjectId m_objectId = -1;

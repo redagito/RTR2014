@@ -4,5 +4,5 @@
 
 std::unique_ptr<IResourceManager> createResourceManager()
 {
-	return std::make_unique<ResourceManager>();
+    return std::make_unique<ResourceManager>();
 }

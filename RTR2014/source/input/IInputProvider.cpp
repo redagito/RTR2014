@@ -1,6 +1,3 @@
 #include "input/IInputProvider.h"
 
-IInputProvider::~IInputProvider()
-{
-	return;
-}
+IInputProvider::~IInputProvider() { return; }

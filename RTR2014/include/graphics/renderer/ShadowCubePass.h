@@ -1,8 +1,7 @@
 #pragma once
 
-#include <memory>
-
 #include <glm/glm.hpp>
+#include <memory>
 
 #include "graphics/renderer/FrameBuffer.h"
 #include "resource/ResourceConfig.h"
@@ -18,11 +17,11 @@ class ShaderProgram;
 class Texture;
 
 /**
-* \brief Renders a shadow cube map from a point light position.
-*
-* Produces a cubemap of the scene as seen from the light, used for per-pixel
-* shadow lookup when lighting the point light volume.
-*/
+ * \brief Renders a shadow cube map from a point light position.
+ *
+ * Produces a cubemap of the scene as seen from the light, used for per-pixel
+ * shadow lookup when lighting the point light volume.
+ */
 class ShadowCubePass
 {
    public:
@@ -30,25 +29,25 @@ class ShadowCubePass
     ~ShadowCubePass();
 
     /**
-    * \brief Initializes the shadow cube pass resources.
-    */
+     * \brief Initializes the shadow cube pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the shadow cube map from the given camera position.
-    */
+     * \brief Renders the shadow cube map from the given camera position.
+     */
     void render(const IScene& scene, const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager);
 
     /**
-    * \brief Returns the shadow cube map texture.
-    */
+     * \brief Returns the shadow cube map texture.
+     */
     const std::shared_ptr<Texture>& getShadowMap() const;
 
    private:
     /**
-    * \brief View direction and up vector for one cubemap face.
-    */
+     * \brief View direction and up vector for one cubemap face.
+     */
     struct CameraDirection
     {
         int cubemapFace; /**< Cube map face layer index, 0 to 5. */

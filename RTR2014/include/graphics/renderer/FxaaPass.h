@@ -10,8 +10,8 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Applies FXAA anti-aliasing to a scene texture.
-*/
+ * \brief Applies FXAA anti-aliasing to a scene texture.
+ */
 class FxaaPass
 {
    public:
@@ -19,13 +19,13 @@ class FxaaPass
     ~FxaaPass();
 
     /**
-    * \brief Initializes the FXAA pass resources.
-    */
+     * \brief Initializes the FXAA pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the scene texture with FXAA applied.
-    */
+     * \brief Renders the scene texture with FXAA applied.
+     */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
                 const std::shared_ptr<Texture>& texture);
 

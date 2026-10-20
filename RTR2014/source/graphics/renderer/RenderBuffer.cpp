@@ -1,6 +1,6 @@
-#include <spdlog/spdlog.h>
-
 #include "graphics/renderer/RenderBuffer.h"
+
+#include <spdlog/spdlog.h>
 
 RenderBuffer::RenderBuffer() : m_bufferId(0), m_height(0), m_width(0) { return; }
 
@@ -46,4 +46,3 @@ bool RenderBuffer::resize(unsigned int width, unsigned int height)
 GLuint RenderBuffer::getId() const { return m_bufferId; }
 
 GLenum RenderBuffer::getFormat() const { return m_format; }
-

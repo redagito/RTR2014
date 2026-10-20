@@ -1,6 +1,3 @@
 #include "graphics/IDebugInfoDisplay.h"
 
-IDebugInfoDisplay::~IDebugInfoDisplay()
-{
-	return;
-}
+IDebugInfoDisplay::~IDebugInfoDisplay() { return; }

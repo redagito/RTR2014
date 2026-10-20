@@ -1,15 +1,13 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
-#include <vector>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
 #include "graphics/Frustum.h"
-#include "resource/OrientedBoundingBox.h"
 #include "graphics/scene/Scene.h"
 #include "graphics/scene/SceneQuery.h"
+#include "resource/OrientedBoundingBox.h"
 
 namespace
 {
@@ -64,7 +62,7 @@ glm::vec3 sorted(const glm::vec3& v)
     }
     return result;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("OrientedBoundingBox of an axis aligned box matches its extents", "[bounding]")
 {
@@ -127,14 +125,15 @@ TEST_CASE("OrientedBoundingBox transform moves and scales the box", "[bounding]"
 
 TEST_CASE("Frustum keeps a box in view and rejects a box behind the camera", "[bounding]")
 {
-    glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
+    glm::mat4 view =
+        glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     glm::mat4 projection = glm::perspective(glm::radians(60.f), 1.33f, 0.1f, 100.f);
     Frustum frustum(projection * view);
 
-    auto inFront = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, -10.f),
-                                                             glm::vec3(1.f)));
-    auto behind = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, 10.f),
-                                                            glm::vec3(1.f)));
+    auto inFront =
+        OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, -10.f), glm::vec3(1.f)));
+    auto behind =
+        OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, 10.f), glm::vec3(1.f)));
 
     REQUIRE(frustum.intersects(inFront));
     REQUIRE_FALSE(frustum.intersects(behind));
@@ -142,14 +141,15 @@ TEST_CASE("Frustum keeps a box in view and rejects a box behind the camera", "[b
 
 TEST_CASE("Frustum rejects a box that is off to the side", "[bounding]")
 {
-    glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
+    glm::mat4 view =
+        glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     glm::mat4 projection = glm::perspective(glm::radians(60.f), 1.33f, 0.1f, 100.f);
     Frustum frustum(projection * view);
 
-    auto inFront = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, -10.f),
-                                                             glm::vec3(1.f)));
-    auto toTheSide = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(50.f, 0.f, -10.f),
-                                                               glm::vec3(1.f)));
+    auto inFront =
+        OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f, 0.f, -10.f), glm::vec3(1.f)));
+    auto toTheSide =
+        OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(50.f, 0.f, -10.f), glm::vec3(1.f)));
 
     REQUIRE(frustum.intersects(inFront));
     REQUIRE_FALSE(frustum.intersects(toTheSide));
@@ -158,7 +158,8 @@ TEST_CASE("Frustum rejects a box that is off to the side", "[bounding]")
 TEST_CASE("Scene query only returns objects inside the view frustum", "[scene]")
 {
     Scene scene;
-    glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
+    glm::mat4 view =
+        glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     glm::mat4 projection = glm::perspective(glm::radians(60.f), 1.33f, 0.1f, 100.f);
 
     auto bounds = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f), glm::vec3(1.f)));
@@ -180,8 +181,7 @@ TEST_CASE("the scene bounds hold every object", "[scene]")
 
     scene.createObject(-1, -1, glm::vec3(-30.f, 0.f, -10.f), glm::vec3(0.f), glm::vec3(1.f),
                        bounds);
-    scene.createObject(-1, -1, glm::vec3(30.f, 0.f, -10.f), glm::vec3(0.f), glm::vec3(1.f),
-                       bounds);
+    scene.createObject(-1, -1, glm::vec3(30.f, 0.f, -10.f), glm::vec3(0.f), glm::vec3(1.f), bounds);
 
     glm::vec3 center;
     float radius = 0.f;
@@ -219,9 +219,11 @@ TEST_CASE("the scene bounds leave out the objects that cast no shadow", "[scene]
     REQUIRE(radius < 10.f);
 }
 
-TEST_CASE("Scene query follows an object that moves", "[scene]"){
+TEST_CASE("Scene query follows an object that moves", "[scene]")
+{
     Scene scene;
-    glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
+    glm::mat4 view =
+        glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));
     glm::mat4 projection = glm::perspective(glm::radians(60.f), 1.33f, 0.1f, 100.f);
 
     auto bounds = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f), glm::vec3(1.f)));

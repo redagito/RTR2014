@@ -1,18 +1,17 @@
-#include <spdlog/spdlog.h>
 #include "graphics/ShaderProgram.h"
 
+#include <spdlog/spdlog.h>
 
 #include <cassert>
-
 #include <glm/gtc/type_ptr.hpp>
 
 GLuint ShaderProgram::s_activeShaderProgram = 0;
 
 ShaderProgram::ShaderProgram(ShaderObject<GL_VERTEX_SHADER>* vertex,
-                               ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
-                               ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
-                               ShaderObject<GL_GEOMETRY_SHADER>* geometry,
-                               ShaderObject<GL_FRAGMENT_SHADER>* fragment)
+                             ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
+                             ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
+                             ShaderObject<GL_GEOMETRY_SHADER>* geometry,
+                             ShaderObject<GL_FRAGMENT_SHADER>* fragment)
     : m_programId(0), m_valid(false)
 {
     init(vertex, tessControl, tessEval, geometry, fragment);
@@ -32,10 +31,10 @@ ShaderProgram::~ShaderProgram()
 }
 
 bool ShaderProgram::init(ShaderObject<GL_VERTEX_SHADER>* vertex,
-                          ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
-                          ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
-                          ShaderObject<GL_GEOMETRY_SHADER>* geometry,
-                          ShaderObject<GL_FRAGMENT_SHADER>* fragment)
+                         ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
+                         ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
+                         ShaderObject<GL_GEOMETRY_SHADER>* geometry,
+                         ShaderObject<GL_FRAGMENT_SHADER>* fragment)
 {
     // Needs vertex shader
     if (vertex == nullptr || !vertex->isValid())
@@ -126,7 +125,6 @@ bool ShaderProgram::init(ShaderObject<GL_VERTEX_SHADER>* vertex,
     // in the code that sets it.
     collectUniformLocations();
 
-
     return true;
 }
 
@@ -207,120 +205,120 @@ GLint ShaderProgram::getAttributeLocation(const std::string& attributeName) cons
 
 void ShaderProgram::setUniform(GLint location, int i)
 {
-        glProgramUniform1i(m_programId, location, i);
+    glProgramUniform1i(m_programId, location, i);
 }
 
 void ShaderProgram::setUniform(const std::string& name, int i)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, i);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, i);
 }
 
 void ShaderProgram::setUniform(GLint location, float f)
 {
-        glProgramUniform1f(m_programId, location, f);
+    glProgramUniform1f(m_programId, location, f);
 }
 
 void ShaderProgram::setUniform(const std::string& name, float f)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, f);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, f);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
 {
-	glProgramUniform2f(m_programId, location, v.x, v.y);
+    glProgramUniform2f(m_programId, location, v.x, v.y);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
 {
-	const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, v);
+    const GLint location = getUniformLocation(name);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
 {
-        glProgramUniform3f(m_programId, location, v.x, v.y, v.z);
+    glProgramUniform3f(m_programId, location, v.x, v.y, v.z);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, v);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
 {
-        glProgramUniform4f(m_programId, location, v.x, v.y, v.z, v.w);
+    glProgramUniform4f(m_programId, location, v.x, v.y, v.z, v.w);
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, v);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
 {
-        glProgramUniformMatrix2fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
+    glProgramUniformMatrix2fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, m);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
 {
-        glProgramUniformMatrix3fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
+    glProgramUniformMatrix3fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, m);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
 {
-        glProgramUniformMatrix4fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
+    glProgramUniformMatrix4fv(m_programId, location, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat4& m)
 {
     const GLint location = getUniformLocation(name);
-	if (location < 0)
-	{
-		return;
-	}
-	setUniform(location, m);
+    if (location < 0)
+    {
+        return;
+    }
+    setUniform(location, m);
 }

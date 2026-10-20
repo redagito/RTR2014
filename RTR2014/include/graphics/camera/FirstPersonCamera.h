@@ -1,15 +1,14 @@
 #pragma once
 
-#include "glm/glm.hpp"
-
 #include "IControllableCamera.h"
 #include "TransformUtils.h"
+#include "glm/glm.hpp"
 
 class FirstPersonCamera : public IControllableCamera
 {
    public:
     FirstPersonCamera(const glm::vec3& position, const glm::vec3& target, float fieldOfView,
-                       float aspectRatio, float zNear, float zFar);
+                      float aspectRatio, float zNear, float zFar);
 
     const glm::mat4& getView() const override;
     const glm::mat4& getProjection() const override;

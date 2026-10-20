@@ -12,8 +12,8 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Applies distance fog to a scene texture.
-*/
+ * \brief Applies distance fog to a scene texture.
+ */
 class FogPass
 {
    public:
@@ -21,13 +21,13 @@ class FogPass
     ~FogPass();
 
     /**
-    * \brief Initializes the fog pass resources.
-    */
+     * \brief Initializes the fog pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the scene texture with fog applied.
-    */
+     * \brief Renders the scene texture with fog applied.
+     */
     void render(const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager, const std::shared_ptr<Texture>& texture,
                 const std::shared_ptr<Texture>& depthTexture);

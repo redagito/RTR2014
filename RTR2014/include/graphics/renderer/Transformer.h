@@ -3,67 +3,67 @@
 #include <glm/glm.hpp>
 
 /**
-* \brief Transformer class calculates and stores all necessary transformations.
-*/
+ * \brief Transformer class calculates and stores all necessary transformations.
+ */
 class Transformer
 {
-public:
-	void setPosition(const glm::vec3& position);
-	void setRotation(const glm::vec3& rotation);
-	void setScale(const glm::vec3& scale);
+   public:
+    void setPosition(const glm::vec3& position);
+    void setRotation(const glm::vec3& rotation);
+    void setScale(const glm::vec3& scale);
 
-	void setViewMatrix(const glm::mat4& view);
-	void setProjectionMatrix(const glm::mat4& projection);
+    void setViewMatrix(const glm::mat4& view);
+    void setProjectionMatrix(const glm::mat4& projection);
 
-	const glm::vec3& getPosition() const;
-	const glm::vec3& getRotation() const;
-	const glm::vec3& getScale() const;
+    const glm::vec3& getPosition() const;
+    const glm::vec3& getRotation() const;
+    const glm::vec3& getScale() const;
 
-	const glm::mat4& getTranslationMatrix() const;
-	const glm::mat4& getInverseTranslationMatrix() const;
+    const glm::mat4& getTranslationMatrix() const;
+    const glm::mat4& getInverseTranslationMatrix() const;
 
-	const glm::mat4& getRotationMatrix() const;
-	const glm::mat4& getInverseRotationMatrix() const;
-	
-	const glm::mat4& getScaleMatrix() const;
-	const glm::mat4& getInverseScaleMatrix() const;
+    const glm::mat4& getRotationMatrix() const;
+    const glm::mat4& getInverseRotationMatrix() const;
 
-	const glm::mat4& getModelMatrix() const;
-	const glm::mat4& getInverseModelMatrix() const;
+    const glm::mat4& getScaleMatrix() const;
+    const glm::mat4& getInverseScaleMatrix() const;
 
-	const glm::mat4& getViewMatrix() const;
-	const glm::mat4& getInverseViewMatrix() const;
+    const glm::mat4& getModelMatrix() const;
+    const glm::mat4& getInverseModelMatrix() const;
 
-	const glm::mat4& getProjectionMatrix() const;
-	const glm::mat4& getInverseProjectionMatrix() const;
+    const glm::mat4& getViewMatrix() const;
+    const glm::mat4& getInverseViewMatrix() const;
 
-	const glm::mat4& getViewProjectionMatrix() const;
-	const glm::mat4& getInverseViewProjectionMatrix() const;
+    const glm::mat4& getProjectionMatrix() const;
+    const glm::mat4& getInverseProjectionMatrix() const;
 
-	const glm::mat4& getModelViewProjectionMatrix() const;
-	const glm::mat4& getInverseModelViewProjectionMatrix() const;
+    const glm::mat4& getViewProjectionMatrix() const;
+    const glm::mat4& getInverseViewProjectionMatrix() const;
 
-private:
-	glm::vec3 m_positionVector = glm::vec3(0.f);
-	glm::vec3 m_rotationVector = glm::vec3(0.f);
-	glm::vec3 m_scaleVector = glm::vec3(1.f);
+    const glm::mat4& getModelViewProjectionMatrix() const;
+    const glm::mat4& getInverseModelViewProjectionMatrix() const;
 
-	struct Transform
-	{
-		bool m_matrixDirty = true;
-		bool m_inverseDirty = true;
-		glm::mat4 m_matrix = glm::mat4(1.f);
-		glm::mat4 m_inverse = glm::mat4(1.f);
-	};
+   private:
+    glm::vec3 m_positionVector = glm::vec3(0.f);
+    glm::vec3 m_rotationVector = glm::vec3(0.f);
+    glm::vec3 m_scaleVector = glm::vec3(1.f);
 
-	mutable Transform m_translation;
-	mutable Transform m_rotation;
-	mutable Transform m_scale;
-	mutable Transform m_model;
+    struct Transform
+    {
+        bool m_matrixDirty = true;
+        bool m_inverseDirty = true;
+        glm::mat4 m_matrix = glm::mat4(1.f);
+        glm::mat4 m_inverse = glm::mat4(1.f);
+    };
 
-	mutable Transform m_view;
-	mutable Transform m_projection;
-	mutable Transform m_viewProjection;
+    mutable Transform m_translation;
+    mutable Transform m_rotation;
+    mutable Transform m_scale;
+    mutable Transform m_model;
 
-	mutable Transform m_modelViewProjection;
+    mutable Transform m_view;
+    mutable Transform m_projection;
+    mutable Transform m_viewProjection;
+
+    mutable Transform m_modelViewProjection;
 };

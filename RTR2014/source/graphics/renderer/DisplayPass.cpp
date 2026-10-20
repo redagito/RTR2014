@@ -1,29 +1,22 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/DisplayPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
-#include "graphics/IWindow.h"
 #include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/FrameBuffer.h"
 #include "graphics/renderer/Renderer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-DisplayPass::DisplayPass()
-{
-    return;
-}
+DisplayPass::DisplayPass() { return; }
 
-DisplayPass::~DisplayPass()
-{
-    return;
-}
+DisplayPass::~DisplayPass() { return; }
 
 void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
                          const std::shared_ptr<Texture>& texture)
@@ -75,7 +68,8 @@ bool DisplayPass::init(IResourceManager* manager)
     // Check if ok
     if (m_displayPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", displayPassShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.",
+                      displayPassShaderFile.c_str());
         return false;
     }
 

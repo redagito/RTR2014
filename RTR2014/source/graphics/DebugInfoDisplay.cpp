@@ -1,18 +1,16 @@
-#include <spdlog/spdlog.h>
 #include "graphics/DebugInfoDisplay.h"
 
+#include <spdlog/spdlog.h>
+
 #include "debug/DebugInfo.h"
-
-#include "graphics/renderer/core/VertexArrayObject.h"
-#include "graphics/renderer/core/VertexBuffer.h"
-
 #include "graphics/ShaderProgram.h"
 #include "graphics/Texture.h"
-
+#include "graphics/renderer/core/VertexArrayObject.h"
+#include "graphics/renderer/core/VertexBuffer.h"
 #include "resource/IResourceManager.h"
 
-bool loadShader(const std::string &path, std::shared_ptr<IResourceManager> &resourceManager,
-                std::unique_ptr<ShaderProgram> &resultShader)
+bool loadShader(const std::string& path, std::shared_ptr<IResourceManager>& resourceManager,
+                std::unique_ptr<ShaderProgram>& resultShader)
 {
     ResourceId shaderId = resourceManager->loadShader(path);
     ResourceId vertexShaderId, tessellationControlShaderId, tessellationEvaluationShaderId,
@@ -66,8 +64,9 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
     }
     if (!loadShader("data/shader/shader_display_overlay.ini", m_resourceManager, m_overlayShader))
     {
-        spdlog::error("The debug info display is not available, its overlay shader could not be "
-                      "loaded.");
+        spdlog::error(
+            "The debug info display is not available, its overlay shader could not be "
+            "loaded.");
     }
 
     m_VAO.reset(new VertexArrayObject());
@@ -100,7 +99,7 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
     }
 }
 
-bool DebugInfoDisplay::loadFont(const std::string &path)
+bool DebugInfoDisplay::loadFont(const std::string& path)
 {
     ResourceId imageId = m_resourceManager->loadImage(path, ColorFormat::RGBA32);
     std::vector<unsigned char> data;
@@ -117,12 +116,12 @@ bool DebugInfoDisplay::loadFont(const std::string &path)
     return true;
 }
 
-void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsigned int size,
-                   std::vector<float> &vertices, std::vector<float> &UVs)
+void textToBuffers(const std::string& text, unsigned int x, unsigned int y, unsigned int size,
+                   std::vector<float>& vertices, std::vector<float>& UVs)
 {
     size_t length = text.size();
 
-    unsigned int hSize = (unsigned int) (size * 0.6f);
+    unsigned int hSize = (unsigned int)(size * 0.6f);
     unsigned int vSize = size;
 
     for (size_t i = 0; i < length; i++)
@@ -172,7 +171,7 @@ void textToBuffers(const std::string &text, unsigned int x, unsigned int y, unsi
     }
 }
 
-void DebugInfoDisplay::draw(const DebugInfo &info)
+void DebugInfoDisplay::draw(const DebugInfo& info)
 {
     if (m_overlayShader == nullptr || m_textShader == nullptr || m_texture == nullptr)
     {
@@ -192,7 +191,7 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     const std::unordered_map<std::string, std::string> values = info.getValues();
 
     int hOffsetLog = 0;
-    int vOffsetLog = (int) info.getLogBufferSize() * m_fontSize;
+    int vOffsetLog = (int)info.getLogBufferSize() * m_fontSize;
     int hOffsetKeys = 500;
     int hOffsetValues = 650;
     int vOffsetKeyValues = 600;
@@ -200,42 +199,45 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     // ===
     // render overlays
     // ===
-    
+
     std::vector<float> overlayVertices;
-    
+
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(800.f);
-    overlayVertices.push_back((float) vOffsetLog);
+    overlayVertices.push_back((float)vOffsetLog);
     overlayVertices.push_back(0.f);
-	overlayVertices.push_back((float) vOffsetLog);
-    
+    overlayVertices.push_back((float)vOffsetLog);
+
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back(0.f);
-    overlayVertices.push_back(800.f);
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) vOffsetLog);
-    
-	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) vOffsetKeyValues);
-	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
-	overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) vOffsetKeyValues);
-    
+    overlayVertices.push_back(0.f);
     overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) vOffsetKeyValues);
-	overlayVertices.push_back((float) hOffsetKeys);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
+    overlayVertices.push_back((float)vOffsetLog);
+
+    overlayVertices.push_back((float)hOffsetKeys);
+    overlayVertices.push_back((float)vOffsetKeyValues);
+    overlayVertices.push_back((float)hOffsetKeys);
+    overlayVertices.push_back(
+        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
     overlayVertices.push_back(800.f);
-	overlayVertices.push_back((float) (vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
-    
+    overlayVertices.push_back((float)vOffsetKeyValues);
+
+    overlayVertices.push_back(800.f);
+    overlayVertices.push_back((float)vOffsetKeyValues);
+    overlayVertices.push_back((float)hOffsetKeys);
+    overlayVertices.push_back(
+        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
+    overlayVertices.push_back(800.f);
+    overlayVertices.push_back(
+        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
+
     m_overlaysBuffer->setData(overlayVertices);
-    
+
     m_overlayShader->setActive();
     m_overlayShader->setUniform("color", glm::vec4(0.0f, 0.0f, 0.0f, 0.6f));
-    
+
     m_overlayVAO->setActive();
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(overlayVertices.size() / 2));
     m_overlayVAO->setInactive();
@@ -248,14 +250,14 @@ void DebugInfoDisplay::draw(const DebugInfo &info)
     std::vector<float> UVs;
 
     int lineCount = 0;
-    for (const std::string &line : log)
+    for (const std::string& line : log)
     {
         textToBuffers(line, hOffsetLog, vOffsetLog - m_fontSize * ++lineCount, m_fontSize, vertices,
                       UVs);
     }
 
     int valueCount = 0;
-    for (const auto &keyValuePair : values)
+    for (const auto& keyValuePair : values)
     {
         ++valueCount;
         textToBuffers(keyValuePair.first, hOffsetKeys, vOffsetKeyValues - m_fontSize * valueCount,

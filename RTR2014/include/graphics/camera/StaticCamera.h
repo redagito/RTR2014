@@ -5,8 +5,8 @@
 #include "graphics/ICamera.h"
 
 /**
-* \brief Camera with fixed view, projection and position matrices.
-*/
+ * \brief Camera with fixed view, projection and position matrices.
+ */
 class StaticCamera : public ICamera
 {
    public:

@@ -1,6 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "graphics/Material.h"
 
+#include <spdlog/spdlog.h>
 
 Material::Material(std::shared_ptr<Texture> diffuse, std::shared_ptr<Texture> normal,
                    std::shared_ptr<Texture> specular, std::shared_ptr<Texture> glow,

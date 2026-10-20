@@ -1,5 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "resource/ResourceManager.h"
+
+#include <spdlog/spdlog.h>
 
 #include <atomic>
 #include <fstream>
@@ -14,16 +15,15 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
-#include "resource/IResourceListener.h"
-
 #include "io/IniFile.h"
+#include "resource/IResourceListener.h"
 
 namespace
 {
 // Texture slots of a material file and the color format they are stored in.
 constexpr int kMaterialTextureSlots = 5;
-const char* const kMaterialTextureSlotNames[kMaterialTextureSlots] = {"diffuse", "normal", "specular",
-                                                                      "glow", "alpha"};
+const char* const kMaterialTextureSlotNames[kMaterialTextureSlots] = {"diffuse", "normal",
+                                                                      "specular", "glow", "alpha"};
 const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
     ColorFormat::RGB24, ColorFormat::RGB24, ColorFormat::GreyScale8, ColorFormat::GreyScale8,
     ColorFormat::GreyScale8};
@@ -50,27 +50,31 @@ class DecoderGuard
    private:
     ma_decoder& m_decoder;
 };
-} // namespace
-
+}  // namespace
 
 ResourceManager::ResourceManager()
-    : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0), m_nextStringId(0), m_nextShaderId(0),
+    : m_nextMeshId(0),
+      m_nextImageId(0),
+      m_nextMaterialId(0),
+      m_nextStringId(0),
+      m_nextShaderId(0),
       m_nextSoundId(0)
 {
     return;
 }
 
 ResourceId ResourceManager::createMesh(std::vector<float> vertices,
-                                        std::vector<unsigned int> indices,
-                                        std::vector<float> normals,
-                                        std::vector<float> uvs, PrimitiveType type)
+                                       std::vector<unsigned int> indices,
+                                       std::vector<float> normals, std::vector<float> uvs,
+                                       PrimitiveType type)
 {
     // Create mesh id
     ResourceId id = m_nextMeshId;
     ++m_nextMeshId;
 
     // Add mesh
-    m_meshes[id] = MeshData(std::move(vertices), std::move(indices), std::move(normals), std::move(uvs), type);
+    m_meshes[id] =
+        MeshData(std::move(vertices), std::move(indices), std::move(normals), std::move(uvs), type);
 
     // Notify listener with create event
     notifyResourceListeners(ResourceType::Mesh, id, ListenerEvent::Create);
@@ -94,8 +98,9 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
         // emptied out data of this one.
         MeshData data = std::move(pending->second);
         m_pendingMeshes.erase(pending);
-        ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
-                                      std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
+        ResourceId meshId =
+            createMesh(std::move(data.m_vertices), std::move(data.m_indices),
+                       std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
         if (meshId == invalidResource)
         {
             spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
@@ -112,7 +117,7 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
     }
 
     ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
-                                  std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
+                                   std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
     if (meshId == invalidResource)
     {
         spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
@@ -129,7 +134,7 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
     if (pos == std::string::npos)
     {
         spdlog::error("The mesh file {} does not have a file extension and could not be loaded.",
-                   file.c_str());
+                      file.c_str());
         return false;
     }
     std::string extension = file.substr(file.find_last_of('.') + 1);
@@ -148,7 +153,7 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
         // The material file is resolved relative to the mesh file
         std::string baseDir = file.substr(0, file.find_last_of("/\\") + 1);
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, file.c_str(),
-                               baseDir.c_str()))
+                              baseDir.c_str()))
         {
             spdlog::error("{}", err.c_str());
             return false;
@@ -160,7 +165,7 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
         if (shapes.size() > 1)
         {
             spdlog::error("Mesh file {} contains multiple shapes, which is not supported.",
-                       file.c_str());
+                          file.c_str());
             return false;
         }
         if (shapes.empty())
@@ -232,8 +237,8 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
         }
 
         // The bounds are computed here, on the worker thread that parses the mesh
-    data = MeshData(std::move(vertices), {}, std::move(normals), std::move(uvs),
-                    PrimitiveType::Triangle);
+        data = MeshData(std::move(vertices), {}, std::move(normals), std::move(uvs),
+                        PrimitiveType::Triangle);
     }
     else
     {
@@ -244,8 +249,8 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
 }
 
 bool ResourceManager::getMesh(ResourceId id, std::vector<float>& vertices,
-                               std::vector<unsigned int>& indices, std::vector<float>& normals,
-                               std::vector<float>& uvs, PrimitiveType& type) const
+                              std::vector<unsigned int>& indices, std::vector<float>& normals,
+                              std::vector<float>& uvs, PrimitiveType& type) const
 {
     // Retrieve from map
     auto iter = m_meshes.find(id);
@@ -274,9 +279,8 @@ bool ResourceManager::getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) 
     return true;
 }
 
-ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData,
-                                         unsigned int width, unsigned int height,
-                                         ColorFormat format)
+ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData, unsigned int width,
+                                        unsigned int height, ColorFormat format)
 {
     // Create image
     ResourceId id = m_nextImageId;
@@ -326,8 +330,8 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         return invalidResource;
     }
 
-    ResourceId imageId = createImage(std::move(image.m_data), image.m_width, image.m_height,
-                                     image.m_format);
+    ResourceId imageId =
+        createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
     if (imageId == invalidResource)
     {
         spdlog::error("Failed to create image resource id from file {}.", file.c_str());
@@ -362,7 +366,8 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
         channels = 4;
         break;
     default:
-        spdlog::error("Unknown color format encountered while loading image file {}.", file.c_str());
+        spdlog::error("Unknown color format encountered while loading image file {}.",
+                      file.c_str());
         return false;
         break;
     }
@@ -370,16 +375,16 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
     // Decode image data
     int decodedWidth = 0;
     int decodedHeight = 0;
-    unsigned char* decoded = stbi_load(file.c_str(), &decodedWidth, &decodedHeight, nullptr, channels);
+    unsigned char* decoded =
+        stbi_load(file.c_str(), &decodedWidth, &decodedHeight, nullptr, channels);
     if (decoded == nullptr)
     {
         spdlog::error("An error occured while decoding the image file {}: {}", file.c_str(),
-                   stbi_failure_reason());
+                      stbi_failure_reason());
         return false;
     }
-    const size_t sampleCount =
-        static_cast<size_t>(decodedWidth) * static_cast<size_t>(decodedHeight) *
-        static_cast<size_t>(channels);
+    const size_t sampleCount = static_cast<size_t>(decodedWidth) *
+                               static_cast<size_t>(decodedHeight) * static_cast<size_t>(channels);
     std::vector<unsigned char> data(decoded, decoded + sampleCount);
     stbi_image_free(decoded);
 
@@ -438,9 +443,8 @@ bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
     return true;
 }
 
-bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
-                                unsigned int& width, unsigned int& height,
-                                ColorFormat& format) const
+bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
+                               unsigned int& height, ColorFormat& format) const
 {
     // Retrieve from map
     auto iter = m_images.find(id);
@@ -496,8 +500,8 @@ const SoundData* ResourceManager::getSound(ResourceId id) const
 }
 
 ResourceId ResourceManager::createMaterial(ResourceId diffuse, ResourceId normal,
-                                            ResourceId specular, ResourceId glow, ResourceId alpha,
-                                            ResourceId customShader)
+                                           ResourceId specular, ResourceId glow, ResourceId alpha,
+                                           ResourceId customShader)
 {
     // Create material
     ResourceId id = m_nextMaterialId;
@@ -543,7 +547,7 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         if (textureIds[i] == invalidResource)
         {
             spdlog::error("Failed to load {} texture specified in material file {}.", slot,
-                       file.c_str());
+                          file.c_str());
             return invalidResource;
         }
     }
@@ -556,7 +560,7 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         if (customShaderId == invalidResource)
         {
             spdlog::error("Failed to load custom shader file specified in material file {}.",
-                       file.c_str());
+                          file.c_str());
             return invalidResource;
         }
     }
@@ -595,8 +599,8 @@ bool ResourceManager::getMaterialImages(const std::string& file,
 }
 
 bool ResourceManager::getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal,
-                                   ResourceId& specular, ResourceId& glow, ResourceId& alpha,
-                                   ResourceId& customShader) const
+                                  ResourceId& specular, ResourceId& glow, ResourceId& alpha,
+                                  ResourceId& customShader) const
 {
     // Retrieve from map
     auto iter = m_materials.find(id);
@@ -642,8 +646,8 @@ bool ResourceManager::getString(ResourceId id, std::string& text) const
 }
 
 ResourceId ResourceManager::createShader(const std::string& file, ResourceId vertex,
-                                          ResourceId tessCtrl, ResourceId tessEval,
-                                          ResourceId geometry, ResourceId fragment)
+                                         ResourceId tessCtrl, ResourceId tessEval,
+                                         ResourceId geometry, ResourceId fragment)
 {
     // Create shader
     ResourceId id = m_nextShaderId;
@@ -665,8 +669,8 @@ ResourceId ResourceManager::createShader(const std::string& file, ResourceId ver
 }
 
 bool ResourceManager::getShader(ResourceId id, ResourceId& vertex, ResourceId& tessCtrl,
-                                 ResourceId& tessEval, ResourceId& geometry,
-                                 ResourceId& fragment) const
+                                ResourceId& tessEval, ResourceId& geometry,
+                                ResourceId& fragment) const
 {
     // Retrieve from map
     auto iter = m_shaders.find(id);
@@ -705,7 +709,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
         return entry->second;
     }
 
-	spdlog::debug("Loading shader from file {}.", file.c_str());
+    spdlog::debug("Loading shader from file {}.", file.c_str());
 
     // Load shader ini
     IniFile ini;
@@ -735,7 +739,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
         return invalidResource;
     }
 
-	ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"));
+    ResourceId fragmentId = loadString(ini.getValue("fragment", "file", "error"));
     if (fragmentId == invalidResource)
     {
         spdlog::error(
@@ -749,7 +753,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation control shader source
     if (ini.hasKey("tessellation_control", "file"))
     {
-		tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"));
+        tessCtrlId = loadString(ini.getValue("tessellation_control", "file", "error"));
         if (tessCtrlId == invalidResource)
         {
             spdlog::error(
@@ -764,7 +768,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
     // Check for and load tessellation evaluation shader source
     if (ini.hasKey("tessellation_evaluation", "file"))
     {
-		tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"));
+        tessEvalId = loadString(ini.getValue("tessellation_evaluation", "file", "error"));
         if (tessEvalId == invalidResource)
         {
             spdlog::error(
@@ -779,7 +783,7 @@ ResourceId ResourceManager::loadShader(const std::string& file)
     // Check for and load geometry shader source
     if (ini.hasKey("geometry", "file"))
     {
-		geometryId = loadString(ini.getValue("geometry", "file", "error"));
+        geometryId = loadString(ini.getValue("geometry", "file", "error"));
         if (geometryId == invalidResource)
         {
             spdlog::error(
@@ -836,7 +840,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
         {
             continue;
         }
-        if (m_meshFiles.find(file) == m_meshFiles.end() && m_pendingMeshes.find(file) == m_pendingMeshes.end())
+        if (m_meshFiles.find(file) == m_meshFiles.end() &&
+            m_pendingMeshes.find(file) == m_pendingMeshes.end())
         {
             meshes.push_back(file);
         }
@@ -850,7 +855,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
         {
             continue;
         }
-        if (m_imageFiles.find(key) == m_imageFiles.end() && m_pendingImages.find(key) == m_pendingImages.end())
+        if (m_imageFiles.find(key) == m_imageFiles.end() &&
+            m_pendingImages.find(key) == m_pendingImages.end())
         {
             images.push_back(image);
         }
@@ -863,7 +869,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
         {
             continue;
         }
-        if (m_soundFiles.find(file) == m_soundFiles.end() && m_pendingSounds.find(file) == m_pendingSounds.end())
+        if (m_soundFiles.find(file) == m_soundFiles.end() &&
+            m_pendingSounds.find(file) == m_pendingSounds.end())
         {
             sounds.push_back(file);
         }
@@ -887,7 +894,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::atomic<size_t> nextJob = 0;
     const size_t jobCount = meshes.size() + images.size() + sounds.size();
 
-    auto worker = [&]() {
+    auto worker = [&]()
+    {
         while (true)
         {
             size_t i = nextJob.fetch_add(1);
@@ -960,8 +968,7 @@ void ResourceManager::removeResourceListener(IResourceListener* listener)
     listener->onDetach(this);
 }
 
-void ResourceManager::notifyResourceListeners(ResourceType type, ResourceId id,
-                                               ListenerEvent event)
+void ResourceManager::notifyResourceListeners(ResourceType type, ResourceId id, ListenerEvent event)
 {
     // A listener may remove itself while it is notified, so the list is
     // iterated over a copy of it.
@@ -974,35 +981,34 @@ void ResourceManager::notifyResourceListeners(ResourceType type, ResourceId id,
 
 ResourceId ResourceManager::loadString(const std::string& file)
 {
-	auto iter = m_textFiles.find(file);
-	if (iter != m_textFiles.end())
-	{
-		return iter->second;
-	}
+    auto iter = m_textFiles.find(file);
+    if (iter != m_textFiles.end())
+    {
+        return iter->second;
+    }
 
-	spdlog::debug("Loading text from file {}.", file.c_str());
-	std::ifstream ifs(file);
-	if (!ifs.is_open())
-	{
-		spdlog::error("Failed to open the text file {}.", file.c_str());
-		return invalidResource;
-	}
+    spdlog::debug("Loading text from file {}.", file.c_str());
+    std::ifstream ifs(file);
+    if (!ifs.is_open())
+    {
+        spdlog::error("Failed to open the text file {}.", file.c_str());
+        return invalidResource;
+    }
 
-	// Load file
-	std::string text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-	ifs.close();
+    // Load file
+    std::string text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    ifs.close();
 
-	ResourceId stringId = invalidResource;
+    ResourceId stringId = invalidResource;
 
+    // Create new string entry
+    stringId = createString(text);
+    if (stringId == invalidResource)
+    {
+        spdlog::error("Failed to create string id for text file {}.", file.c_str());
+        return invalidResource;
+    }
 
-	// Create new string entry
-	stringId = createString(text);
-	if (stringId == invalidResource)
-	{
-		spdlog::error("Failed to create string id for text file {}.", file.c_str());
-		return invalidResource;
-	}
-
-	m_textFiles[file] = stringId;
-	return stringId;
+    m_textFiles[file] = stringId;
+    return stringId;
 }

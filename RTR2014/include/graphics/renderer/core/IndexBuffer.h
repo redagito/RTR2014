@@ -5,8 +5,8 @@
 #include "RendererCoreConfig.h"
 
 /**
-* \brief Represents an index buffer.
-*/
+ * \brief Represents an index buffer.
+ */
 class IndexBuffer
 {
    public:
@@ -19,14 +19,14 @@ class IndexBuffer
     IndexBuffer& operator=(const IndexBuffer& rhs) = delete;
 
     /**
-    * \brief Returns buffer validity.
-    */
+     * \brief Returns buffer validity.
+     */
     bool isValid() const;
 
     /**
-    * \brief Access to internal buffer id.
-    * TODO Should/can this be hidden?
-    */
+     * \brief Access to internal buffer id.
+     * TODO Should/can this be hidden?
+     */
     GLuint getId() const;
 
     unsigned int getSize() const;

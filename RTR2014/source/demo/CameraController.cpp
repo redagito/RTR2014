@@ -1,14 +1,13 @@
-#include <cstdlib>
-#include <fstream>
-#include <spdlog/spdlog.h>
 #include "demo/CameraController.h"
-
 
 #include <GLFW/glfw3.h>
 #include <json/json.h>
+#include <spdlog/spdlog.h>
+
+#include <cstdlib>
+#include <fstream>
 
 #include "graphics/camera/IControllableCamera.h"
-
 #include "input/IInputProvider.h"
 #include "io/JsonDeserializer.h"
 
@@ -26,15 +25,9 @@ CameraController::~CameraController()
     }
 }
 
-void CameraController::setWindow(IWindow* window)
-{
-    m_window = window;
-}
+void CameraController::setWindow(IWindow* window) { m_window = window; }
 
-void CameraController::setCamera(std::shared_ptr<IControllableCamera> camera)
-{
-    m_camera = camera;
-}
+void CameraController::setCamera(std::shared_ptr<IControllableCamera> camera) { m_camera = camera; }
 
 void CameraController::setInputProvider(IInputProvider* provider)
 {
@@ -71,7 +64,7 @@ bool CameraController::loadSequence(std::string file)
     if (!reader.parse(ifs, root))
     {
         spdlog::error("Failed to load scene file {} with error {}.", file.c_str(),
-                  reader.getFormattedErrorMessages().c_str());
+                      reader.getFormattedErrorMessages().c_str());
         return false;
     }
     // Read done, close file
@@ -123,14 +116,14 @@ bool CameraController::loadSequence(std::string file)
             success = false;
             break;
         }
-        
+
         if (!loadParam(node[i], "fxaa", fxaaActive))
         {
             spdlog::error("Failed loading node 'fxaa' for element #{}.", i);
             success = false;
             break;
         }
-        
+
         if (!loadParam(node[i], "fog", fogActive))
         {
             spdlog::error("Failed loading node 'fog' for element #{}.", i);
@@ -166,7 +159,7 @@ void CameraController::animate(float dt)
     if (m_inputProvider != nullptr && m_camera != nullptr)
     {
         animateFeatures(dt);
-        
+
         if (m_isRunningSequence)
         {
             animateSequence(dt);
@@ -178,17 +171,19 @@ void CameraController::animate(float dt)
     }
 }
 
-void CameraController::animateFeatures(float dt) {
+void CameraController::animateFeatures(float dt)
+{
     // tODO
 }
 
-void CameraController::animateSequence(float dt) {
+void CameraController::animateSequence(float dt)
+{
     if (m_inputProvider->isKeyPressed(GLFW_KEY_C))
     {
         m_isRunningSequence = false;
         return;
     }
-    
+
     float timeModifier = 1.0f;
     if (m_inputProvider->isKeyPressed(GLFW_KEY_B))
     {
@@ -202,14 +197,14 @@ void CameraController::animateSequence(float dt) {
     {
         timeModifier = 8.0f;
     }
-    
+
     m_sequenceTime += (dt * timeModifier);
     // Rewinding can push the time below zero; clamp so keyframe lookup works.
     if (m_sequenceTime < 0.0f)
     {
         m_sequenceTime = 0.0f;
     }
-    
+
     if (m_sequenceTime > m_sequencePoints.back().timestamp)
     {
         // Snap to the final keyframe pose instead of stopping short.
@@ -221,38 +216,36 @@ void CameraController::animateSequence(float dt) {
         m_isRunningSequence = false;
         return;
     }
-    
+
     auto it = std::find_if(m_sequencePoints.begin(), m_sequencePoints.end(),
-                           [&](const SequencePoint& s)
-                           {
-                               return s.timestamp >= m_sequenceTime;
-                           });
-    
+                           [&](const SequencePoint& s) { return s.timestamp >= m_sequenceTime; });
+
     if (it == m_sequencePoints.begin())
     {
         // not started yet
         return;
     }
-    
+
     SequencePoint after = *it;
     SequencePoint before = *(--it);
-    
+
     float ix = (m_sequenceTime - before.timestamp) / (after.timestamp - before.timestamp);
     glm::vec3 cameraPosition = before.position * (1.0f - ix) + after.position * ix;
     glm::vec3 cameraOrientation = before.orientation * (1.0f - ix) + after.orientation * ix;
-    
+
     m_camera->lookAt(cameraPosition, cameraPosition + cameraOrientation);
     m_camera->getFeatureInfoForWrite().fogType = (before.fogActive ? FogType::Exp2 : FogType::None);
     m_camera->getFeatureInfoForWrite().fxaaActive = before.fxaaActive;
 }
 
-void CameraController::animateManual(float dt) {
+void CameraController::animateManual(float dt)
+{
     float walkingModifier = 1.0f;
     if (m_inputProvider->isKeyPressed(GLFW_KEY_SPACE))
     {
         walkingModifier = 6.0f;
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_W))
     {
         m_camera->moveForward(dt * 2.f * m_speed * walkingModifier);
@@ -269,7 +262,7 @@ void CameraController::animateManual(float dt) {
     {
         m_camera->moveRight(dt * -2.f * m_speed * walkingModifier);
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_Q))
     {
         m_camera->moveUp(dt * -2.f * m_speed * walkingModifier);
@@ -278,22 +271,22 @@ void CameraController::animateManual(float dt) {
     {
         m_camera->moveUp(dt * 2.f * m_speed * walkingModifier);
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_UP))
     {
         m_camera->pitch(-dt * m_speed);
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_DOWN))
     {
         m_camera->pitch(dt * m_speed);
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_RIGHT))
     {
         m_camera->yaw(-dt * m_speed);
     }
-    
+
     if (m_inputProvider->isKeyPressed(GLFW_KEY_LEFT))
     {
         m_camera->yaw(dt * m_speed);
@@ -302,77 +295,80 @@ void CameraController::animateManual(float dt) {
 
 void CameraController::handleKeyEvent(KeyEventType type, int keyCode)
 {
-    if (type != KeyEventType::KEY_PRESSED) {
+    if (type != KeyEventType::KEY_PRESSED)
+    {
         return;
     }
 
-    if (m_camera == nullptr) {
+    if (m_camera == nullptr)
+    {
         return;
     }
 
     FeatureInfo& info = m_camera->getFeatureInfoForWrite();
-    
 
-	if (keyCode == GLFW_KEY_R)
-	{
-		switch (info.renderMode) {
-		case RenderMode::Final:
-			info.renderMode = RenderMode::Color;
-			break;
-		case RenderMode::Color:
-			info.renderMode = RenderMode::Depth;
-			break;
-		case RenderMode::Depth:
-			info.renderMode = RenderMode::Lights;
-			break;
-		case RenderMode::Lights:
-			info.renderMode = RenderMode::Normals;
-			break;
-		case RenderMode::Normals:
-			info.renderMode = RenderMode::Final;
-			break;
-		default:
-			info.renderMode = RenderMode::Final;
-			break;
-		}
-	}
+    if (keyCode == GLFW_KEY_R)
+    {
+        switch (info.renderMode)
+        {
+        case RenderMode::Final:
+            info.renderMode = RenderMode::Color;
+            break;
+        case RenderMode::Color:
+            info.renderMode = RenderMode::Depth;
+            break;
+        case RenderMode::Depth:
+            info.renderMode = RenderMode::Lights;
+            break;
+        case RenderMode::Lights:
+            info.renderMode = RenderMode::Normals;
+            break;
+        case RenderMode::Normals:
+            info.renderMode = RenderMode::Final;
+            break;
+        default:
+            info.renderMode = RenderMode::Final;
+            break;
+        }
+    }
 
     if (keyCode == GLFW_KEY_T)
     {
-        switch (info.fogType) {
-            case FogType::None:
-                info.fogType = FogType::Linear;
-                break;
-            case FogType::Linear:
-                info.fogType = FogType::Exp;
-                break;
-            case FogType::Exp:
-                info.fogType = FogType::Exp2;
-                break;
-            case FogType::Exp2:
-                info.fogType = FogType::None;
-                break;
-            default:
-                info.fogType = FogType::None;
-                break;
+        switch (info.fogType)
+        {
+        case FogType::None:
+            info.fogType = FogType::Linear;
+            break;
+        case FogType::Linear:
+            info.fogType = FogType::Exp;
+            break;
+        case FogType::Exp:
+            info.fogType = FogType::Exp2;
+            break;
+        case FogType::Exp2:
+            info.fogType = FogType::None;
+            break;
+        default:
+            info.fogType = FogType::None;
+            break;
         }
     }
-    
+
     if (keyCode == GLFW_KEY_Z)
     {
         info.shadowsActive = !info.shadowsActive;
     }
-    
+
     if (keyCode == GLFW_KEY_U)
     {
         info.fxaaActive = !info.fxaaActive;
     }
-    
+
     if (keyCode == GLFW_KEY_I)
     {
         info.dofActive = !info.dofActive;
     }
-    
+
     if (keyCode == GLFW_KEY_O)
     {
         info.normalMappingActive = !info.normalMappingActive;
@@ -381,7 +377,8 @@ void CameraController::handleKeyEvent(KeyEventType type, int keyCode)
 
 void CameraController::handleMouseMovementEvent(int x, int y)
 {
-    if (m_camera == nullptr) {
+    if (m_camera == nullptr)
+    {
         return;
     }
 

@@ -1,6 +1,5 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -41,7 +40,7 @@ class TempIniBytes
    private:
     std::string m_path = "rtr2014_tmp_test_bytes.ini";
 };
-} // namespace
+}  // namespace
 
 TEST_CASE("IniFile parses groups and key value pairs", "[io]")
 {

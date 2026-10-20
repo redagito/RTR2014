@@ -12,8 +12,8 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Visualizes the depth buffer for debugging.
-*/
+ * \brief Visualizes the depth buffer for debugging.
+ */
 class DepthVisualizationPass
 {
    public:
@@ -21,14 +21,14 @@ class DepthVisualizationPass
     ~DepthVisualizationPass();
 
     /**
-    * \brief Initializes the depth visualization pass resources.
-    */
+     * \brief Initializes the depth visualization pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the depth buffer to the screen.
-    * zNear/zFar are the camera clipping planes used to linearize the depth values.
-    */
+     * \brief Renders the depth buffer to the screen.
+     * zNear/zFar are the camera clipping planes used to linearize the depth values.
+     */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
                 const std::shared_ptr<Texture>& depthTexture, float zNear, float zFar);
 

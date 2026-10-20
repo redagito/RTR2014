@@ -1,11 +1,9 @@
-#include <catch2/catch_test_macros.hpp>
+#include <GLFW/glfw3.h>
 
+#include <catch2/catch_test_macros.hpp>
+#include <glm/glm.hpp>
 #include <map>
 #include <memory>
-
-#include <glm/glm.hpp>
-
-#include <GLFW/glfw3.h>
 
 #include "animation/AnimationWorld.h"
 #include "animation/IAnimationController.h"
@@ -13,8 +11,8 @@
 #include "demo/CameraController.h"
 #include "demo/DemoController.h"
 #include "graphics/ICamera.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IDebugInfoDisplay.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IRenderer.h"
 #include "graphics/IScene.h"
 #include "graphics/IWindow.h"
@@ -110,7 +108,8 @@ struct Fixture
         : deferredRenderer(),
           forwardRenderer(),
           scene(),
-          camera(std::make_shared<FirstPersonCamera>(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), 1.f, 1.33f, 0.01f, 1000.f)),
+          camera(std::make_shared<FirstPersonCamera>(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), 1.f,
+                                                     1.33f, 0.01f, 1000.f)),
           cameraController(std::make_shared<CameraController>()),
           inputProvider(),
           window(),
@@ -123,16 +122,13 @@ struct Fixture
         cameraController->setInputProvider(&inputProvider);
         cameraController->setWindow(&window);
 
-        controller = std::make_unique<DemoController>(&deferredRenderer, &deferredRenderer,
-                                                      &forwardRenderer, &scene, camera.get(),
-                                                      cameraController.get(), &inputProvider,
-                                                      &window, &graphicsResourceManager, &debugInfo,
-                                                      &debugInfoDisplay, &animationWorld);
+        controller = std::make_unique<DemoController>(
+            &deferredRenderer, &deferredRenderer, &forwardRenderer, &scene, camera.get(),
+            cameraController.get(), &inputProvider, &window, &graphicsResourceManager, &debugInfo,
+            &debugInfoDisplay, &animationWorld);
     }
 
-    ~Fixture()
-    {
-    }
+    ~Fixture() {}
 
     FakeRenderer deferredRenderer;
     FakeRenderer forwardRenderer;
@@ -149,7 +145,7 @@ struct Fixture
     std::shared_ptr<CameraController> cameraController;
     std::unique_ptr<DemoController> controller;
 };
-} // namespace
+}  // namespace
 
 TEST_CASE("Demo controller draws the initial renderer", "[demo]")
 {
@@ -165,10 +161,10 @@ TEST_CASE("Demo controller respects a forward renderer passed as initial", "[dem
 {
     Fixture f;
 
-    DemoController controller(&f.forwardRenderer, &f.deferredRenderer, &f.forwardRenderer,
-                              &f.scene, f.camera.get(), f.cameraController.get(), &f.inputProvider,
-                              &f.window, &f.graphicsResourceManager, &f.debugInfo,
-                              &f.debugInfoDisplay, &f.animationWorld);
+    DemoController controller(&f.forwardRenderer, &f.deferredRenderer, &f.forwardRenderer, &f.scene,
+                              f.camera.get(), f.cameraController.get(), &f.inputProvider, &f.window,
+                              &f.graphicsResourceManager, &f.debugInfo, &f.debugInfoDisplay,
+                              &f.animationWorld);
 
     controller.update(0.016f);
 
@@ -248,9 +244,9 @@ TEST_CASE("Demo controller keeps the renderer when the deferred one is missing",
     Fixture f;
 
     DemoController controller(&f.forwardRenderer, nullptr, &f.forwardRenderer, &f.scene,
-                              f.camera.get(), f.cameraController.get(), &f.inputProvider,
-                              &f.window, &f.graphicsResourceManager, &f.debugInfo,
-                              &f.debugInfoDisplay, &f.animationWorld);
+                              f.camera.get(), f.cameraController.get(), &f.inputProvider, &f.window,
+                              &f.graphicsResourceManager, &f.debugInfo, &f.debugInfoDisplay,
+                              &f.animationWorld);
 
     f.inputProvider.press(GLFW_KEY_F2);
     controller.update(0.016f);

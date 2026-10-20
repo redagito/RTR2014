@@ -1,13 +1,11 @@
-#include <catch2/catch_test_macros.hpp>
+#include <GLFW/glfw3.h>
 
+#include <catch2/catch_test_macros.hpp>
 #include <cstdio>
 #include <fstream>
+#include <glm/glm.hpp>
 #include <memory>
 #include <string>
-
-#include <glm/glm.hpp>
-
-#include <GLFW/glfw3.h>
 
 #include "demo/CameraController.h"
 #include "graphics/camera/FirstPersonCamera.h"
@@ -41,15 +39,16 @@ class NoInputProvider : public IInputProvider
 
 std::string keyframe(double timestamp, const std::string& position = "[0, 0, 0]")
 {
-    return "{\"position\": " + position + ", \"orientation\": [0, 0, 1], \"timestamp\": " +
-           std::to_string(timestamp) + ", \"fxaa\": true, \"fog\": false}";
+    return "{\"position\": " + position +
+           ", \"orientation\": [0, 0, 1], \"timestamp\": " + std::to_string(timestamp) +
+           ", \"fxaa\": true, \"fog\": false}";
 }
 
 std::string sequenceWith(const std::string& keyframes)
 {
     return "{\"positions\": [" + keyframes + "]}";
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("Camera controller rejects a sequence with two keyframes at the same time", "[demo]")
 {

@@ -33,25 +33,25 @@ class SceneLoader;
 class SoundEngine;
 
 /**
-* \brief Demo application class.
-*
-* Hosts the platform objects (window, input, renderers) and drives the
-* platform independent demo logic.
-*/
+ * \brief Demo application class.
+ *
+ * Hosts the platform objects (window, input, renderers) and drives the
+ * platform independent demo logic.
+ */
 class RTRDemo
 {
    public:
     RTRDemo();
     ~RTRDemo();
 
-	/**
-	* \brief nitialize demo with config file.
-	*/
+    /**
+     * \brief nitialize demo with config file.
+     */
     int init(const std::string& configFile);
 
     /**
-    * \brief Run demo.
-    */
+     * \brief Run demo.
+     */
     int run();
 
    private:
@@ -60,8 +60,8 @@ class RTRDemo
     bool initScene();
 
     /**
-    * \brief Presents a black frame and processes window events.
-    */
+     * \brief Presents a black frame and processes window events.
+     */
     void drawLoadingFrame();
 
     IniFile m_config;
@@ -70,23 +70,23 @@ class RTRDemo
         nullptr; /**< Resource loader and manager. */
     std::shared_ptr<IGraphicsResourceManager> m_graphicsResourceManager =
         nullptr; /**< Resource manager for graphics resources. */
-    
-	std::shared_ptr<IWindow> m_window = nullptr;
+
+    std::shared_ptr<IWindow> m_window = nullptr;
     std::shared_ptr<IInputProvider> m_inputProvider = nullptr;
 
-    std::shared_ptr<IRenderer> m_renderer = nullptr;                 /**< Active renderer. */
-    std::shared_ptr<IRenderer> m_deferredRenderer = nullptr;         /**< Deferred renderer. */
-    std::shared_ptr<IRenderer> m_forwardRenderer = nullptr;          /**< Forward renderer. */
-    std::shared_ptr<IScene> m_scene = nullptr;                       /**< Active scene. */
-    std::shared_ptr<IControllableCamera> m_camera = nullptr;         /**< Active camera. */
+    std::shared_ptr<IRenderer> m_renderer = nullptr;                /**< Active renderer. */
+    std::shared_ptr<IRenderer> m_deferredRenderer = nullptr;        /**< Deferred renderer. */
+    std::shared_ptr<IRenderer> m_forwardRenderer = nullptr;         /**< Forward renderer. */
+    std::shared_ptr<IScene> m_scene = nullptr;                      /**< Active scene. */
+    std::shared_ptr<IControllableCamera> m_camera = nullptr;        /**< Active camera. */
     std::shared_ptr<CameraController> m_cameraController = nullptr; /**< Camera controller. */
 
     std::shared_ptr<DebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
     std::shared_ptr<IDebugInfoDisplay> m_debugInfoDisplay =
-        nullptr; /**< Debug information renderer. */
+        nullptr;                                          /**< Debug information renderer. */
     std::shared_ptr<SoundEngine> m_soundEngine = nullptr; /**< Scene background music. */
 
-	// Animation
+    // Animation
     std::shared_ptr<AnimationWorld> m_animationWorld;
 
     // Platform independent demo logic

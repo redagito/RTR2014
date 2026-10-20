@@ -1,5 +1,4 @@
 #include <catch2/catch_test_macros.hpp>
-
 #include <cstdio>
 #include <fstream>
 #include <sstream>
@@ -38,7 +37,7 @@ int countOf(const std::string& report, const std::string& section)
     }
     return -1;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("Profiler records the count and total of a section", "[util]")
 {
@@ -69,12 +68,14 @@ TEST_CASE("Profiler accepts timings from several threads", "[util]")
     std::vector<std::thread> threads;
     for (int i = 0; i < 8; ++i)
     {
-        threads.emplace_back([&profiler]() {
-            for (int j = 0; j < 100; ++j)
+        threads.emplace_back(
+            [&profiler]()
             {
-                ScopedTimer timer(profiler, "parallel");
-            }
-        });
+                for (int j = 0; j < 100; ++j)
+                {
+                    ScopedTimer timer(profiler, "parallel");
+                }
+            });
     }
     for (std::thread& thread : threads)
     {

@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "IResourceManager.h"
 #include "IResourceListener.h"
+#include "IResourceManager.h"
 
 /**
  * \brief Creates a resource manager.

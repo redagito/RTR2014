@@ -12,12 +12,12 @@ class IScene;
 class IWindow;
 
 /**
-* \brief Platform independent demo logic.
-*
-* Handles the per frame updates: key handling, renderer selection, camera
-* sequence playback, animation and the debug info display. Depends only on
-* interfaces, so it can run without a graphics context.
-*/
+ * \brief Platform independent demo logic.
+ *
+ * Handles the per frame updates: key handling, renderer selection, camera
+ * sequence playback, animation and the debug info display. Depends only on
+ * interfaces, so it can run without a graphics context.
+ */
 class DemoController
 {
    public:
@@ -29,14 +29,14 @@ class DemoController
                    AnimationWorld* animationWorld);
 
     /**
-    * \brief Performs the per frame update.
-    */
+     * \brief Performs the per frame update.
+     */
     void update(float timeDiff);
 
    private:
     /**
-    * \brief Returns whether everything needed to draw a frame is present.
-    */
+     * \brief Returns whether everything needed to draw a frame is present.
+     */
     bool hasRequiredDependencies() const;
 
     /**
@@ -45,8 +45,8 @@ class DemoController
     void updateInput(float timeDiff);
 
     /**
-    * \brief Updates the debug info display.
-    */
+     * \brief Updates the debug info display.
+     */
     void updateDebugInfo(float timeDiff);
 
     IRenderer* m_renderer = nullptr;

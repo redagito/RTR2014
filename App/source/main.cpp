@@ -1,10 +1,10 @@
-#include <exception>
-
 #include <spdlog/spdlog.h>
 
+#include <exception>
+
 #include "demo/RTRDemo.h"
-#include "util/TimeStamp.h"
 #include "util/Profiler.h"
+#include "util/TimeStamp.h"
 
 namespace
 {
@@ -20,7 +20,7 @@ void writeProfile()
         spdlog::error("Failed to write the profile to {}.", file);
     }
 }
-} // namespace
+}  // namespace
 
 int main()
 {

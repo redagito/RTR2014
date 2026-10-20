@@ -1,13 +1,13 @@
 #pragma once
 
-#include <string>
-
 #include <glad/gl.h>
 
+#include <string>
+
 /**
-* Defines the default application-to-shader interface.
-* TODO Cleanup?
-*/
+ * Defines the default application-to-shader interface.
+ * TODO Cleanup?
+ */
 
 // Vertex array data locations
 const GLuint vertexDataShaderLocation = 0;
@@ -69,7 +69,7 @@ const GLint alphaTextureUnit = 4;
 // Texture units for light pass
 const GLint lightPassDepthTextureUnit = 0;
 const GLint lightPassNormalSpecularTextureUnit = 1;
-const GLint lightPassShadowMapTextureUnit = 2; // Should be lightPassShadowTextureUnit
+const GLint lightPassShadowMapTextureUnit = 2;  // Should be lightPassShadowTextureUnit
 
 // Texture units for illumination pass
 const GLint illuminationPassLightTextureUnit = 0;
@@ -109,7 +109,8 @@ const std::string depthTextureUniformName = "depth_texture";
 const std::string normalSpecularTextureUniformName = "normal_specular_texture";
 const std::string diffuseGlowTextureUniformName = "diffuse_glow_texture";
 const std::string lightTextureUniformName = "light_texture";
-const std::string shadowMapTextureUniformName = "shadow_map"; // Should be shadow_map_texture or shadow_texture
+const std::string shadowMapTextureUniformName =
+    "shadow_map";  // Should be shadow_map_texture or shadow_texture
 const std::string shadowCubeTextureUniformName = "shadow_cube";
 const std::string sceneTextureUniformName = "scene_texture";
 const std::string blurTextureUniformName = "blur_texture";

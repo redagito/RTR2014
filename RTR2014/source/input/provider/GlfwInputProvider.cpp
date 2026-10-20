@@ -1,16 +1,16 @@
-#include <spdlog/spdlog.h>
 #include "input/provider/GlfwInputProvider.h"
 
-#include <cassert>
-
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+
+#include <cassert>
 
 #include "input/IInputListener.h"
 
 std::unordered_map<GLFWwindow*, GlfwInputProvider*> GlfwInputProvider::s_instances;
 
 void GlfwInputProvider::glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action,
-                                         int mods)
+                                        int mods)
 {
     auto it = s_instances.find(window);
     if (it != s_instances.end())
@@ -65,7 +65,7 @@ void GlfwInputProvider::glfwCursorPositionCallback(GLFWwindow* window, double xp
 //}
 
 void GlfwInputProvider::glfwMouseButtonCallback(GLFWwindow* window, int button, int action,
-                                                 int mods)
+                                                int mods)
 {
     auto it = s_instances.find(window);
     if (it != s_instances.end())
@@ -115,15 +115,15 @@ GlfwInputProvider::GlfwInputProvider(GLFWwindow* window) : m_window(window)
         return;
     }
 
-	// Set callbacks
-	glfwSetKeyCallback(m_window, GlfwInputProvider::glfwKeyCallback);
-	glfwSetCursorPosCallback(m_window, GlfwInputProvider::glfwCursorPositionCallback);
-	glfwSetMouseButtonCallback(m_window, GlfwInputProvider::glfwMouseButtonCallback);
-	// Create mapping for callbacks
-	s_instances[m_window] = this;
+    // Set callbacks
+    glfwSetKeyCallback(m_window, GlfwInputProvider::glfwKeyCallback);
+    glfwSetCursorPosCallback(m_window, GlfwInputProvider::glfwCursorPositionCallback);
+    glfwSetMouseButtonCallback(m_window, GlfwInputProvider::glfwMouseButtonCallback);
+    // Create mapping for callbacks
+    s_instances[m_window] = this;
 }
 
-GlfwInputProvider::~GlfwInputProvider() 
+GlfwInputProvider::~GlfwInputProvider()
 {
     if (m_window == nullptr)
     {

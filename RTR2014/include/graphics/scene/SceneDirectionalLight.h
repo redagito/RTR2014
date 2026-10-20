@@ -3,12 +3,13 @@
 #include <glm/glm.hpp>
 
 /**
-* \brief Directional light object data.
-*/
+ * \brief Directional light object data.
+ */
 struct SceneDirectionalLight
 {
     SceneDirectionalLight();
-    SceneDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity, bool castsShadow);
+    SceneDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity,
+                          bool castsShadow);
 
     glm::vec3 m_direction = glm::vec3(0.f, -1.f, 0.f); /**< Default direction is down 0/-1/0. */
     glm::vec3 m_color = glm::vec3(1.f);                /**< White color. */

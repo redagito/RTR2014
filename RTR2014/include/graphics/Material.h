@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "Texture.h"
 #include "ShaderProgram.h"
+#include "Texture.h"
 
 /**
  * \brief Material class.
@@ -38,10 +38,10 @@ class Material
    private:
     // The textures and the shader are shared with the graphics resource
     // manager, the material keeps them alive.
-    std::shared_ptr<Texture> m_diffuseTexture;  /**< Base color. */
-    std::shared_ptr<Texture> m_normalTexture;   /**< Normal map. */
-    std::shared_ptr<Texture> m_specularTexture; /**< Specular highlights. */
-    std::shared_ptr<Texture> m_glowTexture;     /**< Glow map. */
-    std::shared_ptr<Texture> m_alphaTexture;    /**< Alpha map. */
+    std::shared_ptr<Texture> m_diffuseTexture;     /**< Base color. */
+    std::shared_ptr<Texture> m_normalTexture;      /**< Normal map. */
+    std::shared_ptr<Texture> m_specularTexture;    /**< Specular highlights. */
+    std::shared_ptr<Texture> m_glowTexture;        /**< Glow map. */
+    std::shared_ptr<Texture> m_alphaTexture;       /**< Alpha map. */
     std::shared_ptr<ShaderProgram> m_customShader; /**< Custom shader. */
 };

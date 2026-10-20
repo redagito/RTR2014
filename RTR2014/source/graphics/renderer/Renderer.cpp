@@ -3,22 +3,15 @@
 #include <cassert>
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
 #include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
 
+Renderer::Renderer() { return; }
 
-Renderer::Renderer()
-{
-	return;
-}
-
-Renderer::~Renderer()
-{
-	return;
-}
+Renderer::~Renderer() { return; }
 
 void Renderer::draw(const Mesh* mesh)
 {

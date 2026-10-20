@@ -1,8 +1,6 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
 #include <cmath>
-
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 
@@ -29,7 +27,7 @@ glm::vec3 upAxis(const FirstPersonCamera& camera)
     const glm::mat4& view = camera.getView();
     return glm::vec3(view[0][1], view[1][1], view[2][1]);
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("FirstPersonCamera lookAt keeps a horizontal target level", "[camera]")
 {

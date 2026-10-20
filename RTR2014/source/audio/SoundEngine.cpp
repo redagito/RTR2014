@@ -1,5 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "audio/SoundEngine.h"
+
+#include <spdlog/spdlog.h>
 
 #include "resource/IResourceManager.h"
 #include "resource/SoundData.h"
@@ -16,8 +17,8 @@ const SoundData* getPlayableSound(IResourceManager& resourceManager, ResourceId 
     return data;
 }
 
-bool createSound(ma_engine& engine, ResourceId id, const SoundData& data,
-                 ma_audio_buffer& buffer, ma_sound& sound, ma_uint32 flags)
+bool createSound(ma_engine& engine, ResourceId id, const SoundData& data, ma_audio_buffer& buffer,
+                 ma_sound& sound, ma_uint32 flags)
 {
     ma_audio_buffer_config bufferConfig = ma_audio_buffer_config_init(
         ma_format_s16, data.m_channels, data.m_samples.size() / data.m_channels,
@@ -46,12 +47,9 @@ void destroySound(ma_audio_buffer& buffer, ma_sound& sound)
     ma_sound_uninit(&sound);
     ma_audio_buffer_uninit(&buffer);
 }
-} // namespace
+}  // namespace
 
-SoundEngine::SoundEngine()
-{
-    return;
-}
+SoundEngine::SoundEngine() { return; }
 
 SoundEngine::~SoundEngine()
 {
@@ -167,8 +165,8 @@ bool SoundEngine::addEmitter(ResourceId id, const glm::vec3& position, float rad
         m_emitters.pop_back();
         return false;
     }
-    spdlog::info("Started sound emitter for sound {} at ({}, {}, {}).", id, position.x,
-                 position.y, position.z);
+    spdlog::info("Started sound emitter for sound {} at ({}, {}, {}).", id, position.x, position.y,
+                 position.z);
     return true;
 }
 

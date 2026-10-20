@@ -1,19 +1,19 @@
 #pragma once
 
-#include <list>
-#include <optional>
+#include <miniaudio.h>
 
 #include <glm/glm.hpp>
-#include <miniaudio.h>
+#include <list>
+#include <optional>
 
 #include "resource/ResourceConfig.h"
 
 class IResourceManager;
 
 /**
-* \brief Plays decoded sound resources through miniaudio.
-* Background music plays in 2D; emitters are positional and attenuated by distance.
-*/
+ * \brief Plays decoded sound resources through miniaudio.
+ * Background music plays in 2D; emitters are positional and attenuated by distance.
+ */
 class SoundEngine
 {
    public:
@@ -24,37 +24,37 @@ class SoundEngine
     SoundEngine& operator=(const SoundEngine&) = delete;
 
     /**
-    * \brief Initializes the audio engine and playback device.
-    * Returns false and leaves the engine silent when no device is available.
-    */
+     * \brief Initializes the audio engine and playback device.
+     * Returns false and leaves the engine silent when no device is available.
+     */
     bool init();
 
     /**
-    * \brief Sets the master volume, applied to current and future sounds.
-    */
+     * \brief Sets the master volume, applied to current and future sounds.
+     */
     void setVolume(float volume);
 
     /**
-    * \brief Stops and releases all playing sounds.
-    */
+     * \brief Stops and releases all playing sounds.
+     */
     void stopAll();
 
     /**
-    * \brief Plays the sound as non-positional background music in a loop.
-    */
+     * \brief Plays the sound as non-positional background music in a loop.
+     */
     void playMusic(ResourceId id, IResourceManager& resourceManager);
 
     /**
-    * \brief Starts a looping positional sound at the given position.
-    * Its gain falls linearly to zero at radius distance from the listener.
-    * Returns false when the engine is silent or the sound cannot be played.
-    */
+     * \brief Starts a looping positional sound at the given position.
+     * Its gain falls linearly to zero at radius distance from the listener.
+     * Returns false when the engine is silent or the sound cannot be played.
+     */
     bool addEmitter(ResourceId id, const glm::vec3& position, float radius,
                     IResourceManager& resourceManager);
 
     /**
-    * \brief Moves the audio listener to the camera.
-    */
+     * \brief Moves the audio listener to the camera.
+     */
     void updateListener(const glm::vec3& position, const glm::vec3& forward);
 
    private:

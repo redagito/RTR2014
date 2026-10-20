@@ -1,9 +1,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
-#include <vector>
-
 #include <glm/glm.hpp>
+#include <vector>
 
 #include "animation/MovementController.h"
 #include "animation/RotationController.h"
@@ -21,8 +19,8 @@ std::vector<glm::vec3> boxPoints(const glm::vec3& min, const glm::vec3& max)
         {
             for (int z = 0; z < 2; ++z)
             {
-                points.push_back(glm::vec3(x ? max.x : min.x, y ? max.y : min.y,
-                                           z ? max.z : min.z));
+                points.push_back(
+                    glm::vec3(x ? max.x : min.x, y ? max.y : min.y, z ? max.z : min.z));
             }
         }
     }
@@ -46,7 +44,7 @@ glm::vec3 objectPosition(const Scene& scene, SceneObjectId id)
     REQUIRE(scene.getObject(id, mesh, material, position, rotation, scale, castsShadow));
     return position;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("the movement controller returns the object to its position", "[animation]")
 {

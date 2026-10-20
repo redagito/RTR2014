@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "core/RendererCoreConfig.h"
 
@@ -10,8 +10,8 @@ class Texture;
 class RenderBuffer;
 
 /**
-* \brief Represents a frame buffer (rendering target).
-*/
+ * \brief Represents a frame buffer (rendering target).
+ */
 class FrameBuffer
 {
    public:
@@ -38,8 +38,8 @@ class FrameBuffer
 
    private:
     /**
-    * \brief Rebuilds the list of draw buffers from the attachments.
-    */
+     * \brief Rebuilds the list of draw buffers from the attachments.
+     */
     void updateDrawBuffers();
 
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */

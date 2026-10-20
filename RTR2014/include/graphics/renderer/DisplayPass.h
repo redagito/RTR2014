@@ -10,11 +10,11 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Draws a texture to the screen.
-*
-* The passthrough render copies the texture to the currently bound framebuffer,
-* the display render targets the default framebuffer.
-*/
+ * \brief Draws a texture to the screen.
+ *
+ * The passthrough render copies the texture to the currently bound framebuffer,
+ * the display render targets the default framebuffer.
+ */
 class DisplayPass
 {
    public:
@@ -22,19 +22,19 @@ class DisplayPass
     ~DisplayPass();
 
     /**
-    * \brief Initializes the display pass resources.
-    */
+     * \brief Initializes the display pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Copies the texture to the currently bound framebuffer.
-    */
+     * \brief Copies the texture to the currently bound framebuffer.
+     */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
                 const std::shared_ptr<Texture>& texture);
 
     /**
-    * \brief Draws the texture to the screen.
-    */
+     * \brief Draws the texture to the screen.
+     */
     void renderToScreen(const IWindow& window, const IGraphicsResourceManager& manager,
                         const std::shared_ptr<Texture>& texture);
 

@@ -1,32 +1,25 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/GeometryPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/Renderer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-GeometryPass::GeometryPass()
-{
-    return;
-}
+GeometryPass::GeometryPass() { return; }
 
-GeometryPass::~GeometryPass()
-{
-    return;
-}
+GeometryPass::~GeometryPass() { return; }
 
 void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera& camera,
                           const IWindow& window, const IGraphicsResourceManager& manager)
@@ -120,10 +113,9 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
             {
                 // Forward draw call
                 geometryPassShader->setActive();
-                Renderer::bindMaterial(geometryPassShader, material,
-                                       m_transformer.getTranslationMatrix(),
-                                       m_transformer.getRotationMatrix(),
-                                       m_transformer.getScaleMatrix(), manager);
+                Renderer::bindMaterial(
+                    geometryPassShader, material, m_transformer.getTranslationMatrix(),
+                    m_transformer.getRotationMatrix(), m_transformer.getScaleMatrix(), manager);
                 Renderer::draw(mesh);
             }
         }
@@ -146,7 +138,8 @@ bool GeometryPass::init(IResourceManager* manager)
     // Check if ok
     if (m_geometryPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", geometryPassShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.",
+                      geometryPassShaderFile.c_str());
         return false;
     }
 
@@ -175,12 +168,10 @@ bool GeometryPass::init(IResourceManager* manager)
         return false;
     }
 
-
     // Total 96 bit per pixel
     m_geometryBuffer.attach(m_depthTexture, GL_DEPTH_ATTACHMENT);
     m_geometryBuffer.attach(m_diffuseGlowTexture, GL_COLOR_ATTACHMENT0);
     m_geometryBuffer.attach(m_normalSpecularTexture, GL_COLOR_ATTACHMENT1);
-
 
     spdlog::info("GBuffer state: {}.", m_geometryBuffer.getState().c_str());
 
@@ -190,10 +181,7 @@ bool GeometryPass::init(IResourceManager* manager)
     return true;
 }
 
-const std::shared_ptr<Texture>& GeometryPass::getDepthTexture() const
-{
-    return m_depthTexture;
-}
+const std::shared_ptr<Texture>& GeometryPass::getDepthTexture() const { return m_depthTexture; }
 
 const std::shared_ptr<Texture>& GeometryPass::getDiffuseGlowTexture() const
 {

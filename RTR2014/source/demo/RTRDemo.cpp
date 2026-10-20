@@ -1,45 +1,42 @@
-#include <chrono>
-#include <future>
-#include <thread>
+#include "demo/RTRDemo.h"
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
-#include "demo/RTRDemo.h"
 
+#include <chrono>
+#include <future>
 #include <string>
+#include <thread>
 #include <vector>
 
 // Debug
 #include "debug/DebugInfo.h"
 
 // Graphics
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include <GLFW/glfw3.h>
 
 #include "graphics/camera/FirstPersonCamera.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
 
 // Renderer types
-#include "graphics/renderer/ForwardRenderer.h"
 #include "graphics/renderer/DeferredRenderer.h"
+#include "graphics/renderer/ForwardRenderer.h"
 
 // Resource system
-#include "resource/Resource.h"
-
-#include "graphics/scene/Scene.h"
-#include "graphics/window/GlfwWindow.h"
+#include "demo/CameraController.h"
+#include "demo/DemoController.h"
+#include "graphics/DebugInfoDisplay.h"
 #include "graphics/GraphicsResourceManager.h"
 #include "graphics/IDebugInfoDisplay.h"
 #include "graphics/IWindow.h"
-
-#include "util/TimeStamp.h"
-#include "util/FrameTimer.h"
-#include "util/Profiler.h"
-#include "graphics/DebugInfoDisplay.h"
+#include "graphics/scene/Scene.h"
+#include "graphics/window/GlfwWindow.h"
 #include "input/provider/GlfwInputProvider.h"
 #include "io/SceneLoader.h"
-#include "demo/CameraController.h"
-#include "demo/DemoController.h"
+#include "resource/Resource.h"
+#include "util/FrameTimer.h"
+#include "util/Profiler.h"
+#include "util/TimeStamp.h"
 
 // Audio
 #include "audio/SoundEngine.h"
@@ -96,7 +93,7 @@ int RTRDemo::init(const std::string& configFile)
     if (!m_config.load(configFile))
     {
         spdlog::warn("Failed to load config file {}, starting with default settings.",
-                    configFile.c_str());
+                     configFile.c_str());
     }
 
     // Create window for rendering
@@ -115,8 +112,8 @@ int RTRDemo::init(const std::string& configFile)
     // Create resource manager
     m_resourceManager = createResourceManager();
 
-	// Create animation world
-	m_animationWorld = std::make_shared<AnimationWorld>();
+    // Create animation world
+    m_animationWorld = std::make_shared<AnimationWorld>();
 
     // Graphics resource manager, listens to resource manager
     GraphicsResourceManager* manager = new GraphicsResourceManager;
@@ -159,10 +156,13 @@ void RTRDemo::drawLoadingFrame()
 int RTRDemo::run()
 {
     // Parse the scene file and decode the resources it references on a worker thread
-    std::future<bool> prepared = std::async(std::launch::async, [this]() {
-        ScopedTimer timer(profiler(), "startup: decode resources");
-        return m_sceneLoader->prepare(m_sceneFile);
-    });
+    std::future<bool> prepared =
+        std::async(std::launch::async,
+                   [this]()
+                   {
+                       ScopedTimer timer(profiler(), "startup: decode resources");
+                       return m_sceneLoader->prepare(m_sceneFile);
+                   });
 
     // Load the resources in steps, keeping the window alive and responsive
     bool resourcesPrepared = false;
@@ -343,7 +343,7 @@ bool RTRDemo::initRenderer()
     {
         // Should not happen as default renderer is set to forward in config call
         spdlog::warn("Invalid renderer type {} specified. Fallback to forward renderer.",
-                    rendererType.c_str());
+                     rendererType.c_str());
         m_renderer = m_forwardRenderer;
     }
 

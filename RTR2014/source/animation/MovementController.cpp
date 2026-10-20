@@ -5,7 +5,7 @@
 #include "graphics/IScene.h"
 
 MovementController::MovementController(SceneObjectId id, AnimationObjectType type, IScene& scene,
-                                         const glm::vec3& direction)
+                                       const glm::vec3& direction)
     : m_objectId(id), m_type(type), m_scene(scene), m_direction(direction)
 {
     m_endTime = glm::length(m_direction) * 2;
@@ -28,15 +28,16 @@ void MovementController::update(float timeStep)
     m_currentTimePoint += timeStep;
     // The phase is within the cycle, a single subtraction is not enough if
     // timeStep exceeded the period.
-    while (m_currentTimePoint >= m_endTime) {
+    while (m_currentTimePoint >= m_endTime)
+    {
         m_currentTimePoint -= m_endTime;
     }
 
     // The distance from the start of the cycle grows to the middle of it and
     // shrinks back afterwards. Deriving it from the phase instead of adding
     // up the steps keeps the object at its start position after a whole cycle.
-    const glm::vec3 diff =
-        glm::normalize(m_direction) * (offsetOfPhase(m_currentTimePoint) - offsetOfPhase(previousPhase));
+    const glm::vec3 diff = glm::normalize(m_direction) *
+                           (offsetOfPhase(m_currentTimePoint) - offsetOfPhase(previousPhase));
 
     if (m_type == AnimationObjectType::Model)
     {

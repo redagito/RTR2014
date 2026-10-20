@@ -19,9 +19,9 @@ enum class ResourceType
 };
 
 /**
-* \brief Primitive type for vertex data.
-* NOTE GL_QUAD is deprecated.
-*/
+ * \brief Primitive type for vertex data.
+ * NOTE GL_QUAD is deprecated.
+ */
 enum class PrimitiveType
 {
     Point = 1,
@@ -31,8 +31,8 @@ enum class PrimitiveType
 };
 
 /**
-* \brief Color format for texture data.
-*/
+ * \brief Color format for texture data.
+ */
 enum class ColorFormat
 {
     GreyScale8 = 1,

@@ -1,29 +1,21 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/LightPass.h"
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
+#include <spdlog/spdlog.h>
 
-#include "util/Profiler.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Texture.h"
 #include "graphics/renderer/RenderBuffer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
+#include "util/Profiler.h"
 
-LightPass::LightPass()
-{
-    return;
-}
+LightPass::LightPass() { return; }
 
-LightPass::~LightPass()
-{
-    return;
-}
+LightPass::~LightPass() { return; }
 
 void LightPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
                        const IGraphicsResourceManager& manager, ISceneQuery& query,
@@ -106,7 +98,4 @@ bool LightPass::init(IResourceManager* manager)
     return true;
 }
 
-const std::shared_ptr<Texture>& LightPass::getLightTexture() const
-{
-    return m_lightPassTexture;
-}
+const std::shared_ptr<Texture>& LightPass::getLightTexture() const { return m_lightPassTexture; }

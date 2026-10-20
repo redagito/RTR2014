@@ -1,50 +1,48 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <unordered_map>
 
-#include <glm/glm.hpp>
-
+#include "ShaderObject.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 
-#include "ShaderObject.h"
-
 /**
-* \brief Represents a linked shader program.
-*/
+ * \brief Represents a linked shader program.
+ */
 class ShaderProgram
 {
    public:
     /**
-    * \brief Creates shader program from shader objects.
-    * Unused shader objects are represented by nullptr. All used shader objects
-    * must be valid or program creation will fail and the program object will
-    * be in invalid state after creation.
-    */
+     * \brief Creates shader program from shader objects.
+     * Unused shader objects are represented by nullptr. All used shader objects
+     * must be valid or program creation will fail and the program object will
+     * be in invalid state after creation.
+     */
     ShaderProgram(ShaderObject<GL_VERTEX_SHADER>* vertex,
-                   ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
-                   ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
-                   ShaderObject<GL_GEOMETRY_SHADER>* geometry,
-                   ShaderObject<GL_FRAGMENT_SHADER>* fragment);
+                  ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
+                  ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
+                  ShaderObject<GL_GEOMETRY_SHADER>* geometry,
+                  ShaderObject<GL_FRAGMENT_SHADER>* fragment);
 
     /**
-    * \brief Deletes GPU shader resource.
-    */
+     * \brief Deletes GPU shader resource.
+     */
     ~ShaderProgram();
 
     ShaderProgram(const ShaderProgram&) = delete;
     ShaderProgram& operator=(const ShaderProgram&) = delete;
 
     /**
-    * \brief Initializes the program with new shader objects.
-    * \return True for success and false for error.
-    * If the function returns false, an error string can be retrieved with
-    * getErrorString.
-    * Multiple calls to init reset the error string content.
-    * If init is called on a valid shader program, a new program id is created
-    * from the provided shader objects. If creation fails, the shader program will
-    * still be valid with the data of the former initialization and an error string
-    * can still be retrieved.
-    */
+     * \brief Initializes the program with new shader objects.
+     * \return True for success and false for error.
+     * If the function returns false, an error string can be retrieved with
+     * getErrorString.
+     * Multiple calls to init reset the error string content.
+     * If init is called on a valid shader program, a new program id is created
+     * from the provided shader objects. If creation fails, the shader program will
+     * still be valid with the data of the former initialization and an error string
+     * can still be retrieved.
+     */
     bool init(ShaderObject<GL_VERTEX_SHADER>* vertex,
               ShaderObject<GL_TESS_CONTROL_SHADER>* tessControl,
               ShaderObject<GL_TESS_EVALUATION_SHADER>* tessEval,
@@ -52,24 +50,24 @@ class ShaderProgram
               ShaderObject<GL_FRAGMENT_SHADER>* fragment);
 
     /**
-    * \brief Sets the shader program as active program for vertex processing.
-    */
-	void setActive();
-	
-	/**
-	* \brief Sets shader program inactive.
-	*/
-	void setInactive();
+     * \brief Sets the shader program as active program for vertex processing.
+     */
+    void setActive();
 
     /**
-    * \brief Returns the error string.
-    * Set by a formerly failed call to init or on failed construction.
-    */
+     * \brief Sets shader program inactive.
+     */
+    void setInactive();
+
+    /**
+     * \brief Returns the error string.
+     * Set by a formerly failed call to init or on failed construction.
+     */
     const std::string& getErrorString() const;
 
     /**
-    * \brief Returns validity of the shader program.
-    */
+     * \brief Returns validity of the shader program.
+     */
     bool isValid() const;
 
     GLint getUniformLocation(const std::string& uniformName) const;
@@ -101,8 +99,8 @@ class ShaderProgram
 
    private:
     /**
-    * \brief Looks up the locations of the uniforms the program actually uses.
-    */
+     * \brief Looks up the locations of the uniforms the program actually uses.
+     */
     void collectUniformLocations();
 
     static GLuint s_activeShaderProgram; /**< Stores currently active shader id to prevent

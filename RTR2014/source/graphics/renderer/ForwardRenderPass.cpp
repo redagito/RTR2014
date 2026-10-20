@@ -1,33 +1,24 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/ForwardRenderPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
 #include "graphics/ShaderProgram.h"
-
 #include "graphics/renderer/Renderer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-ForwardRenderPass::ForwardRenderPass()
-{
-    return;
-}
+ForwardRenderPass::ForwardRenderPass() { return; }
 
-ForwardRenderPass::~ForwardRenderPass()
-{
-    return;
-}
+ForwardRenderPass::~ForwardRenderPass() { return; }
 
 void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
                                const IGraphicsResourceManager& manager)
@@ -101,7 +92,7 @@ void ForwardRenderPass::draw(Mesh* mesh, const glm::mat4& translation, const glm
                              const IGraphicsResourceManager& manager)
 {
     // Decide which shader program to use
-	ShaderProgram* shader = m_currentShader;
+    ShaderProgram* shader = m_currentShader;
     if (material->hasCustomShader())
     {
         shader = material->getCustomShader();
@@ -128,13 +119,13 @@ bool ForwardRenderPass::init(IResourceManager* manager)
 {
     // TODO Read file name from config?
     std::string defaultShaderFile("data/shader/forward_test_0.ini");
-	m_forwardShader = manager->loadShader(defaultShaderFile);
+    m_forwardShader = manager->loadShader(defaultShaderFile);
 
     // Check if ok
-	if (m_forwardShader == invalidResource)
+    if (m_forwardShader == invalidResource)
     {
         spdlog::error("Failed to initialize the default shader from file {}.",
-                  defaultShaderFile.c_str());
+                      defaultShaderFile.c_str());
         return false;
     }
     return true;

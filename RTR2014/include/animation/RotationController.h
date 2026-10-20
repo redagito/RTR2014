@@ -10,14 +10,15 @@ class IScene;
 
 class RotationController : public IAnimationController
 {
-public:
-	RotationController(SceneObjectId id, AnimationObjectType type, IScene& scene, const glm::vec3& rotation);
+   public:
+    RotationController(SceneObjectId id, AnimationObjectType type, IScene& scene,
+                       const glm::vec3& rotation);
 
-	void update(float timeStep) override;
+    void update(float timeStep) override;
 
-private:
-	SceneObjectId m_objectId = -1;
-	AnimationObjectType m_type;
-	IScene& m_scene;
-	glm::vec3 m_rotation;
+   private:
+    SceneObjectId m_objectId = -1;
+    AnimationObjectType m_type;
+    IScene& m_scene;
+    glm::vec3 m_rotation;
 };

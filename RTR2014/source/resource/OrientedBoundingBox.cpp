@@ -173,10 +173,9 @@ OrientedBoundingBox computeBounds(size_t count, PointAccessor point)
 
     return OrientedBoundingBox(center, axes, halfExtents);
 }
-} // namespace
+}  // namespace
 
-OrientedBoundingBox::OrientedBoundingBox()
-    : m_center(0.0f), m_axes(1.0f), m_halfExtents(0.0f)
+OrientedBoundingBox::OrientedBoundingBox() : m_center(0.0f), m_axes(1.0f), m_halfExtents(0.0f)
 {
     return;
 }
@@ -195,11 +194,9 @@ OrientedBoundingBox OrientedBoundingBox::fromPoints(const std::vector<glm::vec3>
 
 OrientedBoundingBox OrientedBoundingBox::fromVertices(const std::vector<float>& vertices)
 {
-    return computeBounds(vertices.size() / 3,
-                         [&vertices](size_t i) {
-                             return glm::vec3(vertices[i * 3], vertices[i * 3 + 1],
-                                              vertices[i * 3 + 2]);
-                         });
+    return computeBounds(
+        vertices.size() / 3, [&vertices](size_t i)
+        { return glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]); });
 }
 
 OrientedBoundingBox OrientedBoundingBox::transformed(const glm::mat4& matrix) const

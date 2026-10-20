@@ -1,29 +1,28 @@
-#include <spdlog/spdlog.h>
-
 #include "graphics/scene/Scene.h"
 
+#include <spdlog/spdlog.h>
+
 #include "graphics/Frustum.h"
-#include "graphics/scene/SceneQuery.h"
+#include "graphics/scene/SceneDirectionalLight.h"
 #include "graphics/scene/SceneObject.h"
 #include "graphics/scene/ScenePointLight.h"
-#include "graphics/scene/SceneDirectionalLight.h"
+#include "graphics/scene/SceneQuery.h"
 
 Scene::Scene() : m_ambientColor(0.f), m_ambientIntensity(0.f) {}
 
 Scene::~Scene() {}
 
 SceneObjectId Scene::createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
-                                   const glm::vec3& rotation, const glm::vec3& scale,
-                                   const OrientedBoundingBox& localBounds, bool castsShadow)
+                                  const glm::vec3& rotation, const glm::vec3& scale,
+                                  const OrientedBoundingBox& localBounds, bool castsShadow)
 {
     m_objects.push_back(
         SceneObject(mesh, material, position, rotation, scale, localBounds, castsShadow));
     return m_objects.size() - 1;
 }
 
-bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
-                       glm::vec3& position, glm::vec3& rotation, glm::vec3& scale,
-                       bool& castsShadow) const
+bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, glm::vec3& position,
+                      glm::vec3& rotation, glm::vec3& scale, bool& castsShadow) const
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || ((unsigned int)id) >= m_objects.size())
@@ -42,7 +41,7 @@ bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
 }
 
 void Scene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
-                       const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+                      const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || static_cast<size_t>(id) >= m_objects.size())
@@ -62,14 +61,14 @@ void Scene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
 }
 
 SceneObjectId Scene::createPointLight(const glm::vec3& position, float radius,
-                                       const glm::vec3& color, float intensity, bool castsShadow)
+                                      const glm::vec3& color, float intensity, bool castsShadow)
 {
     m_pointLights.push_back(ScenePointLight(position, radius, color, intensity, castsShadow));
     return m_pointLights.size() - 1;
 }
 
 bool Scene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius, glm::vec3& color,
-                           float& intensity, bool& castsShadow) const
+                          float& intensity, bool& castsShadow) const
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || ((unsigned int)id) >= m_pointLights.size())
@@ -82,12 +81,12 @@ bool Scene::getPointLight(SceneObjectId id, glm::vec3& position, float& radius, 
     radius = m_pointLights.at(id).m_radius;
     color = m_pointLights.at(id).m_color;
     intensity = m_pointLights.at(id).m_intensity;
-	castsShadow = m_pointLights.at(id).m_castsShadow;
+    castsShadow = m_pointLights.at(id).m_castsShadow;
     return true;
 }
 
 void Scene::setPointLight(SceneObjectId id, const glm::vec3& position, float radius,
-                           const glm::vec3& color, float intensity, bool castsShadow)
+                          const glm::vec3& color, float intensity, bool castsShadow)
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || static_cast<size_t>(id) >= m_pointLights.size())
@@ -100,20 +99,20 @@ void Scene::setPointLight(SceneObjectId id, const glm::vec3& position, float rad
     m_pointLights[id].m_position = position;
     m_pointLights[id].m_radius = radius;
     m_pointLights[id].m_color = color;
-	m_pointLights[id].m_intensity = intensity;
-	m_pointLights[id].m_castsShadow = castsShadow;
+    m_pointLights[id].m_intensity = intensity;
+    m_pointLights[id].m_castsShadow = castsShadow;
     return;
 }
 
 SceneObjectId Scene::createDirectionalLight(const glm::vec3& direction, const glm::vec3& color,
-                                             float intensity, bool castsShadow)
+                                            float intensity, bool castsShadow)
 {
     m_directionalLights.push_back(SceneDirectionalLight(direction, color, intensity, castsShadow));
     return m_directionalLights.size() - 1;
 }
 
 bool Scene::getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec3& color,
-                                 float& intensity, bool& castsShadow) const
+                                float& intensity, bool& castsShadow) const
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || ((unsigned int)id) >= m_directionalLights.size())
@@ -125,12 +124,12 @@ bool Scene::getDirectionalLight(SceneObjectId id, glm::vec3& direction, glm::vec
     direction = m_directionalLights.at(id).m_direction;
     color = m_directionalLights.at(id).m_color;
     intensity = m_directionalLights.at(id).m_intensity;
-	castsShadow = m_directionalLights.at(id).m_castsShadow;
+    castsShadow = m_directionalLights.at(id).m_castsShadow;
     return true;
 }
 
 void Scene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction,
-                                 const glm::vec3& color, float intensity, bool castsShadow)
+                                const glm::vec3& color, float intensity, bool castsShadow)
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || static_cast<size_t>(id) >= m_directionalLights.size())
@@ -141,9 +140,9 @@ void Scene::setDirectionalLight(SceneObjectId id, const glm::vec3& direction,
 
     // Write data
     m_directionalLights[id].m_direction = direction;
-	m_directionalLights[id].m_color = color;
-	m_directionalLights[id].m_intensity = intensity;
-	m_directionalLights[id].m_castsShadow = castsShadow;
+    m_directionalLights[id].m_color = color;
+    m_directionalLights[id].m_intensity = intensity;
+    m_directionalLights[id].m_castsShadow = castsShadow;
     return;
 }
 
@@ -207,8 +206,8 @@ std::unique_ptr<ISceneQuery> Scene::createQuery(const glm::mat4& viewProjection)
 {
     // New query with max storage
     // TODO Allocate less storage, needs experiments on how much is actually needed
-    auto query =
-        std::make_unique<SceneQuery>((unsigned int)m_objects.size(), (unsigned int)m_pointLights.size());
+    auto query = std::make_unique<SceneQuery>((unsigned int)m_objects.size(),
+                                              (unsigned int)m_pointLights.size());
 
     Frustum frustum(viewProjection);
 

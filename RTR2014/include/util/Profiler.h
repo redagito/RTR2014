@@ -6,25 +6,25 @@
 #include <vector>
 
 /**
-* \brief Collects timing data for named sections.
-*
-* Sections are measured with a ScopedTimer. Every section keeps the number of
-* times it was entered, the total time spent in it and the fastest and slowest
-* single visit. Timings may be recorded from any thread.
-*/
+ * \brief Collects timing data for named sections.
+ *
+ * Sections are measured with a ScopedTimer. Every section keeps the number of
+ * times it was entered, the total time spent in it and the fastest and slowest
+ * single visit. Timings may be recorded from any thread.
+ */
 class Profiler
 {
    public:
     /**
-    * \brief Records the time spent in a section.
-    */
+     * \brief Records the time spent in a section.
+     */
     void add(const std::string& name, double milliseconds);
 
     /**
-    * \brief Writes the collected timings to a file.
-    *
-    * Returns false if the file could not be written.
-    */
+     * \brief Writes the collected timings to a file.
+     *
+     * Returns false if the file could not be written.
+     */
     bool writeReport(const std::string& file) const;
 
    private:
@@ -42,8 +42,8 @@ class Profiler
 };
 
 /**
-* \brief Times a section for the lifetime of the object.
-*/
+ * \brief Times a section for the lifetime of the object.
+ */
 class ScopedTimer
 {
    public:
@@ -57,6 +57,6 @@ class ScopedTimer
 };
 
 /**
-* \brief Returns the process wide profiler.
-*/
+ * \brief Returns the process wide profiler.
+ */
 Profiler& profiler();

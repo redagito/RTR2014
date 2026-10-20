@@ -1,19 +1,19 @@
-#include <spdlog/spdlog.h>
 #include "demo/DemoController.h"
+
+#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 #include <cmath>
 #include <string>
-
-#include <GLFW/glfw3.h>
 
 #include "animation/AnimationWorld.h"
 #include "debug/DebugInfo.h"
 #include "demo/CameraController.h"
 #include "graphics/IDebugInfoDisplay.h"
-#include "graphics/camera/IControllableCamera.h"
 #include "graphics/IRenderer.h"
 #include "graphics/IScene.h"
 #include "graphics/IWindow.h"
+#include "graphics/camera/IControllableCamera.h"
 #include "input/IInputProvider.h"
 
 DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRenderer,

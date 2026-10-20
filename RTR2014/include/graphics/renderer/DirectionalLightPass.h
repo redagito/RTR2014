@@ -18,11 +18,11 @@ class ShaderProgram;
 class Texture;
 
 /**
-* \brief Renders directional lights into the light buffer.
-*
-* Each shadow casting directional light gets its own shadow map, which is
-* sampled per pixel when the light is drawn.
-*/
+ * \brief Renders directional lights into the light buffer.
+ *
+ * Each shadow casting directional light gets its own shadow map, which is
+ * sampled per pixel when the light is drawn.
+ */
 class DirectionalLightPass
 {
    public:
@@ -30,13 +30,13 @@ class DirectionalLightPass
     ~DirectionalLightPass();
 
     /**
-    * \brief Initializes the directional light pass resources.
-    */
+     * \brief Initializes the directional light pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the directional lights into the light buffer.
-    */
+     * \brief Renders the directional lights into the light buffer.
+     */
     void render(const IScene& scene, const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager, ISceneQuery& query,
                 FrameBuffer& lightBuffer, const std::shared_ptr<Texture>& depthTexture,

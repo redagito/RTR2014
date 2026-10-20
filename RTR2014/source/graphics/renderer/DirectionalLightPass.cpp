@@ -1,40 +1,32 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/DirectionalLightPass.h"
 
-#include <string>
-#include <cmath>
+#include <spdlog/spdlog.h>
 
+#include <cmath>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/camera/StaticCamera.h"
 #include "graphics/renderer/Renderer.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
 
-DirectionalLightPass::DirectionalLightPass()
-{
-    return;
-}
+DirectionalLightPass::DirectionalLightPass() { return; }
 
-DirectionalLightPass::~DirectionalLightPass()
-{
-    return;
-}
+DirectionalLightPass::~DirectionalLightPass() { return; }
 
-void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
-                                  const IWindow& window, const IGraphicsResourceManager& manager,
-                                  ISceneQuery& query, FrameBuffer& lightBuffer,
+void DirectionalLightPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
+                                  const IGraphicsResourceManager& manager, ISceneQuery& query,
+                                  FrameBuffer& lightBuffer,
                                   const std::shared_ptr<Texture>& depthTexture,
                                   const std::shared_ptr<Texture>& normalSpecularTexture)
 {
@@ -74,16 +66,15 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
                                        castsShadow))
         {
             spdlog::error("Failed to retrieve directional light data from point light id {}.",
-                      directionalLightId);
+                          directionalLightId);
         }
         else
         {
             glm::vec3 lightDir = glm::normalize(direction);
             // A light pointing straight up/down makes the default up vector
             // degenerate for lookAt; swap in a different up in that case.
-            glm::vec3 shadowUp =
-                (std::abs(lightDir.y) > 0.999f) ? glm::vec3(0.0f, 0.0f, 1.0f)
-                                                 : glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 shadowUp = (std::abs(lightDir.y) > 0.999f) ? glm::vec3(0.0f, 0.0f, 1.0f)
+                                                                 : glm::vec3(0.0f, 1.0f, 0.0f);
             // The shadow volume covers the scene, so that everything that
             // casts a shadow is inside it.
             glm::vec3 sceneCenter(0.0f);
@@ -187,7 +178,7 @@ bool DirectionalLightPass::init(IResourceManager* manager)
     if (m_directionalLightPassShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
-                   directionalLightPassShaderFile.c_str());
+                      directionalLightPassShaderFile.c_str());
         return false;
     }
 

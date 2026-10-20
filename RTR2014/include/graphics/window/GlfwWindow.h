@@ -1,9 +1,9 @@
 #pragma once
 
-#include <unordered_map>
 #include <list>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 #include "graphics/IWindow.h"
 #include "input/IInputProvider.h"
@@ -51,7 +51,7 @@ class GlfwWindow : public IWindow
     double getTime() const override;
 
     GLFWwindow* getGlfwHandle() const;
-    
+
     void addListener(IWindowListener* l) override;
     void removeListener(IWindowListener* l) override;
 
@@ -67,6 +67,6 @@ class GlfwWindow : public IWindow
     unsigned int m_height; /**< Current window height. */
 
     bool m_mouseCaptured; /**< Current mouse capture state. */
-    
+
     std::set<IWindowListener*> m_listeners;
 };

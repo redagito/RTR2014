@@ -3,17 +3,14 @@
 #include <memory>
 
 // Required by inheritance
-#include "Renderer.h"
-
 #include "DepthVisualizationPass.h"
 #include "DisplayPass.h"
 #include "GeometryPass.h"
 #include "IlluminationPass.h"
 #include "LightPass.h"
 #include "PostProcessPass.h"
-
+#include "Renderer.h"
 #include "resource/ResourceConfig.h"
-
 
 class Material;
 class ShaderProgram;
@@ -21,8 +18,8 @@ class IResourceManager;
 class ISceneQuery;
 
 /**
-* \brief Deferred renderer implementation.
-*/
+ * \brief Deferred renderer implementation.
+ */
 class DeferredRenderer : public Renderer
 {
    public:

@@ -1,21 +1,18 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/DeferredRenderer.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
-
-#include "util/Profiler.h"
-
-#include "resource/IResourceManager.h"
-
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
-#include "graphics/camera/IControllableCamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-
+#include "graphics/camera/IControllableCamera.h"
+#include "graphics/renderer/core/RendererCoreConfig.h"
+#include "resource/IResourceManager.h"
+#include "util/Profiler.h"
 
 DeferredRenderer::DeferredRenderer() { return; }
 
@@ -24,7 +21,6 @@ DeferredRenderer::~DeferredRenderer() { return; }
 bool DeferredRenderer::init(IResourceManager* manager)
 {
     spdlog::info("Initializing deferred renderer.");
-
 
     // Init geometry pass resources
     if (!m_geometryPass.init(manager))
@@ -69,7 +65,7 @@ bool DeferredRenderer::init(IResourceManager* manager)
 }
 
 void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-                             const IGraphicsResourceManager& manager)
+                            const IGraphicsResourceManager& manager)
 {
     ScopedTimer frameTimer(profiler(), "frame");
 
@@ -88,8 +84,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Light pass fills lbuffer
     {
         ScopedTimer timer(profiler(), "lightPass");
-        m_lightPass.render(scene, camera, window, manager, *query,
-                           m_geometryPass.getDepthTexture(),
+        m_lightPass.render(scene, camera, window, manager, *query, m_geometryPass.getDepthTexture(),
                            m_geometryPass.getNormalSpecularTexture());
     }
 
@@ -104,7 +99,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     {
         ScopedTimer timer(profiler(), "postProcessPass");
         m_postProcessPass.render(camera, window, manager, m_illuminationPass.getOutputTexture(),
-                                  m_geometryPass.getDepthTexture());
+                                 m_geometryPass.getDepthTexture());
     }
 
     FrameBuffer::setDefaultActive();
@@ -146,4 +141,3 @@ std::unique_ptr<DeferredRenderer> DeferredRenderer::create(IResourceManager* man
     }
     return renderer;
 }
-

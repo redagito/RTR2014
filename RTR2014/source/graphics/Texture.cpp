@@ -1,5 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "graphics/Texture.h"
+
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <cassert>
@@ -15,7 +16,7 @@ Texture::Texture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_
 }
 
 Texture::Texture(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
-                   ColorFormat format, bool createMipmaps)
+                 ColorFormat format, bool createMipmaps)
     : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // Init texture with data
@@ -36,7 +37,7 @@ Texture::Texture(unsigned int width, unsigned int height, ColorFormat format, bo
 }
 
 Texture::Texture(GLint id, bool hasMipmaps, unsigned int width, unsigned int height, GLint format,
-                   GLenum externalFormat)
+                 GLenum externalFormat)
 {
     m_valid = true;
     m_hasMipmaps = hasMipmaps;
@@ -56,8 +57,8 @@ Texture::~Texture()
     }
 }
 
-bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
-                    unsigned int height, ColorFormat format, bool createMipmaps)
+bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
+                   ColorFormat format, bool createMipmaps)
 {
     // Set format
     GLint internalFormat;
@@ -178,12 +179,12 @@ void Texture::saveAsPng(const std::string& file)
     std::vector<unsigned char> image;
     image.resize(m_width * m_height * 3);
     glGetTextureImage(m_textureId, 0, GL_RGB, GL_UNSIGNED_BYTE, image.size(), image.data());
-    stbi_write_png(file.c_str(), static_cast<int>(m_width), static_cast<int>(m_height), 3, image.data(),
-                   static_cast<int>(m_width * 3));
+    stbi_write_png(file.c_str(), static_cast<int>(m_width), static_cast<int>(m_height), 3,
+                   image.data(), static_cast<int>(m_width * 3));
 }
 
-bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
-                    unsigned int height, GLint format, bool createMipmaps)
+bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
+                   GLint format, bool createMipmaps)
 {
     // Sanity checks
     if (width == 0 || height == 0)
@@ -270,20 +271,20 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width,
 
     applyParameters(textureId, width, height);
 
-	// Load data
-	if (!image.empty())
-	{
-		// Load image data
-		glTextureSubImage2D(textureId, 0, 0, 0, width, height, m_externalFormat, type,
-			image.data());
-	}
+    // Load data
+    if (!image.empty())
+    {
+        // Load image data
+        glTextureSubImage2D(textureId, 0, 0, 0, width, height, m_externalFormat, type,
+                            image.data());
+    }
 
-	// Mipmaps
-	// Do not generate for 1x1 images
-	if (levels > 1)
-	{
-		glGenerateTextureMipmap(textureId);
-	}
+    // Mipmaps
+    // Do not generate for 1x1 images
+    if (levels > 1)
+    {
+        glGenerateTextureMipmap(textureId);
+    }
 
     // Clean up previously created id
     if (m_textureId != 0)

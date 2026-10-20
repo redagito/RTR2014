@@ -1,28 +1,21 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/GaussBlurPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include "resource/IResourceManager.h"
 
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Renderer.h"
+GaussBlurPass::GaussBlurPass() { return; }
 
-GaussBlurPass::GaussBlurPass()
-{
-    return;
-}
-
-GaussBlurPass::~GaussBlurPass()
-{
-    return;
-}
+GaussBlurPass::~GaussBlurPass() { return; }
 
 void GaussBlurPass::renderVertical(const IWindow& window, const IGraphicsResourceManager& manager,
                                    const std::shared_ptr<Texture>& texture)
@@ -103,7 +96,7 @@ bool GaussBlurPass::init(IResourceManager* manager)
     if (m_gaussBlurVerticalShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
-                   gaussBlurVerticalShaderFile.c_str());
+                      gaussBlurVerticalShaderFile.c_str());
         return false;
     }
 
@@ -114,7 +107,7 @@ bool GaussBlurPass::init(IResourceManager* manager)
     if (m_gaussBlurHorizontalShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
-                   gaussBlurHorizontalShaderFile.c_str());
+                      gaussBlurHorizontalShaderFile.c_str());
         return false;
     }
 

@@ -1,14 +1,12 @@
 #include "graphics/camera/FirstPersonCamera.h"
 
 #include <cmath>
-
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 
 FirstPersonCamera::FirstPersonCamera(const glm::vec3& position, const glm::vec3& target,
-                                       float fieldOfView, float aspectRatio, float zNear,
-                                       float zFar)
+                                     float fieldOfView, float aspectRatio, float zNear, float zFar)
 {
     lookAt(position, target);
     setProjection(fieldOfView, aspectRatio, zNear, zFar);
@@ -120,8 +118,7 @@ float FirstPersonCamera::getZNear() const { return m_zNear; }
 
 float FirstPersonCamera::getZFar() const { return m_zFar; }
 
-void FirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, float zNear,
-                                       float zFar)
+void FirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar)
 {
     m_fieldOfView = fieldOfView;
     m_aspectRatio = aspectRatio;

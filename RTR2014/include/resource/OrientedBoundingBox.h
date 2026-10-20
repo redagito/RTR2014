@@ -1,8 +1,7 @@
 #pragma once
 
-#include <vector>
-
 #include <glm/glm.hpp>
+#include <vector>
 
 /**
  * \brief Oriented bounding box.

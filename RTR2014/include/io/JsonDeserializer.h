@@ -1,16 +1,15 @@
 #pragma once
 
-#include <string>
 #include <concepts>
 #include <cstdint>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <string>
 
 // Json lib forward declare
 namespace Json
 {
-	class Value;
+class Value;
 }
 
 /**
@@ -46,8 +45,8 @@ template <typename T>
 [[nodiscard]] bool deserialize(const Json::Value& node, std::string& str);
 
 /**
-* \brief Deserialize functions for glm types.
-*/
+ * \brief Deserialize functions for glm types.
+ */
 [[nodiscard]] bool deserialize(const Json::Value& node, glm::vec2& val);
 [[nodiscard]] bool deserialize(const Json::Value& node, glm::vec3& val);
 [[nodiscard]] bool deserialize(const Json::Value& node, glm::vec4& val);

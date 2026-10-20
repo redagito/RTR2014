@@ -9,10 +9,15 @@ SceneObject::SceneObject()
 }
 
 SceneObject::SceneObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
-                           const glm::vec3& rotation, const glm::vec3& scale,
-                           const OrientedBoundingBox& localBounds, bool castsShadow)
-    : m_mesh(mesh), m_material(material), m_position(position), m_rotation(rotation), m_scale(scale),
-      m_localBounds(localBounds), m_castsShadow(castsShadow)
+                         const glm::vec3& rotation, const glm::vec3& scale,
+                         const OrientedBoundingBox& localBounds, bool castsShadow)
+    : m_mesh(mesh),
+      m_material(material),
+      m_position(position),
+      m_rotation(rotation),
+      m_scale(scale),
+      m_localBounds(localBounds),
+      m_castsShadow(castsShadow)
 {
     updateWorldBounds();
     return;

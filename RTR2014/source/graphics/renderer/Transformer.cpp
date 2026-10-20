@@ -102,9 +102,10 @@ const glm::mat4& Transformer::getRotationMatrix() const
 {
     if (m_rotation.m_matrixDirty)
     {
-        m_rotation.m_matrix = glm::rotate(glm::mat4(1.0f), m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f)) *
-                              glm::rotate(glm::mat4(1.0f), m_rotationVector.y, glm::vec3(0.f, 1.f, 0.f)) *
-                              glm::rotate(glm::mat4(1.0f), m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f));
+        m_rotation.m_matrix =
+            glm::rotate(glm::mat4(1.0f), m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f)) *
+            glm::rotate(glm::mat4(1.0f), m_rotationVector.y, glm::vec3(0.f, 1.f, 0.f)) *
+            glm::rotate(glm::mat4(1.0f), m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f));
         m_rotation.m_matrixDirty = false;
     }
     return m_rotation.m_matrix;
@@ -115,133 +116,135 @@ const glm::mat4& Transformer::getInverseRotationMatrix() const
     if (m_rotation.m_inverseDirty)
     {
         // Inverse of Rx*Ry*Rz is Rz(-z)*Ry(-y)*Rx(-x), order reversed
-        m_rotation.m_inverse = glm::rotate(glm::mat4(1.0f), -m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f)) *
-                               glm::rotate(glm::mat4(1.0f), -m_rotationVector.y, glm::vec3(0.f, 1.f, 0.f)) *
-                               glm::rotate(glm::mat4(1.0f), -m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f));
+        m_rotation.m_inverse =
+            glm::rotate(glm::mat4(1.0f), -m_rotationVector.z, glm::vec3(0.f, 0.f, 1.f)) *
+            glm::rotate(glm::mat4(1.0f), -m_rotationVector.y, glm::vec3(0.f, 1.f, 0.f)) *
+            glm::rotate(glm::mat4(1.0f), -m_rotationVector.x, glm::vec3(1.f, 0.f, 0.f));
         m_rotation.m_inverseDirty = false;
     }
     return m_rotation.m_inverse;
 }
 
-const glm::mat4& Transformer::getScaleMatrix() const 
+const glm::mat4& Transformer::getScaleMatrix() const
 {
-	if (m_scale.m_matrixDirty)
-	{
-		m_scale.m_matrix = glm::scale(glm::mat4(1.0f), m_scaleVector);
-		m_scale.m_matrixDirty = false;
-	}
-	return m_scale.m_matrix;
+    if (m_scale.m_matrixDirty)
+    {
+        m_scale.m_matrix = glm::scale(glm::mat4(1.0f), m_scaleVector);
+        m_scale.m_matrixDirty = false;
+    }
+    return m_scale.m_matrix;
 }
 
-const glm::mat4& Transformer::getInverseScaleMatrix() const 
+const glm::mat4& Transformer::getInverseScaleMatrix() const
 {
-	if (m_scale.m_inverseDirty)
-	{
-		// The inverse of a zero scale is not defined, a small one is used
-		// instead of an infinity.
-		const glm::vec3 inverseScale(
-			m_scaleVector.x != 0.f ? 1.f / m_scaleVector.x : 1e-6f,
-			m_scaleVector.y != 0.f ? 1.f / m_scaleVector.y : 1e-6f,
-			m_scaleVector.z != 0.f ? 1.f / m_scaleVector.z : 1e-6f);
-		m_scale.m_inverse = glm::scale(glm::mat4(1.0f), inverseScale);
-		m_scale.m_inverseDirty = false;
-	}
-	return m_scale.m_inverse;
+    if (m_scale.m_inverseDirty)
+    {
+        // The inverse of a zero scale is not defined, a small one is used
+        // instead of an infinity.
+        const glm::vec3 inverseScale(m_scaleVector.x != 0.f ? 1.f / m_scaleVector.x : 1e-6f,
+                                     m_scaleVector.y != 0.f ? 1.f / m_scaleVector.y : 1e-6f,
+                                     m_scaleVector.z != 0.f ? 1.f / m_scaleVector.z : 1e-6f);
+        m_scale.m_inverse = glm::scale(glm::mat4(1.0f), inverseScale);
+        m_scale.m_inverseDirty = false;
+    }
+    return m_scale.m_inverse;
 }
 
 const glm::mat4& Transformer::getModelMatrix() const
 {
-	if (m_model.m_matrixDirty)
-	{
-		m_model.m_matrix = getTranslationMatrix() * getRotationMatrix() * getScaleMatrix();
-		m_model.m_matrixDirty = false;
-	}
-	return m_model.m_matrix;
+    if (m_model.m_matrixDirty)
+    {
+        m_model.m_matrix = getTranslationMatrix() * getRotationMatrix() * getScaleMatrix();
+        m_model.m_matrixDirty = false;
+    }
+    return m_model.m_matrix;
 }
 
-const glm::mat4& Transformer::getInverseModelMatrix() const 
+const glm::mat4& Transformer::getInverseModelMatrix() const
 {
-	if (m_model.m_inverseDirty)
-	{
-		// Calculate with inverse matrices
-		m_model.m_inverse = getInverseScaleMatrix() * getInverseRotationMatrix() * getInverseTranslationMatrix();
-		m_model.m_inverseDirty = false;
-	}
-	return m_model.m_inverse;
+    if (m_model.m_inverseDirty)
+    {
+        // Calculate with inverse matrices
+        m_model.m_inverse =
+            getInverseScaleMatrix() * getInverseRotationMatrix() * getInverseTranslationMatrix();
+        m_model.m_inverseDirty = false;
+    }
+    return m_model.m_inverse;
 }
 
 const glm::mat4& Transformer::getViewMatrix() const
 {
-	// View matrix is set directly
-	// TODO Set actual camera parameters and calculate view matrix on the fly
-	return m_view.m_matrix;
+    // View matrix is set directly
+    // TODO Set actual camera parameters and calculate view matrix on the fly
+    return m_view.m_matrix;
 }
 
 const glm::mat4& Transformer::getInverseViewMatrix() const
 {
-	if (m_view.m_inverseDirty)
-	{
-		// Calculate with inverse matrix
-		m_view.m_inverse = glm::inverse(m_view.m_matrix);
-		m_view.m_inverseDirty = false;
-	}
-	return m_view.m_inverse;
+    if (m_view.m_inverseDirty)
+    {
+        // Calculate with inverse matrix
+        m_view.m_inverse = glm::inverse(m_view.m_matrix);
+        m_view.m_inverseDirty = false;
+    }
+    return m_view.m_inverse;
 }
 
 const glm::mat4& Transformer::getProjectionMatrix() const
 {
-	// View projection matrix is set directly
-	// TODO Set actual camera parameters and calculate projection matrix on the fly
-	return m_projection.m_matrix;
+    // View projection matrix is set directly
+    // TODO Set actual camera parameters and calculate projection matrix on the fly
+    return m_projection.m_matrix;
 }
 
 const glm::mat4& Transformer::getInverseProjectionMatrix() const
 {
-	if (m_projection.m_inverseDirty)
-	{
-		// Calculate with inverse matrix
-		m_projection.m_inverse = glm::inverse(m_projection.m_matrix);
-		m_projection.m_inverseDirty = false;
-	}
-	return m_projection.m_inverse;
+    if (m_projection.m_inverseDirty)
+    {
+        // Calculate with inverse matrix
+        m_projection.m_inverse = glm::inverse(m_projection.m_matrix);
+        m_projection.m_inverseDirty = false;
+    }
+    return m_projection.m_inverse;
 }
 
 const glm::mat4& Transformer::getViewProjectionMatrix() const
 {
-	if (m_viewProjection.m_matrixDirty)
-	{
-		m_viewProjection.m_matrix = getProjectionMatrix() * getViewMatrix();
-		m_viewProjection.m_matrixDirty = false;
-	}
-	return m_viewProjection.m_matrix;
+    if (m_viewProjection.m_matrixDirty)
+    {
+        m_viewProjection.m_matrix = getProjectionMatrix() * getViewMatrix();
+        m_viewProjection.m_matrixDirty = false;
+    }
+    return m_viewProjection.m_matrix;
 }
 
 const glm::mat4& Transformer::getInverseViewProjectionMatrix() const
 {
-	if (m_viewProjection.m_inverseDirty)
-	{
-		m_viewProjection.m_inverse = getInverseViewMatrix() * getInverseProjectionMatrix();
-		m_viewProjection.m_inverseDirty = false;
-	}
-	return m_viewProjection.m_inverse;
+    if (m_viewProjection.m_inverseDirty)
+    {
+        m_viewProjection.m_inverse = getInverseViewMatrix() * getInverseProjectionMatrix();
+        m_viewProjection.m_inverseDirty = false;
+    }
+    return m_viewProjection.m_inverse;
 }
 
 const glm::mat4& Transformer::getModelViewProjectionMatrix() const
 {
-	if (m_modelViewProjection.m_matrixDirty)
-	{
-		m_modelViewProjection.m_matrix = getViewProjectionMatrix() * getModelMatrix();
-		m_modelViewProjection.m_matrixDirty = false;
-	}
-	return m_modelViewProjection.m_matrix;
+    if (m_modelViewProjection.m_matrixDirty)
+    {
+        m_modelViewProjection.m_matrix = getViewProjectionMatrix() * getModelMatrix();
+        m_modelViewProjection.m_matrixDirty = false;
+    }
+    return m_modelViewProjection.m_matrix;
 }
 
 const glm::mat4& Transformer::getInverseModelViewProjectionMatrix() const
 {
-	if (m_modelViewProjection.m_inverseDirty)
-	{
-		m_modelViewProjection.m_inverse = getInverseModelMatrix() * getInverseViewProjectionMatrix();
-		m_modelViewProjection.m_inverseDirty = false;
-	}
-	return m_modelViewProjection.m_inverse;
+    if (m_modelViewProjection.m_inverseDirty)
+    {
+        m_modelViewProjection.m_inverse =
+            getInverseModelMatrix() * getInverseViewProjectionMatrix();
+        m_modelViewProjection.m_inverseDirty = false;
+    }
+    return m_modelViewProjection.m_inverse;
 }

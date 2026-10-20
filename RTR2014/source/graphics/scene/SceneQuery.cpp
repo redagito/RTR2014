@@ -1,7 +1,7 @@
 #include "graphics/scene/SceneQuery.h"
 
-#include "graphics/scene/Scene.h"
 #include "graphics/ICamera.h"
+#include "graphics/scene/Scene.h"
 
 SceneQuery::SceneQuery(unsigned int objectStorage, unsigned int lightStorage)
 {
@@ -68,7 +68,4 @@ void SceneQuery::addObject(SceneObjectId id) { m_visibleObjects.push_back(id); }
 
 void SceneQuery::addPointLight(SceneObjectId id) { m_visiblePointLights.push_back(id); }
 
-void SceneQuery::addDirectionalLight(SceneObjectId id)
-{
-    m_visibleDirectionalLights.push_back(id);
-}
+void SceneQuery::addDirectionalLight(SceneObjectId id) { m_visibleDirectionalLights.push_back(id); }

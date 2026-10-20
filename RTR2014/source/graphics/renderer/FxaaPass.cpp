@@ -1,28 +1,21 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/FxaaPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include "resource/IResourceManager.h"
 
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Renderer.h"
+FxaaPass::FxaaPass() { return; }
 
-FxaaPass::FxaaPass()
-{
-    return;
-}
-
-FxaaPass::~FxaaPass()
-{
-    return;
-}
+FxaaPass::~FxaaPass() { return; }
 
 void FxaaPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
                       const std::shared_ptr<Texture>& texture)

@@ -47,10 +47,10 @@ bool Profiler::writeReport(const std::string& file) const
     for (const Section& section : m_sections)
     {
         const double average = section.count > 0 ? section.total / section.count : 0.0;
-        out << std::left << std::setw(34) << section.name << std::right << std::setw(9) << section.count
-            << std::fixed << std::setprecision(2) << std::setw(14) << section.total
-            << std::setw(12) << average << std::setw(12) << section.min << std::setw(12) << section.max
-            << "\n";
+        out << std::left << std::setw(34) << section.name << std::right << std::setw(9)
+            << section.count << std::fixed << std::setprecision(2) << std::setw(14) << section.total
+            << std::setw(12) << average << std::setw(12) << section.min << std::setw(12)
+            << section.max << "\n";
     }
     return out.good();
 }
@@ -63,7 +63,8 @@ ScopedTimer::ScopedTimer(Profiler& profiler, const std::string& name)
 ScopedTimer::~ScopedTimer()
 {
     const double elapsed =
-        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - m_start).count();
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - m_start)
+            .count();
     m_profiler.add(m_name, elapsed);
 }
 

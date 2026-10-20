@@ -1,15 +1,13 @@
-#include <catch2/catch_test_macros.hpp>
-
 #include <algorithm>
+#include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <glm/glm.hpp>
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include <glm/glm.hpp>
 
 #include "resource/IResourceListener.h"
 #include "resource/OrientedBoundingBox.h"
@@ -170,12 +168,13 @@ class ReentrantMeshListener : public IResourceListener
 };
 
 // The same object loaded with and without preloading must yield the same data.
-const char* kObj = "v 0 0 0\n"
-                    "v 1 0 0\n"
-                    "v 0 1 0\n"
-                    "vn 0 0 1\n"
-                    "vt 0 0\n"
-                    "f 1/1/1 2/1/1 3/1/1\n";
+const char* kObj =
+    "v 0 0 0\n"
+    "v 1 0 0\n"
+    "v 0 1 0\n"
+    "vn 0 0 1\n"
+    "vt 0 0\n"
+    "f 1/1/1 2/1/1 3/1/1\n";
 
 bool contains(const OrientedBoundingBox& box, const glm::vec3& point)
 {
@@ -190,7 +189,7 @@ bool contains(const OrientedBoundingBox& box, const glm::vec3& point)
     }
     return true;
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("loadImage rejects a file that is not a png", "[resource]")
 {
@@ -297,7 +296,8 @@ TEST_CASE("the shader program file is known when the listeners are notified", "[
     REQUIRE(listener.m_file == shaderProgram.path());
 }
 
-TEST_CASE("loading a preloaded mesh from a listener does not publish an empty mesh", "[resource]"){
+TEST_CASE("loading a preloaded mesh from a listener does not publish an empty mesh", "[resource]")
+{
     TempObj file(kObj);
 
     ResourceManager manager;

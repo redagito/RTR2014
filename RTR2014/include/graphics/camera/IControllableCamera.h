@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glm/glm.hpp"
-
 #include "graphics/ICamera.h"
 
 class IControllableCamera : public ICamera
@@ -10,10 +9,10 @@ class IControllableCamera : public ICamera
     virtual ~IControllableCamera();
 
     /**
-    * \brief Points the camera at a target.
-    *
-    * The camera has no roll, its up axis is the world up axis.
-    */
+     * \brief Points the camera at a target.
+     *
+     * The camera has no roll, its up axis is the world up axis.
+     */
     virtual glm::vec3 getPosition() const = 0;
     virtual void setPosition(const glm::vec3& position) = 0;
 

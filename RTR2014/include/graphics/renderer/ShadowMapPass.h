@@ -14,11 +14,11 @@ class ShaderProgram;
 class Texture;
 
 /**
-* \brief Renders a shadow map from a directional light.
-*
-* Produces a depth map of the scene as seen from the light, used for shadow
-* lookup when lighting the directional light volume.
-*/
+ * \brief Renders a shadow map from a directional light.
+ *
+ * Produces a depth map of the scene as seen from the light, used for shadow
+ * lookup when lighting the directional light volume.
+ */
 class ShadowMapPass
 {
    public:
@@ -26,19 +26,19 @@ class ShadowMapPass
     ~ShadowMapPass();
 
     /**
-    * \brief Initializes the shadow map pass resources.
-    */
+     * \brief Initializes the shadow map pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Renders the shadow map from the given camera position.
-    */
+     * \brief Renders the shadow map from the given camera position.
+     */
     void render(const IScene& scene, const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager);
 
     /**
-    * \brief Returns the shadow map depth texture.
-    */
+     * \brief Returns the shadow map depth texture.
+     */
     const std::shared_ptr<Texture>& getShadowMap() const;
 
    private:

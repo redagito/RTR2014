@@ -1,28 +1,21 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/IlluminationPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include "resource/IResourceManager.h"
 
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Renderer.h"
+IlluminationPass::IlluminationPass() { return; }
 
-IlluminationPass::IlluminationPass()
-{
-    return;
-}
-
-IlluminationPass::~IlluminationPass()
-{
-    return;
-}
+IlluminationPass::~IlluminationPass() { return; }
 
 void IlluminationPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
                               const std::shared_ptr<Texture>& lightTexture,
@@ -79,10 +72,9 @@ bool IlluminationPass::init(IResourceManager* manager)
     if (m_illuminationPassShaderId == invalidResource)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
-                   illuminationPassShaderFile.c_str());
+                      illuminationPassShaderFile.c_str());
         return false;
     }
-
 
     // Screen quad mesh
     std::string quadMesh = "data/mesh/screen_quad.obj";
@@ -94,7 +86,6 @@ bool IlluminationPass::init(IResourceManager* manager)
         return false;
     }
 
-
     // FBO
     m_illuminationPassTexture = std::make_shared<Texture>();
     if (!m_illuminationPassTexture->init(800, 600, GL_RGBA16F))
@@ -105,7 +96,6 @@ bool IlluminationPass::init(IResourceManager* manager)
     m_illumationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
 
     // TODO Check FBO
-
 
     return true;
 }

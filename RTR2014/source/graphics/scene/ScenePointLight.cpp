@@ -3,7 +3,7 @@
 ScenePointLight::ScenePointLight() {}
 
 ScenePointLight::ScenePointLight(const glm::vec3& position, float radius, const glm::vec3& color,
-                                   float intensity, bool castsShadow)
+                                 float intensity, bool castsShadow)
     : m_position(position),
       m_radius(radius),
       m_color(color),

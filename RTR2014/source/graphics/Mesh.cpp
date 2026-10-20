@@ -1,12 +1,13 @@
-#include <spdlog/spdlog.h>
 #include "graphics/Mesh.h"
 
-#include "graphics/renderer/core/RendererCoreConfig.h"
+#include <spdlog/spdlog.h>
 
 #include <cassert>
 
+#include "graphics/renderer/core/RendererCoreConfig.h"
+
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
-             const std::vector<float>& normals, const std::vector<float>& uvs, PrimitiveType type)
+           const std::vector<float>& normals, const std::vector<float>& uvs, PrimitiveType type)
     : m_vertices(nullptr),
       m_indices(nullptr),
       m_normals(nullptr),
@@ -20,8 +21,8 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 Mesh::~Mesh() { return; }
 
 bool Mesh::init(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
-                 const std::vector<float>& normals, const std::vector<float>& uvs,
-                 PrimitiveType type)
+                const std::vector<float>& normals, const std::vector<float>& uvs,
+                PrimitiveType type)
 {
     if (vertices.empty() || type == PrimitiveType::Invalid)
     {

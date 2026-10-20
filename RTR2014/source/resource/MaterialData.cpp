@@ -1,7 +1,7 @@
 #include "resource/MaterialData.h"
 
-MaterialData::MaterialData(ResourceId diffuse, ResourceId normal, ResourceId specular, ResourceId glow,
-                     ResourceId alpha, ResourceId customShader)
+MaterialData::MaterialData(ResourceId diffuse, ResourceId normal, ResourceId specular,
+                           ResourceId glow, ResourceId alpha, ResourceId customShader)
     : m_diffuse(diffuse),
       m_normal(normal),
       m_specular(specular),

@@ -1,8 +1,8 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/core/VertexBuffer.h"
 
-#include <cassert>
+#include <spdlog/spdlog.h>
 
+#include <cassert>
 
 VertexBuffer::VertexBuffer(const std::vector<float>& data, GLenum usage)
     : m_bufferId(0), m_valid(false), m_size((unsigned int)data.size()), m_usage(usage)
@@ -32,8 +32,7 @@ GLuint VertexBuffer::getId() const { return m_bufferId; }
 
 unsigned int VertexBuffer::getSize() const { return m_size; }
 
-VertexBuffer::VertexBuffer(GLenum usage)
-    : m_bufferId(0), m_valid(false), m_size(0), m_usage(usage)
+VertexBuffer::VertexBuffer(GLenum usage) : m_bufferId(0), m_valid(false), m_size(0), m_usage(usage)
 {
     glCreateBuffers(1, &m_bufferId);
     if (m_bufferId == 0)

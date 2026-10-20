@@ -3,14 +3,14 @@
 #include <glm/glm.hpp>
 
 /**
-* \brief Point light object data.
-* TODO Add constructors
-*/
+ * \brief Point light object data.
+ * TODO Add constructors
+ */
 struct ScenePointLight
 {
     ScenePointLight();
     ScenePointLight(const glm::vec3& position, float radius, const glm::vec3& color,
-                     float intensity, bool castsShadow);
+                    float intensity, bool castsShadow);
 
     glm::vec3 m_position = glm::vec3(0.f); /**< Default position is origin at 0/0/0. */
     float m_radius = 1.f;                  /**< 1 unit light radius. */

@@ -14,12 +14,12 @@ Frustum::Frustum(const glm::mat4& viewProjection)
                    viewProjection[3][3]);
 
     glm::vec4 planes[6] = {
-        row3 + row0, // Left
-        row3 - row0, // Right
-        row3 + row1, // Bottom
-        row3 - row1, // Top
-        row3 + row2, // Near
-        row3 - row2  // Far
+        row3 + row0,  // Left
+        row3 - row0,  // Right
+        row3 + row1,  // Bottom
+        row3 - row1,  // Top
+        row3 + row2,  // Near
+        row3 - row2   // Far
     };
 
     for (int i = 0; i < 6; ++i)

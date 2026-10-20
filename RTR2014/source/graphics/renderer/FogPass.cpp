@@ -1,32 +1,26 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/FogPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include "resource/IResourceManager.h"
 
-#include "graphics/ICamera.h"
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Renderer.h"
+FogPass::FogPass() { return; }
 
-FogPass::FogPass()
-{
-    return;
-}
-
-FogPass::~FogPass()
-{
-    return;
-}
+FogPass::~FogPass() { return; }
 
 void FogPass::render(const ICamera& camera, const IWindow& window,
-                     const IGraphicsResourceManager& manager, const std::shared_ptr<Texture>& texture,
+                     const IGraphicsResourceManager& manager,
+                     const std::shared_ptr<Texture>& texture,
                      const std::shared_ptr<Texture>& depthTexture)
 {
     // Get fog shader

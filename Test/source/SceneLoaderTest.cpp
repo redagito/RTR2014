@@ -1,5 +1,4 @@
 #include <catch2/catch_test_macros.hpp>
-
 #include <fstream>
 #include <string>
 
@@ -25,7 +24,7 @@ class TempJson
    private:
     std::string m_path = "rtr2014_tmp_scene.json";
 };
-} // namespace
+}  // namespace
 
 TEST_CASE("SceneLoader rejects a scene object that is not an object node", "[io]")
 {
@@ -66,9 +65,13 @@ TEST_CASE("SceneLoader rejects a missing file", "[io]")
 
 TEST_CASE("SceneLoader loads music and sound emitters", "[io]")
 {
-    TempJson file(std::string("{\"music\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+    TempJson file(std::string("{\"music\": \"") +
+                  RTR_TEST_DATA_DIR
+                  "/tone.mp3\","
                   "\"scene_objects\": [],"
-                  "\"sound_emitters\": [{\"sound\": \"" + RTR_TEST_DATA_DIR "/tone.mp3\","
+                  "\"sound_emitters\": [{\"sound\": \"" +
+                  RTR_TEST_DATA_DIR
+                  "/tone.mp3\","
                   "\"position\": [-8, 0.5, 31], \"radius\": 10}]}");
 
     ResourceManager resourceManager;
@@ -137,7 +140,9 @@ TEST_CASE("SceneLoader rejects a sound emitter without a sound node", "[io]")
 TEST_CASE("SceneLoader rejects a sound emitter with an invalid position", "[io]")
 {
     TempJson file(std::string("{\"scene_objects\": [],"
-                  "\"sound_emitters\": [{\"sound\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+                              "\"sound_emitters\": [{\"sound\": \"") +
+                  RTR_TEST_DATA_DIR
+                  "/tone.mp3\","
                   "\"position\": \"here\", \"radius\": 5}]}");
 
     ResourceManager resourceManager;
@@ -152,7 +157,9 @@ TEST_CASE("SceneLoader rejects a sound emitter with an invalid position", "[io]"
 TEST_CASE("SceneLoader rejects a sound emitter with a non-positive radius", "[io]")
 {
     TempJson file(std::string("{\"scene_objects\": [],"
-                  "\"sound_emitters\": [{\"sound\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+                              "\"sound_emitters\": [{\"sound\": \"") +
+                  RTR_TEST_DATA_DIR
+                  "/tone.mp3\","
                   "\"position\": [0, 0, 0], \"radius\": 0}]}");
 
     ResourceManager resourceManager;

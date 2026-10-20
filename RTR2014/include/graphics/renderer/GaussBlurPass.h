@@ -10,11 +10,11 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Separable gaussian blur of a scene texture.
-*
-* The vertical and horizontal passes are applied in sequence to produce a
-* symmetric blur.
-*/
+ * \brief Separable gaussian blur of a scene texture.
+ *
+ * The vertical and horizontal passes are applied in sequence to produce a
+ * symmetric blur.
+ */
 class GaussBlurPass
 {
    public:
@@ -22,19 +22,19 @@ class GaussBlurPass
     ~GaussBlurPass();
 
     /**
-    * \brief Initializes the gaussian blur pass resources.
-    */
+     * \brief Initializes the gaussian blur pass resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Blurs the scene texture vertically.
-    */
+     * \brief Blurs the scene texture vertically.
+     */
     void renderVertical(const IWindow& window, const IGraphicsResourceManager& manager,
                         const std::shared_ptr<Texture>& texture);
 
     /**
-    * \brief Blurs the scene texture horizontally.
-    */
+     * \brief Blurs the scene texture horizontally.
+     */
     void renderHorizontal(const IWindow& window, const IGraphicsResourceManager& manager,
                           const std::shared_ptr<Texture>& texture);
 

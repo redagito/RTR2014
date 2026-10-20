@@ -5,9 +5,9 @@
 #include "graphics/renderer/DepthOfFieldPass.h"
 #include "graphics/renderer/DisplayPass.h"
 #include "graphics/renderer/FogPass.h"
+#include "graphics/renderer/FrameBuffer.h"
 #include "graphics/renderer/FxaaPass.h"
 #include "graphics/renderer/GaussBlurPass.h"
-#include "graphics/renderer/FrameBuffer.h"
 #include "graphics/renderer/Transformer.h"
 
 class IGraphicsResourceManager;
@@ -18,11 +18,11 @@ class IWindow;
 class Texture;
 
 /**
-* \brief Runs the post processing chain on the lit scene.
-*
-* Applies FXAA, fog and depth of field in sequence, using ping-pong buffers
-* to pass the result between the steps.
-*/
+ * \brief Runs the post processing chain on the lit scene.
+ *
+ * Applies FXAA, fog and depth of field in sequence, using ping-pong buffers
+ * to pass the result between the steps.
+ */
 class PostProcessPass
 {
    public:
@@ -30,20 +30,20 @@ class PostProcessPass
     ~PostProcessPass();
 
     /**
-    * \brief Initializes the post processing resources.
-    */
+     * \brief Initializes the post processing resources.
+     */
     bool init(IResourceManager* manager);
 
     /**
-    * \brief Runs the post processing chain and returns the result.
-    */
+     * \brief Runs the post processing chain and returns the result.
+     */
     void render(const ICamera& camera, const IWindow& window,
                 const IGraphicsResourceManager& manager, const std::shared_ptr<Texture>& texture,
                 const std::shared_ptr<Texture>& depthTexture);
 
     /**
-    * \brief Returns the texture holding the post processed scene.
-    */
+     * \brief Returns the texture holding the post processed scene.
+     */
     const std::shared_ptr<Texture>& getOutputTexture() const;
 
    private:

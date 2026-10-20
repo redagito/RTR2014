@@ -1,6 +1,3 @@
 #include "input/IInputListener.h"
 
-IInputListener::~IInputListener()
-{
-	return;
-}
+IInputListener::~IInputListener() { return; }

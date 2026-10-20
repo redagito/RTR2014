@@ -1,26 +1,26 @@
 #include "util/TimeStamp.h"
 
-#include <ctime>
-#include <string>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
+#include <string>
 
 std::string createTimeStamp()
 {
-	// Create timestamp
-	time_t rawtime;
-	struct tm timeinfo;
-	char buffer[20];
-	memset(buffer, 0, sizeof(buffer));
+    // Create timestamp
+    time_t rawtime;
+    struct tm timeinfo;
+    char buffer[20];
+    memset(buffer, 0, sizeof(buffer));
 
-	time(&rawtime);
+    time(&rawtime);
 #ifdef _WIN32
-	localtime_s(&timeinfo, &rawtime);
+    localtime_s(&timeinfo, &rawtime);
 #else
-	localtime_r(&rawtime, &timeinfo);
+    localtime_r(&rawtime, &timeinfo);
 #endif
-	strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", &timeinfo);
+    strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", &timeinfo);
 
-	// Create log file name
-	return std::string(buffer);
+    // Create log file name
+    return std::string(buffer);
 }

@@ -1,8 +1,8 @@
 #include "graphics/renderer/FrameBuffer.h"
 
-#include <algorithm>
-
 #include <spdlog/spdlog.h>
+
+#include <algorithm>
 
 #include "graphics/Texture.h"
 #include "graphics/renderer/RenderBuffer.h"
@@ -97,12 +97,12 @@ void FrameBuffer::resize(unsigned int width, unsigned int height)
     }
     for (auto& entry : m_renderBuffers)
     {
-		// Need renderbuffer connot be resized
-		// Instead they are recreated and reattached
-		if (entry.second->resize(width, height))
-		{
-			attach(entry.second, entry.first);
-		}
+        // Need renderbuffer connot be resized
+        // Instead they are recreated and reattached
+        if (entry.second->resize(width, height))
+        {
+            attach(entry.second, entry.first);
+        }
     }
 }
 
@@ -113,7 +113,7 @@ bool isColorAttachment(GLenum attachment)
     return attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
            attachment != GL_DEPTH_STENCIL_ATTACHMENT;
 }
-} // namespace
+}  // namespace
 
 void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachment)
 {
@@ -150,10 +150,7 @@ void FrameBuffer::updateDrawBuffers()
     std::sort(m_drawBuffers.begin(), m_drawBuffers.end());
 }
 
-void FrameBuffer::setDefaultActive()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+void FrameBuffer::setDefaultActive() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLenum attachment)
 {

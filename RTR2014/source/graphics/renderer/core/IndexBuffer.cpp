@@ -1,8 +1,8 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/core/IndexBuffer.h"
 
-#include <cassert>
+#include <spdlog/spdlog.h>
 
+#include <cassert>
 
 IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices, GLenum usage)
     : m_bufferId(0), m_size(0), m_valid(false)

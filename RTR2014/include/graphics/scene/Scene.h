@@ -1,9 +1,8 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-
 #include <glm/glm.hpp>
+#include <memory>
+#include <vector>
 
 #include "graphics/IScene.h"
 
@@ -12,8 +11,8 @@ struct ScenePointLight;
 struct SceneDirectionalLight;
 
 /**
-* \brief Simple scene implementation.
-*/
+ * \brief Simple scene implementation.
+ */
 class Scene : public IScene
 {
    public:

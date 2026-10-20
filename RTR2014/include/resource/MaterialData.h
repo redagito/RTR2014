@@ -9,7 +9,7 @@ struct MaterialData
 {
     MaterialData();
     MaterialData(ResourceId diffuse, ResourceId normal, ResourceId specular, ResourceId glow,
-              ResourceId alpha, ResourceId customShader);
+                 ResourceId alpha, ResourceId customShader);
     ResourceId m_diffuse;
     ResourceId m_normal;
     ResourceId m_specular;

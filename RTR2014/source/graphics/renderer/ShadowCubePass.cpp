@@ -1,22 +1,21 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/ShadowCubePass.h"
 
-#include <string>
+#include <spdlog/spdlog.h>
 
 #include <glm/ext/matrix_transform.hpp>
+#include <string>
 
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
-#include "graphics/ICamera.h"
 #include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/Transformer.h"
-
 #include "resource/IResourceManager.h"
 
 const ShadowCubePass::CameraDirection ShadowCubePass::cameraDirections[6] = {
@@ -27,18 +26,12 @@ const ShadowCubePass::CameraDirection ShadowCubePass::cameraDirections[6] = {
     {4, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
     {5, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)}};
 
-ShadowCubePass::ShadowCubePass()
-{
-    return;
-}
+ShadowCubePass::ShadowCubePass() { return; }
 
-ShadowCubePass::~ShadowCubePass()
-{
-    return;
-}
+ShadowCubePass::~ShadowCubePass() { return; }
 
 void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
-                             const IGraphicsResourceManager& manager)
+                            const IGraphicsResourceManager& manager)
 {
     m_shadowCubePassShader = manager.getShaderProgram(m_shadowCubePassShaderId);
     if (m_shadowCubePassShader == nullptr)
@@ -72,7 +65,8 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_shadowCubeBuffer.getId());
         glNamedFramebufferTextureLayer(m_shadowCubeBuffer.getId(), GL_COLOR_ATTACHMENT0,
-                                m_shadowCubeTexture->getId(), 0, cameraDirections[i].cubemapFace);
+                                       m_shadowCubeTexture->getId(), 0,
+                                       cameraDirections[i].cubemapFace);
         glNamedFramebufferDrawBuffer(m_shadowCubeBuffer.getId(), GL_COLOR_ATTACHMENT0);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -102,7 +96,7 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
             glm::vec3 position;
             glm::vec3 rotation;
             glm::vec3 scale;
-        bool castsShadow = true;
+            bool castsShadow = true;
 
             // Retrieve object data
             if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
@@ -130,10 +124,9 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
 
                 // Forward draw call
                 m_shadowCubePassShader->setActive();
-                Renderer::bindMaterial(m_shadowCubePassShader, material,
-                                       transformer.getTranslationMatrix(),
-                                       transformer.getRotationMatrix(), transformer.getScaleMatrix(),
-                                       manager);
+                Renderer::bindMaterial(
+                    m_shadowCubePassShader, material, transformer.getTranslationMatrix(),
+                    transformer.getRotationMatrix(), transformer.getScaleMatrix(), manager);
                 Renderer::draw(mesh);
             }
         }
@@ -183,8 +176,7 @@ bool ShadowCubePass::init(IResourceManager* manager)
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    m_shadowCubeTexture = std::make_shared<Texture>(textureId, false, 1024, 1024, GL_R32F,
-                                                     GL_RED);
+    m_shadowCubeTexture = std::make_shared<Texture>(textureId, false, 1024, 1024, GL_R32F, GL_RED);
 
     // The depth attachment is registered with the frame buffer, the color
     // attachment is a layer of the cube map that is pointed at the face that
@@ -194,7 +186,6 @@ bool ShadowCubePass::init(IResourceManager* manager)
     glNamedFramebufferDrawBuffer(m_shadowCubeBuffer.getId(), GL_NONE);
     glNamedFramebufferReadBuffer(m_shadowCubeBuffer.getId(), GL_NONE);
 
-
     spdlog::info("Shadow cube buffer state: {}.", m_shadowCubeBuffer.getState().c_str());
 
     // Reset framebuffer
@@ -203,7 +194,4 @@ bool ShadowCubePass::init(IResourceManager* manager)
     return true;
 }
 
-const std::shared_ptr<Texture>& ShadowCubePass::getShadowMap() const
-{
-    return m_shadowCubeTexture;
-}
+const std::shared_ptr<Texture>& ShadowCubePass::getShadowMap() const { return m_shadowCubeTexture; }

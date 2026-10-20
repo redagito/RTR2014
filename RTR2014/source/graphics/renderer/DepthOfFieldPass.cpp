@@ -1,29 +1,22 @@
-#include <spdlog/spdlog.h>
 #include "graphics/renderer/DepthOfFieldPass.h"
+
+#include <spdlog/spdlog.h>
 
 #include <string>
 
+#include "graphics/ICamera.h"
+#include "graphics/IGraphicsResourceManager.h"
+#include "graphics/IWindow.h"
+#include "graphics/Mesh.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Texture.h"
+#include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
-
 #include "resource/IResourceManager.h"
 
-#include "graphics/ICamera.h"
-#include "graphics/IWindow.h"
-#include "graphics/IGraphicsResourceManager.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/renderer/Renderer.h"
+DepthOfFieldPass::DepthOfFieldPass() { return; }
 
-DepthOfFieldPass::DepthOfFieldPass()
-{
-    return;
-}
-
-DepthOfFieldPass::~DepthOfFieldPass()
-{
-    return;
-}
+DepthOfFieldPass::~DepthOfFieldPass() { return; }
 
 void DepthOfFieldPass::render(const ICamera& camera, const IWindow& window,
                               const IGraphicsResourceManager& manager,
@@ -89,7 +82,8 @@ bool DepthOfFieldPass::init(IResourceManager* manager)
     // Check if ok
     if (m_depthOfFieldPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", depthOfFieldShaderFile.c_str());
+        spdlog::error("Failed to initialize the shader from file {}.",
+                      depthOfFieldShaderFile.c_str());
         return false;
     }
 

@@ -1,12 +1,12 @@
 #pragma once
 
+#include <spdlog/details/log_msg.h>
+#include <spdlog/sinks/base_sink.h>
+
 #include <list>
 #include <mutex>
 #include <string>
 #include <unordered_map>
-
-#include <spdlog/details/log_msg.h>
-#include <spdlog/sinks/base_sink.h>
 
 /**
  * \brief Stores debug data.
