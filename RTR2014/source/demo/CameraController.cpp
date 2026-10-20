@@ -158,8 +158,6 @@ void CameraController::animate(float dt)
 {
     if (m_inputProvider != nullptr && m_camera != nullptr)
     {
-        animateFeatures(dt);
-
         if (m_isRunningSequence)
         {
             animateSequence(dt);
@@ -169,11 +167,6 @@ void CameraController::animate(float dt)
             animateManual(dt);
         }
     }
-}
-
-void CameraController::animateFeatures(float dt)
-{
-    // tODO
 }
 
 void CameraController::animateSequence(float dt)

@@ -33,7 +33,6 @@ class CameraController : public IInputListener, public IWindowListener
 
    private:
     // TODO "animate" is a stupid name
-    void animateFeatures(float dt);
     void animateSequence(float dt);
     void animateManual(float dt);
 

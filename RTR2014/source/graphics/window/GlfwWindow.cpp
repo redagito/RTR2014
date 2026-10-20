@@ -61,6 +61,8 @@ GlfwWindow::~GlfwWindow()
     {
         glfwDestroyWindow(m_window);
         m_window = nullptr;
+        // The window owns the library, it is terminated with the last window.
+        glfwTerminate();
     }
 }
 
@@ -72,7 +74,6 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
         return false;
     }
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

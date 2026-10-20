@@ -63,9 +63,8 @@ RTRDemo::~RTRDemo()
     m_forwardRenderer.reset();
     m_graphicsResourceManager.reset();
 
-    // The window owns the graphics context
+    // The window owns the graphics context and the glfw library
     m_window.reset();
-    glfwTerminate();
 
     spdlog::info("Shutdown complete.");
 }
