@@ -575,61 +575,21 @@ bool SceneLoader::loadAnimationController(const Json::Value& node, IScene& scene
 
 bool SceneLoader::load(const Json::Value& node, const std::string& name, float& f)
 {
-    if (!node.isObject())
-    {
-        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
-        return false;
-    }
-    if (!deserialize(node[name], f))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
+    return loadParam(node, name, f);
 }
 
 bool SceneLoader::load(const Json::Value& node, const std::string& name, bool& b)
 {
-    if (!node.isObject())
-    {
-        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
-        return false;
-    }
-    if (!deserialize(node[name], b))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
+    return loadParam(node, name, b);
 }
 
 bool SceneLoader::load(const Json::Value& node, const std::string& name, glm::vec3& vec)
 {
-    if (!node.isObject())
-    {
-        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
-        return false;
-    }
-    if (!deserialize(node[name], vec))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
+    return loadParam(node, name, vec);
 }
 
 bool SceneLoader::load(const Json::Value& node, const std::string& name, std::string& str)
 {
-    if (!node.isObject())
-    {
-        spdlog::error("Node is not an object while loading '{}' parameter.", name.c_str());
-        return false;
-    }
-    if (!deserialize(node[name], str))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
+    return loadParam(node, name, str);
 }
 

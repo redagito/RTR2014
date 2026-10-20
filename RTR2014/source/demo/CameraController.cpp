@@ -50,47 +50,6 @@ void CameraController::setInputProvider(IInputProvider* provider)
         m_inputProvider->addInputListener(this);
     }
 }
-// TODO methods copied from SceneLoader. Extract to utility class!
-bool load(const Json::Value& node, const std::string& name, std::string& str)
-{
-    if (!deserialize(node[name], str))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool load(const Json::Value& node, const std::string& name, glm::vec3& vec)
-{
-    if (!deserialize(node[name], vec))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool load(const Json::Value& node, const std::string& name, float& f)
-{
-    if (!deserialize(node[name], f))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool load(const Json::Value& node, const std::string& name, bool& b)
-{
-    if (!deserialize(node[name], b))
-    {
-        spdlog::error("Failed to load '{}' parameter.", name.c_str());
-        return false;
-    }
-    return true;
-}
-
 bool CameraController::loadSequence(std::string file)
 {
     m_isRunningSequence = false;
@@ -144,35 +103,35 @@ bool CameraController::loadSequence(std::string file)
         bool fxaaActive;
         bool fogActive;
 
-        if (!load(node[i], "position", position))
+        if (!loadParam(node[i], "position", position))
         {
             spdlog::error("Failed loading node 'position' for element #{}.", i);
             success = false;
             break;
         }
 
-        if (!load(node[i], "orientation", orientation))
+        if (!loadParam(node[i], "orientation", orientation))
         {
             spdlog::error("Failed loading node 'orientation' for element #{}.", i);
             success = false;
             break;
         }
 
-        if (!load(node[i], "timestamp", timestamp))
+        if (!loadParam(node[i], "timestamp", timestamp))
         {
             spdlog::error("Failed loading node 'timestamp' for element #{}.", i);
             success = false;
             break;
         }
         
-        if (!load(node[i], "fxaa", fxaaActive))
+        if (!loadParam(node[i], "fxaa", fxaaActive))
         {
             spdlog::error("Failed loading node 'fxaa' for element #{}.", i);
             success = false;
             break;
         }
         
-        if (!load(node[i], "fog", fogActive))
+        if (!loadParam(node[i], "fog", fogActive))
         {
             spdlog::error("Failed loading node 'fog' for element #{}.", i);
             success = false;
