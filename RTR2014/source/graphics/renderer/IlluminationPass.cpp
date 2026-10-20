@@ -97,7 +97,7 @@ bool IlluminationPass::init(IResourceManager* manager)
 
     // FBO
     m_illuminationPassTexture = std::make_shared<Texture>();
-    if (!m_illuminationPassTexture->init(800, 600, GL_RGB))
+    if (!m_illuminationPassTexture->init(800, 600, GL_RGBA16F))
     {
         spdlog::error("Failed to initialize illumination pass texture.");
         return false;

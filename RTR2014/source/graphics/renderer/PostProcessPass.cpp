@@ -138,7 +138,7 @@ bool PostProcessPass::init(IResourceManager* manager)
     // Init post processing FBOs
     // Texture 0
     m_postProcessPassTexture0 = std::make_shared<Texture>();
-    if (!m_postProcessPassTexture0->init(800, 600, GL_RGB))
+    if (!m_postProcessPassTexture0->init(800, 600, GL_RGBA16F))
     {
         spdlog::error("Failed to initialize post process pass texture 0.");
         return false;
@@ -146,7 +146,7 @@ bool PostProcessPass::init(IResourceManager* manager)
 
     // Texture 1
     m_postProcessPassTexture1 = std::make_shared<Texture>();
-    if (!m_postProcessPassTexture1->init(800, 600, GL_RGB))
+    if (!m_postProcessPassTexture1->init(800, 600, GL_RGBA16F))
     {
         spdlog::error("Failed to initialize post process pass texture 1.");
         return false;
@@ -154,7 +154,7 @@ bool PostProcessPass::init(IResourceManager* manager)
 
     // Texture 2
     m_postProcessPassTexture2 = std::make_shared<Texture>();
-    if (!m_postProcessPassTexture2->init(800, 600, GL_RGB))
+    if (!m_postProcessPassTexture2->init(800, 600, GL_RGBA16F))
     {
         spdlog::error("Failed to initialize post process pass texture 2.");
         return false;

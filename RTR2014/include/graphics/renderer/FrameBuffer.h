@@ -24,7 +24,7 @@ class FrameBuffer
     GLuint getId() const { return m_fboId; };
 
     bool init();
-    std::string getState();
+    std::string getState() const;
 
     void setActive(GLenum target);
     void setInactive(GLenum target);
@@ -37,6 +37,11 @@ class FrameBuffer
     static void setDefaultActive();
 
    private:
+    /**
+    * \brief Rebuilds the list of draw buffers from the attachments.
+    */
+    void updateDrawBuffers();
+
     std::vector<GLenum> m_drawBuffers; /**< Stores draw buffer attachments. */
 
     std::unordered_map<GLenum, std::shared_ptr<Texture>>

@@ -157,8 +157,8 @@ bool ShadowMapPass::init(IResourceManager* manager)
     glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTextureParameteri(m_shadowDepthTexture->getId(), GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    // The shadow map is sampled with a comparison.
+    m_shadowDepthTexture->setCompareMode(true);
 
 
     // Total 96 bit per pixel

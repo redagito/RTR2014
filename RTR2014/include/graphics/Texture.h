@@ -49,6 +49,11 @@ class Texture
     void resize(unsigned int width, unsigned int height);
 
     /**
+    * \brief Enables the comparison mode, it is used for shadow maps.
+    */
+    void setCompareMode(bool enabled);
+
+    /**
     * \brief Returns texture id.
     */
     GLuint getId() const;
@@ -80,6 +85,7 @@ class Texture
 
     bool m_valid;
     bool m_hasMipmaps = false;
+    bool m_compareMode = false; /**< Whether the texture is sampled with a comparison. */
     GLuint m_textureId;
     unsigned int m_width;
     unsigned int m_height;

@@ -28,7 +28,7 @@ bool FrameBuffer::init()
     return m_valid;
 }
 
-std::string FrameBuffer::getState()
+std::string FrameBuffer::getState() const
 {
     if (!m_valid)
     {
@@ -106,6 +106,15 @@ void FrameBuffer::resize(unsigned int width, unsigned int height)
     }
 }
 
+namespace
+{
+bool isColorAttachment(GLenum attachment)
+{
+    return attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
+           attachment != GL_DEPTH_STENCIL_ATTACHMENT;
+}
+} // namespace
+
 void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachment)
 {
     if (!m_valid)
@@ -115,14 +124,30 @@ void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachm
     }
     // Attach
     glNamedFramebufferTexture(m_fboId, attachment, texture->getId(), 0);
-    // Add color attachments to draw buffers
-    if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
-        attachment != GL_DEPTH_STENCIL_ATTACHMENT &&
-        std::find(m_drawBuffers.begin(), m_drawBuffers.end(), attachment) == m_drawBuffers.end())
-    {
-        m_drawBuffers.push_back(attachment);
-    }
     m_textures[attachment] = texture;
+    updateDrawBuffers();
+}
+
+void FrameBuffer::updateDrawBuffers()
+{
+    // The color attachments are the draw buffers. They are rebuilt because an
+    // attachment can be replaced by another one.
+    m_drawBuffers.clear();
+    for (const auto& entry : m_textures)
+    {
+        if (isColorAttachment(entry.first))
+        {
+            m_drawBuffers.push_back(entry.first);
+        }
+    }
+    for (const auto& entry : m_renderBuffers)
+    {
+        if (isColorAttachment(entry.first) && m_textures.count(entry.first) == 0)
+        {
+            m_drawBuffers.push_back(entry.first);
+        }
+    }
+    std::sort(m_drawBuffers.begin(), m_drawBuffers.end());
 }
 
 void FrameBuffer::setDefaultActive()
@@ -139,12 +164,6 @@ void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLen
     }
     // Attach
     glNamedFramebufferRenderbuffer(m_fboId, attachment, GL_RENDERBUFFER, renderBuffer->getId());
-    // Add color attachments to draw buffers
-    if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
-        attachment != GL_DEPTH_STENCIL_ATTACHMENT &&
-        std::find(m_drawBuffers.begin(), m_drawBuffers.end(), attachment) == m_drawBuffers.end())
-    {
-        m_drawBuffers.push_back(attachment);
-    }
     m_renderBuffers[attachment] = renderBuffer;
+    updateDrawBuffers();
 }

@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include "graphics/renderer/RenderBuffer.h"
 
 RenderBuffer::RenderBuffer() : m_bufferId(0), m_height(0), m_width(0) { return; }
@@ -15,8 +17,14 @@ bool RenderBuffer::init(unsigned int width, unsigned int height, GLenum format)
     if (m_init)
     {
         glDeleteRenderbuffers(1, &m_bufferId);
+        m_init = false;
     }
     glCreateRenderbuffers(1, &m_bufferId);
+    if (m_bufferId == 0)
+    {
+        spdlog::error("Failed to create the render buffer.");
+        return false;
+    }
     glNamedRenderbufferStorage(m_bufferId, format, width, height);
     m_width = width;
     m_height = height;

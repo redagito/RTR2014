@@ -137,8 +137,13 @@ const glm::mat4& Transformer::getInverseScaleMatrix() const
 {
 	if (m_scale.m_inverseDirty)
 	{
-		// TODO Prevent div by zero?
-		m_scale.m_inverse = glm::scale(glm::mat4(1.0f), 1.f / m_scaleVector);
+		// The inverse of a zero scale is not defined, a small one is used
+		// instead of an infinity.
+		const glm::vec3 inverseScale(
+			m_scaleVector.x != 0.f ? 1.f / m_scaleVector.x : 1e-6f,
+			m_scaleVector.y != 0.f ? 1.f / m_scaleVector.y : 1e-6f,
+			m_scaleVector.z != 0.f ? 1.f / m_scaleVector.z : 1e-6f);
+		m_scale.m_inverse = glm::scale(glm::mat4(1.0f), inverseScale);
 		m_scale.m_inverseDirty = false;
 	}
 	return m_scale.m_inverse;

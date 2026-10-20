@@ -13,10 +13,14 @@ IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices, GLenum usage)
         return;
     }
     glCreateBuffers(1, &m_bufferId);
+    if (m_bufferId == 0)
+    {
+        spdlog::error("Failed to create the index buffer.");
+        return;
+    }
     // Set data
     glNamedBufferData(m_bufferId, indices.size() * sizeof(unsigned int), indices.data(), usage);
     m_size = (unsigned int)indices.size();
-    // TODO Check error
 
     m_valid = true;
 }

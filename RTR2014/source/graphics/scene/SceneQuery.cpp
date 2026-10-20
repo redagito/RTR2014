@@ -7,6 +7,7 @@ SceneQuery::SceneQuery(unsigned int objectStorage, unsigned int lightStorage)
 {
     m_visibleObjects.reserve(objectStorage);
     m_visiblePointLights.reserve(lightStorage);
+    m_visibleDirectionalLights.reserve(lightStorage);
 }
 
 bool SceneQuery::hasNextObject() const { return m_nextObjectIndex < m_visibleObjects.size(); }
@@ -16,8 +17,7 @@ SceneObjectId SceneQuery::getNextObject()
     if (!hasNextObject())
     {
         // Invalid id
-        // TODO Remove magic number
-        return -1;
+        return invalidObject;
     }
     // Get id
     SceneObjectId id = m_visibleObjects.at(m_nextObjectIndex);
@@ -36,8 +36,7 @@ SceneObjectId SceneQuery::getNextPointLight()
     if (!hasNextPointLight())
     {
         // Invalid id
-        // TODO Remove magic number
-        return -1;
+        return invalidObject;
     }
     // Get id
     SceneObjectId id = m_visiblePointLights.at(m_nextPointLightIndex);

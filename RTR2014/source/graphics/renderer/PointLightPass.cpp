@@ -108,8 +108,7 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
                                              lightPassNormalSpecularTextureUnit);
 
             // Set shadow texture for shadow mapping
-            glBindTextureUnit(lightPassShadowMapTextureUnit,
-                              m_shadowCubePass.getShadowMap()->getId());
+            m_shadowCubePass.getShadowMap()->setActive(lightPassShadowMapTextureUnit);
             pointLightPassShader->setUniform(shadowCubeTextureUniformName,
                                              lightPassShadowMapTextureUnit);
             pointLightPassShader->setUniform(

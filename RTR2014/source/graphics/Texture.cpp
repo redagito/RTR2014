@@ -104,6 +104,21 @@ void Texture::resize(unsigned int width, unsigned int height)
     m_height = height;
 }
 
+void Texture::setCompareMode(bool enabled)
+{
+    m_compareMode = enabled;
+    if (!m_valid)
+    {
+        return;
+    }
+    glTextureParameteri(m_textureId, GL_TEXTURE_COMPARE_MODE,
+                        enabled ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE);
+    if (enabled)
+    {
+        glTextureParameteri(m_textureId, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    }
+}
+
 void Texture::applyParameters(GLuint textureId, unsigned int width, unsigned int height) const
 {
     // TODO Filter should be based on arguments and mip map level
@@ -135,6 +150,13 @@ void Texture::applyParameters(GLuint textureId, unsigned int width, unsigned int
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    // The comparison mode is part of the texture, it survives a resize.
+    if (m_compareMode)
+    {
+        glTextureParameteri(textureId, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        glTextureParameteri(textureId, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    }
 }
 
 GLuint Texture::getId() const { return m_textureId; }
