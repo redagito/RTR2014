@@ -97,8 +97,7 @@ class IScene
     /**
      * \brief Creates scene query for the given view projection.
      *
-     * Objects outside the view frustum are not part of the query. Returns heap allocated query
-     * object. Control is transfered to the calling function.
+     * Objects outside the view frustum are not part of the query.
      */
-    virtual ISceneQuery* createQuery(const glm::mat4& viewProjection) const = 0;
+    virtual std::unique_ptr<ISceneQuery> createQuery(const glm::mat4& viewProjection) const = 0;
 };

@@ -77,8 +77,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     window.setActive();
 
     // Query visible scene objects and lights
-    std::unique_ptr<ISceneQuery> query(
-        std::move(scene.createQuery(camera.getProjection() * camera.getView())));
+    auto query = scene.createQuery(camera.getProjection() * camera.getView());
 
     // Geometry pass fills gbuffer
     {
@@ -145,14 +144,13 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Post draw error check
 }
 
-DeferredRenderer* DeferredRenderer::create(IResourceManager* manager)
+std::unique_ptr<DeferredRenderer> DeferredRenderer::create(IResourceManager* manager)
 {
-    DeferredRenderer* renderer = new DeferredRenderer;
+    auto renderer = std::make_unique<DeferredRenderer>();
     if (!renderer->init(manager))
     {
-        delete renderer;
-        renderer = nullptr;
         spdlog::error("Failed to create deferred renderer, initialization failed.");
+        return nullptr;
     }
     return renderer;
 }

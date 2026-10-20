@@ -69,14 +69,13 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
     // Post draw error check
 }
 
-ForwardRenderer* ForwardRenderer::create(IResourceManager* manager)
+std::unique_ptr<ForwardRenderer> ForwardRenderer::create(IResourceManager* manager)
 {
-	ForwardRenderer* renderer = new ForwardRenderer;
+    auto renderer = std::make_unique<ForwardRenderer>();
     if (!renderer->init(manager))
     {
-        delete renderer;
-        renderer = nullptr;
         spdlog::error("Failed to create forward renderer, initialization failed.");
+        return nullptr;
     }
-	return renderer;
+    return renderer;
 }

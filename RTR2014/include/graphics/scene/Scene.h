@@ -54,7 +54,7 @@ class Scene : public IScene
 
     bool getSceneBounds(glm::vec3& center, float& radius) const override;
 
-    ISceneQuery* createQuery(const glm::mat4& viewProjection) const override;
+    std::unique_ptr<ISceneQuery> createQuery(const glm::mat4& viewProjection) const override;
 
    private:
     glm::vec3 m_ambientColor; /**< Global ambient light color. */

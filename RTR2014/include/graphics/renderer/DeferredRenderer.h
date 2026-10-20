@@ -34,7 +34,7 @@ class DeferredRenderer : public Renderer
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
               const IGraphicsResourceManager& manager) override;
 
-    static DeferredRenderer* create(IResourceManager* manager);
+    static std::unique_ptr<DeferredRenderer> create(IResourceManager* manager);
 
    private:
     // Geometry pass

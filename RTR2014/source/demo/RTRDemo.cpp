@@ -113,12 +113,7 @@ int RTRDemo::init(const std::string& configFile)
     drawLoadingFrame();
 
     // Create resource manager
-    m_resourceManager.reset(createResourceManager());
-    if (m_resourceManager == nullptr)
-    {
-        spdlog::error("Failed to initialize resource manager.");
-        return 1;
-    }
+    m_resourceManager = createResourceManager();
 
 	// Create animation world
 	m_animationWorld = std::make_shared<AnimationWorld>();
@@ -302,7 +297,7 @@ bool RTRDemo::initRenderer()
 
     // Initialize deferred renderer
     spdlog::info("Initializing deferred renderer.");
-    m_deferredRenderer.reset(DeferredRenderer::create(m_resourceManager.get()));
+    m_deferredRenderer = DeferredRenderer::create(m_resourceManager.get());
     if (m_deferredRenderer == nullptr)
     {
         spdlog::error("Failed to initialize deferred renderer.");
@@ -311,7 +306,7 @@ bool RTRDemo::initRenderer()
 
     // Initialize forward renderer
     spdlog::info("Initializing forward renderer.");
-    m_forwardRenderer.reset(ForwardRenderer::create(m_resourceManager.get()));
+    m_forwardRenderer = ForwardRenderer::create(m_resourceManager.get());
     if (m_forwardRenderer == nullptr)
     {
         spdlog::error("Failed to initialize forward renderer.");

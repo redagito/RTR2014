@@ -189,12 +189,12 @@ bool Scene::getSceneBounds(glm::vec3& center, float& radius) const
     return true;
 }
 
-ISceneQuery* Scene::createQuery(const glm::mat4& viewProjection) const
+std::unique_ptr<ISceneQuery> Scene::createQuery(const glm::mat4& viewProjection) const
 {
     // New query with max storage
     // TODO Allocate less storage, needs experiments on how much is actually needed
-    SceneQuery* query =
-        new SceneQuery((unsigned int)m_objects.size(), (unsigned int)m_pointLights.size());
+    auto query =
+        std::make_unique<SceneQuery>((unsigned int)m_objects.size(), (unsigned int)m_pointLights.size());
 
     Frustum frustum(viewProjection);
 

@@ -40,7 +40,7 @@ class ForwardRenderer : public Renderer
     /**
      * \brief Creates and initializes forward renderer.
      */
-    static ForwardRenderer* create(IResourceManager* manager);
+    static std::unique_ptr<ForwardRenderer> create(IResourceManager* manager);
 
    private:
     ForwardRenderPass m_forwardRenderPass;

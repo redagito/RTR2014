@@ -2,7 +2,7 @@
 
 #include "resource/ResourceManager.h"
 
-IResourceManager* createResourceManager()
+std::unique_ptr<IResourceManager> createResourceManager()
 {
-	return new ResourceManager;
+	return std::make_unique<ResourceManager>();
 }

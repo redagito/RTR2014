@@ -88,8 +88,7 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
         m_shadowCubePassShader->setUniform(viewMatrixUniformName, view);
 
         // Query visible scene objects
-        std::unique_ptr<ISceneQuery> query(
-            std::move(scene.createQuery(camera.getProjection() * view)));
+        auto query = scene.createQuery(camera.getProjection() * view);
 
         // Traverse visible objects
         while (query->hasNextObject())

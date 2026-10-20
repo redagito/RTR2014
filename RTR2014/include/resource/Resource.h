@@ -5,4 +5,7 @@
 #include "IResourceManager.h"
 #include "IResourceListener.h"
 
-IResourceManager* createResourceManager();
+/**
+ * \brief Creates a resource manager.
+ */
+std::unique_ptr<IResourceManager> createResourceManager();
