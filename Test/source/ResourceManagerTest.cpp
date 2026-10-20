@@ -98,6 +98,28 @@ class SoundListener : public IResourceListener
     std::vector<std::tuple<ResourceType, ResourceId, ListenerEvent>> m_events;
 };
 
+// Removes itself while it is notified.
+class SelfRemovingListener : public IResourceListener
+{
+   public:
+    void onAttach(IResourceManager*) override {}
+    void onDetach(IResourceManager*) override {}
+    void notify(ResourceType, ResourceId, ListenerEvent, IResourceManager* manager) override
+    {
+        manager->removeResourceListener(this);
+    }
+};
+
+class CountingListener : public IResourceListener
+{
+   public:
+    void onAttach(IResourceManager*) override {}
+    void onDetach(IResourceManager*) override {}
+    void notify(ResourceType, ResourceId, ListenerEvent, IResourceManager*) override { ++count; }
+
+    int count = 0;
+};
+
 // Records the file of a shader program while the listener is notified, which
 // is when the graphics manager reports a compilation error.
 class ShaderFileListener : public IResourceListener
@@ -120,6 +142,31 @@ class ShaderFileListener : public IResourceListener
     }
 
     std::string m_file;
+};
+
+// Loads a mesh again while the listener is notified, which happens inside the
+// creation of the resource.
+class ReentrantMeshListener : public IResourceListener
+{
+   public:
+    void onAttach(IResourceManager*) override {}
+    void onDetach(IResourceManager*) override {}
+    void notify(ResourceType type, ResourceId id, ListenerEvent event,
+                IResourceManager* manager) override
+    {
+        if (type != ResourceType::Mesh || event != ListenerEvent::Create || m_reentered)
+        {
+            return;
+        }
+        m_reentered = true;
+        m_secondId = manager->loadMesh(m_file);
+    }
+
+    ResourceId m_secondId = invalidResource;
+    std::string m_file;
+
+   private:
+    bool m_reentered = false;
 };
 
 // The same object loaded with and without preloading must yield the same data.
@@ -248,6 +295,44 @@ TEST_CASE("the shader program file is known when the listeners are notified", "[
     const ResourceId id = manager.loadShader(shaderProgram.path());
     REQUIRE(id != invalidResource);
     REQUIRE(listener.m_file == shaderProgram.path());
+}
+
+TEST_CASE("loading a preloaded mesh from a listener does not publish an empty mesh", "[resource]"){
+    TempObj file(kObj);
+
+    ResourceManager manager;
+    manager.preload({file.path()}, {}, {});
+
+    ReentrantMeshListener listener;
+    listener.m_file = file.path();
+    manager.addResourceListener(&listener);
+
+    const ResourceId id = manager.loadMesh(file.path());
+    REQUIRE(id != invalidResource);
+
+    // The listener loaded the same file again, it must not have got a mesh
+    // without any data.
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<float> normals;
+    std::vector<float> uvs;
+    PrimitiveType type = PrimitiveType::Invalid;
+    REQUIRE(manager.getMesh(listener.m_secondId, vertices, indices, normals, uvs, type));
+    REQUIRE(vertices.size() == 9);
+}
+
+TEST_CASE("a listener can remove itself while it is notified", "[resource]")
+{
+    ResourceManager manager;
+    SelfRemovingListener remover;
+    CountingListener counter;
+    manager.addResourceListener(&remover);
+    manager.addResourceListener(&counter);
+
+    manager.createMesh({}, {}, {}, {}, PrimitiveType::Triangle);
+
+    // The listener behind the one that removed itself is still notified.
+    REQUIRE(counter.count == 1);
 }
 
 TEST_CASE("a material without a texture slot reports an invalid id for it", "[resource]")

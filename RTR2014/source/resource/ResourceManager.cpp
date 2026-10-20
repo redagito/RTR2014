@@ -82,10 +82,13 @@ ResourceId ResourceManager::loadMesh(const std::string& file)
     auto pending = m_pendingMeshes.find(file);
     if (pending != m_pendingMeshes.end())
     {
-        MeshData& data = pending->second;
+        // The pending entry is removed before the resource is created, so that
+        // a listener that loads the same file again does not publish the
+        // emptied out data of this one.
+        MeshData data = std::move(pending->second);
+        m_pendingMeshes.erase(pending);
         ResourceId meshId = createMesh(std::move(data.m_vertices), std::move(data.m_indices),
                                       std::move(data.m_normals), std::move(data.m_uvs), data.m_type);
-        m_pendingMeshes.erase(pending);
         if (meshId == -1)
         {
             spdlog::error("Failed to create mesh resource id from file {}.", file.c_str());
@@ -294,10 +297,13 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
     auto pending = m_pendingImages.find(imageKey);
     if (pending != m_pendingImages.end())
     {
-        Image& image = pending->second;
+        // The pending entry is removed before the resource is created, so that
+        // a listener that loads the same file again does not publish the
+        // emptied out data of this one.
+        Image image = std::move(pending->second);
+        m_pendingImages.erase(pending);
         ResourceId imageId =
             createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
-        m_pendingImages.erase(pending);
         if (imageId == -1)
         {
             spdlog::error("Failed to create image resource id from file {}.", file.c_str());
@@ -946,7 +952,10 @@ void ResourceManager::removeResourceListener(IResourceListener* listener)
 void ResourceManager::notifyResourceListeners(ResourceType type, ResourceId id,
                                                ListenerEvent event)
 {
-    for (const auto& listener : m_resourceListeners)
+    // A listener may remove itself while it is notified, so the list is
+    // iterated over a copy of it.
+    const std::list<IResourceListener*> listeners = m_resourceListeners;
+    for (const auto& listener : listeners)
     {
         listener->notify(type, id, event, this);
     }
