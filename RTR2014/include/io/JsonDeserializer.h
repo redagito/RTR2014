@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <concepts>
 #include <cstdint>
 
 #include <glm/glm.hpp>
@@ -13,19 +14,18 @@ namespace Json
 }
 
 /**
-* \brief Deserialize functions for native types.
-*/
+ * \brief Deserialize functions for native types.
+ */
 bool deserialize(const Json::Value& node, bool& b);
 
-bool deserialize(const Json::Value& node, int8_t& val);
-bool deserialize(const Json::Value& node, int16_t& val);
-bool deserialize(const Json::Value& node, int32_t& val);
-bool deserialize(const Json::Value& node, int64_t& val);
-
-bool deserialize(const Json::Value& node, uint8_t& val);
-bool deserialize(const Json::Value& node, uint16_t& val);
-bool deserialize(const Json::Value& node, uint32_t& val);
-bool deserialize(const Json::Value& node, uint64_t& val);
+/**
+ * \brief Deserializes an integer node.
+ *
+ * The node has to hold a whole number that fits the target type.
+ */
+template <typename T>
+    requires std::integral<T> && (!std::same_as<T, bool>)
+bool deserialize(const Json::Value& node, T& val);
 
 bool deserialize(const Json::Value& node, float& f);
 bool deserialize(const Json::Value& node, double& d);

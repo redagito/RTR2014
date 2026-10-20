@@ -22,7 +22,9 @@ bool deserialize(const Json::Value& node, bool& b)
 	return true;
 }
 
-bool deserialize(const Json::Value& node, int8_t& val)
+template <typename T>
+    requires std::integral<T> && (!std::same_as<T, bool>)
+bool deserialize(const Json::Value& node, T& val)
 {
 	if (node.empty())
 	{
@@ -35,174 +37,56 @@ bool deserialize(const Json::Value& node, int8_t& val)
 		return false;
 	}
 
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<int8_t>::min() || raw > std::numeric_limits<int8_t>::max())
+	if constexpr (std::is_signed_v<T>)
 	{
-		spdlog::error("Node value {} does not fit in int8_t.", raw);
-		return false;
-	}
+		// jsoncpp converts to a signed 64 bit value, which fails for the
+		// unsigned values that do not fit into it.
+		if (node.isUInt64() &&
+			node.asUInt64() > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
+		{
+			spdlog::error("Node value does not fit into a signed integer.");
+			return false;
+		}
 
-	val = static_cast<int8_t>(raw);
+		const int64_t raw = node.asInt64();
+		if (raw < static_cast<int64_t>(std::numeric_limits<T>::min()) ||
+			raw > static_cast<int64_t>(std::numeric_limits<T>::max()))
+		{
+			spdlog::error("Node value {} does not fit in the target type.", raw);
+			return false;
+		}
+
+		val = static_cast<T>(raw);
+	}
+	else
+	{
+		if (node.isInt64() && node.asInt64() < 0)
+		{
+			spdlog::error("Node value {} is negative.", node.asInt64());
+			return false;
+		}
+
+		const uint64_t raw =
+			node.isUInt64() ? node.asUInt64() : static_cast<uint64_t>(node.asInt64());
+		if (raw > static_cast<uint64_t>(std::numeric_limits<T>::max()))
+		{
+			spdlog::error("Node value {} does not fit in the target type.", raw);
+			return false;
+		}
+
+		val = static_cast<T>(raw);
+	}
 	return true;
 }
 
-bool deserialize(const Json::Value& node, int16_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isIntegral())
-	{
-		spdlog::error("Node data type is not integral.");
-		return false;
-	}
-
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<int16_t>::min() || raw > std::numeric_limits<int16_t>::max())
-	{
-		spdlog::error("Node value {} does not fit in int16_t.", raw);
-		return false;
-	}
-
-	val = static_cast<int16_t>(raw);
-	return true;
-}
-
-bool deserialize(const Json::Value& node, int32_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isIntegral())
-	{
-		spdlog::error("Node data type is not integral.");
-		return false;
-	}
-
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<int32_t>::min() || raw > std::numeric_limits<int32_t>::max())
-	{
-		spdlog::error("Node value {} does not fit in int32_t.", raw);
-		return false;
-	}
-
-	val = static_cast<int32_t>(raw);
-	return true;
-}
-
-bool deserialize(const Json::Value& node, int64_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isNumeric())
-	{
-		spdlog::error("Node data type is not numeric.");
-		return false;
-	}
-	val = node.asInt64();
-	return true;
-}
-
-bool deserialize(const Json::Value& node, uint8_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isIntegral())
-	{
-		spdlog::error("Node data type is not integral.");
-		return false;
-	}
-
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<uint8_t>::min() || raw > std::numeric_limits<uint8_t>::max())
-	{
-		spdlog::error("Node value {} does not fit in uint8_t.", raw);
-		return false;
-	}
-
-	val = static_cast<uint8_t>(raw);
-	return true;
-}
-
-bool deserialize(const Json::Value& node, uint16_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isIntegral())
-	{
-		spdlog::error("Node data type is not integral.");
-		return false;
-	}
-
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<uint16_t>::min() || raw > std::numeric_limits<uint16_t>::max())
-	{
-		spdlog::error("Node value {} does not fit in uint16_t.", raw);
-		return false;
-	}
-
-	val = static_cast<uint16_t>(raw);
-	return true;
-}
-
-bool deserialize(const Json::Value& node, uint32_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isIntegral())
-	{
-		spdlog::error("Node data type is not integral.");
-		return false;
-	}
-
-	const Json::Int64 raw = node.asInt64();
-	if (raw < std::numeric_limits<uint32_t>::min() || raw > std::numeric_limits<uint32_t>::max())
-	{
-		spdlog::error("Node value {} does not fit in uint32_t.", raw);
-		return false;
-	}
-
-	val = static_cast<uint32_t>(raw);
-	return true;
-}
-
-bool deserialize(const Json::Value& node, uint64_t& val)
-{
-	if (node.empty())
-	{
-		spdlog::error("Node is empty.");
-		return false;
-	}
-	if (!node.isNumeric())
-	{
-		spdlog::error("Node data type is not numeric.");
-		return false;
-	}
-	const int64_t raw = node.asInt64();
-	if (raw < 0)
-	{
-		spdlog::error("Node value {} does not fit in uint64_t.", raw);
-		return false;
-	}
-	val = static_cast<uint64_t>(raw);
-	return true;
-}
+template bool deserialize(const Json::Value&, int8_t&);
+template bool deserialize(const Json::Value&, int16_t&);
+template bool deserialize(const Json::Value&, int32_t&);
+template bool deserialize(const Json::Value&, int64_t&);
+template bool deserialize(const Json::Value&, uint8_t&);
+template bool deserialize(const Json::Value&, uint16_t&);
+template bool deserialize(const Json::Value&, uint32_t&);
+template bool deserialize(const Json::Value&, uint64_t&);
 
 bool deserialize(const Json::Value& node, float& f)
 {

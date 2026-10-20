@@ -1,7 +1,6 @@
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(jsoncpp CONFIG REQUIRED)
 find_package(stb CONFIG REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
