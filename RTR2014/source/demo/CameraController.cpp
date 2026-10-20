@@ -186,6 +186,14 @@ bool CameraController::loadSequence(std::string file)
             break;
         }
 
+        // The keyframes are interpolated, so they have to be ordered in time.
+        if (!m_sequencePoints.empty() && timestamp <= m_sequencePoints.back().timestamp)
+        {
+            spdlog::error("The timestamp of element #{} is not later than the one before it.", i);
+            success = false;
+            break;
+        }
+
         SequencePoint sp{position, glm::normalize(orientation), timestamp, fxaaActive, fogActive};
         m_sequencePoints.push_back(sp);
     }
@@ -338,7 +346,11 @@ void CameraController::handleKeyEvent(KeyEventType type, int keyCode)
     if (type != KeyEventType::KEY_PRESSED) {
         return;
     }
-    
+
+    if (m_camera == nullptr) {
+        return;
+    }
+
     FeatureInfo& info = m_camera->getFeatureInfoForWrite();
     
 
@@ -410,6 +422,10 @@ void CameraController::handleKeyEvent(KeyEventType type, int keyCode)
 
 void CameraController::handleMouseMovementEvent(int x, int y)
 {
+    if (m_camera == nullptr) {
+        return;
+    }
+
     // A jump this large is a cursor warp (e.g. entering capture mode), not
     // real motion; re-baseline instead of pitching/yawing by the full jump.
     const int warpThreshold = 200;
@@ -434,7 +450,7 @@ void CameraController::handleMouseButtonEvent(MouseButtonEventType type, int but
 
 void CameraController::handleResizeEvent(int width, int height)
 {
-    if (width <= 0 || height <= 0)
+    if (width <= 0 || height <= 0 || m_camera == nullptr)
     {
         return;
     }
