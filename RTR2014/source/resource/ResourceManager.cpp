@@ -143,39 +143,58 @@ bool ResourceManager::parseMesh(const std::string& file, MeshData& data)
             return false;
         }
 
-// tinyobj keeps attributes in shared arrays indexed per corner
+        // tinyobj keeps attributes in shared arrays indexed per corner and
+        // triangulates polygons for us, so every face has three corners.
+        const tinyobj::mesh_t& mesh = shapes.at(0).mesh;
         std::vector<float> vertices;
         std::vector<float> normals;
         std::vector<float> uvs;
         bool hasNormals = true;
         bool hasUvs = true;
-        for (const tinyobj::index_t& index : shapes.at(0).mesh.indices)
+        size_t corner = 0;
+        for (const unsigned char cornerCount : mesh.num_face_vertices)
         {
-            if (index.vertex_index < 0)
+            if (cornerCount != 3)
             {
-                spdlog::error("Mesh file {} has a face corner without a position.", file.c_str());
+                spdlog::error("Mesh file {} has a face with {} corners, expected a triangle.",
+                              file.c_str(), static_cast<int>(cornerCount));
                 return false;
             }
-            vertices.insert(vertices.end(), attrib.vertices.begin() + index.vertex_index * 3,
-                            attrib.vertices.begin() + index.vertex_index * 3 + 3);
-            if (index.normal_index < 0)
+            for (unsigned char i = 0; i < cornerCount; ++i, ++corner)
             {
-                hasNormals = false;
+                const tinyobj::index_t& index = mesh.indices[corner];
+                if (index.vertex_index < 0)
+                {
+                    spdlog::error("Mesh file {} has a face corner without a position.",
+                                  file.c_str());
+                    return false;
+                }
+                vertices.insert(vertices.end(), attrib.vertices.begin() + index.vertex_index * 3,
+                                attrib.vertices.begin() + index.vertex_index * 3 + 3);
+                if (index.normal_index < 0)
+                {
+                    hasNormals = false;
+                }
+                else
+                {
+                    normals.insert(normals.end(), attrib.normals.begin() + index.normal_index * 3,
+                                   attrib.normals.begin() + index.normal_index * 3 + 3);
+                }
+                if (index.texcoord_index < 0)
+                {
+                    hasUvs = false;
+                }
+                else
+                {
+                    uvs.insert(uvs.end(), attrib.texcoords.begin() + index.texcoord_index * 2,
+                               attrib.texcoords.begin() + index.texcoord_index * 2 + 2);
+                }
             }
-            else
-            {
-                normals.insert(normals.end(), attrib.normals.begin() + index.normal_index * 3,
-                               attrib.normals.begin() + index.normal_index * 3 + 3);
-            }
-            if (index.texcoord_index < 0)
-            {
-                hasUvs = false;
-            }
-            else
-            {
-                uvs.insert(uvs.end(), attrib.texcoords.begin() + index.texcoord_index * 2,
-                           attrib.texcoords.begin() + index.texcoord_index * 2 + 2);
-            }
+        }
+        if (vertices.empty())
+        {
+            spdlog::error("Mesh file {} does not contain any face.", file.c_str());
+            return false;
         }
         if (!hasNormals)
         {
