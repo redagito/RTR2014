@@ -32,51 +32,51 @@ class GraphicsResourceManager : public IGraphicsResourceManager, public IResourc
     * Implements the attach callback for the resource listener interface.
     * TODO Currently stubbed, renderer attaches itself to resource manager in constructor.
     */
-    void onAttach(IResourceManager* resourceManager);
+    void onAttach(IResourceManager* resourceManager) override;
 
     /**
-    * \brief On detach callback.
-    * Implements the detach callback for the resource listener interface.
-    * TODO Currently stubbed.
-    */
-    void onDetach(IResourceManager* resourceManager);
+     * \brief On detach callback.
+     * Implements the detach callback for the resource listener interface.
+     * TODO Currently stubbed.
+     */
+    void onDetach(IResourceManager* resourceManager) override;
 
     /**
-    * \brief Notify callback.
-    * Implements the notify callback for the resource listener interface.
-    * The function resolves the resource type and forwards the call to specialized functions.
-    */
+     * \brief Notify callback.
+     * Implements the notify callback for the resource listener interface.
+     * The function resolves the resource type and forwards the call to specialized functions.
+     */
     void notify(ResourceType type, ResourceId, ListenerEvent event,
-                IResourceManager* resourceManager);
+                IResourceManager* resourceManager) override;
 
     /**
-    * \brief Maps id to internal mesh object.
-    */
-    Mesh* getMesh(ResourceId) const;
+     * \brief Maps id to internal mesh object.
+     */
+    Mesh* getMesh(ResourceId) const override;
 
     /**
-    * \brief Maps id to internal material object.
-    */
-    Material* getMaterial(ResourceId) const;
+     * \brief Maps id to internal material object.
+     */
+    Material* getMaterial(ResourceId) const override;
 
     /**
-    * \brief Maps id to internal texture object.
-    */
-    Texture* getTexture(ResourceId) const;
+     * \brief Maps id to internal texture object.
+     */
+    Texture* getTexture(ResourceId) const override;
 
     /**
      * \brief Maps id to internal shader program object.
      */
-    ShaderProgram* getShaderProgram(ResourceId) const;
+    ShaderProgram* getShaderProgram(ResourceId) const override;
 
     /**
-    * \brief Returns respective default texture.
-    */
-    Texture* getDefaultDiffuseTexture() const;
-    Texture* getDefaultNormalTexture() const;
-    Texture* getDefaultSpecularTexture() const;
-    Texture* getDefaultGlowTexture() const;
-    Texture* getDefaultAlphaTexture() const;
+     * \brief Returns respective default texture.
+     */
+    Texture* getDefaultDiffuseTexture() const override;
+    Texture* getDefaultNormalTexture() const override;
+    Texture* getDefaultSpecularTexture() const override;
+    Texture* getDefaultGlowTexture() const override;
+    Texture* getDefaultAlphaTexture() const override;
 
    protected:
     /**

@@ -13,7 +13,7 @@ class RotationController : public IAnimationController
 public:
 	RotationController(SceneObjectId id, AnimationObjectType type, IScene& scene, const glm::vec3& rotation);
 
-	void update(float timeStep);
+	void update(float timeStep) override;
 
 private:
 	SceneObjectId m_objectId = -1;

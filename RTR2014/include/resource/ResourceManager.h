@@ -23,53 +23,55 @@ class ResourceManager : public IResourceManager
     ResourceManager();
 
     ResourceId createMesh(std::vector<float> vertices, std::vector<unsigned int> indices,
-                          std::vector<float> normals, std::vector<float> uvs, PrimitiveType type);
+                          std::vector<float> normals, std::vector<float> uvs,
+                          PrimitiveType type) override;
 
     ResourceId loadMesh(const std::string& file) override;
 
     bool getMesh(ResourceId id, std::vector<float>& vertices, std::vector<unsigned int>& indices,
-                 std::vector<float>& normals, std::vector<float>& uvs, PrimitiveType& type) const;
+                 std::vector<float>& normals, std::vector<float>& uvs,
+                 PrimitiveType& type) const override;
 
     bool getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) const override;
 
     ResourceId createImage(std::vector<unsigned char> imageData, unsigned int width,
-                           unsigned int height, ColorFormat format);
+                           unsigned int height, ColorFormat format) override;
 
     ResourceId loadImage(const std::string& file, ColorFormat format) override;
 
     bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
-                  unsigned int& height, ColorFormat& format) const;
+                  unsigned int& height, ColorFormat& format) const override;
 
     ResourceId createMaterial(ResourceId diffuse, ResourceId normal, ResourceId specular,
-                              ResourceId glow, ResourceId alpha, ResourceId customShader);
+                              ResourceId glow, ResourceId alpha, ResourceId customShader) override;
 
     ResourceId loadMaterial(const std::string& file) override;
 
     bool getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal, ResourceId& specular,
-                     ResourceId& glow, ResourceId& alpha, ResourceId& customShader) const;
+                     ResourceId& glow, ResourceId& alpha, ResourceId& customShader) const override;
 
     ResourceId loadSound(const std::string& file) override;
 
     const SoundData* getSound(ResourceId id) const override;
 
-    ResourceId createString(const std::string& text);
+    ResourceId createString(const std::string& text) override;
 
-    ResourceId loadString(const std::string& file);
+    ResourceId loadString(const std::string& file) override;
 
-    bool getString(ResourceId id, std::string& text) const;
+    bool getString(ResourceId id, std::string& text) const override;
 
     ResourceId createShader(const std::string& file, ResourceId vertex, ResourceId tessCtrl,
-                            ResourceId tessEval, ResourceId geometry, ResourceId fragment);
+                            ResourceId tessEval, ResourceId geometry, ResourceId fragment) override;
 
     ResourceId loadShader(const std::string& file) override;
 
     bool getShader(ResourceId id, ResourceId& vertex, ResourceId& tessCtrl, ResourceId& tessEval,
-                   ResourceId& geometry, ResourceId& fragment) const;
+                   ResourceId& geometry, ResourceId& fragment) const override;
 
     bool getShaderFile(ResourceId id, std::string& file) const override;
 
-    void addResourceListener(IResourceListener* listener);
-    void removeResourceListener(IResourceListener* listener);
+    void addResourceListener(IResourceListener* listener) override;
+    void removeResourceListener(IResourceListener* listener) override;
 
     /**
     * \brief Loads meshes, the images of the given materials and sounds in parallel.

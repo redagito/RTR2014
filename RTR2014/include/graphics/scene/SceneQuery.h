@@ -15,17 +15,17 @@ class SceneQuery : public ISceneQuery
      */
     SceneQuery(unsigned int objectStorage = 200, unsigned int lightStorage = 100);
 
-    bool hasNextObject() const;
+    bool hasNextObject() const override;
 
-    SceneObjectId getNextObject();
+    SceneObjectId getNextObject() override;
 
-    bool hasNextPointLight() const;
+    bool hasNextPointLight() const override;
 
-    SceneObjectId getNextPointLight();
+    SceneObjectId getNextPointLight() override;
 
-    bool hasNextDirectionalLight() const;
+    bool hasNextDirectionalLight() const override;
 
-    SceneObjectId getNextDirectionalLight();
+    SceneObjectId getNextDirectionalLight() override;
 
     /**
      * \brief Adds object id.

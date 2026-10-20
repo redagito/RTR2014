@@ -32,7 +32,7 @@ class DeferredRenderer : public Renderer
     bool init(IResourceManager* manager);
 
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-              const IGraphicsResourceManager& manager);
+              const IGraphicsResourceManager& manager) override;
 
     static DeferredRenderer* create(IResourceManager* manager);
 

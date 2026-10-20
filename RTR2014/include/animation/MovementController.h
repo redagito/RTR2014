@@ -14,7 +14,7 @@ class MovementController : public IAnimationController
     MovementController(SceneObjectId id, AnimationObjectType type, IScene& scene,
                         const glm::vec3& direction);
 
-    void update(float timeStep);
+    void update(float timeStep) override;
 
    private:
     SceneObjectId m_objectId = -1;

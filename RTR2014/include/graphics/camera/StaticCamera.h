@@ -17,11 +17,11 @@ class StaticCamera : public ICamera
         m_pos = position;
     }
 
-    virtual const glm::mat4& getView() const { return m_view; }
+    const glm::mat4& getView() const override { return m_view; }
 
-    virtual const glm::mat4& getProjection() const { return m_proj; }
+    const glm::mat4& getProjection() const override { return m_proj; }
 
-    virtual glm::vec3 getPosition() const { return m_pos; }
+    glm::vec3 getPosition() const override { return m_pos; }
 
    private:
     glm::mat4 m_view;

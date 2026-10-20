@@ -30,7 +30,7 @@ class ForwardRenderer : public Renderer
     * This function implements the highlevel drawing logic for the scene,
     * selects rendering targets and manages render passes.
     */
-	void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager);
+	void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) override;
 
     /**
      * \brief Performs resource aqucisition and initialization.

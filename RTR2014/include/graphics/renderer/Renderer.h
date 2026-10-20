@@ -29,7 +29,6 @@ class Renderer : public IRenderer
 	* Implemented in specialized rendering classes.
     */
     virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window, const IGraphicsResourceManager& manager) = 0;
-
     /**
     * \brief Performs GL draw call based on mesh data.
     *
