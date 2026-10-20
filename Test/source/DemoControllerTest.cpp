@@ -74,6 +74,20 @@ class FakeDebugInfoDisplay : public IDebugInfoDisplay
     int drawCount = 0;
 };
 
+class FakeGraphicsResourceManager : public IGraphicsResourceManager
+{
+   public:
+    Mesh* getMesh(ResourceId) const override { return nullptr; }
+    Material* getMaterial(ResourceId) const override { return nullptr; }
+    Texture* getTexture(ResourceId) const override { return nullptr; }
+    ShaderProgram* getShaderProgram(ResourceId) const override { return nullptr; }
+    Texture* getDefaultDiffuseTexture() const override { return nullptr; }
+    Texture* getDefaultNormalTexture() const override { return nullptr; }
+    Texture* getDefaultSpecularTexture() const override { return nullptr; }
+    Texture* getDefaultGlowTexture() const override { return nullptr; }
+    Texture* getDefaultAlphaTexture() const override { return nullptr; }
+};
+
 struct Fixture
 {
     Fixture()
@@ -88,6 +102,7 @@ struct Fixture
           window(),
           debugInfo(),
           debugInfoDisplay(),
+          graphicsResourceManager(),
           animationWorld()
     {
         cameraController->setCamera(camera);
@@ -97,7 +112,7 @@ struct Fixture
         controller = std::make_unique<DemoController>(&deferredRenderer, &deferredRenderer,
                                                       &forwardRenderer, &scene, camera.get(),
                                                       cameraController.get(), &inputProvider,
-                                                      &window, nullptr, &debugInfo,
+                                                      &window, &graphicsResourceManager, &debugInfo,
                                                       &debugInfoDisplay, &animationWorld);
     }
 
@@ -113,6 +128,7 @@ struct Fixture
     FakeWindow window;
     DebugInfo debugInfo;
     FakeDebugInfoDisplay debugInfoDisplay;
+    FakeGraphicsResourceManager graphicsResourceManager;
     AnimationWorld animationWorld;
     // Declared last so they are destroyed first: the camera controller
     // deregisters from the window and the input provider on destruction.
@@ -137,8 +153,8 @@ TEST_CASE("Demo controller respects a forward renderer passed as initial", "[dem
 
     DemoController controller(&f.forwardRenderer, &f.deferredRenderer, &f.forwardRenderer,
                               &f.scene, f.camera.get(), f.cameraController.get(), &f.inputProvider,
-                              &f.window, nullptr, &f.debugInfo, &f.debugInfoDisplay,
-                              &f.animationWorld);
+                              &f.window, &f.graphicsResourceManager, &f.debugInfo,
+                              &f.debugInfoDisplay, &f.animationWorld);
 
     controller.update(0.016f);
 
@@ -195,4 +211,35 @@ TEST_CASE("Demo controller toggles vsync on F4", "[demo]")
     f.inputProvider.press(GLFW_KEY_F4);
     f.controller->update(0.016f);
     REQUIRE(f.window.vSync == false);
+}
+
+TEST_CASE("Demo controller survives a missing renderer", "[demo]")
+{
+    Fixture f;
+
+    DemoController controller(nullptr, nullptr, nullptr, &f.scene, f.camera.get(),
+                              f.cameraController.get(), &f.inputProvider, &f.window,
+                              &f.graphicsResourceManager, &f.debugInfo, &f.debugInfoDisplay,
+                              &f.animationWorld);
+
+    // Must not crash
+    controller.update(0.016f);
+
+    REQUIRE(f.deferredRenderer.drawCount == 0);
+    REQUIRE(f.forwardRenderer.drawCount == 0);
+}
+
+TEST_CASE("Demo controller keeps the renderer when the deferred one is missing", "[demo]")
+{
+    Fixture f;
+
+    DemoController controller(&f.forwardRenderer, nullptr, &f.forwardRenderer, &f.scene,
+                              f.camera.get(), f.cameraController.get(), &f.inputProvider,
+                              &f.window, &f.graphicsResourceManager, &f.debugInfo,
+                              &f.debugInfoDisplay, &f.animationWorld);
+
+    f.inputProvider.press(GLFW_KEY_F2);
+    controller.update(0.016f);
+
+    REQUIRE(f.forwardRenderer.drawCount == 1);
 }

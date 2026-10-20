@@ -40,6 +40,11 @@ DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRe
 
 void DemoController::update(float timeDiff)
 {
+    if (!hasRequiredDependencies())
+    {
+        return;
+    }
+
     updateInput(timeDiff);
 
     m_cameraController->animate(timeDiff);
@@ -52,6 +57,18 @@ void DemoController::update(float timeDiff)
     m_animationWorld->update(timeDiff);
 
     ++m_currentFrameCount;
+}
+
+bool DemoController::hasRequiredDependencies() const
+{
+    if (m_renderer == nullptr || m_scene == nullptr || m_camera == nullptr || m_window == nullptr ||
+        m_graphicsResourceManager == nullptr || m_cameraController == nullptr ||
+        m_animationWorld == nullptr)
+    {
+        spdlog::error("The demo controller is missing a dependency and cannot draw a frame.");
+        return false;
+    }
+    return true;
 }
 
 void DemoController::updateInput(float timeDiff)
@@ -88,13 +105,19 @@ void DemoController::updateInput(float timeDiff)
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F2) && m_f2Cooldown <= 0.f)
     {
         m_f2Cooldown = 0.3f;
-        m_renderer = m_deferredRenderer;
+        if (m_deferredRenderer != nullptr)
+        {
+            m_renderer = m_deferredRenderer;
+        }
     }
 
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F3) && m_f3Cooldown <= 0.f)
     {
         m_f3Cooldown = 0.3f;
-        m_renderer = m_forwardRenderer;
+        if (m_forwardRenderer != nullptr)
+        {
+            m_renderer = m_forwardRenderer;
+        }
     }
 
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F4) && m_f4Cooldown <= 0.f)

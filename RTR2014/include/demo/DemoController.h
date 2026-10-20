@@ -35,8 +35,13 @@ class DemoController
 
    private:
     /**
-    * \brief Handles the key input and updates the frame counters.
+    * \brief Returns whether everything needed to draw a frame is present.
     */
+    bool hasRequiredDependencies() const;
+
+    /**
+     * \brief Handles the key input and updates the frame counters.
+     */
     void updateInput(float timeDiff);
 
     /**
