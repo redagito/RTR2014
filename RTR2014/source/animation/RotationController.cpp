@@ -25,8 +25,9 @@ void RotationController::update(float timeStep)
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
+        bool castsShadow = true;
 		// Retrieve object
-		if (!m_scene.getObject(m_objectId, mesh, material, position, rotation, scale))
+		if (!m_scene.getObject(m_objectId, mesh, material, position, rotation, scale, castsShadow))
 		{
 			// Invalid id?
 			return;

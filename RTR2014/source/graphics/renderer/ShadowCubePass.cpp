@@ -102,9 +102,10 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
             glm::vec3 position;
             glm::vec3 rotation;
             glm::vec3 scale;
+        bool castsShadow = true;
 
             // Retrieve object data
-            if (!scene.getObject(id, meshId, materialId, position, rotation, scale))
+            if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
             {
                 // Invalid id
                 spdlog::error("Invalid scene object id {}.", id);

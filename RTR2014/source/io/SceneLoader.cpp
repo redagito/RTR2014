@@ -276,6 +276,8 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
+    // Objects cast a shadow unless the scene says otherwise.
+    bool castsShadow = true;
 
     if (!load(node, "mesh", mesh))
     {
@@ -298,6 +300,11 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
     }
 
     if (!load(node, "scale", scale))
+    {
+        return false;
+    }
+
+    if (node.isMember("casts_shadow") && !load(node, "casts_shadow", castsShadow))
     {
         return false;
     }
@@ -326,7 +333,7 @@ bool SceneLoader::loadSceneObject(const Json::Value& node, IScene& scene,
         return false;
     }
     SceneObjectId objectId =
-        scene.createObject(meshId, materialId, position, rotation, scale, bounds);
+        scene.createObject(meshId, materialId, position, rotation, scale, bounds, castsShadow);
 
     // Load optional animation controllers
 	if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,

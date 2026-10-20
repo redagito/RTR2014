@@ -19,8 +19,9 @@
         	"mesh" : "data/mesh/skybox.obj",
         	"material" : "data/material/skybox.ini",
         	"position": [0, 0, 0],
-        	"rotation" :  [ 0, 0, 0 ],
-            "scale" :  [ 500, 500, 500 ]
+        	"rotation": [ 0, 0, 0 ],
+            "scale":  [ 500, 500, 500 ],
+            "casts_shadow" : false
         },
         {
         	"mesh" : "data/mesh/gear.obj",

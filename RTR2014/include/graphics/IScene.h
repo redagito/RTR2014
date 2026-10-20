@@ -29,18 +29,20 @@ class IScene
     virtual SceneObjectId createObject(ResourceId mesh, ResourceId material,
                                        const glm::vec3& position, const glm::vec3& rotation,
                                        const glm::vec3& scale,
-                                       const OrientedBoundingBox& localBounds) = 0;
+                                       const OrientedBoundingBox& localBounds,
+                                       bool castsShadow = true) = 0;
 
     /**
      * \brief Returns scene object data.
      */
     virtual bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
-                           glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const = 0;
+                           glm::vec3& position, glm::vec3& rotation, glm::vec3& scale,
+                           bool& castsShadow) const = 0;
 
     /**
-    * \brief Set scene object parameters.
-    */
-    virtual void setObject(SceneObjectId id, ResourceId mesh, ResourceId material,
+     * \brief Set scene object parameters.
+     */
+    virtual void setObject(ResourceId id, ResourceId mesh, ResourceId material,
                            const glm::vec3& position, const glm::vec3& rotation,
                            const glm::vec3& scale) = 0;
 

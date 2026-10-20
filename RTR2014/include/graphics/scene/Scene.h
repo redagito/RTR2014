@@ -22,10 +22,11 @@ class Scene : public IScene
 
     SceneObjectId createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
                                const glm::vec3& rotation, const glm::vec3& scale,
-                               const OrientedBoundingBox& localBounds) override;
+                               const OrientedBoundingBox& localBounds,
+                               bool castsShadow = true) override;
 
     bool getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, glm::vec3& position,
-                   glm::vec3& rotation, glm::vec3& scale) const override;
+                   glm::vec3& rotation, glm::vec3& scale, bool& castsShadow) const override;
 
     void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
                    const glm::vec3& rotation, const glm::vec3& scale) override;

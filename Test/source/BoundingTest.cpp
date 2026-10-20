@@ -203,6 +203,22 @@ TEST_CASE("a scene without objects has no bounds", "[scene]")
     REQUIRE_FALSE(scene.getSceneBounds(center, radius));
 }
 
+TEST_CASE("the scene bounds leave out the objects that cast no shadow", "[scene]")
+{
+    Scene scene;
+    auto bounds = OrientedBoundingBox::fromPoints(boxPoints(glm::vec3(0.f), glm::vec3(1.f)));
+
+    scene.createObject(-1, -1, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f), bounds);
+    // A big object that does not cast a shadow must not enlarge the volume.
+    scene.createObject(-1, -1, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1000.f), bounds,
+                       false);
+
+    glm::vec3 center;
+    float radius = 0.f;
+    REQUIRE(scene.getSceneBounds(center, radius));
+    REQUIRE(radius < 10.f);
+}
+
 TEST_CASE("Scene query follows an object that moves", "[scene]"){
     Scene scene;
     glm::mat4 view = glm::lookAt(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f));

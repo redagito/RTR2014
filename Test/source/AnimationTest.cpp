@@ -42,7 +42,8 @@ glm::vec3 objectPosition(const Scene& scene, SceneObjectId id)
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
-    REQUIRE(scene.getObject(id, mesh, material, position, rotation, scale));
+    bool castsShadow = false;
+    REQUIRE(scene.getObject(id, mesh, material, position, rotation, scale, castsShadow));
     return position;
 }
 } // namespace
@@ -94,7 +95,8 @@ TEST_CASE("the rotation controller keeps the angles in range", "[animation]")
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
-    REQUIRE(scene.getObject(id, mesh, material, position, rotation, scale));
+    bool castsShadow = false;
+    REQUIRE(scene.getObject(id, mesh, material, position, rotation, scale, castsShadow));
 
     const float fullTurn = 6.28318530717958647692f;
     REQUIRE(rotation.x >= 0.f);

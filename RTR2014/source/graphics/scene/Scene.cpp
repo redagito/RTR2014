@@ -14,14 +14,16 @@ Scene::~Scene() {}
 
 SceneObjectId Scene::createObject(ResourceId mesh, ResourceId material, const glm::vec3& position,
                                    const glm::vec3& rotation, const glm::vec3& scale,
-                                   const OrientedBoundingBox& localBounds)
+                                   const OrientedBoundingBox& localBounds, bool castsShadow)
 {
-    m_objects.push_back(SceneObject(mesh, material, position, rotation, scale, localBounds));
+    m_objects.push_back(
+        SceneObject(mesh, material, position, rotation, scale, localBounds, castsShadow));
     return m_objects.size() - 1;
 }
 
 bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
-                       glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const
+                       glm::vec3& position, glm::vec3& rotation, glm::vec3& scale,
+                       bool& castsShadow) const
 {
     // TODO Needs to be changed for better data structures
     if (id < 0 || ((unsigned int)id) >= m_objects.size())
@@ -35,6 +37,7 @@ bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material,
     position = m_objects.at(id).m_position;
     rotation = m_objects.at(id).m_rotation;
     scale = m_objects.at(id).m_scale;
+    castsShadow = m_objects.at(id).m_castsShadow;
     return true;
 }
 
@@ -159,7 +162,18 @@ bool Scene::getAmbientLight(glm::vec3& color, float& intensity) const
 
 bool Scene::getSceneBounds(glm::vec3& center, float& radius) const
 {
-    if (m_objects.empty())
+    // The objects that do not cast a shadow are not part of the volume, an
+    // environment object would make it huge.
+    std::vector<const SceneObject*> casters;
+    for (const SceneObject& object : m_objects)
+    {
+        if (object.m_castsShadow)
+        {
+            casters.push_back(&object);
+        }
+    }
+
+    if (casters.empty())
     {
         center = glm::vec3(0.f);
         radius = 0.f;
@@ -168,22 +182,22 @@ bool Scene::getSceneBounds(glm::vec3& center, float& radius) const
 
     // The center is the middle of the object centers, the radius reaches the
     // object that is furthest away from it.
-    glm::vec3 minimum = m_objects.front().m_worldBounds.getCenter();
+    glm::vec3 minimum = casters.front()->m_worldBounds.getCenter();
     glm::vec3 maximum = minimum;
-    for (const SceneObject& object : m_objects)
+    for (const SceneObject* object : casters)
     {
-        const glm::vec3 objectCenter = object.m_worldBounds.getCenter();
+        const glm::vec3 objectCenter = object->m_worldBounds.getCenter();
         minimum = glm::min(minimum, objectCenter);
         maximum = glm::max(maximum, objectCenter);
     }
     center = (minimum + maximum) * 0.5f;
 
     radius = 0.f;
-    for (const SceneObject& object : m_objects)
+    for (const SceneObject* object : casters)
     {
-        const glm::vec3 objectCenter = object.m_worldBounds.getCenter();
+        const glm::vec3 objectCenter = object->m_worldBounds.getCenter();
         // The half extents of the box are the radii of the sphere around it.
-        const float objectRadius = glm::length(object.m_worldBounds.getHalfExtents());
+        const float objectRadius = glm::length(object->m_worldBounds.getHalfExtents());
         radius = std::max(radius, glm::length(objectCenter - center) + objectRadius);
     }
     return true;
