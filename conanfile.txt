@@ -7,6 +7,7 @@ stb/cci.20240531
 tinyobjloader/1.0.7
 catch2/3.16.0
 spdlog/1.17.0
+miniaudio/0.11.21
 
 [options]
 glad/*:gl_profile=core

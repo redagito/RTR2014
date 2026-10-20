@@ -8,6 +8,7 @@
 #include "resource/OrientedBoundingBox.h"
 
 class IResourceListener; /**< Listener class. */
+struct SoundData;
 
 /**
  * \brief Resource manager interface class.
@@ -80,11 +81,24 @@ class IResourceManager
     virtual ResourceId loadMaterial(const std::string& file) = 0;
 
     /**
-    * \brief Returns material data.
-    */
+     * \brief Returns material data.
+     */
     virtual bool getMaterial(ResourceId id, ResourceId& diffuseImage, ResourceId& normalImage,
-                             ResourceId& specularImage, ResourceId& glowImage,
-                             ResourceId& alphaImage, ResourceId& customShader) const = 0;
+                             ResourceId& specularImage, ResourceId& glowImage, ResourceId& alphaImage,
+                             ResourceId& customShader) const = 0;
+
+    /**
+     * \brief Loads a sound file and decodes it into pcm samples.
+     * Decoding of preloaded files happens on worker threads; publishing
+     * occurs on the thread that first loads the file.
+     */
+    virtual ResourceId loadSound(const std::string& file) = 0;
+
+    /**
+     * \brief Returns the decoded sound data, or null for an unknown id.
+     * The pointer stays valid until the resource manager is destroyed.
+     */
+    virtual const SoundData* getSound(ResourceId id) const = 0;
 
     /**
      * \brief Creates string resource.
@@ -128,14 +142,15 @@ class IResourceManager
                            ResourceId& fragmentShaderString) const = 0;
 
     /**
-    * \brief Loads meshes and the images of the given materials in parallel.
+    * \brief Loads meshes, the images of the given materials and sounds in parallel.
     *
     * The files are parsed and decoded on worker threads, but not published
     * yet. Publishing happens when the resource is loaded for the first time,
     * which must occur on the thread owning the graphics context.
     */
     virtual void preload(const std::vector<std::string>& meshFiles,
-                         const std::vector<std::string>& materialFiles) = 0;
+                         const std::vector<std::string>& materialFiles,
+                         const std::vector<std::string>& soundFiles) = 0;
 
     /**
     * \brief Adds resource listener.

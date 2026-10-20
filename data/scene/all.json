@@ -1,4 +1,12 @@
 {
+    "music" : "data/sound/bgm/welbornworks-welcome-to-the-badlands-377489.mp3",
+    "sound_emitters" : [
+        {
+            "sound" : "data/sound/sfx/freesound_community-rusty-gears-62898.mp3",
+            "position" : [ -8, 0.5, 31 ],
+            "radius" : 10
+        }
+    ],
     "scene_objects" :  [
         {
             "mesh" :  "data/mesh/new_cave.obj",

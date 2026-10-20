@@ -11,6 +11,9 @@
 #include "stb_image.h"
 #include "tiny_obj_loader.h"
 
+#define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio.h>
+
 #include "resource/IResourceListener.h"
 
 #include "io/IniFile.h"
@@ -28,7 +31,8 @@ const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
 
 
 ResourceManager::ResourceManager()
-    : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0), m_nextStringId(0), m_nextShaderId(0)
+    : m_nextMeshId(0), m_nextImageId(0), m_nextMaterialId(0), m_nextStringId(0), m_nextShaderId(0),
+      m_nextSoundId(0)
 {
     return;
 }
@@ -332,6 +336,55 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
     return true;
 }
 
+bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
+{
+    ma_decoder_config config = ma_decoder_config_init(ma_format_s16, 0, 0);
+    ma_decoder decoder;
+    if (ma_decoder_init_file(file.c_str(), &config, &decoder) != MA_SUCCESS)
+    {
+        spdlog::error("Failed to decode sound file {}.", file.c_str());
+        return false;
+    }
+
+    ma_format format = ma_format_unknown;
+    ma_uint32 channels = 0;
+    ma_uint32 sampleRate = 0;
+    if (ma_decoder_get_data_format(&decoder, &format, &channels, &sampleRate, nullptr, 0) !=
+        MA_SUCCESS)
+    {
+        ma_decoder_uninit(&decoder);
+        spdlog::error("Failed to determine the format of sound file {}.", file.c_str());
+        return false;
+    }
+
+    constexpr ma_uint64 kChunkFrames = 4096;
+    std::vector<int16_t> chunk(static_cast<size_t>(kChunkFrames) * channels);
+    std::vector<int16_t> samples;
+    while (true)
+    {
+        ma_uint64 framesRead = 0;
+        const ma_result result =
+            ma_decoder_read_pcm_frames(&decoder, chunk.data(), kChunkFrames, &framesRead);
+        samples.insert(samples.end(), chunk.begin(), chunk.begin() + framesRead * channels);
+        if (result != MA_SUCCESS || framesRead == 0)
+        {
+            break;
+        }
+    }
+    ma_decoder_uninit(&decoder);
+
+    if (samples.empty())
+    {
+        spdlog::error("Sound file {} decoded to no samples.", file.c_str());
+        return false;
+    }
+
+    data.m_samples = std::move(samples);
+    data.m_sampleRate = sampleRate;
+    data.m_channels = channels;
+    return true;
+}
+
 bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
                                 unsigned int& width, unsigned int& height,
                                 ColorFormat& format) const
@@ -348,6 +401,45 @@ bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data,
     height = iter->second.m_height;
     format = iter->second.m_format;
     return true;
+}
+
+ResourceId ResourceManager::loadSound(const std::string& file)
+{
+    auto entry = m_soundFiles.find(file);
+    if (entry != m_soundFiles.end())
+    {
+        return entry->second;
+    }
+
+    // Publish a preloaded sound
+    SoundData data;
+    auto pending = m_pendingSounds.find(file);
+    if (pending != m_pendingSounds.end())
+    {
+        data = std::move(pending->second);
+        m_pendingSounds.erase(pending);
+    }
+    else if (!decodeSound(file, data))
+    {
+        return invalidResource;
+    }
+
+    ResourceId soundId = m_nextSoundId;
+    ++m_nextSoundId;
+    m_sounds[soundId] = std::move(data);
+    m_soundFiles[file] = soundId;
+    notifyResourceListeners(ResourceType::Sound, soundId, ListenerEvent::Create);
+    return soundId;
+}
+
+const SoundData* ResourceManager::getSound(ResourceId id) const
+{
+    auto iter = m_sounds.find(id);
+    if (iter == m_sounds.end())
+    {
+        return nullptr;
+    }
+    return &iter->second;
 }
 
 ResourceId ResourceManager::createMaterial(ResourceId diffuse, ResourceId normal,
@@ -644,7 +736,8 @@ void ResourceManager::addResourceListener(IResourceListener* listener)
 }
 
 void ResourceManager::preload(const std::vector<std::string>& meshFiles,
-                              const std::vector<std::string>& materialFiles)
+                              const std::vector<std::string>& materialFiles,
+                              const std::vector<std::string>& soundFiles)
 {
     // Collect the image files of the materials, each material only once
     std::set<std::string> uniqueMaterials;
@@ -690,8 +783,21 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
             images.push_back(image);
         }
     }
+    std::vector<std::string> sounds;
+    std::set<std::string> uniqueSounds;
+    for (const std::string& file : soundFiles)
+    {
+        if (!uniqueSounds.insert(file).second)
+        {
+            continue;
+        }
+        if (m_soundFiles.find(file) == m_soundFiles.end() && m_pendingSounds.find(file) == m_pendingSounds.end())
+        {
+            sounds.push_back(file);
+        }
+    }
 
-    if (meshes.empty() && images.empty())
+    if (meshes.empty() && images.empty() && sounds.empty())
     {
         return;
     }
@@ -701,11 +807,13 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     std::vector<char> meshOk(meshes.size(), 0);
     std::vector<Image> imageData(images.size());
     std::vector<char> imageOk(images.size(), 0);
+    std::vector<SoundData> soundData(sounds.size());
+    std::vector<char> soundOk(sounds.size(), 0);
 
-    // One queue for both kinds of work, so the slowest job starts immediately.
+    // One queue for all kinds of work, so the slowest job starts immediately.
     // The images are the slow part, so they go first.
     std::atomic<size_t> nextJob = 0;
-    const size_t jobCount = meshes.size() + images.size();
+    const size_t jobCount = meshes.size() + images.size() + sounds.size();
 
     auto worker = [&]() {
         while (true)
@@ -719,10 +827,15 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
             {
                 imageOk[i] = decodeImage(images[i].first, images[i].second, imageData[i]) ? 1 : 0;
             }
-            else
+            else if (i < images.size() + meshes.size())
             {
                 size_t mesh = i - images.size();
                 meshOk[mesh] = parseMesh(meshes[mesh], meshData[mesh]) ? 1 : 0;
+            }
+            else
+            {
+                size_t sound = i - images.size() - meshes.size();
+                soundOk[sound] = decodeSound(sounds[sound], soundData[sound]) ? 1 : 0;
             }
         }
     };
@@ -758,6 +871,13 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
         {
             std::string key = images[i].first + "|" + std::to_string(static_cast<int>(images[i].second));
             m_pendingImages[key] = std::move(imageData[i]);
+        }
+    }
+    for (size_t i = 0; i < sounds.size(); ++i)
+    {
+        if (soundOk[i])
+        {
+            m_pendingSounds[sounds[i]] = std::move(soundData[i]);
         }
     }
 }

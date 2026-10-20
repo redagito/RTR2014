@@ -5,6 +5,7 @@ find_package(jsoncpp CONFIG REQUIRED)
 find_package(stb CONFIG REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(miniaudio CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
@@ -28,4 +29,5 @@ target_link_libraries(RTR2014
     PRIVATE
         JsonCpp::JsonCpp
         stb::stb
-        tinyobjloader::tinyobjloader)
+        tinyobjloader::tinyobjloader
+        miniaudio::miniaudio)

@@ -1,4 +1,5 @@
 {
+    "music" : "data/sound/bgm/welbornworks-welcome-to-the-badlands-377489.mp3",
     "scene_objects" :  [
         {
             "mesh" :  "data/mesh/cube.obj",

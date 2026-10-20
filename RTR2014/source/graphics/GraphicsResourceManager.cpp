@@ -125,6 +125,8 @@ void GraphicsResourceManager::notify(ResourceType type, ResourceId id, ListenerE
 	case ResourceType::String:
 		handleStringEvent(id, event, resourceManager);
 		break;
+	case ResourceType::Sound:
+		break;
 	default:
 		spdlog::error("Unknown resource type encountered.");
 		break;

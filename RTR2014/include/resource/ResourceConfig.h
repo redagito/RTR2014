@@ -14,7 +14,8 @@ enum class ResourceType
     Image,
     String,
     Shader,
-    Material
+    Material,
+    Sound
 };
 
 /**

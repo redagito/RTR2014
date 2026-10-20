@@ -40,6 +40,9 @@
 #include "demo/CameraController.h"
 #include "demo/DemoController.h"
 
+// Audio
+#include "audio/SoundEngine.h"
+
 // Animation
 #include "animation/AnimationWorld.h"
 
@@ -53,6 +56,7 @@ RTRDemo::~RTRDemo()
     // owned here, so they have to be destroyed before those objects
     m_demoController.reset();
     m_cameraController.reset();
+    m_soundEngine.reset();
 
     // Graphics objects must die while the context is still current
     m_debugInfoDisplay.reset();
@@ -122,6 +126,10 @@ int RTRDemo::init(const std::string& configFile)
     GraphicsResourceManager* manager = new GraphicsResourceManager;
     m_resourceManager->addResourceListener(manager);
     m_graphicsResourceManager.reset(manager);
+
+    // Sound engine; runs silent when no audio device is available
+    m_soundEngine = std::make_shared<SoundEngine>();
+    m_soundEngine->init();
 
     m_camera = std::make_shared<FirstPersonCamera>(
         glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
@@ -230,6 +238,10 @@ int RTRDemo::run()
         double startTime = m_window->getTime();
 
         m_demoController->update((float)timeDiff);
+
+        const glm::mat4& view = m_camera->getView();
+        m_soundEngine->updateListener(m_camera->getPosition(),
+                                      -glm::vec3(view[0][2], view[1][2], view[2][2]));
 
         m_window->swapBuffer();
 
@@ -346,6 +358,17 @@ bool RTRDemo::initScene()
         spdlog::error("Failed to load scene file {}.", m_sceneFile.c_str());
         m_scene = nullptr;
         return false;
+    }
+
+    ResourceId music = m_sceneLoader->getMusicResourceId();
+    if (music != invalidResource)
+    {
+        m_soundEngine->playMusic(music, *m_resourceManager);
+    }
+    for (const SoundEmitter& emitter : m_sceneLoader->getSoundEmitters())
+    {
+        m_soundEngine->addEmitter(emitter.m_sound, emitter.m_position, emitter.m_radius,
+                                  *m_resourceManager);
     }
     return true;
 }

@@ -6,4 +6,6 @@ add_executable(RTR2014Test ${SOURCES})
 
 target_link_libraries(RTR2014Test PRIVATE RTR2014 Catch2::Catch2WithMain)
 
+target_compile_definitions(RTR2014Test PRIVATE RTR_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/Test/data")
+
 add_test(NAME RTR2014Test COMMAND RTR2014Test)

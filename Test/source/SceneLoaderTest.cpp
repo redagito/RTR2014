@@ -63,3 +63,120 @@ TEST_CASE("SceneLoader rejects a missing file", "[io]")
     REQUIRE_FALSE(loader.prepare("does_not_exist_scene.json"));
     REQUIRE_FALSE(loader.load(scene, animationWorld));
 }
+
+TEST_CASE("SceneLoader loads music and sound emitters", "[io]")
+{
+    TempJson file(std::string("{\"music\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+                  "\"scene_objects\": [],"
+                  "\"sound_emitters\": [{\"sound\": \"" + RTR_TEST_DATA_DIR "/tone.mp3\","
+                  "\"position\": [-8, 0.5, 31], \"radius\": 10}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE(loader.prepare(file.path()));
+    REQUIRE(loader.load(scene, animationWorld));
+
+    REQUIRE(loader.getMusicResourceId() != invalidResource);
+    REQUIRE(resourceManager.getSound(loader.getMusicResourceId()) != nullptr);
+
+    const std::vector<SoundEmitter>& emitters = loader.getSoundEmitters();
+    REQUIRE(emitters.size() == 1);
+    CHECK(emitters[0].m_sound != invalidResource);
+    REQUIRE(resourceManager.getSound(emitters[0].m_sound) != nullptr);
+    CHECK(emitters[0].m_position == glm::vec3(-8.0f, 0.5f, 31.0f));
+    CHECK(emitters[0].m_radius == 10.0f);
+}
+
+TEST_CASE("SceneLoader reports no music without a music node", "[io]")
+{
+    TempJson file("{\"scene_objects\": []}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE(loader.prepare(file.path()));
+    REQUIRE(loader.load(scene, animationWorld));
+
+    CHECK(loader.getMusicResourceId() == invalidResource);
+    CHECK(loader.getSoundEmitters().empty());
+}
+
+TEST_CASE("SceneLoader rejects a sound emitters node that is not an array", "[io]")
+{
+    TempJson file("{\"scene_objects\": [], \"sound_emitters\": {}}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
+}
+
+TEST_CASE("SceneLoader rejects a sound emitter without a sound node", "[io]")
+{
+    TempJson file(
+        "{\"scene_objects\": [],"
+        "\"sound_emitters\": [{\"position\": [0, 0, 0], \"radius\": 5}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
+}
+
+TEST_CASE("SceneLoader rejects a sound emitter with an invalid position", "[io]")
+{
+    TempJson file(std::string("{\"scene_objects\": [],"
+                  "\"sound_emitters\": [{\"sound\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+                  "\"position\": \"here\", \"radius\": 5}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
+}
+
+TEST_CASE("SceneLoader rejects a sound emitter with a non-positive radius", "[io]")
+{
+    TempJson file(std::string("{\"scene_objects\": [],"
+                  "\"sound_emitters\": [{\"sound\": \"") + RTR_TEST_DATA_DIR "/tone.mp3\","
+                  "\"position\": [0, 0, 0], \"radius\": 0}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE_FALSE(loader.prepare(file.path()));
+    REQUIRE_FALSE(loader.load(scene, animationWorld));
+}
+
+TEST_CASE("SceneLoader skips an emitter whose sound file cannot be loaded", "[io]")
+{
+    TempJson file(
+        "{\"scene_objects\": [],"
+        "\"sound_emitters\": [{\"sound\": \"does_not_exist_sound.mp3\","
+        "\"position\": [1, 2, 3], \"radius\": 5}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE(loader.prepare(file.path()));
+    REQUIRE(loader.load(scene, animationWorld));
+    CHECK(loader.getSoundEmitters().empty());
+}

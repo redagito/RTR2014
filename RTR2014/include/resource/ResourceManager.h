@@ -12,6 +12,7 @@
 #include "MaterialData.h"
 #include "MeshData.h"
 #include "Shader.h"
+#include "SoundData.h"
 
 /**
 * \brief Resource manager implementation.
@@ -47,6 +48,10 @@ class ResourceManager : public IResourceManager
     bool getMaterial(ResourceId id, ResourceId& diffuse, ResourceId& normal, ResourceId& specular,
                      ResourceId& glow, ResourceId& alpha, ResourceId& customShader) const;
 
+    ResourceId loadSound(const std::string& file) override;
+
+    const SoundData* getSound(ResourceId id) const override;
+
     ResourceId createString(const std::string& text);
 
     ResourceId loadString(const std::string& file);
@@ -65,14 +70,15 @@ class ResourceManager : public IResourceManager
     void removeResourceListener(IResourceListener* listener);
 
     /**
-    * \brief Loads meshes and the images of the given materials in parallel.
+    * \brief Loads meshes, the images of the given materials and sounds in parallel.
     *
     * The files are parsed and decoded on worker threads, but not published
     * yet. Publishing happens when the resource is loaded for the first time,
     * which must occur on the thread owning the graphics context.
     */
     void preload(const std::vector<std::string>& meshFiles,
-                 const std::vector<std::string>& materialFiles);
+                 const std::vector<std::string>& materialFiles,
+                 const std::vector<std::string>& soundFiles);
 
     void notifyResourceListeners(ResourceType type, ResourceId id, ListenerEvent event);
 
@@ -88,6 +94,11 @@ class ResourceManager : public IResourceManager
     static bool decodeImage(const std::string& file, ColorFormat format, Image& image);
 
     /**
+    * \brief Decodes a sound file into pcm samples without publishing it.
+    */
+    static bool decodeSound(const std::string& file, SoundData& data);
+
+    /**
     * \brief Returns the image files referenced by a material file.
     */
     static bool getMaterialImages(const std::string& file,
@@ -98,6 +109,7 @@ class ResourceManager : public IResourceManager
     ResourceId m_nextMaterialId; /**< Next free material id. */
     ResourceId m_nextStringId;   /**< Next free string id. */
     ResourceId m_nextShaderId;   /**< Next free shader id. */
+    ResourceId m_nextSoundId;    /**< Next free sound id. */
 
     // TODO Change to vector?
     std::unordered_map<ResourceId, MeshData> m_meshes;        /**< Loaded meshes. */
@@ -105,6 +117,7 @@ class ResourceManager : public IResourceManager
     std::unordered_map<ResourceId, MaterialData> m_materials; /**< Loaded materials. */
     std::unordered_map<ResourceId, std::string> m_strings; /**< Loaded strings. */
     std::unordered_map<ResourceId, Shader> m_shaders;     /**< Loaded shaders. */
+    std::unordered_map<ResourceId, SoundData> m_sounds;   /**< Loaded sounds. */
 
     std::unordered_map<std::string, ResourceId>
         m_meshFiles; /**< Maps mesh file to string resource id. */
@@ -115,12 +128,16 @@ class ResourceManager : public IResourceManager
     std::unordered_map<std::string, ResourceId>
         m_textFiles; /**< Maps text file to string resource id. */
     std::unordered_map<std::string, ResourceId>
-        m_shaderFiles; /**< Maps shader program file to shader resource id. */
+        m_shaderFiles; /**< Maps shader program file to string resource id. */
+    std::unordered_map<std::string, ResourceId>
+        m_soundFiles; /**< Maps sound file to sound resource id. */
 
     std::unordered_map<std::string, MeshData>
         m_pendingMeshes; /**< Preloaded meshes, not published yet. */
     std::unordered_map<std::string, Image>
         m_pendingImages; /**< Preloaded images, not published yet. */
+    std::unordered_map<std::string, SoundData>
+        m_pendingSounds; /**< Preloaded sounds, not published yet. */
 
     std::list<IResourceListener*> m_resourceListeners; /**< Registered listeners. */
 };

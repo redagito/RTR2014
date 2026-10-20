@@ -64,9 +64,76 @@ bool SceneLoader::prepare(const std::string& file)
         spdlog::error("The scene file {} has an invalid scene objects node.", file.c_str());
         return false;
     }
-    m_resourceManager.preload(meshes, materials);
+
+    std::string music;
+    if (root.isMember("music") && !load(root, "music", music))
+    {
+        spdlog::error("The scene file {} has an invalid music node.", file.c_str());
+        return false;
+    }
+    std::vector<std::string> sounds;
+    if (!music.empty())
+    {
+        sounds.push_back(music);
+    }
+
+    std::vector<PendingSoundEmitter> pendingEmitters;
+    if (root.isMember("sound_emitters") && !parseSoundEmitters(root["sound_emitters"], pendingEmitters))
+    {
+        spdlog::error("The scene file {} has an invalid sound emitters node.", file.c_str());
+        return false;
+    }
+    for (const PendingSoundEmitter& emitter : pendingEmitters)
+    {
+        sounds.push_back(emitter.m_file);
+    }
+
+    m_resourceManager.preload(meshes, materials, sounds);
+    m_musicFile = std::move(music);
+    m_musicResourceId = invalidResource;
+    m_pendingEmitters = std::move(pendingEmitters);
+    m_emitters.clear();
 
     m_root = std::make_unique<Json::Value>(std::move(root));
+    return true;
+}
+
+bool SceneLoader::parseSoundEmitters(const Json::Value& node,
+                                     std::vector<PendingSoundEmitter>& emitters)
+{
+    if (!node.isArray())
+    {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < node.size(); ++i)
+    {
+        const Json::Value& entry = node[i];
+        if (!entry.isObject())
+        {
+            return false;
+        }
+
+        PendingSoundEmitter emitter;
+        if (!load(entry, "sound", emitter.m_file) || emitter.m_file.empty())
+        {
+            return false;
+        }
+        if (!load(entry, "position", emitter.m_position))
+        {
+            return false;
+        }
+        if (!load(entry, "radius", emitter.m_radius))
+        {
+            return false;
+        }
+        if (emitter.m_radius <= 0.f)
+        {
+            spdlog::error("Sound emitter radius must be positive, got {}.", emitter.m_radius);
+            return false;
+        }
+        emitters.push_back(std::move(emitter));
+    }
     return true;
 }
 
@@ -107,7 +174,35 @@ bool SceneLoader::load(IScene& scene, AnimationWorld& animationWorld)
         return false;
     }
 
+    // Publish the music and emitter sounds; playback is started explicitly by the demo
+    if (!m_musicFile.empty())
+    {
+        m_musicResourceId = m_resourceManager.loadSound(m_musicFile);
+    }
+
+    for (const PendingSoundEmitter& pending : m_pendingEmitters)
+    {
+        ResourceId id = m_resourceManager.loadSound(pending.m_file);
+        if (id == invalidResource)
+        {
+            spdlog::warn("Skipping sound emitter, failed to load sound {}.",
+                         pending.m_file.c_str());
+            continue;
+        }
+        m_emitters.push_back({id, pending.m_position, pending.m_radius});
+    }
+
     return true;
+}
+
+ResourceId SceneLoader::getMusicResourceId() const
+{
+    return m_musicResourceId;
+}
+
+const std::vector<SoundEmitter>& SceneLoader::getSoundEmitters() const
+{
+    return m_emitters;
 }
 
 bool SceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,

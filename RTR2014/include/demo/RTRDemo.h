@@ -29,6 +29,9 @@ class IDebugInfoDisplay;
 class DemoController;
 class SceneLoader;
 
+// Audio
+class SoundEngine;
+
 /**
 * \brief Demo application class.
 *
@@ -81,6 +84,7 @@ class RTRDemo
     std::shared_ptr<DebugInfo> m_debugInfo = nullptr; /**< Debug information storage. */
     std::shared_ptr<IDebugInfoDisplay> m_debugInfoDisplay =
         nullptr; /**< Debug information renderer. */
+    std::shared_ptr<SoundEngine> m_soundEngine = nullptr; /**< Scene background music. */
 
 	// Animation
     std::shared_ptr<AnimationWorld> m_animationWorld;

@@ -1,16 +1,21 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <glm/glm.hpp>
 
+#include "resource/IResourceListener.h"
 #include "resource/OrientedBoundingBox.h"
 #include "resource/ResourceConfig.h"
 #include "resource/ResourceManager.h"
+#include "resource/SoundData.h"
 
 namespace
 {
@@ -44,6 +49,36 @@ class TempIni
 
    private:
     std::string m_path = "rtr2014_tmp_preload.ini";
+};
+
+class TempSound
+{
+   public:
+    TempSound()
+    {
+        std::ifstream ifs(std::string(RTR_TEST_DATA_DIR) + "/tone.mp3", std::ios::binary);
+        std::ofstream ofs(m_path, std::ios::binary);
+        ofs << ifs.rdbuf();
+    }
+    ~TempSound() { std::remove(m_path.c_str()); }
+
+    std::string path() const { return m_path; }
+
+   private:
+    std::string m_path = "rtr2014_tmp_sound.mp3";
+};
+
+class SoundListener : public IResourceListener
+{
+   public:
+    void onAttach(IResourceManager*) override {}
+    void onDetach(IResourceManager*) override {}
+    void notify(ResourceType type, ResourceId id, ListenerEvent event, IResourceManager*) override
+    {
+        m_events.emplace_back(type, id, event);
+    }
+
+    std::vector<std::tuple<ResourceType, ResourceId, ListenerEvent>> m_events;
 };
 
 // The same object loaded with and without preloading must yield the same data.
@@ -88,7 +123,7 @@ TEST_CASE("preloaded mesh data matches the synchronously loaded data", "[resourc
     TempObj file(kObj);
 
     ResourceManager preloaded;
-    preloaded.preload({file.path()}, {});
+    preloaded.preload({file.path()}, {}, {});
     const ResourceId preloadedId = preloaded.loadMesh(file.path());
 
     ResourceManager synchronous;
@@ -121,7 +156,7 @@ TEST_CASE("preloaded mesh data matches the synchronously loaded data", "[resourc
 TEST_CASE("preloading an unknown mesh file does not publish it", "[resource]")
 {
     ResourceManager manager;
-    manager.preload({"no_such_file.obj"}, {});
+    manager.preload({"no_such_file.obj"}, {}, {});
 
     REQUIRE(manager.loadMesh("no_such_file.obj") == invalidResource);
 }
@@ -129,7 +164,7 @@ TEST_CASE("preloading an unknown mesh file does not publish it", "[resource]")
 TEST_CASE("preloading an unknown material file does not publish it", "[resource]")
 {
     ResourceManager manager;
-    manager.preload({}, {"no_such_material.ini"});
+    manager.preload({}, {"no_such_material.ini"}, {});
 
     REQUIRE(manager.loadMaterial("no_such_material.ini") == invalidResource);
 }
@@ -178,7 +213,7 @@ TEST_CASE("a preloaded mesh reports the same bounds as a synchronously loaded me
     TempObj file(kObj);
 
     ResourceManager preloaded;
-    preloaded.preload({file.path()}, {});
+    preloaded.preload({file.path()}, {}, {});
     const ResourceId preloadedId = preloaded.loadMesh(file.path());
 
     ResourceManager synchronous;
@@ -191,4 +226,76 @@ TEST_CASE("a preloaded mesh reports the same bounds as a synchronously loaded me
 
     REQUIRE(preloadedBounds.getCenter() == synchronousBounds.getCenter());
     REQUIRE(preloadedBounds.getHalfExtents() == synchronousBounds.getHalfExtents());
+}
+
+TEST_CASE("loadSound decodes an mp3 file into pcm samples", "[resource]")
+{
+    ResourceManager manager;
+    const ResourceId id = manager.loadSound(RTR_TEST_DATA_DIR "/tone.mp3");
+
+    REQUIRE(id != invalidResource);
+    const SoundData* sound = manager.getSound(id);
+    REQUIRE(sound != nullptr);
+    REQUIRE(sound->m_sampleRate == 44100);
+    REQUIRE(sound->m_channels == 2);
+    REQUIRE(sound->m_samples.size() >= sound->m_channels);
+    REQUIRE(std::any_of(sound->m_samples.begin(), sound->m_samples.end(),
+                        [](int16_t sample) { return sample != 0; }));
+}
+
+TEST_CASE("loading the same sound file twice returns the same id", "[resource]")
+{
+    ResourceManager manager;
+    const ResourceId first = manager.loadSound(RTR_TEST_DATA_DIR "/tone.mp3");
+    const ResourceId second = manager.loadSound(RTR_TEST_DATA_DIR "/tone.mp3");
+
+    REQUIRE(first != invalidResource);
+    REQUIRE(second == first);
+}
+
+TEST_CASE("loadSound rejects a missing file", "[resource]")
+{
+    ResourceManager manager;
+
+    REQUIRE(manager.loadSound("no_such_sound.mp3") == invalidResource);
+}
+
+TEST_CASE("loadSound rejects a file that is not audio", "[resource]")
+{
+    TempObj file("not audio");
+
+    ResourceManager manager;
+
+    REQUIRE(manager.loadSound(file.path()) == invalidResource);
+}
+
+TEST_CASE("a preloaded sound is decoded before the first load", "[resource]")
+{
+    TempSound file;
+    ResourceManager manager;
+    manager.preload({}, {}, {file.path()});
+    std::remove(file.path().c_str());
+
+    const ResourceId id = manager.loadSound(file.path());
+    REQUIRE(id != invalidResource);
+    const SoundData* sound = manager.getSound(id);
+    REQUIRE(sound != nullptr);
+    REQUIRE_FALSE(sound->m_samples.empty());
+}
+
+TEST_CASE("loading a sound notifies listeners exactly once", "[resource]")
+{
+    ResourceManager manager;
+    SoundListener listener;
+    manager.addResourceListener(&listener);
+
+    const ResourceId id = manager.loadSound(RTR_TEST_DATA_DIR "/tone.mp3");
+    REQUIRE(id != invalidResource);
+    REQUIRE(listener.m_events.size() == 1);
+    REQUIRE(std::get<0>(listener.m_events[0]) == ResourceType::Sound);
+    REQUIRE(std::get<1>(listener.m_events[0]) == id);
+    REQUIRE(std::get<2>(listener.m_events[0]) == ListenerEvent::Create);
+
+    REQUIRE(manager.loadSound(RTR_TEST_DATA_DIR "/tone.mp3") == id);
+    REQUIRE(listener.m_events.size() == 1);
 }
