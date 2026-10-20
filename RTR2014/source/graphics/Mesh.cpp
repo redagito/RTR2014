@@ -102,6 +102,8 @@ bool Mesh::init(const std::vector<float>& vertices, const std::vector<unsigned i
         glVertexArrayElementBuffer(vao, m_indices->getId());
     }
 
+    m_vao->setInactive();
+
     return true;
 }
 

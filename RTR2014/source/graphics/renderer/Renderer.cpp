@@ -27,6 +27,12 @@ void Renderer::draw(Mesh* mesh)
     // Set primitive draw mode
     GLenum mode = Mesh::toGLPrimitive(mesh->getPrimitiveType());
     unsigned int primitiveSize = Mesh::getPrimitiveSize(mesh->getPrimitiveType());
+    if (primitiveSize == 0)
+    {
+        spdlog::error("A mesh with an unknown primitive type cannot be drawn.");
+        mesh->getVertexArray()->setInactive();
+        return;
+    }
 
     // Decide on draw method based on the stored data
     if (mesh->hasIndexBuffer())

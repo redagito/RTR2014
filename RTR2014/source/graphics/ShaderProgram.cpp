@@ -129,22 +129,29 @@ bool ShaderProgram::init(ShaderObject<GL_VERTEX_SHADER>* vertex,
 
 void ShaderProgram::setActive()
 {
-	assert(isValid());
-	if (s_activeShaderProgram != m_programId)
-	{
-		glUseProgram(m_programId);
-		s_activeShaderProgram = m_programId;
-	}
+    if (!isValid())
+    {
+        spdlog::error("An invalid shader program cannot be used.");
+        return;
+    }
+    if (s_activeShaderProgram != m_programId)
+    {
+        glUseProgram(m_programId);
+        s_activeShaderProgram = m_programId;
+    }
 }
 
 void ShaderProgram::setInactive()
 {
-	assert(isValid());
-	if (s_activeShaderProgram == m_programId)
-	{
-		glUseProgram(0);
-		s_activeShaderProgram = 0;
-	}
+    if (!isValid())
+    {
+        return;
+    }
+    if (s_activeShaderProgram == m_programId)
+    {
+        glUseProgram(0);
+        s_activeShaderProgram = 0;
+    }
 }
 
 const std::string& ShaderProgram::getErrorString() const { return m_infoLog; }

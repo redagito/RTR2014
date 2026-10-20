@@ -1,7 +1,8 @@
 #include "graphics/renderer/FrameBuffer.h"
 
 #include <algorithm>
-#include <cassert>
+
+#include <spdlog/spdlog.h>
 
 #include "graphics/Texture.h"
 #include "graphics/renderer/RenderBuffer.h"
@@ -29,8 +30,10 @@ bool FrameBuffer::init()
 
 std::string FrameBuffer::getState()
 {
-    assert(m_valid);
-    // Caller must rebind the framebuffer it was using; this leaves the default FBO bound.
+    if (!m_valid)
+    {
+        return "The frame buffer is not initialized";
+    }
     GLenum state = glCheckNamedFramebufferStatus(m_fboId, GL_FRAMEBUFFER);
 
     switch (state)
@@ -69,7 +72,11 @@ std::string FrameBuffer::getState()
 
 void FrameBuffer::setActive(GLenum target)
 {
-    assert(m_valid);
+    if (!m_valid)
+    {
+        spdlog::error("An invalid frame buffer cannot be bound.");
+        return;
+    }
     glBindFramebuffer(target, m_fboId);
     // Set draw buffers
     if (!m_drawBuffers.empty())
@@ -101,8 +108,12 @@ void FrameBuffer::resize(unsigned int width, unsigned int height)
 
 void FrameBuffer::attach(const std::shared_ptr<Texture>& texture, GLenum attachment)
 {
+    if (!m_valid)
+    {
+        spdlog::error("An invalid frame buffer cannot have an attachment.");
+        return;
+    }
     // Attach
-    assert(m_valid);
     glNamedFramebufferTexture(m_fboId, attachment, texture->getId(), 0);
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&
@@ -121,8 +132,12 @@ void FrameBuffer::setDefaultActive()
 
 void FrameBuffer::attach(const std::shared_ptr<RenderBuffer>& renderBuffer, GLenum attachment)
 {
+    if (!m_valid)
+    {
+        spdlog::error("An invalid frame buffer cannot have an attachment.");
+        return;
+    }
     // Attach
-    assert(m_valid);
     glNamedFramebufferRenderbuffer(m_fboId, attachment, GL_RENDERBUFFER, renderBuffer->getId());
     // Add color attachments to draw buffers
     if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT &&

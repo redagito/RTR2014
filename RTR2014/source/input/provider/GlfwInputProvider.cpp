@@ -110,8 +110,10 @@ void GlfwInputProvider::glfwMouseButtonCallback(GLFWwindow* window, int button, 
 
 GlfwInputProvider::GlfwInputProvider(GLFWwindow* window) : m_window(window)
 {
-    assert(m_window != nullptr);
-	assert(s_instances.find(m_window) == s_instances.end());
+    if (m_window == nullptr)
+    {
+        return;
+    }
 
 	// Set callbacks
 	glfwSetKeyCallback(m_window, GlfwInputProvider::glfwKeyCallback);
@@ -123,8 +125,17 @@ GlfwInputProvider::GlfwInputProvider(GLFWwindow* window) : m_window(window)
 
 GlfwInputProvider::~GlfwInputProvider() 
 {
-	// Remove mapping
-	s_instances.erase(m_window);
+    if (m_window == nullptr)
+    {
+        return;
+    }
+
+    // Remove the callbacks, they would outlive this provider.
+    glfwSetKeyCallback(m_window, nullptr);
+    glfwSetCursorPosCallback(m_window, nullptr);
+    glfwSetMouseButtonCallback(m_window, nullptr);
+    // Remove mapping
+    s_instances.erase(m_window);
 }
 
 void GlfwInputProvider::addInputListener(IInputListener* listener)

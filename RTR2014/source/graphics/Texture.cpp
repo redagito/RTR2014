@@ -143,7 +143,11 @@ bool Texture::isValid() const { return m_valid; }
 
 void Texture::setActive(GLint textureUnit) const
 {
-    assert(isValid());
+    if (!isValid())
+    {
+        spdlog::error("An invalid texture cannot be bound.");
+        return;
+    }
     glBindTextureUnit(textureUnit, m_textureId);
 }
 

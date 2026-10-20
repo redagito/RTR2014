@@ -322,7 +322,13 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 	switch (event)
 	{
 	case ListenerEvent::Create:
-		assert(m_textures.count(id) == 0 && "Texture id already exists");
+		if (m_textures.count(id) != 0)
+		{
+			// Replacing the texture would leave the materials that use it with
+			// a dangling pointer.
+			spdlog::error("The texture id {} already exists.", id);
+			return;
+		}
 
 		if (!resourceManager->getImage(id, data, width, height, format))
 		{
@@ -330,12 +336,17 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 			return;
 		}
 		// Create new texture
-		m_textures[id] =
-			std::move(std::unique_ptr<Texture>(new Texture(data, width, height, format)));
+		m_textures[id] = std::make_unique<Texture>(data, width, height, format);
 		break;
 
 	case ListenerEvent::Change:
-		assert(m_textures.count(id) == 1 && "Texture id does not exist");
+	{
+		auto texture = m_textures.find(id);
+		if (texture == m_textures.end())
+		{
+			spdlog::error("The texture id {} does not exist.", id);
+			return;
+		}
 
 		if (!resourceManager->getImage(id, data, width, height, format))
 		{
@@ -343,8 +354,9 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
 			return;
 		}
 		// Reinitialize texture on change
-		m_textures.at(id)->init(data, width, height, format);
+		texture->second->init(data, width, height, format);
 		break;
+	}
 
 	case ListenerEvent::Delete:
 		// Keep texture?
@@ -367,20 +379,31 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 	switch (event)
 	{
 	case ListenerEvent::Create:
-		assert(m_meshes.count(id) == 0 && "Mesh id already exists");
+		if (m_meshes.count(id) != 0)
+		{
+			// Replacing the mesh would leave the scene objects that use it with
+			// a dangling pointer.
+			spdlog::error("The mesh id {} already exists.", id);
+			return;
+		}
 
 		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
 		{
 			spdlog::error("Failed to access mesh resource {}.", id);
 			return;
 		}
-		// Create new texture
-		m_meshes[id] =
-			std::move(std::unique_ptr<Mesh>(new Mesh(vertices, indices, normals, uvs, type)));
+		// Create new mesh
+		m_meshes[id] = std::make_unique<Mesh>(vertices, indices, normals, uvs, type);
 		break;
 
 	case ListenerEvent::Change:
-		assert(m_meshes.count(id) == 1 && "Mesh id does not exist");
+	{
+		auto mesh = m_meshes.find(id);
+		if (mesh == m_meshes.end())
+		{
+			spdlog::error("The mesh id {} does not exist.", id);
+			return;
+		}
 
 		if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
 		{
@@ -388,8 +411,9 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
 			return;
 		}
 		// Reinitialize mesh on change
-		m_meshes.at(id)->init(vertices, indices, normals, uvs, type);
+		mesh->second->init(vertices, indices, normals, uvs, type);
 		break;
+	}
 
 	case ListenerEvent::Delete:
 		// Keep mesh?
@@ -413,7 +437,13 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 	switch (event)
 	{
 	case ListenerEvent::Create:
-		assert(m_materials.count(id) == 0 && "Material id already exists");
+		if (m_materials.count(id) != 0)
+		{
+			// Replacing the material would leave the scene objects that use it
+			// with a dangling pointer.
+			spdlog::error("The material id {} already exists.", id);
+			return;
+		}
 
 		if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
 		{
@@ -422,13 +452,19 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 		}
 
 		// Create new material
-		m_materials[id] = std::move(std::unique_ptr<Material>(
-			new Material(getTexture(diffuse), getTexture(normal), getTexture(specular),
-			getTexture(glow), getTexture(alpha), getShaderProgram(customShader))));
+		m_materials[id] = std::make_unique<Material>(
+			getTexture(diffuse), getTexture(normal), getTexture(specular), getTexture(glow),
+			getTexture(alpha), getShaderProgram(customShader));
 		break;
 
 	case ListenerEvent::Change:
-		assert(m_materials.count(id) == 1 && "Material id does not exist");
+	{
+		auto material = m_materials.find(id);
+		if (material == m_materials.end())
+		{
+			spdlog::error("The material id {} does not exist.", id);
+			return;
+		}
 
 		if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
 		{
@@ -437,10 +473,11 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
 		}
 
 		// Reinitialize material on change
-		m_materials.at(id)->init(getTexture(diffuse), getTexture(normal), getTexture(specular),
+		material->second->init(getTexture(diffuse), getTexture(normal), getTexture(specular),
 			getTexture(glow), getTexture(alpha),
 			getShaderProgram(customShader));
 		break;
+	}
 
 	case ListenerEvent::Delete:
 		// Keep material?
@@ -463,8 +500,13 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 	switch (event)
 	{
 	case ListenerEvent::Create:
-		// TODO Replace assert with log statement and global error handler
-		assert(m_shaderPrograms.count(id) == 0 && "Shader id already exists");
+		if (m_shaderPrograms.count(id) != 0)
+		{
+			// Replacing the program would leave the materials that use it with
+			// a dangling pointer.
+			spdlog::error("The shader program id {} already exists.", id);
+			return;
+		}
 
 		// Load shader source ids
 		if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
