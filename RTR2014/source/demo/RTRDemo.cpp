@@ -33,6 +33,7 @@
 #include "graphics/IWindow.h"
 
 #include "util/TimeStamp.h"
+#include "util/FrameTimer.h"
 #include "util/Profiler.h"
 #include "graphics/DebugInfoDisplay.h"
 #include "input/provider/GlfwInputProvider.h"
@@ -163,8 +164,6 @@ void RTRDemo::drawLoadingFrame()
 
 int RTRDemo::run()
 {
-    double timeDiff = 0.0;
-
     // Parse the scene file and decode the resources it references on a worker thread
     std::future<bool> prepared = std::async(std::launch::async, [this]() {
         ScopedTimer timer(profiler(), "startup: decode resources");
@@ -233,11 +232,15 @@ int RTRDemo::run()
 
     m_window->toggleMouseCapture();
 
+    FrameTimer frameTimer(m_window->getTime());
+
     do
     {
-        double startTime = m_window->getTime();
+        // The delta is measured between the frames, not around the work of a
+        // single frame, so that it does not depend on how long the frame took.
+        const float delta = frameTimer.tick(m_window->getTime());
 
-        m_demoController->update((float)timeDiff);
+        m_demoController->update(delta);
 
         const glm::mat4& view = m_camera->getView();
         m_soundEngine->updateListener(m_camera->getPosition(),
@@ -247,8 +250,6 @@ int RTRDemo::run()
 
         // Update input
         m_window->pollEvents();
-
-        timeDiff = m_window->getTime() - startTime;
 
     } while (!m_inputProvider->isKeyPressed(GLFW_KEY_ESCAPE) && m_window->isOpen());
 
