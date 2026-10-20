@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "animation/AnimationWorld.h"
+#include "animation/IAnimationController.h"
 #include "debug/DebugInfo.h"
 #include "demo/CameraController.h"
 #include "demo/DemoController.h"
@@ -59,9 +60,14 @@ class FakeInputProvider : public IInputProvider
    public:
     void addInputListener(IInputListener* listener) override {}
     void removeInputListener(IInputListener* listener) override {}
-    bool isKeyPressed(int keyCode) override { return pressedKeys.count(keyCode) > 0; }
+    bool isKeyPressed(int keyCode) override
+    {
+        auto entry = pressedKeys.find(keyCode);
+        return entry != pressedKeys.end() && entry->second;
+    }
 
     void press(int keyCode) { pressedKeys[keyCode] = true; }
+    void release(int keyCode) { pressedKeys[keyCode] = false; }
 
     std::map<int, bool> pressedKeys;
 };
@@ -86,6 +92,16 @@ class FakeGraphicsResourceManager : public IGraphicsResourceManager
     Texture* getDefaultSpecularTexture() const override { return nullptr; }
     Texture* getDefaultGlowTexture() const override { return nullptr; }
     Texture* getDefaultAlphaTexture() const override { return nullptr; }
+};
+
+// Records how many frames were drawn when it was updated.
+class OrderRecordingAnimation : public IAnimationController
+{
+   public:
+    void update(float) override { drawCountAtUpdate = renderer->drawCount; }
+
+    FakeRenderer* renderer = nullptr;
+    int drawCountAtUpdate = -1;
 };
 
 struct Fixture
@@ -240,4 +256,36 @@ TEST_CASE("Demo controller keeps the renderer when the deferred one is missing",
     controller.update(0.016f);
 
     REQUIRE(f.forwardRenderer.drawCount == 1);
+}
+
+TEST_CASE("Demo controller keeps the frame rate after a long frame", "[demo]")
+{
+    Fixture f;
+    f.inputProvider.press(GLFW_KEY_1);
+    f.controller->update(0.016f);
+    // The key is only pressed once, the toggle would fire again otherwise.
+    f.inputProvider.release(GLFW_KEY_1);
+
+    // A frame that takes five seconds
+    f.controller->update(5.0f);
+    // The frames after it are counted in the new second
+    f.controller->update(0.5f);
+    f.controller->update(0.5f);
+
+    const int fps = std::stoi(f.debugInfo.getValues().at("FPS"));
+    REQUIRE(fps == 2);
+}
+
+TEST_CASE("Demo controller animates the scene before it draws it", "[demo]")
+{
+    Fixture f;
+
+    auto animation = std::make_shared<OrderRecordingAnimation>();
+    animation->renderer = &f.deferredRenderer;
+    f.animationWorld.addAnimationController(animation);
+
+    f.controller->update(0.016f);
+
+    // The animation must not see the frame that is drawn after it.
+    REQUIRE(animation->drawCountAtUpdate == 0);
 }

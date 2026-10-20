@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include "demo/DemoController.h"
 
+#include <cmath>
 #include <string>
 
 #include <GLFW/glfw3.h>
@@ -49,12 +50,13 @@ void DemoController::update(float timeDiff)
 
     m_cameraController->animate(timeDiff);
 
+    // The scene is animated before it is drawn, so that the frame shows the
+    // new state of the objects.
+    m_animationWorld->update(timeDiff);
+
     m_renderer->draw(*m_scene, *m_camera, *m_window, *m_graphicsResourceManager);
 
     updateDebugInfo(timeDiff);
-
-    // Perform animation update
-    m_animationWorld->update(timeDiff);
 
     ++m_currentFrameCount;
 }
@@ -84,7 +86,8 @@ void DemoController::updateInput(float timeDiff)
 
     if (m_fpsCoolDown < 0)
     {
-        m_fpsCoolDown += 1.0;
+        // The countdown can be more than a second behind after a long frame.
+        m_fpsCoolDown = std::fmod(m_fpsCoolDown, 1.0) + 1.0;
         m_lastFrameCount = m_currentFrameCount;
         m_currentFrameCount = 0;
     }
