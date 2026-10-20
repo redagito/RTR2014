@@ -186,8 +186,10 @@ bool ShadowCubePass::init(IResourceManager* manager)
     m_shadowCubeTexture = std::make_shared<Texture>(textureId, false, 1024, 1024, GL_R32F,
                                                      GL_RED);
 
-    glNamedFramebufferTexture(m_shadowCubeBuffer.getId(), GL_DEPTH_ATTACHMENT,
-                            m_shadowCubeDepthTexture->getId(), 0);
+    // The depth attachment is registered with the frame buffer, the color
+    // attachment is a layer of the cube map that is pointed at the face that
+    // is rendered, so it is attached per face.
+    m_shadowCubeBuffer.attach(m_shadowCubeDepthTexture, GL_DEPTH_ATTACHMENT);
 
     glNamedFramebufferDrawBuffer(m_shadowCubeBuffer.getId(), GL_NONE);
     glNamedFramebufferReadBuffer(m_shadowCubeBuffer.getId(), GL_NONE);

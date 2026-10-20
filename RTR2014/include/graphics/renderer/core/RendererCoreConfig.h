@@ -40,6 +40,8 @@ const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
 const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
+const std::string shadowVolumeCenterUniformName = "shadow_volume_center";
+const std::string shadowVolumeRadiusUniformName = "shadow_volume_radius";
 
 // Transformation matrix uniform names
 const std::string rotationMatrixUniformName = "rotation";

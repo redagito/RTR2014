@@ -157,6 +157,11 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera,
             directionalLightPassShader->setUniform(shadowViewProjectionBiasMatrixUniformName,
                                                    shadowViewProjBiasMatrix);
 
+            // The volume the shadow map covers, the environment around the
+            // scene is outside of it.
+            directionalLightPassShader->setUniform(shadowVolumeCenterUniformName, sceneCenter);
+            directionalLightPassShader->setUniform(shadowVolumeRadiusUniformName, radius);
+
             // Set directional light parameters
             directionalLightPassShader->setUniform(lightDirectionUniformName, lightDir);
             directionalLightPassShader->setUniform(lightColorUniformName, color);
