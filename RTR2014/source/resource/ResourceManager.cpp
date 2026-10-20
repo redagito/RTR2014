@@ -27,6 +27,22 @@ const char* const kMaterialTextureSlotNames[kMaterialTextureSlots] = {"diffuse",
 const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
     ColorFormat::RGB24, ColorFormat::RGB24, ColorFormat::GreyScale8, ColorFormat::GreyScale8,
     ColorFormat::GreyScale8};
+
+// Releases a miniaudio decoder when the scope ends, also when an exception
+// leaves it.
+class DecoderGuard
+{
+   public:
+    explicit DecoderGuard(ma_decoder& decoder) : m_decoder(decoder) {}
+
+    ~DecoderGuard() { ma_decoder_uninit(&m_decoder); }
+
+    DecoderGuard(const DecoderGuard&) = delete;
+    DecoderGuard& operator=(const DecoderGuard&) = delete;
+
+   private:
+    ma_decoder& m_decoder;
+};
 } // namespace
 
 
@@ -364,6 +380,8 @@ bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
         spdlog::error("Failed to decode sound file {}.", file.c_str());
         return false;
     }
+    // The decoder holds a file handle, it has to be released on every path.
+    DecoderGuard guard(decoder);
 
     ma_format format = ma_format_unknown;
     ma_uint32 channels = 0;
@@ -371,7 +389,6 @@ bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
     if (ma_decoder_get_data_format(&decoder, &format, &channels, &sampleRate, nullptr, 0) !=
         MA_SUCCESS)
     {
-        ma_decoder_uninit(&decoder);
         spdlog::error("Failed to determine the format of sound file {}.", file.c_str());
         return false;
     }
@@ -384,13 +401,13 @@ bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
         ma_uint64 framesRead = 0;
         const ma_result result =
             ma_decoder_read_pcm_frames(&decoder, chunk.data(), kChunkFrames, &framesRead);
-        samples.insert(samples.end(), chunk.begin(), chunk.begin() + framesRead * channels);
+        samples.insert(samples.end(), chunk.begin(),
+                       chunk.begin() + static_cast<std::ptrdiff_t>(framesRead * channels));
         if (result != MA_SUCCESS || framesRead == 0)
         {
             break;
         }
     }
-    ma_decoder_uninit(&decoder);
 
     if (samples.empty())
     {
