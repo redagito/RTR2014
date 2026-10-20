@@ -9,6 +9,11 @@ class IControllableCamera : public ICamera
    public:
     virtual ~IControllableCamera();
 
+    /**
+    * \brief Points the camera at a target.
+    *
+    * The camera has no roll, its up axis is the world up axis.
+    */
     virtual glm::vec3 getPosition() const = 0;
     virtual void setPosition(const glm::vec3& position) = 0;
 
@@ -22,9 +27,8 @@ class IControllableCamera : public ICamera
     virtual void roll(float amount) = 0;
     virtual void yaw(float amount) = 0;
 
-    virtual void lookAt(const glm::vec3& target, const glm::vec3& up) = 0;
-    virtual void lookAt(const glm::vec3& position, const glm::vec3& target,
-                        const glm::vec3& up) = 0;
+    virtual void lookAt(const glm::vec3& target) = 0;
+    virtual void lookAt(const glm::vec3& position, const glm::vec3& target) = 0;
 
     virtual float getFieldOfView() const = 0;
     virtual float getZNear() const = 0;

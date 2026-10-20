@@ -8,8 +8,8 @@
 class FirstPersonCamera : public IControllableCamera
 {
    public:
-    FirstPersonCamera(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up,
-                       float fieldOfView, float aspectRatio, float zNear, float zFar);
+    FirstPersonCamera(const glm::vec3& position, const glm::vec3& target, float fieldOfView,
+                       float aspectRatio, float zNear, float zFar);
 
     const glm::mat4& getView() const override;
     const glm::mat4& getProjection() const override;
@@ -27,8 +27,8 @@ class FirstPersonCamera : public IControllableCamera
     void roll(float amount) override;
     void yaw(float amount) override;
 
-    void lookAt(const glm::vec3& target, const glm::vec3& up) override;
-    void lookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) override;
+    void lookAt(const glm::vec3& target) override;
+    void lookAt(const glm::vec3& position, const glm::vec3& target) override;
 
     float getFieldOfView() const override;
     float getZNear() const override;

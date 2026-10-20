@@ -133,8 +133,7 @@ int RTRDemo::init(const std::string& configFile)
     m_soundEngine->init();
 
     m_camera = std::make_shared<FirstPersonCamera>(
-        glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f), 45.f,
-        4.f / 3.f, 0.01f, 1000.f);
+        glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), 45.f, 4.f / 3.f, 0.01f, 1000.f);
 
     m_cameraController = std::make_shared<CameraController>();
     m_cameraController->setCamera(m_camera);

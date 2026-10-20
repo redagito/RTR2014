@@ -255,7 +255,7 @@ void CameraController::animateSequence(float dt) {
     {
         // Snap to the final keyframe pose instead of stopping short.
         const SequencePoint& last = m_sequencePoints.back();
-        m_camera->lookAt(last.position, last.position + last.orientation, glm::vec3(0,1,0));
+        m_camera->lookAt(last.position, last.position + last.orientation);
         m_camera->getFeatureInfoForWrite().fogType =
             (last.fogActive ? FogType::Exp2 : FogType::None);
         m_camera->getFeatureInfoForWrite().fxaaActive = last.fxaaActive;
@@ -282,7 +282,7 @@ void CameraController::animateSequence(float dt) {
     glm::vec3 cameraPosition = before.position * (1.0f - ix) + after.position * ix;
     glm::vec3 cameraOrientation = before.orientation * (1.0f - ix) + after.orientation * ix;
     
-    m_camera->lookAt(cameraPosition, cameraPosition + cameraOrientation, glm::vec3(0,1,0));
+    m_camera->lookAt(cameraPosition, cameraPosition + cameraOrientation);
     m_camera->getFeatureInfoForWrite().fogType = (before.fogActive ? FogType::Exp2 : FogType::None);
     m_camera->getFeatureInfoForWrite().fxaaActive = before.fxaaActive;
 }

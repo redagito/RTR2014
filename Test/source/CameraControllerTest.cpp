@@ -57,8 +57,7 @@ TEST_CASE("Camera controller rejects a sequence with two keyframes at the same t
 
     CameraController controller;
     controller.setCamera(std::make_shared<FirstPersonCamera>(
-        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f), 1.f, 1.33f, 0.01f,
-        1000.f));
+        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), 1.f, 1.33f, 0.01f, 1000.f));
 
     REQUIRE_FALSE(controller.loadSequence(file.path()));
 }
@@ -69,8 +68,7 @@ TEST_CASE("Camera controller rejects a sequence whose timestamps go backwards", 
 
     CameraController controller;
     controller.setCamera(std::make_shared<FirstPersonCamera>(
-        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f), 1.f, 1.33f, 0.01f,
-        1000.f));
+        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), 1.f, 1.33f, 0.01f, 1000.f));
 
     REQUIRE_FALSE(controller.loadSequence(file.path()));
 }
@@ -81,8 +79,7 @@ TEST_CASE("Camera controller accepts a sequence with increasing timestamps", "[d
 
     CameraController controller;
     controller.setCamera(std::make_shared<FirstPersonCamera>(
-        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f), 1.f, 1.33f, 0.01f,
-        1000.f));
+        glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f), 1.f, 1.33f, 0.01f, 1000.f));
 
     REQUIRE(controller.loadSequence(file.path()));
 }
@@ -92,8 +89,7 @@ TEST_CASE("Camera controller keeps the camera finite while a sequence runs", "[d
     TempJson file(sequenceWith(keyframe(0.0)));
 
     auto camera = std::make_shared<FirstPersonCamera>(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f),
-                                                      glm::vec3(0.f, 1.f, 0.f), 1.f, 1.33f,
-                                                      0.01f, 1000.f);
+                                                      1.f, 1.33f, 0.01f, 1000.f);
     NoInputProvider inputProvider;
     CameraController controller;
     controller.setCamera(camera);

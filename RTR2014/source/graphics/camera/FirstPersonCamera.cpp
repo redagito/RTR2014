@@ -7,10 +7,10 @@
 #include <glm/trigonometric.hpp>
 
 FirstPersonCamera::FirstPersonCamera(const glm::vec3& position, const glm::vec3& target,
-                                       const glm::vec3& up, float fieldOfView, float aspectRatio,
-                                       float zNear, float zFar)
+                                       float fieldOfView, float aspectRatio, float zNear,
+                                       float zFar)
 {
-    lookAt(position, target, up);
+    lookAt(position, target);
     setProjection(fieldOfView, aspectRatio, zNear, zFar);
 }
 
@@ -76,7 +76,7 @@ void FirstPersonCamera::yaw(float amount)
     updateView();
 }
 
-void FirstPersonCamera::lookAt(const glm::vec3& target, const glm::vec3& /* up */)
+void FirstPersonCamera::lookAt(const glm::vec3& target)
 {
     glm::vec3 direction = target - m_position;
     if (glm::dot(direction, direction) < 1e-8f)
@@ -108,10 +108,10 @@ const glm::mat4& FirstPersonCamera::getView() const { return m_view; }
 
 const glm::mat4& FirstPersonCamera::getProjection() const { return m_proj; }
 
-void FirstPersonCamera::lookAt(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up)
+void FirstPersonCamera::lookAt(const glm::vec3& eye, const glm::vec3& target)
 {
     m_position = eye;
-    lookAt(target, up);
+    lookAt(target);
 }
 
 float FirstPersonCamera::getFieldOfView() const { return m_fieldOfView; }
