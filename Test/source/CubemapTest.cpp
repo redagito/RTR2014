@@ -1,3 +1,4 @@
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <cmath>
@@ -39,6 +40,30 @@ TEST_CASE("the atlas cells of the faces are the ones of a cross", "[graphics]")
     REQUIRE(atlasCellForFace(4) == glm::ivec2(1, 1));
     REQUIRE(atlasCellForFace(0) == glm::ivec2(2, 1));
     REQUIRE(atlasCellForFace(5) == glm::ivec2(3, 1));
+}
+
+TEST_CASE("the direction of a texel and its coordinates agree", "[graphics]")
+{
+    // The two are inverses of each other, the mip levels are filtered with
+    // them. The texels on the border of a face lie on the border of two
+    // faces, there the direction does not name a single one.
+    for (int face = 0; face < 6; ++face)
+    {
+        for (int i = 1; i < 4; ++i)
+        {
+            for (int j = 1; j < 4; ++j)
+            {
+                const float s = (float)i / 4.f;
+                const float t = (float)j / 4.f;
+                const glm::vec3 direction = cubemapFaceDirection(face, s, t);
+                const CubemapCoordinates coordinates =
+                    cubemapCoordinatesForDirection(direction);
+                REQUIRE(coordinates.face == face);
+                REQUIRE(coordinates.s == Catch::Approx(s).margin(0.001f));
+                REQUIRE(coordinates.t == Catch::Approx(t).margin(0.001f));
+            }
+        }
+    }
 }
 
 TEST_CASE("the atlas of the cubemap is continuous around the horizon", "[graphics]")

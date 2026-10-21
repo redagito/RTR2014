@@ -39,6 +39,8 @@ const std::string fogPassTypeUniformName = "fog_type";
 const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
+const std::string inverseViewUniformName = "inverse_view";
+const std::string inverseProjectionUniformName = "inverse_projection";
 const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
 
 // The environment of the scene

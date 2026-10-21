@@ -17,7 +17,26 @@ enum Face
     PositiveZ = 4,
     NegativeZ = 5
 };
-}  // namespace
+} // namespace
+
+glm::vec3 cubemapFaceDirection(int face, float s, float t)
+{
+    switch (face)
+    {
+    case PositiveX:
+        return glm::vec3(1.f, 1.f - 2.f * t, 1.f - 2.f * s);
+    case NegativeX:
+        return glm::vec3(-1.f, 1.f - 2.f * t, 2.f * s - 1.f);
+    case PositiveY:
+        return glm::vec3(2.f * s - 1.f, 1.f, 2.f * t - 1.f);
+    case NegativeY:
+        return glm::vec3(2.f * s - 1.f, -1.f, 1.f - 2.f * t);
+    case PositiveZ:
+        return glm::vec3(2.f * s - 1.f, 1.f - 2.f * t, 1.f);
+    default:
+        return glm::vec3(1.f - 2.f * s, 1.f - 2.f * t, -1.f);
+    }
+}
 
 CubemapCoordinates cubemapCoordinatesForDirection(const glm::vec3& direction)
 {
@@ -126,7 +145,7 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
 
     // The cells of the atlas are copied out one face at a time, the source of
     // an upload has to be contiguous.
-    std::vector<unsigned char> face(faceSize * faceSize * 3);
+    std::vector<unsigned char> face((size_t)faceSize * faceSize * 3);
     for (int f = 0; f < 6; ++f)
     {
         const glm::ivec2 cell = atlasCellForFace(f);
@@ -142,8 +161,11 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
                             face.data());
     }
 
-    // The mipmaps are generated per face, the atlas would bleed between them.
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    // The mip levels are generated here and not by the driver. The driver
+    // generates them per face, the content of a face border does not match the
+    // neighbouring face and the seams of the cube show.
+    generateMipLevels(faceSize, levels);
+
     glTextureParameteri(m_textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTextureParameteri(m_textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(m_textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -152,6 +174,91 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
 
     m_valid = true;
     return true;
+}
+
+void Cubemap::generateMipLevels(unsigned int faceSize, unsigned int levels)
+{
+    // The texels of the six faces of a level.
+    std::vector<std::vector<unsigned char>> faces;
+    for (int f = 0; f < 6; ++f)
+    {
+        faces.emplace_back((size_t)faceSize * faceSize * 3);
+        glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + f, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                      faces.back().data());
+    }
+
+    for (unsigned int level = 1; level < levels; ++level)
+    {
+        const unsigned int size = faceSize >> level;
+        const unsigned int previousSize = size * 2;
+        const std::vector<std::vector<unsigned char>> previous = faces;
+
+        for (int f = 0; f < 6; ++f)
+        {
+            std::vector<unsigned char>& face = faces[f];
+            for (unsigned int y = 0; y < size; ++y)
+            {
+                for (unsigned int x = 0; x < size; ++x)
+                {
+                    unsigned int sum[3] = {0, 0, 0};
+                    // The four texels of the previous level this texel covers
+                    // may lie on a neighbouring face.
+                    for (unsigned int dy = 0; dy < 2; ++dy)
+                    {
+                        for (unsigned int dx = 0; dx < 2; ++dx)
+                        {
+                            const float s = (x * 2 + dx + 0.5f) / (float)previousSize;
+                            const float t = (y * 2 + dy + 0.5f) / (float)previousSize;
+                            const glm::vec3 direction = cubemapFaceDirection(f, s, t);
+                            const CubemapCoordinates coordinates =
+                                cubemapCoordinatesForDirection(direction);
+                            const unsigned char* texel = sampleFace(previous[coordinates.face],
+                                                                 previousSize, coordinates.s,
+                                                                 coordinates.t);
+                            sum[0] += texel[0];
+                            sum[1] += texel[1];
+                            sum[2] += texel[2];
+                        }
+                    }
+                    const size_t offset = ((size_t)y * size + x) * 3;
+                    for (int c = 0; c < 3; ++c)
+                    {
+                        face[offset + c] = (unsigned char)(sum[c] / 4);
+                    }
+                }
+            }
+            glTextureSubImage3D(m_textureId, (GLint)level, 0, 0, f, static_cast<GLsizei>(size),
+                                static_cast<GLsizei>(size), 1, GL_RGB, GL_UNSIGNED_BYTE,
+                                faces[f].data());
+        }
+    }
+}
+
+const unsigned char* Cubemap::sampleFace(const std::vector<unsigned char>& face, unsigned int size,
+                                         float s, float t)
+{
+    const float x = s * size - 0.5f;
+    const float y = t * size - 0.5f;
+    const int x0 = (int)std::floor(x);
+    const int y0 = (int)std::floor(y);
+    const int x1 = std::min(x0 + 1, (int)size - 1);
+    const int y1 = std::min(y0 + 1, (int)size - 1);
+    const int cx0 = std::clamp(x0, 0, (int)size - 1);
+    const int cy0 = std::clamp(y0, 0, (int)size - 1);
+    const float fx = x - (float)cx0;
+    const float fy = y - (float)cy0;
+
+    static thread_local unsigned char texel[3];
+    for (int c = 0; c < 3; ++c)
+    {
+        const float a = face[((size_t)cy0 * size + cx0) * 3 + c];
+        const float b = face[((size_t)cy0 * size + x1) * 3 + c];
+        const float d = face[((size_t)y1 * size + cx0) * 3 + c];
+        const float e = face[((size_t)y1 * size + x1) * 3 + c];
+        texel[c] = (unsigned char)(a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy +
+                                         e * fx * fy + 0.5f);
+    }
+    return texel;
 }
 
 void Cubemap::setActive(GLint textureUnit) const

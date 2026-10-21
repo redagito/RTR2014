@@ -23,6 +23,13 @@ struct CubemapCoordinates
 CubemapCoordinates cubemapCoordinatesForDirection(const glm::vec3& direction);
 
 /**
+ * \brief Returns the direction of the texel at the coordinates of a face.
+ *
+ * The inverse of cubemapCoordinatesForDirection.
+ */
+glm::vec3 cubemapFaceDirection(int face, float s, float t);
+
+/**
  * \brief Returns the cell of a horizontal cross atlas that holds a face.
  *
  * The cells are given as (column, row) in the image, the row 0 is the top.
@@ -75,6 +82,20 @@ class Cubemap
     bool isValid() const;
 
    private:
+    /**
+    * \brief Generates the mip levels of the cubemap.
+     *
+    * The levels are filtered across the face borders, the levels the driver
+     * generates are clamped to the face and show the seams of the cube.
+    */
+    void generateMipLevels(unsigned int faceSize, unsigned int levels);
+
+    /**
+    * \brief Samples the face at the given coordinates.
+    */
+    static const unsigned char* sampleFace(const std::vector<unsigned char>& face,
+                                           unsigned int size, float s, float t);
+
     GLuint m_textureId = 0;
     bool m_valid = false;
 };

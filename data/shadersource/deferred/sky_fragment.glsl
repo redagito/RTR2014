@@ -4,8 +4,8 @@
 uniform samplerCube sky_cubemap;
 
 // The camera
-uniform vec3 camera_position;
-uniform mat4 inverse_view_projection;
+uniform mat4 inverse_view;
+uniform mat4 inverse_projection;
 
 // Screen size
 uniform float screen_width;
@@ -21,10 +21,14 @@ void main(void)
 	vec2 normalized_screen_coordinates = gl_FragCoord.xy / vec2(screen_width, screen_height);
 	vec2 ndc = normalized_screen_coordinates * 2.0 - 1.0;
 
-	// The direction of the sky is the direction of the far plane, the inverse
-	// view projection turns it back into the world.
-	vec4 farPoint = inverse_view_projection * vec4(ndc, 1.0, 1.0);
-	vec3 direction = normalize(farPoint.xyz / farPoint.w - camera_position);
+	// The direction of the sky is the direction of the view ray. The ray is
+	// built in view space, the inverse projection accounts for the aspect
+	// ratio. No division is needed, the w of the result is a constant, so the
+	// derivatives of the direction stay accurate. A position on the far plane
+	// would need a division by a varying w, the two terms of its derivative
+	// cancel each other out and leave it without any precision.
+	vec4 viewRay = inverse_projection * vec4(ndc, -1.0, 1.0);
+	vec3 direction = normalize((inverse_view * vec4(viewRay.xyz, 0.0)).xyz);
 
 	vec3 color = texture(sky_cubemap, direction).rgb;
 

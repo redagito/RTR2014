@@ -109,14 +109,12 @@ void SkyPass::render(const IWindow& window, const IGraphicsResourceManager& mana
     skyShader->setActive();
     m_cubemap->setActive(skyCubemapTextureUnit);
     skyShader->setUniform(skyCubemapUniformName, skyCubemapTextureUnit);
-    skyShader->setUniform(cameraPositionUniformName, camera.getPosition());
     skyShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     skyShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-    // The direction of the sky is the direction of the far plane, the inverse
-    // view projection turns it back into the world.
-    const glm::mat4 inverseViewProjection = glm::inverse(camera.getProjection() * camera.getView());
-    skyShader->setUniform(inverseViewProjectionMatrixUniformName, inverseViewProjection);
+    // The direction of the sky is the direction of the view ray.
+    skyShader->setUniform(inverseViewUniformName, glm::inverse(camera.getView()));
+    skyShader->setUniform(inverseProjectionUniformName, glm::inverse(camera.getProjection()));
 
     Renderer::draw(quadMesh);
 
