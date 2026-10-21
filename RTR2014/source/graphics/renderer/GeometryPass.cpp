@@ -43,6 +43,9 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
     // Clear
     glClear(GL_DEPTH_BUFFER_BIT);
 
+    // The sky fills the background, it is drawn before the scene.
+    m_skyPass.render(window, manager, camera);
+
     // Geometry pass, uses gbuffer fbo
     ShaderProgram* geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
     if (geometryPassShader == nullptr)
@@ -126,8 +129,7 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
     // Disable geometry buffer
     m_geometryBuffer.setInactive(GL_FRAMEBUFFER);
 }
-
-bool GeometryPass::init(IResourceManager* manager)
+bool GeometryPass::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     // Init geometry pass shader
     // TODO Read file name from config?
@@ -140,6 +142,13 @@ bool GeometryPass::init(IResourceManager* manager)
     {
         spdlog::error("Failed to initialize the shader from file {}.",
                       geometryPassShaderFile.c_str());
+        return false;
+    }
+
+    // The sky that fills the background of the scene
+    if (!m_skyPass.init(manager, skyCubemapFile))
+    {
+        spdlog::error("Failed to initialize the sky.");
         return false;
     }
 

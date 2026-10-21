@@ -89,6 +89,17 @@ bool SceneLoader::prepare(const std::string& file)
     m_pendingEmitters = std::move(pendingEmitters);
     m_emitters.clear();
 
+    // The environment of the scene, the sky that fills the background.
+    m_skyCubemapFile.clear();
+    if (root.isMember("sky"))
+    {
+        if (!load(root["sky"], "cubemap", m_skyCubemapFile))
+        {
+            spdlog::error("The scene file {} has an invalid sky node.", file.c_str());
+            return false;
+        }
+    }
+
     m_root = std::make_unique<Json::Value>(std::move(root));
     return true;
 }
@@ -195,6 +206,8 @@ bool SceneLoader::load(IScene& scene, AnimationWorld& animationWorld)
 ResourceId SceneLoader::getMusicResourceId() const { return m_musicResourceId; }
 
 const std::vector<SoundEmitter>& SceneLoader::getSoundEmitters() const { return m_emitters; }
+
+const std::string& SceneLoader::getSkyCubemapFile() const { return m_skyCubemapFile; }
 
 bool SceneLoader::loadSceneObjects(const Json::Value& node, IScene& scene,
                                    AnimationWorld& animationWorld)

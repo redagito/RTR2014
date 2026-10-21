@@ -1,5 +1,8 @@
 {
     "music" : "data/sound/bgm/welbornworks-welcome-to-the-badlands-377489.mp3",
+    "sky" : {
+        "cubemap" : "data/images/skybox.png"
+    },
     "sound_emitters" : [
         {
             "sound" : "data/sound/sfx/freesound_community-rusty-gears-62898.mp3",
@@ -14,14 +17,6 @@
             "position" :  [ 0, 0, 0 ],
             "rotation" :  [ 0, 0, 0 ],
             "scale" :  [ 1, 1, 1 ]
-        },
-        {
-        	"mesh" : "data/mesh/skybox.obj",
-        	"material" : "data/material/skybox.ini",
-        	"position": [0, 0, 0],
-        	"rotation": [ 0, 0, 0 ],
-            "scale":  [ 500, 500, 500 ],
-            "casts_shadow" : false
         },
         {
         	"mesh" : "data/mesh/gear.obj",

@@ -21,7 +21,7 @@ ForwardRenderer::~ForwardRenderer()
     // TODO Cleanup
 }
 
-bool ForwardRenderer::init(IResourceManager* manager)
+bool ForwardRenderer::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     // Set clear color
     glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
@@ -63,10 +63,11 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
     // Post draw error check
 }
 
-std::unique_ptr<ForwardRenderer> ForwardRenderer::create(IResourceManager* manager)
+std::unique_ptr<ForwardRenderer> ForwardRenderer::create(IResourceManager* manager,
+                                                         const std::string& skyCubemapFile)
 {
     auto renderer = std::make_unique<ForwardRenderer>();
-    if (!renderer->init(manager))
+    if (!renderer->init(manager, skyCubemapFile))
     {
         spdlog::error("Failed to create forward renderer, initialization failed.");
         return nullptr;

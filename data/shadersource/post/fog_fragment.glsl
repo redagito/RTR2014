@@ -45,8 +45,14 @@ void main(void)
                                               gl_FragCoord.y / screen_height);
 
     vec3 sceneColor = texture(scene_texture, normalized_screen_coordinates).xyz;
-    
+
     float d = texture(depth_texture, normalized_screen_coordinates).x;
-    
+
+    // The sky is the background, it is not in the fog.
+    if (d >= 1.0) {
+        output_color = vec4(sceneColor, 1.0f);
+        return;
+    }
+
     output_color = vec4(applyFog(sceneColor, d), 1.0f);
 }

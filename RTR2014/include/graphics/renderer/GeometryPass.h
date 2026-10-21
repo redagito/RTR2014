@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "graphics/renderer/FrameBuffer.h"
+#include "graphics/renderer/SkyPass.h"
 #include "graphics/renderer/Transformer.h"
 #include "resource/ResourceConfig.h"
 
@@ -29,8 +30,10 @@ class GeometryPass
 
     /**
      * \brief Initializes the geometry pass resources.
+     *
+     * The sky cubemap is the environment of the scene, it may be empty.
      */
-    bool init(IResourceManager* manager);
+    bool init(IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
     /**
      * \brief Renders the visible scene objects into the g-buffer.
@@ -55,6 +58,7 @@ class GeometryPass
 
    private:
     FrameBuffer m_geometryBuffer;
+    SkyPass m_skyPass;
     std::shared_ptr<Texture> m_depthTexture = nullptr;
     std::shared_ptr<Texture> m_diffuseGlowTexture = nullptr;
     std::shared_ptr<Texture> m_normalSpecularTexture = nullptr;

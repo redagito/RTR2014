@@ -71,6 +71,13 @@ class SceneLoader
      */
     const std::vector<SoundEmitter>& getSoundEmitters() const;
 
+    /**
+     * \brief The file of the cubemap that holds the environment of the scene.
+     *
+     * It is empty if the scene does not have a sky.
+     */
+    const std::string& getSkyCubemapFile() const;
+
    protected:
     bool loadSceneObjects(const Json::Value& node, IScene& scene, AnimationWorld& animationWorld);
     bool loadSceneObject(const Json::Value& node, IScene& scene, AnimationWorld& animationWorld);
@@ -121,6 +128,7 @@ class SceneLoader
 
     std::unique_ptr<Json::Value> m_root; /**< Parsed scene file. */
     std::string m_musicFile;             /**< Background music of the prepared scene. */
+    std::string m_skyCubemapFile;        /**< Environment of the prepared scene. */
     ResourceId m_musicResourceId = invalidResource;
     std::vector<PendingSoundEmitter> m_pendingEmitters;
     std::vector<SoundEmitter> m_emitters;

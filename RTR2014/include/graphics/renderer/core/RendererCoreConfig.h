@@ -40,8 +40,10 @@ const std::string viewMatrixUniformName = "view";
 const std::string projectionMatrixUniformName = "projection";
 const std::string inverseViewProjectionMatrixUniformName = "inverse_view_projection";
 const std::string shadowViewProjectionBiasMatrixUniformName = "shadow_view_projection_bias";
-const std::string shadowVolumeCenterUniformName = "shadow_volume_center";
-const std::string shadowVolumeRadiusUniformName = "shadow_volume_radius";
+
+// The environment of the scene
+const std::string skyCubemapUniformName = "sky_cubemap";
+const GLint skyCubemapTextureUnit = 0;
 
 // Transformation matrix uniform names
 const std::string rotationMatrixUniformName = "rotation";
@@ -74,6 +76,7 @@ const GLint lightPassShadowMapTextureUnit = 2;  // Should be lightPassShadowText
 // Texture units for illumination pass
 const GLint illuminationPassLightTextureUnit = 0;
 const GLint illuminationPassDiffuseGlowTextureUnit = 1;
+const GLint illuminationPassDepthTextureUnit = 2;
 
 // Texture units for fog pass
 const GLint fogPassSceneTextureUnit = 0;

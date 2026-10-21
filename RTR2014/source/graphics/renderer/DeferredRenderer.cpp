@@ -9,6 +9,7 @@
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
 #include "graphics/IWindow.h"
+#include "graphics/Texture.h"
 #include "graphics/camera/IControllableCamera.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
@@ -18,12 +19,12 @@ DeferredRenderer::DeferredRenderer() { return; }
 
 DeferredRenderer::~DeferredRenderer() { return; }
 
-bool DeferredRenderer::init(IResourceManager* manager)
+bool DeferredRenderer::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     spdlog::info("Initializing deferred renderer.");
 
     // Init geometry pass resources
-    if (!m_geometryPass.init(manager))
+    if (!m_geometryPass.init(manager, skyCubemapFile))
     {
         spdlog::error("Failed to intialize geometry pass.");
         return false;
@@ -92,7 +93,8 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     {
         ScopedTimer timer(profiler(), "illuminationPass");
         m_illuminationPass.render(window, manager, m_lightPass.getLightTexture(),
-                                  m_geometryPass.getDiffuseGlowTexture());
+                                  m_geometryPass.getDiffuseGlowTexture(),
+                                  m_geometryPass.getDepthTexture());
     }
 
     // Post processing pass
@@ -131,10 +133,11 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Post draw error check
 }
 
-std::unique_ptr<DeferredRenderer> DeferredRenderer::create(IResourceManager* manager)
+std::unique_ptr<DeferredRenderer> DeferredRenderer::create(IResourceManager* manager,
+                                                           const std::string& skyCubemapFile)
 {
     auto renderer = std::make_unique<DeferredRenderer>();
-    if (!renderer->init(manager))
+    if (!renderer->init(manager, skyCubemapFile))
     {
         spdlog::error("Failed to create deferred renderer, initialization failed.");
         return nullptr;

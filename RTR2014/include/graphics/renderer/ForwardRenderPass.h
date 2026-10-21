@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include "graphics/renderer/SkyPass.h"
 #include "graphics/renderer/Transformer.h"
 #include "resource/ResourceConfig.h"
 
@@ -29,8 +30,10 @@ class ForwardRenderPass
 
     /**
      * \brief Initializes the forward render pass resources.
+     *
+     * The sky cubemap is the environment of the scene, it may be empty.
      */
-    bool init(IResourceManager* manager);
+    bool init(IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
     /**
      * \brief Draws the visible scene objects.
@@ -46,6 +49,7 @@ class ForwardRenderPass
               const glm::mat4& scale, Material* material, const IGraphicsResourceManager& manager);
 
     Transformer m_transformer;
+    SkyPass m_skyPass;
 
     glm::mat4 m_currentView = glm::mat4(1.f);       /**< Stores the current view matrix. */
     glm::mat4 m_currentProjection = glm::mat4(1.f); /**< Stores the current projection matrix. */

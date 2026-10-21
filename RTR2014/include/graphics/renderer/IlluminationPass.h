@@ -33,7 +33,8 @@ class IlluminationPass
      */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
                 const std::shared_ptr<Texture>& lightTexture,
-                const std::shared_ptr<Texture>& diffuseGlowTexture);
+                const std::shared_ptr<Texture>& diffuseGlowTexture,
+                const std::shared_ptr<Texture>& depthTexture);
 
     /**
      * \brief Returns the texture holding the illuminated scene.

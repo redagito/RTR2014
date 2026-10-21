@@ -37,7 +37,14 @@ void main(void)
 {
 	// Calculate screen position of the fragment [0-1]
 	vec2 normalized_screen_coordinates = vec2(gl_FragCoord.x / screen_width, gl_FragCoord.y / screen_height);
-	
+
+	// The sky is the background, it is not blurred.
+	float depth = texture(depth_texture, normalized_screen_coordinates).x;
+	if (depth >= 1.0) {
+		color = texture(scene_texture, normalized_screen_coordinates).xyz;
+		return;
+	}
+
 	// Calculate world position of affected fragment
 	vec3 fragment_world_position = getWorldPosition(normalized_screen_coordinates);
 

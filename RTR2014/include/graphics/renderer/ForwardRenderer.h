@@ -36,12 +36,13 @@ class ForwardRenderer : public Renderer
     /**
      * \brief Performs resource aqucisition and initialization.
      */
-    bool init(IResourceManager* manager);
+    bool init(IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
     /**
      * \brief Creates and initializes forward renderer.
      */
-    static std::unique_ptr<ForwardRenderer> create(IResourceManager* manager);
+    static std::unique_ptr<ForwardRenderer> create(
+        IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
    private:
     ForwardRenderPass m_forwardRenderPass;

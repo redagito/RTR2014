@@ -1,5 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "graphics/Cubemap.h"
+
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <cmath>
@@ -16,7 +17,7 @@ enum Face
     PositiveZ = 4,
     NegativeZ = 5
 };
-} // namespace
+}  // namespace
 
 CubemapCoordinates cubemapCoordinatesForDirection(const glm::vec3& direction)
 {
@@ -101,7 +102,8 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
 {
     if (faceSize == 0 || width < faceSize * 4 || height < faceSize * 3)
     {
-        spdlog::error("The image is too small for a cubemap atlas of faces of {} pixels.", faceSize);
+        spdlog::error("The image is too small for a cubemap atlas of faces of {} pixels.",
+                      faceSize);
         return false;
     }
     if (pixels.size() < static_cast<size_t>(width) * height * 3)
@@ -116,7 +118,10 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
         spdlog::error("Failed to create the cubemap.");
         return false;
     }
-    glTextureStorage2D(m_textureId, 1, GL_RGB8, static_cast<GLsizei>(faceSize),
+    // The whole chain of mip levels has to be allocated, they are generated
+    // for the faces afterwards.
+    const unsigned int levels = 1 + (unsigned int)std::log2((float)faceSize);
+    glTextureStorage2D(m_textureId, levels, GL_RGB8, static_cast<GLsizei>(faceSize),
                        static_cast<GLsizei>(faceSize));
 
     // The cells of the atlas are copied out one face at a time, the source of
@@ -127,11 +132,14 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
         const glm::ivec2 cell = atlasCellForFace(f);
         for (unsigned int row = 0; row < faceSize; ++row)
         {
-            const size_t source = ((size_t)(cell.y * faceSize + row) * width + cell.x * faceSize) * 3;
-            std::copy_n(pixels.begin() + source, faceSize * 3, face.begin() + (size_t)row * faceSize * 3);
+            const size_t source =
+                ((size_t)(cell.y * faceSize + row) * width + cell.x * faceSize) * 3;
+            std::copy_n(pixels.begin() + source, faceSize * 3,
+                        face.begin() + (size_t)row * faceSize * 3);
         }
         glTextureSubImage3D(m_textureId, 0, 0, 0, f, static_cast<GLsizei>(faceSize),
-                            static_cast<GLsizei>(faceSize), 1, GL_RGB, GL_UNSIGNED_BYTE, face.data());
+                            static_cast<GLsizei>(faceSize), 1, GL_RGB, GL_UNSIGNED_BYTE,
+                            face.data());
     }
 
     // The mipmaps are generated per face, the atlas would bleed between them.

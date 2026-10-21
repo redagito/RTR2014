@@ -23,6 +23,9 @@ ForwardRenderPass::~ForwardRenderPass() { return; }
 void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const IWindow& window,
                                const IGraphicsResourceManager& manager)
 {
+    // The sky fills the background, it is drawn before the scene.
+    m_skyPass.render(window, manager, camera);
+
     // Set forward shader as active
     m_currentShader = manager.getShaderProgram(m_forwardShader);
     if (m_currentShader == nullptr)
@@ -115,7 +118,7 @@ void ForwardRenderPass::draw(Mesh* mesh, const glm::mat4& translation, const glm
     // TODO Cleanup?
 }
 
-bool ForwardRenderPass::init(IResourceManager* manager)
+bool ForwardRenderPass::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     // TODO Read file name from config?
     std::string defaultShaderFile("data/shader/forward_test_0.ini");
@@ -126,6 +129,13 @@ bool ForwardRenderPass::init(IResourceManager* manager)
     {
         spdlog::error("Failed to initialize the default shader from file {}.",
                       defaultShaderFile.c_str());
+        return false;
+    }
+
+    // The sky that fills the background of the scene
+    if (!m_skyPass.init(manager, skyCubemapFile))
+    {
+        spdlog::error("Failed to initialize the sky.");
         return false;
     }
     return true;

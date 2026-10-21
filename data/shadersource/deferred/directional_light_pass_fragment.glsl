@@ -16,10 +16,6 @@ uniform float screen_height;
 uniform mat4 inverse_view_projection;
 uniform mat4 shadow_view_projection_bias;
 
-// The sphere the shadow map covers
-uniform vec3 shadow_volume_center;
-uniform float shadow_volume_radius;
-
 // Depth, normal and specularity
 uniform sampler2D depth_texture;
 uniform sampler2D normal_specular_texture;
@@ -42,14 +38,7 @@ void main(void)
 	// Calculate world position of affected fragment
 	vec3 fragment_world_position = getWorldPosition(normalized_screen_coordinates);
 	
-	// The environment around the scene is outside of the shadow volume, it is
-	// lit without a shadow.
-	if (distance(fragment_world_position, shadow_volume_center) > shadow_volume_radius) {
-		light_data = vec4(2.0, 2.0, 2.0, 0.0);
-		return;
-	}
-
-	// Temp storage for single texture fetch
+	// The environment around the scene is the sky, it is not lit here.
 	vec4 temp = texture(normal_specular_texture, normalized_screen_coordinates);
 
 	// Store world space normal vector

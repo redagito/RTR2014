@@ -309,7 +309,8 @@ bool RTRDemo::initRenderer()
 
     // Initialize deferred renderer
     spdlog::info("Initializing deferred renderer.");
-    m_deferredRenderer = DeferredRenderer::create(m_resourceManager.get());
+    m_deferredRenderer =
+        DeferredRenderer::create(m_resourceManager.get(), m_sceneLoader->getSkyCubemapFile());
     if (m_deferredRenderer == nullptr)
     {
         spdlog::error("Failed to initialize deferred renderer.");
@@ -318,7 +319,8 @@ bool RTRDemo::initRenderer()
 
     // Initialize forward renderer
     spdlog::info("Initializing forward renderer.");
-    m_forwardRenderer = ForwardRenderer::create(m_resourceManager.get());
+    m_forwardRenderer =
+        ForwardRenderer::create(m_resourceManager.get(), m_sceneLoader->getSkyCubemapFile());
     if (m_forwardRenderer == nullptr)
     {
         spdlog::error("Failed to initialize forward renderer.");
