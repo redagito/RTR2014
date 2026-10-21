@@ -143,23 +143,25 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
     glTextureStorage2D(m_textureId, levels, GL_RGB8, static_cast<GLsizei>(faceSize),
                        static_cast<GLsizei>(faceSize));
 
-    // The cells of the atlas are copied out one face at a time, the source of
-    // an upload has to be contiguous.
-    std::vector<std::vector<unsigned char>> faces;
+    // The faces of the cubemap, one after the other, the order the GL cube map
+    // targets have.
+    const size_t faceBytes = (size_t)faceSize * faceSize * 3;
+    std::vector<unsigned char> faces(faceBytes * 6);
     for (int f = 0; f < 6; ++f)
     {
-        faces.emplace_back((size_t)faceSize * faceSize * 3);
+        // The cells of the atlas are copied out one face at a time, the source
+        // of an upload has to be contiguous.
         const glm::ivec2 cell = atlasCellForFace(f);
         for (unsigned int row = 0; row < faceSize; ++row)
         {
             const size_t source =
                 ((size_t)(cell.y * faceSize + row) * width + cell.x * faceSize) * 3;
             std::copy_n(pixels.begin() + source, faceSize * 3,
-                        faces[f].begin() + (size_t)row * faceSize * 3);
+                        faces.begin() + f * faceBytes + (size_t)row * faceSize * 3);
         }
         glTextureSubImage3D(m_textureId, 0, 0, 0, f, static_cast<GLsizei>(faceSize),
                             static_cast<GLsizei>(faceSize), 1, GL_RGB, GL_UNSIGNED_BYTE,
-                            faces[f].data());
+                            faces.data() + f * faceBytes);
     }
 
     // The mip levels are generated here and not by the driver. The driver
@@ -177,23 +179,29 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
     return true;
 }
 
-void Cubemap::generateMipLevels(std::vector<std::vector<unsigned char>> faces, unsigned int faceSize,
-                                 unsigned int levels)
+void Cubemap::generateMipLevels(const std::vector<unsigned char>& base, unsigned int faceSize,
+                                unsigned int levels)
 {
+    // The level that is written and the one it is read from, they take turns.
+    std::vector<unsigned char> current = base;
+    std::vector<unsigned char> previous;
+
     for (unsigned int level = 1; level < levels; ++level)
     {
         const unsigned int size = faceSize >> level;
         const unsigned int previousSize = size * 2;
-        const std::vector<std::vector<unsigned char>> previous = faces;
+        const size_t levelBytes = (size_t)size * size * 3;
+
+        previous.swap(current);
+        current.assign(6 * levelBytes, 0);
 
         for (int f = 0; f < 6; ++f)
         {
-            std::vector<unsigned char>& face = faces[f];
             for (unsigned int y = 0; y < size; ++y)
             {
                 for (unsigned int x = 0; x < size; ++x)
                 {
-                    unsigned int sum[3] = {0, 0, 0};
+                    std::array<unsigned int, 3> sum = {0, 0, 0};
                     // The four texels of the previous level this texel covers
                     // may lie on a neighbouring face.
                     for (unsigned int dy = 0; dy < 2; ++dy)
@@ -205,31 +213,33 @@ void Cubemap::generateMipLevels(std::vector<std::vector<unsigned char>> faces, u
                             const glm::vec3 direction = cubemapFaceDirection(f, s, t);
                             const CubemapCoordinates coordinates =
                                 cubemapCoordinatesForDirection(direction);
-                            const unsigned char* texel = sampleFace(previous[coordinates.face],
-                                                                 previousSize, coordinates.s,
-                                                                 coordinates.t);
-                            sum[0] += texel[0];
-                            sum[1] += texel[1];
-                            sum[2] += texel[2];
+                            const std::array<unsigned char, 3> texel =
+                                sampleFace(previous.data(), previousSize, coordinates.face,
+                                           coordinates.s, coordinates.t);
+                            for (int c = 0; c < 3; ++c)
+                            {
+                                sum[c] += texel[c];
+                            }
                         }
                     }
-                    const size_t offset = ((size_t)y * size + x) * 3;
+                    const size_t offset = f * levelBytes + ((size_t)y * size + x) * 3;
                     for (int c = 0; c < 3; ++c)
                     {
-                        face[offset + c] = (unsigned char)(sum[c] / 4);
+                        current[offset + c] = (unsigned char)(sum[c] / 4);
                     }
                 }
             }
             glTextureSubImage3D(m_textureId, (GLint)level, 0, 0, f, static_cast<GLsizei>(size),
                                 static_cast<GLsizei>(size), 1, GL_RGB, GL_UNSIGNED_BYTE,
-                                faces[f].data());
+                                current.data() + f * levelBytes);
         }
     }
 }
 
-const unsigned char* Cubemap::sampleFace(const std::vector<unsigned char>& face, unsigned int size,
-                                         float s, float t)
+std::array<unsigned char, 3> Cubemap::sampleFace(const unsigned char* faces, unsigned int size,
+                                                 int face, float s, float t)
 {
+    const unsigned char* data = faces + (size_t)face * size * size * 3;
     const float x = s * size - 0.5f;
     const float y = t * size - 0.5f;
     const int x0 = (int)std::floor(x);
@@ -241,13 +251,13 @@ const unsigned char* Cubemap::sampleFace(const std::vector<unsigned char>& face,
     const float fx = x - (float)cx0;
     const float fy = y - (float)cy0;
 
-    static thread_local unsigned char texel[3];
+    std::array<unsigned char, 3> texel = {0, 0, 0};
     for (int c = 0; c < 3; ++c)
     {
-        const float a = face[((size_t)cy0 * size + cx0) * 3 + c];
-        const float b = face[((size_t)cy0 * size + x1) * 3 + c];
-        const float d = face[((size_t)y1 * size + cx0) * 3 + c];
-        const float e = face[((size_t)y1 * size + x1) * 3 + c];
+        const float a = data[((size_t)cy0 * size + cx0) * 3 + c];
+        const float b = data[((size_t)cy0 * size + x1) * 3 + c];
+        const float d = data[((size_t)y1 * size + cx0) * 3 + c];
+        const float e = data[((size_t)y1 * size + x1) * 3 + c];
         texel[c] = (unsigned char)(a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy +
                                          e * fx * fy + 0.5f);
     }

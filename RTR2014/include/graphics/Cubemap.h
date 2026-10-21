@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -86,16 +87,17 @@ class Cubemap
     * \brief Generates the mip levels of the cubemap.
     *
     * The levels are filtered across the face borders, the levels the driver
-    * generates are clamped to the face and show the seams of the cube.
+    * generates are clamped to the face and show the seams of the cube. The
+    * faces are given as one buffer, one after the other.
     */
-    void generateMipLevels(std::vector<std::vector<unsigned char>> faces, unsigned int faceSize,
+    void generateMipLevels(const std::vector<unsigned char>& base, unsigned int faceSize,
                            unsigned int levels);
 
     /**
-    * \brief Samples the face at the given coordinates.
+    * \brief Samples a face of the cubemap at the given coordinates.
     */
-    static const unsigned char* sampleFace(const std::vector<unsigned char>& face,
-                                           unsigned int size, float s, float t);
+    static std::array<unsigned char, 3> sampleFace(const unsigned char* faces, unsigned int size,
+                                                   int face, float s, float t);
 
     GLuint m_textureId = 0;
     bool m_valid = false;
