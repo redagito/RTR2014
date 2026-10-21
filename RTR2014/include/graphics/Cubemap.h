@@ -84,11 +84,12 @@ class Cubemap
    private:
     /**
     * \brief Generates the mip levels of the cubemap.
-     *
+    *
     * The levels are filtered across the face borders, the levels the driver
-     * generates are clamped to the face and show the seams of the cube.
+    * generates are clamped to the face and show the seams of the cube.
     */
-    void generateMipLevels(unsigned int faceSize, unsigned int levels);
+    void generateMipLevels(std::vector<std::vector<unsigned char>> faces, unsigned int faceSize,
+                           unsigned int levels);
 
     /**
     * \brief Samples the face at the given coordinates.

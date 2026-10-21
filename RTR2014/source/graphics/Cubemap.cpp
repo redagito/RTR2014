@@ -145,26 +145,27 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
 
     // The cells of the atlas are copied out one face at a time, the source of
     // an upload has to be contiguous.
-    std::vector<unsigned char> face((size_t)faceSize * faceSize * 3);
+    std::vector<std::vector<unsigned char>> faces;
     for (int f = 0; f < 6; ++f)
     {
+        faces.emplace_back((size_t)faceSize * faceSize * 3);
         const glm::ivec2 cell = atlasCellForFace(f);
         for (unsigned int row = 0; row < faceSize; ++row)
         {
             const size_t source =
                 ((size_t)(cell.y * faceSize + row) * width + cell.x * faceSize) * 3;
             std::copy_n(pixels.begin() + source, faceSize * 3,
-                        face.begin() + (size_t)row * faceSize * 3);
+                        faces[f].begin() + (size_t)row * faceSize * 3);
         }
         glTextureSubImage3D(m_textureId, 0, 0, 0, f, static_cast<GLsizei>(faceSize),
                             static_cast<GLsizei>(faceSize), 1, GL_RGB, GL_UNSIGNED_BYTE,
-                            face.data());
+                            faces[f].data());
     }
 
     // The mip levels are generated here and not by the driver. The driver
     // generates them per face, the content of a face border does not match the
     // neighbouring face and the seams of the cube show.
-    generateMipLevels(faceSize, levels);
+    generateMipLevels(faces, faceSize, levels);
 
     glTextureParameteri(m_textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTextureParameteri(m_textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -176,17 +177,9 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
     return true;
 }
 
-void Cubemap::generateMipLevels(unsigned int faceSize, unsigned int levels)
+void Cubemap::generateMipLevels(std::vector<std::vector<unsigned char>> faces, unsigned int faceSize,
+                                 unsigned int levels)
 {
-    // The texels of the six faces of a level.
-    std::vector<std::vector<unsigned char>> faces;
-    for (int f = 0; f < 6; ++f)
-    {
-        faces.emplace_back((size_t)faceSize * faceSize * 3);
-        glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + f, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                      faces.back().data());
-    }
-
     for (unsigned int level = 1; level < levels; ++level)
     {
         const unsigned int size = faceSize >> level;
