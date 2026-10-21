@@ -16,6 +16,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 GeometryPass::GeometryPass() { return; }
 
@@ -50,8 +51,7 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
     ShaderProgram* geometryPassShader = manager.getShaderProgram(m_geometryPassShaderId);
     if (geometryPassShader == nullptr)
     {
-        spdlog::error("Shader program for geometry pass could not be retrieved.");
-        return;
+        fatalError("Shader program for geometry pass could not be retrieved.");
     }
 
     // Depth
@@ -89,7 +89,7 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
         if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
         {
             // Invalid id
-            spdlog::error("Invalid scene object id {}.", id);
+            fatalError("Invalid scene object id {}.", id);
         }
         else
         {
@@ -116,9 +116,21 @@ void GeometryPass::render(const IScene& scene, ISceneQuery& query, const ICamera
             {
                 // Forward draw call
                 geometryPassShader->setActive();
-                Renderer::bindMaterial(
-                    geometryPassShader, material, m_transformer.getTranslationMatrix(),
-                    m_transformer.getRotationMatrix(), m_transformer.getScaleMatrix(), manager);
+                geometryPassShader->setUniform(modelMatrixUniformName,
+                                               m_transformer.getModelMatrix());
+                geometryPassShader->setUniform(rotationMatrixUniformName,
+                                               m_transformer.getRotationMatrix());
+                Renderer::bindTexture(geometryPassShader, diffuseTextureUniformName,
+                                      diffuseTextureUnit, material->getDiffuse(),
+                                      manager.getDefaultDiffuseTexture());
+                Renderer::bindTexture(geometryPassShader, normalTextureUniformName,
+                                      normalTextureUnit, material->getNormal(),
+                                      manager.getDefaultNormalTexture());
+                Renderer::bindTexture(geometryPassShader, specularTextureUniformName,
+                                      specularTextureUnit, material->getSpecular(),
+                                      manager.getDefaultSpecularTexture());
+                Renderer::bindTexture(geometryPassShader, glowTextureUniformName, glowTextureUnit,
+                                      material->getGlow(), manager.getDefaultGlowTexture());
                 Renderer::draw(mesh);
             }
         }
@@ -140,16 +152,13 @@ bool GeometryPass::init(IResourceManager* manager, const std::string& skyCubemap
     // Check if ok
     if (m_geometryPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      geometryPassShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", geometryPassShaderFile.c_str());
     }
 
     // The sky that fills the background of the scene
     if (!m_skyPass.init(manager, skyCubemapFile))
     {
-        spdlog::error("Failed to initialize the sky.");
-        return false;
+        fatalError("Failed to initialize the sky.");
     }
 
     // Init gbuffer
@@ -157,24 +166,21 @@ bool GeometryPass::init(IResourceManager* manager, const std::string& skyCubemap
     m_diffuseGlowTexture = std::make_shared<Texture>();
     if (!m_diffuseGlowTexture->init(800, 600, GL_RGBA8))
     {
-        spdlog::error("Failed to initialize the diffuse and glow texture.");
-        return false;
+        fatalError("Failed to initialize the diffuse and glow texture.");
     }
 
     // Normal texture, store x and y, z normals and specularity.
     m_normalSpecularTexture = std::make_shared<Texture>();
     if (!m_normalSpecularTexture->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to initialize the normal and specular texture.");
-        return false;
+        fatalError("Failed to initialize the normal and specular texture.");
     }
 
     // Depth texture
     m_depthTexture = std::make_shared<Texture>();
     if (!m_depthTexture->init(800, 600, GL_DEPTH_COMPONENT24))
     {
-        spdlog::error("Failed to initialize the depth texture.");
-        return false;
+        fatalError("Failed to initialize the depth texture.");
     }
 
     // Total 96 bit per pixel

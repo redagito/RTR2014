@@ -7,6 +7,7 @@
 #include <cstdlib>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
+#include "util/FatalError.h"
 
 namespace
 {
@@ -40,7 +41,9 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 
     if (type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
     {
-        std::abort();
+        // The callback is called by the driver, an exception cannot be thrown
+        // through its call stack.
+        fatalExit("OpenGL [source {} type {} id {}]: {}", source, type, id, text);
     }
 }
 }  // namespace
@@ -70,8 +73,7 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
 {
     if (!glfwInit())
     {
-        spdlog::error("Failed to initialize GLFW.");
-        return false;
+        fatalError("Failed to initialize GLFW.");
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -83,9 +85,8 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
     m_window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (m_window == nullptr)
     {
-        spdlog::error("Failed to create GLFW window.");
         glfwTerminate();
-        return false;
+        fatalError("Failed to create GLFW window.");
     }
 
     int framebufferWidth;
@@ -102,13 +103,12 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
 
     if (gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)) == 0)
     {
-        spdlog::error("Failed to initialize glad.");
         // Destroy this window before glfwTerminate wipes all windows, so the
         // destructor does not touch an already-destroyed handle later.
         glfwDestroyWindow(m_window);
         m_window = nullptr;
         glfwTerminate();
-        return false;
+        fatalError("Failed to initialize glad.");
     }
 
     glEnable(GL_DEBUG_OUTPUT);

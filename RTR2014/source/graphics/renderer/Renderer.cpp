@@ -41,93 +41,16 @@ void Renderer::draw(const Mesh* mesh)
     mesh->getVertexArray()->setInactive();
 }
 
-void Renderer::bindMaterial(ShaderProgram* shader, const Material* material,
-                            const glm::mat4& translation, const glm::mat4& rotation,
-                            const glm::mat4& scale, const IGraphicsResourceManager& manager)
+void Renderer::bindTexture(ShaderProgram* shader, const std::string& uniformName, GLint unit,
+                           const Texture* texture, const Texture* fallback)
 {
-    // The shaders use different subsets of these, only the ones the program
-    // has are sent.
-    if (shader->hasUniform(translationMatrixUniformName))
+    if (texture != nullptr)
     {
-        shader->setUniform(translationMatrixUniformName, translation);
-    }
-    if (shader->hasUniform(rotationMatrixUniformName))
-    {
-        shader->setUniform(rotationMatrixUniformName, rotation);
-    }
-    if (shader->hasUniform(scaleMatrixUniformName))
-    {
-        shader->setUniform(scaleMatrixUniformName, scale);
-    }
-    if (shader->hasUniform(modelMatrixUniformName))
-    {
-        shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
-    }
-
-    // Send material textures to shader
-    if (material->hasDiffuse())
-    {
-        material->getDiffuse()->setActive(diffuseTextureUnit);
+        texture->setActive(unit);
     }
     else
     {
-        manager.getDefaultDiffuseTexture()->setActive(diffuseTextureUnit);
+        fallback->setActive(unit);
     }
-    if (shader->hasUniform(diffuseTextureUniformName))
-    {
-        shader->setUniform(diffuseTextureUniformName, diffuseTextureUnit);
-    }
-
-    if (material->hasNormal())
-    {
-        material->getNormal()->setActive(normalTextureUnit);
-    }
-    else
-    {
-        manager.getDefaultNormalTexture()->setActive(normalTextureUnit);
-    }
-    if (shader->hasUniform(normalTextureUniformName))
-    {
-        shader->setUniform(normalTextureUniformName, normalTextureUnit);
-    }
-
-    if (material->hasSpecular())
-    {
-        material->getSpecular()->setActive(specularTextureUnit);
-    }
-    else
-    {
-        manager.getDefaultSpecularTexture()->setActive(specularTextureUnit);
-    }
-    if (shader->hasUniform(specularTextureUniformName))
-    {
-        shader->setUniform(specularTextureUniformName, specularTextureUnit);
-    }
-
-    if (material->hasGlow())
-    {
-        material->getGlow()->setActive(glowTextureUnit);
-    }
-    else
-    {
-        manager.getDefaultGlowTexture()->setActive(glowTextureUnit);
-    }
-    if (shader->hasUniform(glowTextureUniformName))
-    {
-        shader->setUniform(glowTextureUniformName, glowTextureUnit);
-    }
-
-    // TODO Sort materials with alpha texture for blending.
-    if (material->hasAlpha())
-    {
-        material->getAlpha()->setActive(alphaTextureUnit);
-    }
-    else
-    {
-        manager.getDefaultAlphaTexture()->setActive(alphaTextureUnit);
-    }
-    if (shader->hasUniform(alphaTextureUniformName))
-    {
-        shader->setUniform(alphaTextureUniformName, alphaTextureUnit);
-    }
+    shader->setUniform(uniformName, unit);
 }

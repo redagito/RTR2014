@@ -1,7 +1,5 @@
 #include "graphics/renderer/DepthOfFieldPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/ICamera.h"
@@ -13,6 +11,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 DepthOfFieldPass::DepthOfFieldPass() { return; }
 
@@ -29,8 +28,7 @@ void DepthOfFieldPass::render(const ICamera& camera, const IWindow& window,
     ShaderProgram* shader = manager.getShaderProgram(m_depthOfFieldPassShaderId);
     if (shader == nullptr)
     {
-        spdlog::error("Shader program for depth-of-field pass could not be retrieved.");
-        return;
+        fatalError("Shader program for depth-of-field pass could not be retrieved.");
     }
     shader->setActive();
 
@@ -38,8 +36,7 @@ void DepthOfFieldPass::render(const ICamera& camera, const IWindow& window,
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for depth-of-field pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for depth-of-field pass could not be retrieved.");
     }
 
     // Input scene texture
@@ -82,9 +79,7 @@ bool DepthOfFieldPass::init(IResourceManager* manager)
     // Check if ok
     if (m_depthOfFieldPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      depthOfFieldShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", depthOfFieldShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -92,8 +87,7 @@ bool DepthOfFieldPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

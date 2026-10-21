@@ -1,22 +1,18 @@
 #include "graphics/renderer/core/IndexBuffer.h"
 
-#include <spdlog/spdlog.h>
-
-#include <cassert>
+#include "util/FatalError.h"
 
 IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices, GLenum usage)
     : m_bufferId(0), m_size(0), m_valid(false)
 {
     if (indices.empty())
     {
-        spdlog::error("Index buffer data is empty.");
-        return;
+        fatalError("Index buffer data is empty.");
     }
     glCreateBuffers(1, &m_bufferId);
     if (m_bufferId == 0)
     {
-        spdlog::error("Failed to create the index buffer.");
-        return;
+        fatalError("Failed to create the index buffer.");
     }
     // Set data
     glNamedBufferData(m_bufferId, indices.size() * sizeof(unsigned int), indices.data(), usage);

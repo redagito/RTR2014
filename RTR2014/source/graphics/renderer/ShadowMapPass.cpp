@@ -17,6 +17,7 @@
 #include "graphics/renderer/Transformer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 ShadowMapPass::ShadowMapPass() { return; }
 
@@ -28,8 +29,7 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
     m_shadowMapPassShader = manager.getShaderProgram(m_shadowMapPassShaderId);
     if (m_shadowMapPassShader == nullptr)
     {
-        spdlog::error("Shader program for shadow map pass could not be retrieved.");
-        return;
+        fatalError("Shader program for shadow map pass could not be retrieved.");
     }
 
     // Set framebuffer
@@ -88,7 +88,7 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
         if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
         {
             // Invalid id
-            spdlog::error("Invalid scene object id {}.", id);
+            fatalError("Invalid scene object id {}.", id);
         }
         else if (!castsShadow)
         {
@@ -99,8 +99,7 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
         {
             // Resolve ids
             Mesh* mesh = manager.getMesh(meshId);
-            Material* material = manager.getMaterial(materialId);
-            if (mesh == nullptr || material == nullptr)
+            if (mesh == nullptr)
             {
                 // The graphics resource manager logged the missing resource
                 continue;
@@ -111,20 +110,11 @@ void ShadowMapPass::render(const IScene& scene, const ICamera& camera, const IWi
             transformer.setRotation(rotation);
             transformer.setScale(scale);
 
-            if (material->hasCustomShader())
-            {
-                // Custom shaders not supported
-                spdlog::warn("Deferred renderer does not support custom material shaders.");
-            }
-            else
-            {
-                // Forward draw call
-                m_shadowMapPassShader->setActive();
-                Renderer::bindMaterial(
-                    m_shadowMapPassShader, material, transformer.getTranslationMatrix(),
-                    transformer.getRotationMatrix(), transformer.getScaleMatrix(), manager);
-                Renderer::draw(mesh);
-            }
+            // The shadow map only needs the transformed geometry, the material
+            // does not matter.
+            m_shadowMapPassShader->setActive();
+            m_shadowMapPassShader->setUniform(modelMatrixUniformName, transformer.getModelMatrix());
+            Renderer::draw(mesh);
         }
     }
 
@@ -143,8 +133,7 @@ bool ShadowMapPass::init(IResourceManager* manager)
 
     if (m_shadowMapPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", shaderFile.c_str());
     }
 
     // Depth texture

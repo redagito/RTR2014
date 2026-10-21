@@ -1,7 +1,5 @@
 #include "graphics/renderer/DirectionalLightPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cmath>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -19,6 +17,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 DirectionalLightPass::DirectionalLightPass() { return; }
 
@@ -35,16 +34,14 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera, co
         manager.getShaderProgram(m_directionalLightPassShaderId);
     if (directionalLightPassShader == nullptr)
     {
-        spdlog::error("Shader program for directional light pass could not be retrieved.");
-        return;
+        fatalError("Shader program for directional light pass could not be retrieved.");
     }
 
     // Retrieve fullscreen quad mesh
     Mesh* quadMesh = manager.getMesh(m_directionalLightScreenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for directional light pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for directional light pass could not be retrieved.");
     }
 
     // Set view and projection matrices
@@ -65,8 +62,8 @@ void DirectionalLightPass::render(const IScene& scene, const ICamera& camera, co
         if (!scene.getDirectionalLight(directionalLightId, direction, color, intensity,
                                        castsShadow))
         {
-            spdlog::error("Failed to retrieve directional light data from point light id {}.",
-                          directionalLightId);
+            fatalError("Failed to retrieve directional light data from directional light id {}.",
+                       directionalLightId);
         }
         else
         {
@@ -172,9 +169,8 @@ bool DirectionalLightPass::init(IResourceManager* manager)
     // Check if ok
     if (m_directionalLightPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      directionalLightPassShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.",
+                   directionalLightPassShaderFile.c_str());
     }
 
     // Load quad mesh for directional light representation
@@ -182,14 +178,12 @@ bool DirectionalLightPass::init(IResourceManager* manager)
     m_directionalLightScreenQuadId = manager->loadMesh(quadMesh);
     if (m_directionalLightScreenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     if (!m_shadowMapPass.init(manager))
     {
-        spdlog::error("Failed to initialize shadow map pass.");
-        return false;
+        fatalError("Failed to initialize shadow map pass.");
     }
 
     return true;

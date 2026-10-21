@@ -13,6 +13,7 @@
 #include "graphics/camera/IControllableCamera.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 #include "util/Profiler.h"
 
 DeferredRenderer::DeferredRenderer() { return; }
@@ -26,41 +27,35 @@ bool DeferredRenderer::init(IResourceManager* manager, const std::string& skyCub
     // Init geometry pass resources
     if (!m_geometryPass.init(manager, skyCubemapFile))
     {
-        spdlog::error("Failed to intialize geometry pass.");
-        return false;
+        fatalError("Failed to intialize geometry pass.");
     }
 
     // Init light pass resources
     if (!m_lightPass.init(manager))
     {
-        spdlog::error("Failed to initialize light pass.");
-        return false;
+        fatalError("Failed to initialize light pass.");
     }
 
     // Init illumination pass
     if (!m_illuminationPass.init(manager))
     {
-        spdlog::error("Failed to initialize illumination pass.");
-        return false;
+        fatalError("Failed to initialize illumination pass.");
     }
     // Post process
     if (!m_postProcessPass.init(manager))
     {
-        spdlog::error("Failed to initialize post processing pass.");
-        return false;
+        fatalError("Failed to initialize post processing pass.");
     }
 
     // Display pass
     if (!m_displayPass.init(manager))
     {
-        spdlog::error("Failed to initialize display pass.");
-        return false;
+        fatalError("Failed to initialize display pass.");
     }
 
     if (!m_depthVisualizationPass.init(manager))
     {
-        spdlog::error("Failed to initialize depth visualization pass.");
-        return false;
+        fatalError("Failed to initialize depth visualization pass.");
     }
     return true;
 }
@@ -139,8 +134,7 @@ std::unique_ptr<DeferredRenderer> DeferredRenderer::create(IResourceManager* man
     auto renderer = std::make_unique<DeferredRenderer>();
     if (!renderer->init(manager, skyCubemapFile))
     {
-        spdlog::error("Failed to create deferred renderer, initialization failed.");
-        return nullptr;
+        fatalError("Failed to create deferred renderer, initialization failed.");
     }
     return renderer;
 }

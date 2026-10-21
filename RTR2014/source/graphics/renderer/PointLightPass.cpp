@@ -1,7 +1,5 @@
 #include "graphics/renderer/PointLightPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/trigonometric.hpp>
 #include <string>
@@ -18,6 +16,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 PointLightPass::PointLightPass() { return; }
 
@@ -32,15 +31,13 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
     ShaderProgram* pointLightPassShader = manager.getShaderProgram(m_pointLightPassShaderId);
     if (pointLightPassShader == nullptr)
     {
-        spdlog::error("Shader program for point light pass could not be retrieved.");
-        return;
+        fatalError("Shader program for point light pass could not be retrieved.");
     }
 
     Mesh* pointLightMesh = manager.getMesh(m_pointLightSphereId);
     if (pointLightMesh == nullptr)
     {
-        spdlog::error("Mesh object for point light pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for point light pass could not be retrieved.");
     }
 
     // Set view and projection matrices
@@ -61,8 +58,7 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
 
         if (!scene.getPointLight(pointLightId, position, radius, color, intensity, castsShadow))
         {
-            spdlog::error("Failed to retrieve point light data from point light id {}.",
-                          pointLightId);
+            fatalError("Failed to retrieve point light data from point light id {}.", pointLightId);
         }
         else
         {
@@ -113,8 +109,6 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
             pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
             pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-
-
             // Inverse view-projection
             pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,
                                              m_transformer.getInverseViewProjectionMatrix());
@@ -151,9 +145,8 @@ bool PointLightPass::init(IResourceManager* manager)
     // Check if ok
     if (m_pointLightPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      pointLightPassShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.",
+                   pointLightPassShaderFile.c_str());
     }
 
     // Load sphere mesh for point light representation
@@ -161,14 +154,12 @@ bool PointLightPass::init(IResourceManager* manager)
     m_pointLightSphereId = manager->loadMesh(sphereMesh);
     if (m_pointLightSphereId == invalidResource)
     {
-        spdlog::error("Failed to initialize point light volume mesh {}.", sphereMesh.c_str());
-        return false;
+        fatalError("Failed to initialize point light volume mesh {}.", sphereMesh.c_str());
     }
 
     if (!m_shadowCubePass.init(manager))
     {
-        spdlog::error("Failed to initialize shadow cube pass.");
-        return false;
+        fatalError("Failed to initialize shadow cube pass.");
     }
 
     return true;

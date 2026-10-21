@@ -1,7 +1,5 @@
 #include "graphics/renderer/FogPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/ICamera.h"
@@ -13,6 +11,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 FogPass::FogPass() { return; }
 
@@ -27,16 +26,14 @@ void FogPass::render(const ICamera& camera, const IWindow& window,
     ShaderProgram* fogShader = manager.getShaderProgram(m_fogPassShaderId);
     if (fogShader == nullptr)
     {
-        spdlog::error("Shader program for fog pass could not be retrieved.");
-        return;
+        fatalError("Shader program for fog pass could not be retrieved.");
     }
 
     // Get screen space quad
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for fog pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for fog pass could not be retrieved.");
     }
 
     fogShader->setActive();
@@ -85,8 +82,7 @@ bool FogPass::init(IResourceManager* manager)
     // Check if ok
     if (m_fogPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", fogShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", fogShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -94,8 +90,7 @@ bool FogPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

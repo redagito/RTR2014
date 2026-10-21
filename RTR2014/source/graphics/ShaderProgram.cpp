@@ -1,9 +1,9 @@
 #include "graphics/ShaderProgram.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "util/FatalError.h"
 
 GLuint ShaderProgram::s_activeShaderProgram = 0;
 
@@ -149,8 +149,7 @@ void ShaderProgram::setActive()
 {
     if (!isValid())
     {
-        spdlog::error("An invalid shader program cannot be used.");
-        return;
+        fatalError("An invalid shader program cannot be used.");
     }
     if (s_activeShaderProgram != m_programId)
     {
@@ -185,13 +184,13 @@ GLint ShaderProgram::getUniformLocation(const std::string& uniformName) const
     {
         // Cache location
         GLint location = glGetUniformLocation(m_programId, uniformName.data());
-        m_uniformLocations[uniformName] = location;
         if (location < 0)
         {
-            // The name is not known to the program, setting it would do
-            // nothing. It is reported once, the result is cached.
-            spdlog::error("The shader program has no active uniform named {}.", uniformName);
+            // The program does not have the uniform, setting it would do
+            // nothing and the error would only show as a wrong image.
+            fatalError("The shader program does not have the uniform '{}'.", uniformName);
         }
+        m_uniformLocations[uniformName] = location;
         return location;
     }
     // Found
@@ -203,12 +202,6 @@ GLint ShaderProgram::getAttributeLocation(const std::string& attributeName) cons
     return glGetAttribLocation(m_programId, attributeName.data());
 }
 
-bool ShaderProgram::hasUniform(const std::string& uniformName) const
-{
-    const auto iter = m_uniformLocations.find(uniformName);
-    return iter != m_uniformLocations.end() && iter->second >= 0;
-}
-
 void ShaderProgram::setUniform(GLint location, int i)
 {
     glProgramUniform1i(m_programId, location, i);
@@ -216,12 +209,7 @@ void ShaderProgram::setUniform(GLint location, int i)
 
 void ShaderProgram::setUniform(const std::string& name, int i)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, i);
+    setUniform(getUniformLocation(name), i);
 }
 
 void ShaderProgram::setUniform(GLint location, float f)
@@ -231,12 +219,7 @@ void ShaderProgram::setUniform(GLint location, float f)
 
 void ShaderProgram::setUniform(const std::string& name, float f)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, f);
+    setUniform(getUniformLocation(name), f);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
@@ -246,12 +229,7 @@ void ShaderProgram::setUniform(GLint location, const glm::vec2& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec2& v)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, v);
+    setUniform(getUniformLocation(name), v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
@@ -261,12 +239,7 @@ void ShaderProgram::setUniform(GLint location, const glm::vec3& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec3& v)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, v);
+    setUniform(getUniformLocation(name), v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
@@ -276,12 +249,7 @@ void ShaderProgram::setUniform(GLint location, const glm::vec4& v)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::vec4& v)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, v);
+    setUniform(getUniformLocation(name), v);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
@@ -291,12 +259,7 @@ void ShaderProgram::setUniform(GLint location, const glm::mat2& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat2& m)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, m);
+    setUniform(getUniformLocation(name), m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
@@ -306,12 +269,7 @@ void ShaderProgram::setUniform(GLint location, const glm::mat3& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat3& m)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, m);
+    setUniform(getUniformLocation(name), m);
 }
 
 void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
@@ -321,10 +279,5 @@ void ShaderProgram::setUniform(GLint location, const glm::mat4& m)
 
 void ShaderProgram::setUniform(const std::string& name, const glm::mat4& m)
 {
-    const GLint location = getUniformLocation(name);
-    if (location < 0)
-    {
-        return;
-    }
-    setUniform(location, m);
+    setUniform(getUniformLocation(name), m);
 }

@@ -1,6 +1,6 @@
 #include "graphics/Material.h"
 
-#include <spdlog/spdlog.h>
+#include "util/FatalError.h"
 
 Material::Material(std::shared_ptr<Texture> diffuse, std::shared_ptr<Texture> normal,
                    std::shared_ptr<Texture> specular, std::shared_ptr<Texture> glow,
@@ -23,28 +23,23 @@ bool Material::init(std::shared_ptr<Texture> diffuse, std::shared_ptr<Texture> n
     // Textures must either be unset (unused) or valid
     if (diffuse != nullptr && !diffuse->isValid())
     {
-        spdlog::error("Diffuse texture is not valid.");
-        return false;
+        fatalError("Diffuse texture is not valid.");
     }
     if (normal != nullptr && !normal->isValid())
     {
-        spdlog::error("Normal texture is not valid.");
-        return false;
+        fatalError("Normal texture is not valid.");
     }
     if (specular != nullptr && !specular->isValid())
     {
-        spdlog::error("Specular texture is not valid.");
-        return false;
+        fatalError("Specular texture is not valid.");
     }
     if (glow != nullptr && !glow->isValid())
     {
-        spdlog::error("Glow texture is not valid.");
-        return false;
+        fatalError("Glow texture is not valid.");
     }
     if (alpha != nullptr && !alpha->isValid())
     {
-        spdlog::error("Alpha texture is not valid.");
-        return false;
+        fatalError("Alpha texture is not valid.");
     }
     // Custom shader must either be unset for unused or valid
     if (customShader != nullptr && !customShader->isValid())

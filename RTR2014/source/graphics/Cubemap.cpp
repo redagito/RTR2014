@@ -1,9 +1,9 @@
 #include "graphics/Cubemap.h"
 
-#include <spdlog/spdlog.h>
-
 #include <algorithm>
 #include <cmath>
+
+#include "util/FatalError.h"
 
 namespace
 {
@@ -17,7 +17,7 @@ enum Face
     PositiveZ = 4,
     NegativeZ = 5
 };
-} // namespace
+}  // namespace
 
 glm::vec3 cubemapFaceDirection(int face, float s, float t)
 {
@@ -121,21 +121,17 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
 {
     if (faceSize == 0 || width < faceSize * 4 || height < faceSize * 3)
     {
-        spdlog::error("The image is too small for a cubemap atlas of faces of {} pixels.",
-                      faceSize);
-        return false;
+        fatalError("The image is too small for a cubemap atlas of faces of {} pixels.", faceSize);
     }
     if (pixels.size() < static_cast<size_t>(width) * height * 3)
     {
-        spdlog::error("The image does not hold the data of {}x{} pixels.", width, height);
-        return false;
+        fatalError("The image does not hold the data of {}x{} pixels.", width, height);
     }
 
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_textureId);
     if (m_textureId == 0)
     {
-        spdlog::error("Failed to create the cubemap.");
-        return false;
+        fatalError("Failed to create the cubemap.");
     }
     // The whole chain of mip levels has to be allocated, they are generated
     // for the faces afterwards.
@@ -259,7 +255,7 @@ std::array<unsigned char, 3> Cubemap::sampleFace(const unsigned char* faces, uns
         const float d = data[((size_t)y1 * size + cx0) * 3 + c];
         const float e = data[((size_t)y1 * size + x1) * 3 + c];
         texel[c] = (unsigned char)(a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy +
-                                         e * fx * fy + 0.5f);
+                                   e * fx * fy + 0.5f);
     }
     return texel;
 }
@@ -268,8 +264,7 @@ void Cubemap::setActive(GLint textureUnit) const
 {
     if (!m_valid)
     {
-        spdlog::error("An invalid cubemap cannot be bound.");
-        return;
+        fatalError("An invalid cubemap cannot be bound.");
     }
     glBindTextureUnit(textureUnit, m_textureId);
 }

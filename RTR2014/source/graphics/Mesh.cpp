@@ -1,10 +1,9 @@
 #include "graphics/Mesh.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 
 #include "graphics/renderer/core/RendererCoreConfig.h"
+#include "util/FatalError.h"
 
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices,
            const std::vector<float>& normals, const std::vector<float>& uvs, PrimitiveType type)
@@ -136,9 +135,7 @@ GLenum Mesh::toGLPrimitive(PrimitiveType type)
         return GL_TRIANGLES;
         break;
     default:
-        spdlog::error("Invalid or unknown primitive type, default triangle type used.");
-        // Default
-        return GL_TRIANGLES;
+        fatalError("Invalid or unknown primitive type, default triangle type used.");
     }
 }
 
@@ -156,7 +153,6 @@ unsigned int Mesh::getPrimitiveSize(PrimitiveType type)
         return 3;
         break;
     default:
-        spdlog::error("Invalid or unknown primitive type");
-        return 0;
+        fatalError("Invalid or unknown primitive type");
     }
 }

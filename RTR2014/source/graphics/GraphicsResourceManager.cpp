@@ -7,6 +7,7 @@
 #include <string>
 
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 namespace
 {
@@ -53,22 +54,19 @@ bool loadShaderStage(ResourceId id, IResourceManager* resourceManager,
     std::string text;
     if (!resourceManager->getString(id, text))
     {
-        spdlog::error("The source of the {} shader {} could not be retrieved.",
-                      shaderStageName(Stage), id);
-        return false;
+        fatalError("The source of the {} shader {} could not be retrieved.", shaderStageName(Stage),
+                   id);
     }
     if (text.empty())
     {
-        spdlog::error("The source of the {} shader {} is empty.", shaderStageName(Stage), id);
-        return false;
+        fatalError("The source of the {} shader {} is empty.", shaderStageName(Stage), id);
     }
     std::unique_ptr<ShaderObject<Stage>> shader(new ShaderObject<Stage>(text));
     // Check compile error
     if (!shader->isValid())
     {
-        spdlog::error("Failed to compile the {} shader {}: {}", shaderStageName(Stage), id,
-                      shader->getErrorString());
-        return false;
+        fatalError("Failed to compile the {} shader {}: {}", shaderStageName(Stage), id,
+                   shader->getErrorString());
     }
     // Move to map
     shaders[id] = std::move(shader);
@@ -159,7 +157,7 @@ void GraphicsResourceManager::notify(ResourceType type, ResourceId id, ListenerE
     case ResourceType::Sound:
         break;
     default:
-        spdlog::error("Unknown resource type encountered.");
+        fatalError("Unknown resource type encountered.");
         break;
     }
 }
@@ -339,14 +337,12 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
         {
             // Replacing the texture would leave the materials that use it with
             // a dangling pointer.
-            spdlog::error("The texture id {} already exists.", id);
-            return;
+            fatalError("The texture id {} already exists.", id);
         }
 
         if (!resourceManager->getImage(id, data, width, height, format))
         {
-            spdlog::error("Failed to access image resource {}.", id);
-            return;
+            fatalError("Failed to access image resource {}.", id);
         }
         // Create new texture
         m_textures[id] = std::make_shared<Texture>(data, width, height, format);
@@ -357,14 +353,12 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
         auto texture = m_textures.find(id);
         if (texture == m_textures.end())
         {
-            spdlog::error("The texture id {} does not exist.", id);
-            return;
+            fatalError("The texture id {} does not exist.", id);
         }
 
         if (!resourceManager->getImage(id, data, width, height, format))
         {
-            spdlog::error("Failed to access image resource {}.", id);
-            return;
+            fatalError("Failed to access image resource {}.", id);
         }
         // Reinitialize texture on change
         texture->second->init(data, width, height, format);
@@ -396,14 +390,12 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
         {
             // Replacing the mesh would leave the scene objects that use it with
             // a dangling pointer.
-            spdlog::error("The mesh id {} already exists.", id);
-            return;
+            fatalError("The mesh id {} already exists.", id);
         }
 
         if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
         {
-            spdlog::error("Failed to access mesh resource {}.", id);
-            return;
+            fatalError("Failed to access mesh resource {}.", id);
         }
         // Create new mesh
         m_meshes[id] = std::make_unique<Mesh>(vertices, indices, normals, uvs, type);
@@ -414,14 +406,12 @@ void GraphicsResourceManager::handleMeshEvent(ResourceId id, ListenerEvent event
         auto mesh = m_meshes.find(id);
         if (mesh == m_meshes.end())
         {
-            spdlog::error("The mesh id {} does not exist.", id);
-            return;
+            fatalError("The mesh id {} does not exist.", id);
         }
 
         if (!resourceManager->getMesh(id, vertices, indices, normals, uvs, type))
         {
-            spdlog::error("Failed to access mesh resource {}.", id);
-            return;
+            fatalError("Failed to access mesh resource {}.", id);
         }
         // Reinitialize mesh on change
         mesh->second->init(vertices, indices, normals, uvs, type);
@@ -454,14 +444,12 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
         {
             // Replacing the material would leave the scene objects that use it
             // with a dangling pointer.
-            spdlog::error("The material id {} already exists.", id);
-            return;
+            fatalError("The material id {} already exists.", id);
         }
 
         if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
         {
-            spdlog::error("Failed to access material resource {}.", id);
-            return;
+            fatalError("Failed to access material resource {}.", id);
         }
 
         // Create new material
@@ -475,14 +463,12 @@ void GraphicsResourceManager::handleMaterialEvent(ResourceId id, ListenerEvent e
         auto material = m_materials.find(id);
         if (material == m_materials.end())
         {
-            spdlog::error("The material id {} does not exist.", id);
-            return;
+            fatalError("The material id {} does not exist.", id);
         }
 
         if (!resourceManager->getMaterial(id, diffuse, normal, specular, glow, alpha, customShader))
         {
-            spdlog::error("Failed to access material resource {}.", id);
-            return;
+            fatalError("Failed to access material resource {}.", id);
         }
 
         // Reinitialize material on change
@@ -517,15 +503,13 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
         {
             // Replacing the program would leave the materials that use it with
             // a dangling pointer.
-            spdlog::error("The shader program id {} already exists.", id);
-            return;
+            fatalError("The shader program id {} already exists.", id);
         }
 
         // Load shader source ids
         if (!resourceManager->getShader(id, vertex, tessControl, tessEval, geometry, fragment))
         {
-            spdlog::error("Failed to access shader resource {}.", id);
-            return;
+            fatalError("Failed to access shader resource {}.", id);
         }
 
         // Load shader objects from source
@@ -542,13 +526,9 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
             std::string file;
             if (resourceManager->getShaderFile(id, file))
             {
-                spdlog::error("The shader program from file {} could not be built.", file);
+                fatalError("The shader program from file {} could not be built.", file);
             }
-            else
-            {
-                spdlog::error("The shader program with id {} could not be built.", id);
-            }
-            std::abort();
+            fatalError("The shader program with id {} could not be built.", id);
         }
 
         {
@@ -560,8 +540,7 @@ void GraphicsResourceManager::handleShaderEvent(ResourceId id, ListenerEvent eve
 
             if (!program->isValid())
             {
-                spdlog::error("Failed to link the shader program with id {}.", id);
-                std::abort();
+                fatalError("Failed to link the shader program with id {}.", id);
             }
 
             m_shaderPrograms[id] = std::move(program);

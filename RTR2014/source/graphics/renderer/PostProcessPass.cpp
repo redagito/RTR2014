@@ -1,7 +1,5 @@
 #include "graphics/renderer/PostProcessPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/ICamera.h"
@@ -10,6 +8,7 @@
 #include "graphics/Texture.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 #include "util/Profiler.h"
 
 PostProcessPass::PostProcessPass() { return; }
@@ -99,32 +98,27 @@ bool PostProcessPass::init(IResourceManager* manager)
 {
     if (!m_fxaaPass.init(manager))
     {
-        spdlog::error("Failed to initialize fxaa pass.");
-        return false;
+        fatalError("Failed to initialize fxaa pass.");
     }
 
     if (!m_fogPass.init(manager))
     {
-        spdlog::error("Failed to initialize fog pass.");
-        return false;
+        fatalError("Failed to initialize fog pass.");
     }
 
     if (!m_gaussBlurPass.init(manager))
     {
-        spdlog::error("Failed to initialize gauss blur pass.");
-        return false;
+        fatalError("Failed to initialize gauss blur pass.");
     }
 
     if (!m_depthOfFieldPass.init(manager))
     {
-        spdlog::error("Failed to initialize depth of field pass.");
-        return false;
+        fatalError("Failed to initialize depth of field pass.");
     }
 
     if (!m_displayPass.init(manager))
     {
-        spdlog::error("Failed to initialize display pass.");
-        return false;
+        fatalError("Failed to initialize display pass.");
     }
 
     // Init post processing FBOs
@@ -132,24 +126,21 @@ bool PostProcessPass::init(IResourceManager* manager)
     m_postProcessPassTexture0 = std::make_shared<Texture>();
     if (!m_postProcessPassTexture0->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to initialize post process pass texture 0.");
-        return false;
+        fatalError("Failed to initialize post process pass texture 0.");
     }
 
     // Texture 1
     m_postProcessPassTexture1 = std::make_shared<Texture>();
     if (!m_postProcessPassTexture1->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to initialize post process pass texture 1.");
-        return false;
+        fatalError("Failed to initialize post process pass texture 1.");
     }
 
     // Texture 2
     m_postProcessPassTexture2 = std::make_shared<Texture>();
     if (!m_postProcessPassTexture2->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to initialize post process pass texture 2.");
-        return false;
+        fatalError("Failed to initialize post process pass texture 2.");
     }
 
     m_postProcessPassFrameBuffer0.attach(m_postProcessPassTexture0, GL_COLOR_ATTACHMENT0);

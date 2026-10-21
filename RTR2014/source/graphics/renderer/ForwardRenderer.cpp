@@ -1,7 +1,5 @@
 #include "graphics/renderer/ForwardRenderer.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 #include <string>
 
@@ -12,6 +10,7 @@
 #include "graphics/IWindow.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 #include "util/Profiler.h"
 
 ForwardRenderer::ForwardRenderer() { return; }
@@ -69,8 +68,7 @@ std::unique_ptr<ForwardRenderer> ForwardRenderer::create(IResourceManager* manag
     auto renderer = std::make_unique<ForwardRenderer>();
     if (!renderer->init(manager, skyCubemapFile))
     {
-        spdlog::error("Failed to create forward renderer, initialization failed.");
-        return nullptr;
+        fatalError("Failed to create forward renderer, initialization failed.");
     }
     return renderer;
 }

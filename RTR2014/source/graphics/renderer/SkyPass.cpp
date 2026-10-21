@@ -1,7 +1,5 @@
 #include "graphics/renderer/SkyPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <algorithm>
 #include <vector>
 
@@ -14,6 +12,7 @@
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
 #include "resource/ResourceConfig.h"
+#include "util/FatalError.h"
 
 SkyPass::SkyPass() : m_cubemap(std::make_shared<Cubemap>()) {}
 
@@ -30,8 +29,7 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     const ResourceId imageId = manager->loadImage(cubemapFile, ColorFormat::RGB24);
     if (imageId == invalidResource)
     {
-        spdlog::error("Failed to load the sky cubemap file {}.", cubemapFile.c_str());
-        return false;
+        fatalError("Failed to load the sky cubemap file {}.", cubemapFile.c_str());
     }
 
     std::vector<unsigned char> pixels;
@@ -40,8 +38,7 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     ColorFormat format = ColorFormat::Invalid;
     if (!manager->getImage(imageId, pixels, width, height, format))
     {
-        spdlog::error("Failed to read the sky cubemap file {}.", cubemapFile.c_str());
-        return false;
+        fatalError("Failed to read the sky cubemap file {}.", cubemapFile.c_str());
     }
 
     // The atlas is a cross of square faces, four of them in a row and three
@@ -49,13 +46,11 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     const unsigned int faceSize = std::min(width / 4, height / 3);
     if (faceSize == 0)
     {
-        spdlog::error("The sky cubemap file {} is too small.", cubemapFile.c_str());
-        return false;
+        fatalError("The sky cubemap file {} is too small.", cubemapFile.c_str());
     }
     if (!m_cubemap->initFromAtlas(pixels, width, height, faceSize))
     {
-        spdlog::error("Failed to build the sky cubemap from file {}.", cubemapFile.c_str());
-        return false;
+        fatalError("Failed to build the sky cubemap from file {}.", cubemapFile.c_str());
     }
 
     // The shader that draws the sky
@@ -63,8 +58,7 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     m_skyShaderId = manager->loadShader(skyShaderFile);
     if (m_skyShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", skyShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", skyShaderFile.c_str());
     }
 
     // The screen quad the sky is drawn with
@@ -72,8 +66,7 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     m_valid = true;
@@ -91,14 +84,12 @@ void SkyPass::render(const IWindow& window, const IGraphicsResourceManager& mana
     ShaderProgram* skyShader = manager.getShaderProgram(m_skyShaderId);
     if (skyShader == nullptr)
     {
-        spdlog::error("Shader program for the sky could not be retrieved.");
-        return;
+        fatalError("Shader program for the sky could not be retrieved.");
     }
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for the sky could not be retrieved.");
-        return;
+        fatalError("Mesh object for the sky could not be retrieved.");
     }
 
     // The sky is behind everything, it may neither be hidden by the scene nor

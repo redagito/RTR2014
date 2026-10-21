@@ -17,6 +17,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/Transformer.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 const ShadowCubePass::CameraDirection ShadowCubePass::cameraDirections[6] = {
     {0, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)},
@@ -36,8 +37,7 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
     m_shadowCubePassShader = manager.getShaderProgram(m_shadowCubePassShaderId);
     if (m_shadowCubePassShader == nullptr)
     {
-        spdlog::error("Shader program for shadow cube pass could not be retrieved.");
-        return;
+        fatalError("Shader program for shadow cube pass could not be retrieved.");
     }
     m_shadowCubePassShader->setActive();
 
@@ -102,14 +102,13 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
             if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
             {
                 // Invalid id
-                spdlog::error("Invalid scene object id {}.", id);
+                fatalError("Invalid scene object id {}.", id);
             }
             else
             {
                 // Resolve ids
                 Mesh* mesh = manager.getMesh(meshId);
-                Material* material = manager.getMaterial(materialId);
-                if (mesh == nullptr || material == nullptr)
+                if (mesh == nullptr)
                 {
                     // The graphics resource manager logged the missing resource
                     continue;
@@ -122,11 +121,11 @@ void ShadowCubePass::render(const IScene& scene, const ICamera& camera, const IW
                 transformer.setRotation(rotation);
                 transformer.setScale(scale);
 
-                // Forward draw call
+                // The shadow cube only needs the transformed geometry, the
+                // material does not matter.
                 m_shadowCubePassShader->setActive();
-                Renderer::bindMaterial(
-                    m_shadowCubePassShader, material, transformer.getTranslationMatrix(),
-                    transformer.getRotationMatrix(), transformer.getScaleMatrix(), manager);
+                m_shadowCubePassShader->setUniform(modelMatrixUniformName,
+                                                   transformer.getModelMatrix());
                 Renderer::draw(mesh);
             }
         }
@@ -148,8 +147,7 @@ bool ShadowCubePass::init(IResourceManager* manager)
 
     if (m_shadowCubePassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", shaderFile.c_str());
     }
 
     m_shadowCubeBuffer.resize(1024, 1024);

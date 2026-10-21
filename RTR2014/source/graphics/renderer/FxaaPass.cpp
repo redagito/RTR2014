@@ -1,7 +1,5 @@
 #include "graphics/renderer/FxaaPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/IGraphicsResourceManager.h"
@@ -12,6 +10,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 FxaaPass::FxaaPass() { return; }
 
@@ -24,8 +23,7 @@ void FxaaPass::render(const IWindow& window, const IGraphicsResourceManager& man
     ShaderProgram* fxaaShader = manager.getShaderProgram(m_fxaaPassShaderId);
     if (fxaaShader == nullptr)
     {
-        spdlog::error("Shader program for fxaa pass could not be retrieved.");
-        return;
+        fatalError("Shader program for fxaa pass could not be retrieved.");
     }
     fxaaShader->setActive();
 
@@ -33,8 +31,7 @@ void FxaaPass::render(const IWindow& window, const IGraphicsResourceManager& man
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for fxaa pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for fxaa pass could not be retrieved.");
     }
 
     // Set input texture
@@ -56,8 +53,7 @@ bool FxaaPass::init(IResourceManager* manager)
     // Check if ok
     if (m_fxaaPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", fxaaShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", fxaaShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -65,8 +61,7 @@ bool FxaaPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

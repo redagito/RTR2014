@@ -1,7 +1,5 @@
 #include "graphics/renderer/GaussBlurPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/IGraphicsResourceManager.h"
@@ -12,6 +10,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 GaussBlurPass::GaussBlurPass() { return; }
 
@@ -24,8 +23,7 @@ void GaussBlurPass::renderVertical(const IWindow& window, const IGraphicsResourc
     ShaderProgram* shader = manager.getShaderProgram(m_gaussBlurVerticalShaderId);
     if (shader == nullptr)
     {
-        spdlog::error("Shader program for vertical gauss blur pass could not be retrieved.");
-        return;
+        fatalError("Shader program for vertical gauss blur pass could not be retrieved.");
     }
     shader->setActive();
 
@@ -33,8 +31,7 @@ void GaussBlurPass::renderVertical(const IWindow& window, const IGraphicsResourc
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for vertical gauss blur pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for vertical gauss blur pass could not be retrieved.");
     }
 
     // Input texture
@@ -59,8 +56,7 @@ void GaussBlurPass::renderHorizontal(const IWindow& window, const IGraphicsResou
     ShaderProgram* shader = manager.getShaderProgram(m_gaussBlurHorizontalShaderId);
     if (shader == nullptr)
     {
-        spdlog::error("Shader program for horizontal gauss blur pass could not be retrieved.");
-        return;
+        fatalError("Shader program for horizontal gauss blur pass could not be retrieved.");
     }
     shader->setActive();
 
@@ -68,8 +64,7 @@ void GaussBlurPass::renderHorizontal(const IWindow& window, const IGraphicsResou
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for horizontal gauss blur pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for horizontal gauss blur pass could not be retrieved.");
     }
 
     // Input texture
@@ -95,9 +90,8 @@ bool GaussBlurPass::init(IResourceManager* manager)
     // Check if ok
     if (m_gaussBlurVerticalShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      gaussBlurVerticalShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.",
+                   gaussBlurVerticalShaderFile.c_str());
     }
 
     // Horizontal gauss blur shader
@@ -106,9 +100,8 @@ bool GaussBlurPass::init(IResourceManager* manager)
     // Check if ok
     if (m_gaussBlurHorizontalShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      gaussBlurHorizontalShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.",
+                   gaussBlurHorizontalShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -116,8 +109,7 @@ bool GaussBlurPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

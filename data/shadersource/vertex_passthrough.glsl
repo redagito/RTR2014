@@ -9,7 +9,6 @@ layout (location = 2) in vec2 vertexUV;
 uniform mat4 model;
 uniform mat4 rotation;
 uniform mat4 translation;
-uniform mat4 scale;
 
 // View and projection matrices
 uniform mat4 view;

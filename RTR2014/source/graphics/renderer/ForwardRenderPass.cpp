@@ -1,7 +1,5 @@
 #include "graphics/renderer/ForwardRenderPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/ICamera.h"
@@ -15,6 +13,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 ForwardRenderPass::ForwardRenderPass() { return; }
 
@@ -30,8 +29,7 @@ void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const
     m_currentShader = manager.getShaderProgram(m_forwardShader);
     if (m_currentShader == nullptr)
     {
-        spdlog::error("Shader program for forward render pass could not be retrieved.");
-        return;
+        fatalError("Shader program for forward render pass could not be retrieved.");
     }
 
     // Set view and projection matrices
@@ -63,7 +61,7 @@ void ForwardRenderPass::render(const IScene& scene, const ICamera& camera, const
         if (!scene.getObject(id, meshId, materialId, position, rotation, scale, castsShadow))
         {
             // Invalid id
-            spdlog::error("Invalid scene object id {}.", id);
+            fatalError("Invalid scene object id {}.", id);
         }
         else
         {
@@ -109,7 +107,20 @@ void ForwardRenderPass::draw(Mesh* mesh, const glm::mat4& translation, const glm
         shader->setUniform(projectionMatrixUniformName, m_currentProjection);
     }
 
-    Renderer::bindMaterial(shader, material, translation, rotation, scale, manager);
+    shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
+    shader->setUniform(rotationMatrixUniformName, rotation);
+    shader->setUniform(translationMatrixUniformName, translation);
+    Renderer::bindTexture(shader, diffuseTextureUniformName, diffuseTextureUnit,
+                          material->getDiffuse(), manager.getDefaultDiffuseTexture());
+    Renderer::bindTexture(shader, normalTextureUniformName, normalTextureUnit,
+                          material->getNormal(), manager.getDefaultNormalTexture());
+    Renderer::bindTexture(shader, specularTextureUniformName, specularTextureUnit,
+                          material->getSpecular(), manager.getDefaultSpecularTexture());
+    Renderer::bindTexture(shader, glowTextureUniformName, glowTextureUnit, material->getGlow(),
+                          manager.getDefaultGlowTexture());
+    // TODO Sort materials with alpha texture for blending.
+    Renderer::bindTexture(shader, alphaTextureUniformName, alphaTextureUnit, material->getAlpha(),
+                          manager.getDefaultAlphaTexture());
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes
@@ -127,16 +138,14 @@ bool ForwardRenderPass::init(IResourceManager* manager, const std::string& skyCu
     // Check if ok
     if (m_forwardShader == invalidResource)
     {
-        spdlog::error("Failed to initialize the default shader from file {}.",
-                      defaultShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the default shader from file {}.",
+                   defaultShaderFile.c_str());
     }
 
     // The sky that fills the background of the scene
     if (!m_skyPass.init(manager, skyCubemapFile))
     {
-        spdlog::error("Failed to initialize the sky.");
-        return false;
+        fatalError("Failed to initialize the sky.");
     }
     return true;
 }

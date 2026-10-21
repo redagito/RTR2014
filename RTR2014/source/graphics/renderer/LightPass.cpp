@@ -1,7 +1,5 @@
 #include "graphics/renderer/LightPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include "graphics/ICamera.h"
 #include "graphics/IGraphicsResourceManager.h"
 #include "graphics/IScene.h"
@@ -11,6 +9,7 @@
 #include "graphics/renderer/RenderBuffer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 #include "util/Profiler.h"
 
 LightPass::LightPass() { return; }
@@ -67,22 +66,19 @@ bool LightPass::init(IResourceManager* manager)
 {
     if (!m_pointLightPass.init(manager))
     {
-        spdlog::error("Failed to initialize point light pass.");
-        return false;
+        fatalError("Failed to initialize point light pass.");
     }
 
     if (!m_directionalLightPass.init(manager))
     {
-        spdlog::error("Failed to initialize directional light pass.");
-        return false;
+        fatalError("Failed to initialize directional light pass.");
     }
 
     // Attach texture for light data
     m_lightPassTexture = std::make_shared<Texture>();
     if (!m_lightPassTexture->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to create color texture for light pass frame buffer.");
-        return false;
+        fatalError("Failed to create color texture for light pass frame buffer.");
     }
     m_lightPassFrameBuffer.attach(m_lightPassTexture, GL_COLOR_ATTACHMENT0);
 
@@ -91,8 +87,7 @@ bool LightPass::init(IResourceManager* manager)
     std::shared_ptr<RenderBuffer> depthBuffer = std::make_shared<RenderBuffer>();
     if (!depthBuffer->init(800, 600, GL_DEPTH_COMPONENT))
     {
-        spdlog::error("Failed to create depth buffer for light pass frame buffer.");
-        return false;
+        fatalError("Failed to create depth buffer for light pass frame buffer.");
     }
     m_lightPassFrameBuffer.attach(depthBuffer, GL_DEPTH_ATTACHMENT);
     return true;

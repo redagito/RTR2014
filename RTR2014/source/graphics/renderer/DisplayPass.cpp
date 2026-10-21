@@ -1,7 +1,5 @@
 #include "graphics/renderer/DisplayPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/IGraphicsResourceManager.h"
@@ -13,6 +11,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 DisplayPass::DisplayPass() { return; }
 
@@ -28,8 +27,7 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
     ShaderProgram* displayShader = manager.getShaderProgram(m_displayPassShaderId);
     if (displayShader == nullptr)
     {
-        spdlog::error("Shader program for display pass could not be retrieved.");
-        return;
+        fatalError("Shader program for display pass could not be retrieved.");
     }
     displayShader->setActive();
 
@@ -37,8 +35,7 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for illumination pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for illumination pass could not be retrieved.");
     }
 
     // Scene texture
@@ -68,9 +65,7 @@ bool DisplayPass::init(IResourceManager* manager)
     // Check if ok
     if (m_displayPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      displayPassShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", displayPassShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -78,8 +73,7 @@ bool DisplayPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

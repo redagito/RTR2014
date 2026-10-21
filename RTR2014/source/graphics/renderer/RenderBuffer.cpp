@@ -1,6 +1,6 @@
 #include "graphics/renderer/RenderBuffer.h"
 
-#include <spdlog/spdlog.h>
+#include "util/FatalError.h"
 
 RenderBuffer::RenderBuffer() : m_bufferId(0), m_height(0), m_width(0) { return; }
 
@@ -22,8 +22,7 @@ bool RenderBuffer::init(unsigned int width, unsigned int height, GLenum format)
     glCreateRenderbuffers(1, &m_bufferId);
     if (m_bufferId == 0)
     {
-        spdlog::error("Failed to create the render buffer.");
-        return false;
+        fatalError("Failed to create the render buffer.");
     }
     glNamedRenderbufferStorage(m_bufferId, format, width, height);
     m_width = width;

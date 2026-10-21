@@ -1,6 +1,9 @@
 #pragma once
 
+#include <glad/gl.h>
+
 #include <glm/glm.hpp>
+#include <string>
 
 // Required for inheritance
 #include "graphics/IRenderer.h"
@@ -9,6 +12,7 @@ class IGraphicsResourceManager;
 class Material;
 class Mesh;
 class ShaderProgram;
+class Texture;
 
 /**
  * \brief Abstract renderer base class.
@@ -39,12 +43,11 @@ class Renderer : public IRenderer
     static void draw(const Mesh* mesh);
 
     /**
-     * \brief Sends transformation matrices and material textures to the shader.
+     * \brief Binds a texture to a texture unit and sets the sampler of the shader.
      *
-     * Textures the material does not provide fall back to the manager's defaults.
-     * Shader must be set active by caller.
+     * The texture of the material is used, the fallback when it has none. The
+     * shader has to have the uniform, a mismatch is an error.
      */
-    static void bindMaterial(ShaderProgram* shader, const Material* material,
-                             const glm::mat4& translation, const glm::mat4& rotation,
-                             const glm::mat4& scale, const IGraphicsResourceManager& manager);
+    static void bindTexture(ShaderProgram* shader, const std::string& uniformName, GLint unit,
+                            const Texture* texture, const Texture* fallback);
 };

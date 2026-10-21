@@ -1,23 +1,19 @@
 #include "graphics/renderer/core/VertexBuffer.h"
 
-#include <spdlog/spdlog.h>
-
-#include <cassert>
+#include "util/FatalError.h"
 
 VertexBuffer::VertexBuffer(const std::vector<float>& data, GLenum usage)
     : m_bufferId(0), m_valid(false), m_size((unsigned int)data.size()), m_usage(usage)
 {
     if (data.empty())
     {
-        spdlog::error("Vertex buffer data is empty.");
-        return;
+        fatalError("Vertex buffer data is empty.");
     }
     // Create GL buffer resource
     glCreateBuffers(1, &m_bufferId);
     if (m_bufferId == 0)
     {
-        spdlog::error("Failed to create the vertex buffer.");
-        return;
+        fatalError("Failed to create the vertex buffer.");
     }
     // Set data
     glNamedBufferData(m_bufferId, data.size() * sizeof(float), data.data(), usage);
@@ -37,7 +33,7 @@ VertexBuffer::VertexBuffer(GLenum usage) : m_bufferId(0), m_valid(false), m_size
     glCreateBuffers(1, &m_bufferId);
     if (m_bufferId == 0)
     {
-        spdlog::error("Failed to create the vertex buffer.");
+        fatalError("Failed to create the vertex buffer.");
     }
 }
 

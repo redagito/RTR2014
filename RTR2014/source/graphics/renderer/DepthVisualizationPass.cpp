@@ -1,7 +1,5 @@
 #include "graphics/renderer/DepthVisualizationPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/IGraphicsResourceManager.h"
@@ -12,6 +10,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 DepthVisualizationPass::DepthVisualizationPass() { return; }
 
@@ -28,8 +27,7 @@ void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResour
     ShaderProgram* shader = manager.getShaderProgram(m_visualizeDepthPassShaderId);
     if (shader == nullptr)
     {
-        spdlog::error("Shader program for depth visualization pass could not be retrieved.");
-        return;
+        fatalError("Shader program for depth visualization pass could not be retrieved.");
     }
     shader->setActive();
 
@@ -37,8 +35,7 @@ void DepthVisualizationPass::render(const IWindow& window, const IGraphicsResour
     Mesh* quadMesh = manager.getMesh(m_screenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for depth visualization pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for depth visualization pass could not be retrieved.");
     }
 
     // Depth texture
@@ -65,8 +62,7 @@ bool DepthVisualizationPass::init(IResourceManager* manager)
     // Check if ok
     if (m_visualizeDepthPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.", shaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.", shaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -74,8 +70,7 @@ bool DepthVisualizationPass::init(IResourceManager* manager)
     m_screenQuadId = manager->loadMesh(quadMesh);
     if (m_screenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     return true;

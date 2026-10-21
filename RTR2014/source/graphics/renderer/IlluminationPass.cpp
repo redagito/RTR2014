@@ -1,7 +1,5 @@
 #include "graphics/renderer/IlluminationPass.h"
 
-#include <spdlog/spdlog.h>
-
 #include <string>
 
 #include "graphics/IGraphicsResourceManager.h"
@@ -12,6 +10,7 @@
 #include "graphics/renderer/Renderer.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
+#include "util/FatalError.h"
 
 IlluminationPass::IlluminationPass() { return; }
 
@@ -31,8 +30,7 @@ void IlluminationPass::render(const IWindow& window, const IGraphicsResourceMana
     ShaderProgram* illuminationShader = manager.getShaderProgram(m_illuminationPassShaderId);
     if (illuminationShader == nullptr)
     {
-        spdlog::error("Shader program for illumination pass could not be retrieved.");
-        return;
+        fatalError("Shader program for illumination pass could not be retrieved.");
     }
     illuminationShader->setActive();
 
@@ -40,8 +38,7 @@ void IlluminationPass::render(const IWindow& window, const IGraphicsResourceMana
     Mesh* quadMesh = manager.getMesh(m_illuminationPassScreenQuadId);
     if (quadMesh == nullptr)
     {
-        spdlog::error("Mesh object for illumination pass could not be retrieved.");
-        return;
+        fatalError("Mesh object for illumination pass could not be retrieved.");
     }
 
     // Set textures
@@ -76,9 +73,8 @@ bool IlluminationPass::init(IResourceManager* manager)
     // Check if ok
     if (m_illuminationPassShaderId == invalidResource)
     {
-        spdlog::error("Failed to initialize the shader from file {}.",
-                      illuminationPassShaderFile.c_str());
-        return false;
+        fatalError("Failed to initialize the shader from file {}.",
+                   illuminationPassShaderFile.c_str());
     }
 
     // Screen quad mesh
@@ -87,16 +83,14 @@ bool IlluminationPass::init(IResourceManager* manager)
     // Check if ok
     if (m_illuminationPassScreenQuadId == invalidResource)
     {
-        spdlog::error("Failed to load screen quad mesh {}.", quadMesh.c_str());
-        return false;
+        fatalError("Failed to load screen quad mesh {}.", quadMesh.c_str());
     }
 
     // FBO
     m_illuminationPassTexture = std::make_shared<Texture>();
     if (!m_illuminationPassTexture->init(800, 600, GL_RGBA16F))
     {
-        spdlog::error("Failed to initialize illumination pass texture.");
-        return false;
+        fatalError("Failed to initialize illumination pass texture.");
     }
     m_illumationPassFrameBuffer.attach(m_illuminationPassTexture, GL_COLOR_ATTACHMENT0);
 
