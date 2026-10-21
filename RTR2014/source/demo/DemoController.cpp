@@ -133,8 +133,13 @@ void DemoController::updateInput(float timeDiff)
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F5) && m_f5Cooldown <= 0.f)
     {
         m_f5Cooldown = 0.3f;
-        m_cameraController->loadSequence("data/democam.json");
+        startCameraSequence();
     }
+}
+
+void DemoController::startCameraSequence()
+{
+    m_cameraController->loadSequence("data/democam.json");
 }
 
 void DemoController::updateDebugInfo(float timeDiff)

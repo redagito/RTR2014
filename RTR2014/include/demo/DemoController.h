@@ -33,6 +33,11 @@ class DemoController
      */
     void update(float timeDiff);
 
+    /**
+     * \brief Starts the camera sequence of the demo.
+     */
+    void startCameraSequence();
+
    private:
     /**
      * \brief Returns whether everything needed to draw a frame is present.

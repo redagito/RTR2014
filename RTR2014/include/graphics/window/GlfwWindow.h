@@ -22,7 +22,8 @@ class GlfwWindow : public IWindow
     GlfwWindow(const GlfwWindow&) = delete;
     GlfwWindow& operator=(const GlfwWindow&) = delete;
 
-    bool init(unsigned int width, unsigned int height, const std::string& name);
+    bool init(unsigned int width, unsigned int height, const std::string& name,
+              bool visible = true);
 
     void setWidth(unsigned int width);
     void setHeight(unsigned int height);

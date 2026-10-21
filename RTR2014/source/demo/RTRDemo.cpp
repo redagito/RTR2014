@@ -2,6 +2,7 @@
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
+#include <stb_image_write.h>
 
 #include <chrono>
 #include <future>
@@ -14,6 +15,7 @@
 
 // Graphics
 #include <GLFW/glfw3.h>
+#include <glad/gl.h>
 
 #include "graphics/camera/FirstPersonCamera.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
@@ -43,6 +45,13 @@
 
 // Animation
 #include "animation/AnimationWorld.h"
+
+namespace
+{
+// The capture renders the frames with a fixed time step, so that the captured
+// image does not depend on the speed of the machine.
+constexpr float kCaptureFrameDelta = 1.0f / 60.0f;
+}  // namespace
 
 RTRDemo::RTRDemo() {}
 
@@ -119,9 +128,13 @@ int RTRDemo::init(const std::string& configFile)
     m_resourceManager->addResourceListener(manager);
     m_graphicsResourceManager.reset(manager);
 
-    // Sound engine; runs silent when no audio device is available
+    // Sound engine; runs silent when no audio device is available. The capture
+    // mode stays silent, it must not play sounds on the desktop.
     m_soundEngine = std::make_shared<SoundEngine>();
-    m_soundEngine->init();
+    if (m_captureFile.empty())
+    {
+        m_soundEngine->init();
+    }
 
     m_camera = std::make_shared<FirstPersonCamera>(
         glm::vec3(0.5f, 0.f, 0.5f), glm::vec3(0.f, 0.f, 1.f), 45.f, 4.f / 3.f, 0.01f, 1000.f);
@@ -230,7 +243,20 @@ int RTRDemo::run()
         m_graphicsResourceManager.get(), m_debugInfo.get(), m_debugInfoDisplay.get(),
         m_animationWorld.get());
 
-    m_window->toggleMouseCapture();
+    // The capture mode does not take over the mouse.
+    if (m_captureFile.empty())
+    {
+        m_window->toggleMouseCapture();
+    }
+    else
+    {
+        // The frames are rendered as fast as possible, the capture does not
+        // have to wait for the display.
+        m_window->setVSync(false);
+        // The camera follows the sequence of the demo, the mouse does not move
+        // it.
+        m_demoController->startCameraSequence();
+    }
 
     FrameTimer frameTimer(m_window->getTime());
 
@@ -238,13 +264,30 @@ int RTRDemo::run()
     {
         // The delta is measured between the frames, not around the work of a
         // single frame, so that it does not depend on how long the frame took.
-        const float delta = frameTimer.tick(m_window->getTime());
+        // The capture uses a fixed delta, so that the rendered frames do not
+        // depend on the speed of the machine.
+        const float delta =
+            m_captureFile.empty() ? frameTimer.tick(m_window->getTime()) : kCaptureFrameDelta;
 
         m_demoController->update(delta);
 
         const glm::mat4& view = m_camera->getView();
         m_soundEngine->updateListener(m_camera->getPosition(),
                                       -glm::vec3(view[0][2], view[1][2], view[2][2]));
+
+        // The capture is taken from the back buffer, before it is presented.
+        if (!m_captureFile.empty())
+        {
+            m_renderedFrames++;
+            if (m_renderedFrames >= m_captureFrames)
+            {
+                if (!captureFrame(m_captureFile))
+                {
+                    return 1;
+                }
+                return 0;
+            }
+        }
 
         m_window->swapBuffer();
 
@@ -254,6 +297,35 @@ int RTRDemo::run()
     } while (!m_inputProvider->isKeyPressed(GLFW_KEY_ESCAPE) && m_window->isOpen());
 
     return 0;
+}
+
+void RTRDemo::setFrameCapture(const std::string& file, int frames)
+{
+    m_captureFile = file;
+    m_captureFrames = frames > 0 ? frames : 1;
+}
+
+bool RTRDemo::captureFrame(const std::string& file)
+{
+    const unsigned int width = m_window->getWidth();
+    const unsigned int height = m_window->getHeight();
+    std::vector<unsigned char> pixels(static_cast<size_t>(width) * height * 3);
+    // The image is in the back buffer of the default framebuffer, it is read
+    // before the buffers are swapped.
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glReadBuffer(GL_BACK);
+    glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGB,
+                 GL_UNSIGNED_BYTE, pixels.data());
+    // The first row of the framebuffer is the bottom of the image.
+    stbi_flip_vertically_on_write(1);
+    if (stbi_write_png(file.c_str(), static_cast<int>(width), static_cast<int>(height), 3,
+                       pixels.data(), static_cast<int>(width * 3)) == 0)
+    {
+        spdlog::error("Failed to write the captured image to {}.", file);
+        return false;
+    }
+    spdlog::info("Wrote the captured image to {}.", file);
+    return true;
 }
 
 bool RTRDemo::initWindow()
@@ -283,7 +355,8 @@ bool RTRDemo::initWindow()
 
     // Create window
     GlfwWindow* window = new GlfwWindow;
-    if (!window->init(width, height, title))
+    // The capture mode renders without showing the window.
+    if (!window->init(width, height, title, m_captureFile.empty()))
     {
         spdlog::error("Failed to initialize GLFW window wrapper.");
         delete window;

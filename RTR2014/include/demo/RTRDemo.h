@@ -54,10 +54,24 @@ class RTRDemo
      */
     int run();
 
+    /**
+     * \brief Renders the given number of frames and writes the last one to a file.
+     *
+     * The window is not shown and the mouse is not captured, the demo does not
+     * take over the desktop. The frames are rendered with a fixed time step, so
+     * that the captured image does not depend on the speed of the machine.
+     */
+    void setFrameCapture(const std::string& file, int frames);
+
    private:
     bool initWindow();
     bool initRenderer();
     bool initScene();
+
+    /**
+     * \brief Writes the rendered image to a file.
+     */
+    bool captureFrame(const std::string& file);
 
     /**
      * \brief Presents a black frame and processes window events.
@@ -95,4 +109,8 @@ class RTRDemo
     // Scene loading
     std::unique_ptr<SceneLoader> m_sceneLoader;
     std::string m_sceneFile; /**< Scene file to load. */
+
+    std::string m_captureFile; /**< File the captured frame is written to. */
+    int m_captureFrames = 0;   /**< Number of frames to render before the capture. */
+    int m_renderedFrames = 0;  /**< Number of frames rendered since the scene was loaded. */
 };

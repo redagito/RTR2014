@@ -51,3 +51,21 @@ conan install . --build=missing -s build_type=Release
 cmake --preset conan-default
 cmake --build build --config Release
 ```
+
+# Running
+
+The demo reads its data from the `data` folder, it is started from the project directory or from the directory the data was copied to.
+
+```
+build/App/Release/RTRDemo.exe
+```
+
+## Capturing a frame
+
+The capture mode renders a number of frames without showing the window and writes the last one to a PNG file. The frames are rendered with a fixed time step, so that the same image is written every time.
+
+```
+build/App/Release/RTRDemo.exe --capture shot.png --frames 2400
+```
+
+The number of frames selects the point on the camera sequence of `data/democam.json` that is captured, one frame is a sixtieth of a second.

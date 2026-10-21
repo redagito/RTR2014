@@ -69,7 +69,8 @@ GlfwWindow::~GlfwWindow()
     }
 }
 
-bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string& name)
+bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string& name,
+                      bool visible)
 {
     if (!glfwInit())
     {
@@ -80,6 +81,7 @@ bool GlfwWindow::init(unsigned int width, unsigned int height, const std::string
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_VISIBLE, visible ? GLFW_TRUE : GLFW_FALSE);
 
     // Create window from parameters
     m_window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);

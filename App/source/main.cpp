@@ -1,6 +1,8 @@
 #include <spdlog/spdlog.h>
 
+#include <cstdlib>
 #include <exception>
+#include <string>
 
 #include "demo/RTRDemo.h"
 #include "util/Profiler.h"
@@ -22,11 +24,37 @@ void writeProfile()
 }
 }  // namespace
 
-int main()
+int main(int argc, char** argv)
 {
     try
     {
         RTRDemo demo;
+
+        // The capture renders a number of frames and writes the last one to a
+        // file, it does not show the window.
+        std::string captureFile;
+        int captureFrames = 1;
+        for (int i = 1; i < argc; ++i)
+        {
+            const std::string argument = argv[i];
+            if (argument == "--capture" && i + 1 < argc)
+            {
+                captureFile = argv[++i];
+            }
+            else if (argument == "--frames" && i + 1 < argc)
+            {
+                captureFrames = std::atoi(argv[++i]);
+            }
+            else
+            {
+                spdlog::error("Unknown argument {}.", argument);
+                return 2;
+            }
+        }
+        if (!captureFile.empty())
+        {
+            demo.setFrameCapture(captureFile, captureFrames);
+        }
 
         int result = demo.init("data/demo.ini");
         if (result != 0)
