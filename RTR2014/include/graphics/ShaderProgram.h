@@ -73,6 +73,11 @@ class ShaderProgram
     GLint getUniformLocation(const std::string& uniformName) const;
     GLint getAttributeLocation(const std::string& attributeName) const;
 
+    /**
+    * \brief Returns whether the program has an active uniform with that name.
+    */
+    bool hasUniform(const std::string& uniformName) const;
+
     void setUniform(GLint location, int i);
     void setUniform(const std::string& uniformName, int i);
 

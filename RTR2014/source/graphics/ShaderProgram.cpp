@@ -203,6 +203,12 @@ GLint ShaderProgram::getAttributeLocation(const std::string& attributeName) cons
     return glGetAttribLocation(m_programId, attributeName.data());
 }
 
+bool ShaderProgram::hasUniform(const std::string& uniformName) const
+{
+    const auto iter = m_uniformLocations.find(uniformName);
+    return iter != m_uniformLocations.end() && iter->second >= 0;
+}
+
 void ShaderProgram::setUniform(GLint location, int i)
 {
     glProgramUniform1i(m_programId, location, i);

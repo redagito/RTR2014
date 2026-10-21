@@ -113,8 +113,7 @@ void PointLightPass::render(const IScene& scene, const ICamera& camera, const IW
             pointLightPassShader->setUniform(screenWidthUniformName, (float)window.getWidth());
             pointLightPassShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
-            // Camera position
-            pointLightPassShader->setUniform(cameraPositionUniformName, camera.getPosition());
+
 
             // Inverse view-projection
             pointLightPassShader->setUniform(inverseViewProjectionMatrixUniformName,

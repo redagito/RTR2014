@@ -10,9 +10,6 @@ uniform sampler2D normal_texture;
 uniform sampler2D specular_texture;
 uniform sampler2D glow_texture;
 
-// Actually not needed here
-uniform sampler2D alpha_texture;
-
 // When disabled, the geometric world-space normal is written instead of the
 // normal-map perturbed one.
 uniform int normal_mapping_active;

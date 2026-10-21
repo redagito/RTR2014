@@ -9,9 +9,6 @@ uniform vec3 light_color;
 uniform float light_intensity;
 uniform int casts_shadow;
 
-// Camera parameter
-uniform vec3 camera_position;
-
 // Screen size
 uniform float screen_width;
 uniform float screen_height;
