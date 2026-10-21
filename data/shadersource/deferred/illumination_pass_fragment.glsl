@@ -74,10 +74,12 @@ void main(void)
 	// Extract glow, should be used for blur pass
 	vec3 glow = vec3(temp.a);
 
-	// The background is the sky, it is not lit by the scene.
+	// The background is the sky, it is not lit by the scene. It goes through
+	// the same curve as the rest of the image, otherwise it keeps its full
+	// brightness and looks blown out.
 	float depth = texture(depth_texture, normalized_screen_coordinates).x;
 	if (depth >= 1.0) {
-		fragmentColor = diffuseColor;
+		fragmentColor = gammaCorrection(filmicTonemap(diffuseColor));
 		return;
 	}
 
