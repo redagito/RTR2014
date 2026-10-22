@@ -34,12 +34,13 @@ class ResourceManager : public IResourceManager
     bool getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) const override;
 
     ResourceId createImage(std::vector<unsigned char> imageData, unsigned int width,
-                           unsigned int height, ColorFormat format) override;
+                           unsigned int height, ColorFormat format, ColorSpace colorSpace) override;
 
-    ResourceId loadImage(const std::string& file, ColorFormat format) override;
+    ResourceId loadImage(const std::string& file, ColorFormat format,
+                         ColorSpace colorSpace) override;
 
     bool getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
-                  unsigned int& height, ColorFormat& format) const override;
+                  unsigned int& height, ColorFormat& format, ColorSpace& colorSpace) const override;
 
     ResourceId createMaterial(ResourceId diffuse, ResourceId normal, ResourceId specular,
                               ResourceId glow, ResourceId alpha, ResourceId customShader) override;
@@ -105,8 +106,7 @@ class ResourceManager : public IResourceManager
     /**
      * \brief Returns the image files referenced by a material file.
      */
-    static bool getMaterialImages(const std::string& file,
-                                  std::vector<std::pair<std::string, ColorFormat>>& images);
+    static bool getMaterialImages(const std::string& file, std::vector<ImageDescriptor>& images);
 
     /**
      * \brief Notifies the listeners about a resource event.

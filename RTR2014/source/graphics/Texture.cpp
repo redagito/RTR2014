@@ -7,6 +7,8 @@
 #include <cmath>
 #include <string>
 
+#include "util/FatalError.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
@@ -16,13 +18,13 @@ Texture::Texture() : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_
 }
 
 Texture::Texture(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
-                 ColorFormat format, bool createMipmaps)
+                 ColorFormat format, ColorSpace colorSpace, bool createMipmaps)
     : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // Init texture with data
-    if (!init(image, width, height, format, createMipmaps))
+    if (!init(image, width, height, format, colorSpace, createMipmaps))
     {
-        spdlog::error("Failed to initialize texture.");
+        fatalError("Failed to initialize texture.");
     }
 }
 
@@ -30,9 +32,9 @@ Texture::Texture(unsigned int width, unsigned int height, ColorFormat format, bo
     : m_valid(false), m_textureId(0), m_width(0), m_height(0), m_format(0)
 {
     // Init texture with data
-    if (!init({}, width, height, format, createMipmaps))
+    if (!init({}, width, height, format, ColorSpace::Linear, createMipmaps))
     {
-        spdlog::error("Failed to initialize texture.");
+        fatalError("Failed to initialize texture.");
     }
 }
 
@@ -58,7 +60,7 @@ Texture::~Texture()
 }
 
 bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, unsigned int height,
-                   ColorFormat format, bool createMipmaps)
+                   ColorFormat format, ColorSpace colorSpace, bool createMipmaps)
 {
     // Set format
     GLint internalFormat;
@@ -68,10 +70,11 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, 
         internalFormat = GL_R8;
         break;
     case ColorFormat::RGB24:
-        internalFormat = GL_RGB8;
+        // An sRGB texture is decoded by the hardware when it is sampled.
+        internalFormat = colorSpace == ColorSpace::sRGB ? GL_SRGB8 : GL_RGB8;
         break;
     case ColorFormat::RGBA32:
-        internalFormat = GL_RGBA8;
+        internalFormat = colorSpace == ColorSpace::sRGB ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         break;
     default:
         return false;
@@ -220,6 +223,14 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, 
     case GL_RGB8:
         m_externalFormat = GL_RGB;
         bytePerPixel = 3;
+        break;
+    case GL_SRGB8:  // sRGB encoded rgb texture, the hardware decodes it on sampling
+        m_externalFormat = GL_RGB;
+        bytePerPixel = 3;
+        break;
+    case GL_SRGB8_ALPHA8:  // sRGB encoded rgba texture
+        m_externalFormat = GL_RGBA;
+        bytePerPixel = 4;
         break;
     case GL_DEPTH_COMPONENT24:  // Depth texture for FBO
         m_externalFormat = GL_DEPTH_COMPONENT;

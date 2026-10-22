@@ -57,19 +57,20 @@ class IResourceManager
      */
     [[nodiscard]] virtual ResourceId createImage(std::vector<unsigned char> imageData,
                                                  unsigned int width, unsigned int height,
-                                                 ColorFormat format) = 0;
+                                                 ColorFormat format, ColorSpace colorSpace) = 0;
 
     /**
      * \brief Loads image from file.
      */
-    [[nodiscard]] virtual ResourceId loadImage(const std::string& file, ColorFormat format) = 0;
+    [[nodiscard]] virtual ResourceId loadImage(const std::string& file, ColorFormat format,
+                                               ColorSpace colorSpace) = 0;
 
     /**
      * \brief Retrieves image data.
      */
     [[nodiscard]] virtual bool getImage(ResourceId id, std::vector<unsigned char>& data,
                                         unsigned int& width, unsigned int& height,
-                                        ColorFormat& format) const = 0;
+                                        ColorFormat& format, ColorSpace& colorSpace) const = 0;
 
     /**
      * \brief Creates material.

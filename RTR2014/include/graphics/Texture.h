@@ -17,7 +17,8 @@ class Texture
      * \brief Create from image data.
      */
     Texture(const std::vector<unsigned char>& imageData, unsigned int width, unsigned int height,
-            ColorFormat format, bool createMipmaps = true);
+            ColorFormat format, ColorSpace colorSpace = ColorSpace::Linear,
+            bool createMipmaps = true);
 
     /**
      * \brief Creates empty texture.
@@ -38,7 +39,8 @@ class Texture
      * \brief Initializes texture data.
      */
     bool init(const std::vector<unsigned char>& imageData, unsigned int width, unsigned int height,
-              ColorFormat format, bool createMipmaps = true);
+              ColorFormat format, ColorSpace colorSpace = ColorSpace::Linear,
+              bool createMipmaps = true);
 
     bool init(unsigned int width, unsigned int height, GLint format);
 

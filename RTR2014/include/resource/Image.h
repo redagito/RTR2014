@@ -11,9 +11,10 @@ struct Image
 {
     Image();
     Image(std::vector<unsigned char> data, unsigned int width, unsigned int height,
-          ColorFormat format);
+          ColorFormat format, ColorSpace colorSpace);
     std::vector<unsigned char> m_data;
     unsigned int m_width;
     unsigned int m_height;
     ColorFormat m_format;
+    ColorSpace m_colorSpace;
 };

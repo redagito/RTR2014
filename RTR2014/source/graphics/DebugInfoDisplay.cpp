@@ -101,17 +101,20 @@ DebugInfoDisplay::DebugInfoDisplay(std::shared_ptr<IResourceManager> resourceMan
 
 bool DebugInfoDisplay::loadFont(const std::string& path)
 {
-    ResourceId imageId = m_resourceManager->loadImage(path, ColorFormat::RGBA32);
+    // The font is a mask for the text, its values are not a color.
+    ResourceId imageId =
+        m_resourceManager->loadImage(path, ColorFormat::RGBA32, ColorSpace::Linear);
     std::vector<unsigned char> data;
     unsigned int width, height;
     ColorFormat colorFormat;
-    if (!m_resourceManager->getImage(imageId, data, width, height, colorFormat))
+    ColorSpace colorSpace;
+    if (!m_resourceManager->getImage(imageId, data, width, height, colorFormat, colorSpace))
     {
         spdlog::error("Error on retrieving data from image.");
         return false;
     }
 
-    m_texture.reset(new Texture(data, width, height, colorFormat, false));
+    m_texture.reset(new Texture(data, width, height, colorFormat, colorSpace, false));
 
     return true;
 }

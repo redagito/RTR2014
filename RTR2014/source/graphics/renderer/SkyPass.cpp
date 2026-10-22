@@ -26,7 +26,8 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
         return true;
     }
 
-    const ResourceId imageId = manager->loadImage(cubemapFile, ColorFormat::RGB24);
+    const ResourceId imageId =
+        manager->loadImage(cubemapFile, ColorFormat::RGB24, ColorSpace::sRGB);
     if (imageId == invalidResource)
     {
         fatalError("Failed to load the sky cubemap file {}.", cubemapFile.c_str());
@@ -36,7 +37,8 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
     unsigned int width = 0;
     unsigned int height = 0;
     ColorFormat format = ColorFormat::Invalid;
-    if (!manager->getImage(imageId, pixels, width, height, format))
+    ColorSpace colorSpace = ColorSpace::Linear;
+    if (!manager->getImage(imageId, pixels, width, height, format, colorSpace))
     {
         fatalError("Failed to read the sky cubemap file {}.", cubemapFile.c_str());
     }

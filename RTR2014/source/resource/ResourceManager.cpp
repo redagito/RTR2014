@@ -27,12 +27,22 @@ const char* const kMaterialTextureSlotNames[kMaterialTextureSlots] = {"diffuse",
 const ColorFormat kMaterialTextureFormats[kMaterialTextureSlots] = {
     ColorFormat::RGB24, ColorFormat::RGB24, ColorFormat::GreyScale8, ColorFormat::GreyScale8,
     ColorFormat::GreyScale8};
+// The diffuse map holds a color, the other maps hold a direction or scalars.
+const ColorSpace kMaterialTextureColorSpaces[kMaterialTextureSlots] = {
+    ColorSpace::sRGB, ColorSpace::Linear, ColorSpace::Linear, ColorSpace::Linear,
+    ColorSpace::Linear};
 
-// The key an image file is cached under, the color format is part of it
-// because the same file can be loaded with different formats.
-std::string imageKey(const std::string& file, ColorFormat format)
+// The key an image file is cached under, the color format and the color space
+// are part of it because the same file can be loaded with different ones.
+std::string imageKey(const std::string& file, ColorFormat format, ColorSpace colorSpace)
 {
-    return file + "|" + std::to_string(static_cast<int>(format));
+    return file + "|" + std::to_string(static_cast<int>(format)) + "|" +
+           std::to_string(static_cast<int>(colorSpace));
+}
+
+std::string imageKey(const ImageDescriptor& image)
+{
+    return imageKey(image.m_file, image.m_format, image.m_colorSpace);
 }
 
 // Releases a miniaudio decoder when the scope ends, also when an exception
@@ -280,7 +290,8 @@ bool ResourceManager::getMeshBounds(ResourceId id, OrientedBoundingBox& bounds) 
 }
 
 ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData, unsigned int width,
-                                        unsigned int height, ColorFormat format)
+                                        unsigned int height, ColorFormat format,
+                                        ColorSpace colorSpace)
 {
     // Create image
     ResourceId id = m_nextImageId;
@@ -288,16 +299,17 @@ ResourceId ResourceManager::createImage(std::vector<unsigned char> imageData, un
 
     // TODO Sanity check if mesh id exists?
     // Add mesh
-    m_images[id] = Image(std::move(imageData), width, height, format);
+    m_images[id] = Image(std::move(imageData), width, height, format, colorSpace);
 
     // Notify listener with create event
     notifyResourceListeners(ResourceType::Image, id, ListenerEvent::Create);
     return id;
 }
 
-ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat format)
+ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat format,
+                                      ColorSpace colorSpace)
 {
-    const std::string key = imageKey(file, format);
+    const std::string key = imageKey(file, format, colorSpace);
     auto entry = m_imageFiles.find(key);
     if (entry != m_imageFiles.end())
     {
@@ -313,8 +325,8 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         // emptied out data of this one.
         Image image = std::move(pending->second);
         m_pendingImages.erase(pending);
-        ResourceId imageId =
-            createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
+        ResourceId imageId = createImage(std::move(image.m_data), image.m_width, image.m_height,
+                                         image.m_format, colorSpace);
         if (imageId == invalidResource)
         {
             spdlog::error("Failed to create image resource id from file {}.", file.c_str());
@@ -330,8 +342,8 @@ ResourceId ResourceManager::loadImage(const std::string& file, ColorFormat forma
         return invalidResource;
     }
 
-    ResourceId imageId =
-        createImage(std::move(image.m_data), image.m_width, image.m_height, image.m_format);
+    ResourceId imageId = createImage(std::move(image.m_data), image.m_width, image.m_height,
+                                     image.m_format, colorSpace);
     if (imageId == invalidResource)
     {
         spdlog::error("Failed to create image resource id from file {}.", file.c_str());
@@ -389,7 +401,7 @@ bool ResourceManager::decodeImage(const std::string& file, ColorFormat format, I
     stbi_image_free(decoded);
 
     image = Image(std::move(data), static_cast<unsigned int>(decodedWidth),
-                  static_cast<unsigned int>(decodedHeight), format);
+                  static_cast<unsigned int>(decodedHeight), format, ColorSpace::Linear);
     return true;
 }
 
@@ -444,7 +456,8 @@ bool ResourceManager::decodeSound(const std::string& file, SoundData& data)
 }
 
 bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data, unsigned int& width,
-                               unsigned int& height, ColorFormat& format) const
+                               unsigned int& height, ColorFormat& format,
+                               ColorSpace& colorSpace) const
 {
     // Retrieve from map
     auto iter = m_images.find(id);
@@ -457,6 +470,7 @@ bool ResourceManager::getImage(ResourceId id, std::vector<unsigned char>& data, 
     width = iter->second.m_width;
     height = iter->second.m_height;
     format = iter->second.m_format;
+    colorSpace = iter->second.m_colorSpace;
     return true;
 }
 
@@ -543,7 +557,8 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
         {
             continue;
         }
-        textureIds[i] = loadImage(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i]);
+        textureIds[i] = loadImage(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i],
+                                  kMaterialTextureColorSpaces[i]);
         if (textureIds[i] == invalidResource)
         {
             spdlog::error("Failed to load {} texture specified in material file {}.", slot,
@@ -577,7 +592,7 @@ ResourceId ResourceManager::loadMaterial(const std::string& file)
 }
 
 bool ResourceManager::getMaterialImages(const std::string& file,
-                                        std::vector<std::pair<std::string, ColorFormat>>& images)
+                                        std::vector<ImageDescriptor>& images)
 {
     IniFile ini;
     if (!ini.load(file))
@@ -593,7 +608,8 @@ bool ResourceManager::getMaterialImages(const std::string& file,
         {
             continue;
         }
-        images.emplace_back(ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i]);
+        images.push_back({ini.getValue(slot, "file", "error"), kMaterialTextureFormats[i],
+                          kMaterialTextureColorSpaces[i]});
     }
     return true;
 }
@@ -822,8 +838,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
         uniqueMaterials.insert(material);
     }
 
-    std::vector<std::pair<std::string, ColorFormat>> imageFiles;
-    for (const std::string& material : uniqueMaterials)
+    std::vector<ImageDescriptor> imageFiles;
+    for (const auto& material : uniqueMaterials)
     {
         if (!getMaterialImages(material, imageFiles))
         {
@@ -846,11 +862,11 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
             meshes.push_back(file);
         }
     }
-    std::vector<std::pair<std::string, ColorFormat>> images;
+    std::vector<ImageDescriptor> images;
     std::set<std::string> uniqueImages;
     for (const auto& image : imageFiles)
     {
-        const std::string key = imageKey(image.first, image.second);
+        const std::string key = imageKey(image);
         if (!uniqueImages.insert(key).second)
         {
             continue;
@@ -905,7 +921,8 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
             }
             if (i < images.size())
             {
-                imageOk[i] = decodeImage(images[i].first, images[i].second, imageData[i]) ? 1 : 0;
+                imageOk[i] =
+                    decodeImage(images[i].m_file, images[i].m_format, imageData[i]) ? 1 : 0;
             }
             else if (i < images.size() + meshes.size())
             {
@@ -949,7 +966,7 @@ void ResourceManager::preload(const std::vector<std::string>& meshFiles,
     {
         if (imageOk[i])
         {
-            const std::string key = imageKey(images[i].first, images[i].second);
+            const std::string key = imageKey(images[i]);
             m_pendingImages[key] = std::move(imageData[i]);
         }
     }

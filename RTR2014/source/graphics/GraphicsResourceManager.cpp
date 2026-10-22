@@ -165,12 +165,14 @@ void GraphicsResourceManager::notify(ResourceType type, ResourceId id, ListenerE
 void GraphicsResourceManager::initDefaultTextures()
 {
     // Default diffuse texture is deep pink to signal errors/missing textures
-    m_defaultDiffuseTexture.reset(new Texture({238, 18, 137}, 1, 1, ColorFormat::RGB24, 0));
+    m_defaultDiffuseTexture.reset(
+        new Texture({238, 18, 137}, 1, 1, ColorFormat::RGB24, ColorSpace::sRGB, 0));
 
     // Default normal texture with straight/non-perturbed normals
     // Discussion here:
     // http://www.gameartisans.org/forums/threads/1985-Normal-Map-RGB-127-127-255-or-128-128-255
-    m_defaultNormalTexture.reset(new Texture({128, 128, 255}, 1, 1, ColorFormat::RGB24, 0));
+    m_defaultNormalTexture.reset(
+        new Texture({128, 128, 255}, 1, 1, ColorFormat::RGB24, ColorSpace::Linear, 0));
 
     // Default specular texture is black (no specular highlights)
     m_defaultSpecularTexture.reset(new Texture({0}, 1, 1, ColorFormat::GreyScale8));
@@ -329,6 +331,7 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
     unsigned int width;
     unsigned int height;
     ColorFormat format;
+    ColorSpace colorSpace;
 
     switch (event)
     {
@@ -340,12 +343,12 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
             fatalError("The texture id {} already exists.", id);
         }
 
-        if (!resourceManager->getImage(id, data, width, height, format))
+        if (!resourceManager->getImage(id, data, width, height, format, colorSpace))
         {
             fatalError("Failed to access image resource {}.", id);
         }
         // Create new texture
-        m_textures[id] = std::make_shared<Texture>(data, width, height, format);
+        m_textures[id] = std::make_shared<Texture>(data, width, height, format, colorSpace);
         break;
 
     case ListenerEvent::Change:
@@ -356,12 +359,12 @@ void GraphicsResourceManager::handleImageEvent(ResourceId id, ListenerEvent even
             fatalError("The texture id {} does not exist.", id);
         }
 
-        if (!resourceManager->getImage(id, data, width, height, format))
+        if (!resourceManager->getImage(id, data, width, height, format, colorSpace))
         {
             fatalError("Failed to access image resource {}.", id);
         }
         // Reinitialize texture on change
-        texture->second->init(data, width, height, format);
+        texture->second->init(data, width, height, format, colorSpace);
         break;
     }
 

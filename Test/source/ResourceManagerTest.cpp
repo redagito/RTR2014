@@ -195,14 +195,46 @@ TEST_CASE("loadImage rejects a file that is not a png", "[resource]")
 {
     ResourceManager manager;
 
-    REQUIRE(manager.loadImage("not_an_image.txt", ColorFormat::RGBA32) == invalidResource);
+    REQUIRE(manager.loadImage("not_an_image.txt", ColorFormat::RGBA32, ColorSpace::Linear) ==
+            invalidResource);
 }
 
 TEST_CASE("loadImage rejects an unknown color format", "[resource]")
 {
     ResourceManager manager;
 
-    REQUIRE(manager.loadImage("image.png", ColorFormat::Invalid) == invalidResource);
+    REQUIRE(manager.loadImage("image.png", ColorFormat::Invalid, ColorSpace::Linear) ==
+            invalidResource);
+}
+
+TEST_CASE("loadImage keeps the color space of the image", "[resource]")
+{
+    ResourceManager manager;
+    const ResourceId id = manager.loadImage(RTR_PROJECT_DATA_DIR "/images/brick_1_diffuse.png",
+                                            ColorFormat::RGB24, ColorSpace::sRGB);
+
+    REQUIRE(id != invalidResource);
+    std::vector<unsigned char> data;
+    unsigned int width = 0;
+    unsigned int height = 0;
+    ColorFormat format = ColorFormat::Invalid;
+    ColorSpace colorSpace = ColorSpace::Linear;
+    REQUIRE(manager.getImage(id, data, width, height, format, colorSpace));
+    REQUIRE(format == ColorFormat::RGB24);
+    REQUIRE(colorSpace == ColorSpace::sRGB);
+}
+
+TEST_CASE("the same image file with a different color space is a different image", "[resource]")
+{
+    ResourceManager manager;
+    const ResourceId linear = manager.loadImage(RTR_PROJECT_DATA_DIR "/images/brick_1_diffuse.png",
+                                                ColorFormat::RGB24, ColorSpace::Linear);
+    const ResourceId srgb = manager.loadImage(RTR_PROJECT_DATA_DIR "/images/brick_1_diffuse.png",
+                                              ColorFormat::RGB24, ColorSpace::sRGB);
+
+    REQUIRE(linear != invalidResource);
+    REQUIRE(srgb != invalidResource);
+    REQUIRE(linear != srgb);
 }
 
 TEST_CASE("preloaded mesh data matches the synchronously loaded data", "[resource]")
