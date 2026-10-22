@@ -46,8 +46,9 @@ vec3 filmicTonemap(vec3 color)
 	float e = 0.01f;
 	float f = 0.3f;
 
-	// linearWhile = linear white point value
-	vec3 linearWhite = vec3(11.2f);
+	// The linear white point, the radiance that is displayed as white. It is
+	// the brightest value of the sky, the sun of the environment.
+	vec3 linearWhite = vec3(2.0f);
 
 	vec3 num = filmicTonemapOperator(color, a, b, c, d, e, f);
 	vec3 denom = filmicTonemapOperator(linearWhite, a, b, c, d, e, f);
