@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "util/ColorSpace.h"
 #include "util/FatalError.h"
 
 namespace
@@ -134,9 +135,10 @@ bool Cubemap::initFromAtlas(const std::vector<unsigned char>& pixels, unsigned i
         fatalError("Failed to create the cubemap.");
     }
     // The whole chain of mip levels has to be allocated, they are generated
-    // for the faces afterwards.
+    // for the faces afterwards. The faces hold a color, the hardware decodes
+    // it when it is sampled.
     const unsigned int levels = 1 + (unsigned int)std::log2((float)faceSize);
-    glTextureStorage2D(m_textureId, levels, GL_RGB8, static_cast<GLsizei>(faceSize),
+    glTextureStorage2D(m_textureId, levels, GL_SRGB8, static_cast<GLsizei>(faceSize),
                        static_cast<GLsizei>(faceSize));
 
     // The faces of the cubemap, one after the other, the order the GL cube map
@@ -197,7 +199,7 @@ void Cubemap::generateMipLevels(const std::vector<unsigned char>& base, unsigned
             {
                 for (unsigned int x = 0; x < size; ++x)
                 {
-                    std::array<unsigned int, 3> sum = {0, 0, 0};
+                    glm::vec3 sum(0.0f);
                     // The four texels of the previous level this texel covers
                     // may lie on a neighbouring face.
                     for (unsigned int dy = 0; dy < 2; ++dy)
@@ -209,19 +211,19 @@ void Cubemap::generateMipLevels(const std::vector<unsigned char>& base, unsigned
                             const glm::vec3 direction = cubemapFaceDirection(f, s, t);
                             const CubemapCoordinates coordinates =
                                 cubemapCoordinatesForDirection(direction);
-                            const std::array<unsigned char, 3> texel =
-                                sampleFace(previous.data(), previousSize, coordinates.face,
-                                           coordinates.s, coordinates.t);
-                            for (int c = 0; c < 3; ++c)
-                            {
-                                sum[c] += texel[c];
-                            }
+                            const glm::vec3 texel =
+                                sampleCubemapFace(previous.data(), previousSize, coordinates.face,
+                                                  coordinates.s, coordinates.t);
+                            sum += texel;
                         }
                     }
+                    // The level is stored sRGB encoded, like the base level.
+                    const glm::vec3 encoded = linearToSRGB(sum / 4.0f);
                     const size_t offset = f * levelBytes + ((size_t)y * size + x) * 3;
                     for (int c = 0; c < 3; ++c)
                     {
-                        current[offset + c] = (unsigned char)(sum[c] / 4);
+                        current[offset + c] =
+                            (unsigned char)std::clamp(encoded[c] * 255.0f + 0.5f, 0.0f, 255.0f);
                     }
                 }
             }
@@ -232,8 +234,8 @@ void Cubemap::generateMipLevels(const std::vector<unsigned char>& base, unsigned
     }
 }
 
-std::array<unsigned char, 3> Cubemap::sampleFace(const unsigned char* faces, unsigned int size,
-                                                 int face, float s, float t)
+glm::vec3 sampleCubemapFace(const unsigned char* faces, unsigned int size, int face, float s,
+                            float t)
 {
     const unsigned char* data = faces + (size_t)face * size * size * 3;
     const float x = s * size - 0.5f;
@@ -247,15 +249,15 @@ std::array<unsigned char, 3> Cubemap::sampleFace(const unsigned char* faces, uns
     const float fx = x - (float)cx0;
     const float fy = y - (float)cy0;
 
-    std::array<unsigned char, 3> texel = {0, 0, 0};
+    // The texels are sRGB encoded, the filtering happens in linear space.
+    glm::vec3 texel(0.0f);
     for (int c = 0; c < 3; ++c)
     {
-        const float a = data[((size_t)cy0 * size + cx0) * 3 + c];
-        const float b = data[((size_t)cy0 * size + x1) * 3 + c];
-        const float d = data[((size_t)y1 * size + cx0) * 3 + c];
-        const float e = data[((size_t)y1 * size + x1) * 3 + c];
-        texel[c] = (unsigned char)(a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy +
-                                   e * fx * fy + 0.5f);
+        const float a = sRGBToLinear(data[((size_t)cy0 * size + cx0) * 3 + c] / 255.0f);
+        const float b = sRGBToLinear(data[((size_t)cy0 * size + x1) * 3 + c] / 255.0f);
+        const float d = sRGBToLinear(data[((size_t)y1 * size + cx0) * 3 + c] / 255.0f);
+        const float e = sRGBToLinear(data[((size_t)y1 * size + x1) * 3 + c] / 255.0f);
+        texel[c] = a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy + e * fx * fy;
     }
     return texel;
 }

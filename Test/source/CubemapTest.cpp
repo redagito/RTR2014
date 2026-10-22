@@ -1,10 +1,8 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
 #include <cmath>
-#include <vector>
-
 #include <glm/glm.hpp>
+#include <vector>
 
 #include "graphics/Cubemap.h"
 
@@ -15,10 +13,11 @@ glm::vec2 atlasTexel(const glm::vec3& direction)
 {
     const CubemapCoordinates coordinates = cubemapCoordinatesForDirection(direction);
     const glm::ivec2 cell = atlasCellForFace(coordinates.face);
-    const glm::vec2 within = atlasCoordinatesForFace(coordinates.face, coordinates.s, coordinates.t);
+    const glm::vec2 within =
+        atlasCoordinatesForFace(coordinates.face, coordinates.s, coordinates.t);
     return glm::vec2(cell.x + within.x, cell.y + within.y);
 }
-} // namespace
+}  // namespace
 
 TEST_CASE("a direction on an axis selects the face of that axis", "[graphics]")
 {
@@ -56,8 +55,7 @@ TEST_CASE("the direction of a texel and its coordinates agree", "[graphics]")
                 const float s = (float)i / 4.f;
                 const float t = (float)j / 4.f;
                 const glm::vec3 direction = cubemapFaceDirection(face, s, t);
-                const CubemapCoordinates coordinates =
-                    cubemapCoordinatesForDirection(direction);
+                const CubemapCoordinates coordinates = cubemapCoordinatesForDirection(direction);
                 REQUIRE(coordinates.face == face);
                 REQUIRE(coordinates.s == Catch::Approx(s).margin(0.001f));
                 REQUIRE(coordinates.t == Catch::Approx(t).margin(0.001f));
@@ -96,4 +94,34 @@ TEST_CASE("the atlas of the cubemap is continuous from the horizon to the zenith
     const glm::vec2 below = atlasTexel(glm::normalize(glm::vec3(0.f, 1.f, 0.999f)));
     const glm::vec2 above = atlasTexel(glm::normalize(glm::vec3(0.f, 1.f, 1.001f)));
     REQUIRE(glm::length(below - above) < 0.05f);
+}
+
+TEST_CASE("the cubemap is filtered in linear space", "[graphics]")
+{
+    // A face of two columns, one black and one with the middle gray. The
+    // sample in the middle of the face is the average of the two, in linear
+    // space it is much darker than the average of the two encoded values.
+    const unsigned int size = 2;
+    std::vector<unsigned char> faces(size * size * 3, 128);
+    for (unsigned int y = 0; y < size; ++y)
+    {
+        for (unsigned int x = 0; x < size; ++x)
+        {
+            const unsigned char value = (x == 0) ? 0 : 128;
+            const size_t offset = (y * size + x) * 3;
+            for (int c = 0; c < 3; ++c)
+            {
+                faces[offset + c] = value;
+            }
+        }
+    }
+
+    const glm::vec3 sample = sampleCubemapFace(faces.data(), size, 0, 0.5f, 0.5f);
+
+    // The average of the encoded values is 0.25, the linear one is half of
+    // the decoded gray.
+    const float expected = std::pow(128.0f / 255.0f, 2.2f) / 2.0f;
+    REQUIRE(sample.r == Catch::Approx(expected).margin(0.001f));
+    REQUIRE(sample.g == Catch::Approx(expected).margin(0.001f));
+    REQUIRE(sample.b == Catch::Approx(expected).margin(0.001f));
 }

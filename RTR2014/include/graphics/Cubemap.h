@@ -1,19 +1,19 @@
 #pragma once
 
-#include <array>
-#include <vector>
-
-#include <glm/glm.hpp>
 #include <glad/gl.h>
+
+#include <array>
+#include <glm/glm.hpp>
+#include <vector>
 
 /**
  * \brief The face of a cubemap and the coordinates within it.
  */
 struct CubemapCoordinates
 {
-    int face = 0;   /**< The face, in the order of the GL_TEXTURE_CUBE_MAP targets. */
-    float s = 0.f;  /**< The horizontal coordinate within the face. */
-    float t = 0.f;  /**< The vertical coordinate within the face. */
+    int face = 0;  /**< The face, in the order of the GL_TEXTURE_CUBE_MAP targets. */
+    float s = 0.f; /**< The horizontal coordinate within the face. */
+    float t = 0.f; /**< The vertical coordinate within the face. */
 };
 
 /**
@@ -46,6 +46,16 @@ glm::ivec2 atlasCellForFace(int face);
 glm::vec2 atlasCoordinatesForFace(int face, float s, float t);
 
 /**
+ * \brief Samples a face of the cubemap at the given coordinates.
+ *
+ * The faces are given as one buffer, one face after the other, with three
+ * bytes per texel. The values are sRGB encoded, they are returned in linear
+ * space, so that the filtering of the mip levels happens in linear space.
+ */
+glm::vec3 sampleCubemapFace(const unsigned char* faces, unsigned int size, int face, float s,
+                            float t);
+
+/**
  * \brief A cubemap, the six faces of an environment.
  */
 class Cubemap
@@ -58,46 +68,40 @@ class Cubemap
     Cubemap& operator=(const Cubemap&) = delete;
 
     /**
-    * \brief Creates the cubemap from a horizontal cross atlas.
-    *
-    * The atlas holds the six faces in a cross of square cells, the cell of the
-    * positive y axis is in the top row and the cell of the negative y axis in
-    * the bottom row, the other four are in the middle row.
-    */
+     * \brief Creates the cubemap from a horizontal cross atlas.
+     *
+     * The atlas holds the six faces in a cross of square cells, the cell of the
+     * positive y axis is in the top row and the cell of the negative y axis in
+     * the bottom row, the other four are in the middle row.
+     */
     bool initFromAtlas(const std::vector<unsigned char>& pixels, unsigned int width,
                        unsigned int height, unsigned int faceSize);
 
     /**
-    * \brief Binds the cubemap to a texture unit.
-    */
+     * \brief Binds the cubemap to a texture unit.
+     */
     void setActive(GLint textureUnit) const;
 
     /**
-    * \brief Returns the texture id.
-    */
+     * \brief Returns the texture id.
+     */
     GLuint getId() const;
 
     /**
-    * \brief Returns whether the cubemap is usable.
-    */
+     * \brief Returns whether the cubemap is usable.
+     */
     bool isValid() const;
 
    private:
     /**
-    * \brief Generates the mip levels of the cubemap.
-    *
-    * The levels are filtered across the face borders, the levels the driver
-    * generates are clamped to the face and show the seams of the cube. The
-    * faces are given as one buffer, one after the other.
-    */
+     * \brief Generates the mip levels of the cubemap.
+     *
+     * The levels are filtered across the face borders, the levels the driver
+     * generates are clamped to the face and show the seams of the cube. The
+     * faces are given as one buffer, one after the other.
+     */
     void generateMipLevels(const std::vector<unsigned char>& base, unsigned int faceSize,
                            unsigned int levels);
-
-    /**
-    * \brief Samples a face of the cubemap at the given coordinates.
-    */
-    static std::array<unsigned char, 3> sampleFace(const unsigned char* faces, unsigned int size,
-                                                   int face, float s, float t);
 
     GLuint m_textureId = 0;
     bool m_valid = false;
