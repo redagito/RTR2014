@@ -53,10 +53,14 @@ void main(void)
 	light_direction /= max(fragment_light_distance, 1e-6);
 	
 	// Calculate distance-based light attenuation
-	// Linear for now
-	// TODO Needs better model?
-	// The radius guards the division, a light without one would be infinite.
-	float light_attenuation = max(0.0, (light_radius - fragment_light_distance) / max(light_radius, 1e-6));
+	// The irradiance of a point light falls off with the square of the
+	// distance, the intensity is the irradiance at one meter.
+	float distance_squared = max(fragment_light_distance * fragment_light_distance, 1e-6);
+	// The window fades the light out at its radius, so that it does not blow up
+	// at the position of the light.
+	float ratio = fragment_light_distance / max(light_radius, 1e-6);
+	float window = clamp(1.0 - ratio * ratio * ratio * ratio, 0.0f, 1.0f);
+	float light_attenuation = window * window / distance_squared;
 	// Calculate intensity with attenuation
 	float attenuated_intensity = light_intensity * light_attenuation;
 	
