@@ -1,6 +1,7 @@
 #include "graphics/renderer/SkyPass.h"
 
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 
 #include "graphics/ICamera.h"
@@ -26,34 +27,51 @@ bool SkyPass::init(IResourceManager* manager, const std::string& cubemapFile)
         return true;
     }
 
-    const ResourceId imageId =
-        manager->loadImage(cubemapFile, ColorFormat::RGB24, ColorSpace::sRGB);
-    if (imageId == invalidResource)
+    // Both renderers draw the same sky, building the cubemap twice would only
+    // repeat the work.
+    static std::unordered_map<std::string, std::weak_ptr<Cubemap>> s_cubemaps;
+    std::shared_ptr<Cubemap> cubemap;
+    const auto cached = s_cubemaps.find(cubemapFile);
+    if (cached != s_cubemaps.end())
     {
-        fatalError("Failed to load the sky cubemap file {}.", cubemapFile.c_str());
+        cubemap = cached->second.lock();
     }
 
-    std::vector<unsigned char> pixels;
-    unsigned int width = 0;
-    unsigned int height = 0;
-    ColorFormat format = ColorFormat::Invalid;
-    ColorSpace colorSpace = ColorSpace::Linear;
-    if (!manager->getImage(imageId, pixels, width, height, format, colorSpace))
+    if (cubemap == nullptr)
     {
-        fatalError("Failed to read the sky cubemap file {}.", cubemapFile.c_str());
-    }
+        std::vector<unsigned char> pixels;
+        unsigned int width = 0;
+        unsigned int height = 0;
+        ColorFormat format = ColorFormat::Invalid;
+        ColorSpace colorSpace = ColorSpace::Linear;
+        const ResourceId imageId =
+            manager->loadImage(cubemapFile, ColorFormat::RGB24, ColorSpace::sRGB);
+        if (imageId == invalidResource)
+        {
+            fatalError("Failed to load the sky cubemap file {}.", cubemapFile.c_str());
+        }
 
-    // The atlas is a cross of square faces, four of them in a row and three
-    // rows high.
-    const unsigned int faceSize = std::min(width / 4, height / 3);
-    if (faceSize == 0)
-    {
-        fatalError("The sky cubemap file {} is too small.", cubemapFile.c_str());
+        if (!manager->getImage(imageId, pixels, width, height, format, colorSpace))
+        {
+            fatalError("Failed to read the sky cubemap file {}.", cubemapFile.c_str());
+        }
+
+        // The atlas is a cross of square faces, four of them in a row and
+        // three rows high.
+        const unsigned int faceSize = std::min(width / 4, height / 3);
+        if (faceSize == 0)
+        {
+            fatalError("The sky cubemap file {} is too small.", cubemapFile.c_str());
+        }
+
+        cubemap = std::make_shared<Cubemap>();
+        if (!cubemap->initFromAtlas(pixels, width, height, faceSize))
+        {
+            fatalError("Failed to build the sky cubemap from file {}.", cubemapFile.c_str());
+        }
+        s_cubemaps[cubemapFile] = cubemap;
     }
-    if (!m_cubemap->initFromAtlas(pixels, width, height, faceSize))
-    {
-        fatalError("Failed to build the sky cubemap from file {}.", cubemapFile.c_str());
-    }
+    m_cubemap = std::move(cubemap);
 
     // The shader that draws the sky
     const std::string skyShaderFile = "data/shader/deferred/sky.ini";

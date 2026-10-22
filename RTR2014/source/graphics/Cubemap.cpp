@@ -1,6 +1,7 @@
 #include "graphics/Cubemap.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 #include "util/ColorSpace.h"
@@ -18,6 +19,22 @@ enum Face
     PositiveZ = 4,
     NegativeZ = 5
 };
+
+// The texels of the atlas are bytes, the conversion to linear is the same for
+// every texel, so it is looked up instead of calculated.
+const std::array<float, 256>& srgbBytesToLinear()
+{
+    static const std::array<float, 256> table = [] {
+        std::array<float, 256> values{};
+        for (int i = 0; i < 256; ++i)
+        {
+            values[i] = sRGBToLinear((float)i / 255.0f);
+        }
+        return values;
+    }();
+    return table;
+}
+
 }  // namespace
 
 glm::vec3 cubemapFaceDirection(int face, float s, float t)
@@ -41,7 +58,7 @@ glm::vec3 cubemapFaceDirection(int face, float s, float t)
 
 CubemapCoordinates cubemapCoordinatesForDirection(const glm::vec3& direction)
 {
-    const glm::vec3 d = glm::normalize(direction);
+    const glm::vec3& d = direction;
     const float ax = std::fabs(d.x);
     const float ay = std::fabs(d.y);
     const float az = std::fabs(d.z);
@@ -250,13 +267,14 @@ glm::vec3 sampleCubemapFace(const unsigned char* faces, unsigned int size, int f
     const float fy = y - (float)cy0;
 
     // The texels are sRGB encoded, the filtering happens in linear space.
+    const std::array<float, 256>& toLinear = srgbBytesToLinear();
     glm::vec3 texel(0.0f);
     for (int c = 0; c < 3; ++c)
     {
-        const float a = sRGBToLinear(data[((size_t)cy0 * size + cx0) * 3 + c] / 255.0f);
-        const float b = sRGBToLinear(data[((size_t)cy0 * size + x1) * 3 + c] / 255.0f);
-        const float d = sRGBToLinear(data[((size_t)y1 * size + cx0) * 3 + c] / 255.0f);
-        const float e = sRGBToLinear(data[((size_t)y1 * size + x1) * 3 + c] / 255.0f);
+        const float a = toLinear[data[((size_t)cy0 * size + cx0) * 3 + c]];
+        const float b = toLinear[data[((size_t)cy0 * size + x1) * 3 + c]];
+        const float d = toLinear[data[((size_t)y1 * size + cx0) * 3 + c]];
+        const float e = toLinear[data[((size_t)y1 * size + x1) * 3 + c]];
         texel[c] = a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + d * (1 - fx) * fy + e * fx * fy;
     }
     return texel;
