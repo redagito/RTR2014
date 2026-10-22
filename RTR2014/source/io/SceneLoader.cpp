@@ -13,6 +13,7 @@
 #include "io/JsonDeserializer.h"
 #include "resource/IResourceManager.h"
 #include "resource/OrientedBoundingBox.h"
+#include "util/ColorSpace.h"
 
 SceneLoader::SceneLoader(IResourceManager& resourceManager) : m_resourceManager(resourceManager)
 {
@@ -419,7 +420,7 @@ bool SceneLoader::loadPointLight(const Json::Value& node, IScene& scene,
 
     // Create object in scene
     SceneObjectId objectId =
-        scene.createPointLight(position, radius, color, intensity, castsShadow);
+        scene.createPointLight(position, radius, sRGBToLinear(color), intensity, castsShadow);
 
     // Load optional animation controllers
     if (!loadAnimationControllers(node["animations"], scene, animationWorld, objectId,
@@ -491,7 +492,7 @@ bool SceneLoader::loadDirectionalLight(const Json::Value& node, IScene& scene,
     }
 
     // Create object in scene
-    scene.createDirectionalLight(direction, color, intensity, castsShadow);
+    scene.createDirectionalLight(direction, sRGBToLinear(color), intensity, castsShadow);
     return true;
 }
 
@@ -516,7 +517,7 @@ bool SceneLoader::loadAmbientLight(const Json::Value& node, IScene& scene)
         return false;
     }
 
-    scene.setAmbientLight(color, intensity);
+    scene.setAmbientLight(sRGBToLinear(color), intensity);
     return true;
 }
 

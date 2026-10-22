@@ -187,3 +187,34 @@ TEST_CASE("SceneLoader skips an emitter whose sound file cannot be loaded", "[io
     REQUIRE(loader.load(scene, animationWorld));
     CHECK(loader.getSoundEmitters().empty());
 }
+
+TEST_CASE("SceneLoader decodes the color of the lights", "[io]")
+{
+    TempJson file(
+        "{\"scene_objects\": [],"
+        "\"ambient_light\": {\"color\": [0.5, 0.25, 1.0], \"intensity\": 1.0},"
+        "\"directional_lights\": [{\"direction\": [0, -1, 0],"
+        "\"color\": [0.5, 0.25, 1.0], \"intensity\": 1.0}]}");
+
+    ResourceManager resourceManager;
+    AnimationWorld animationWorld;
+    Scene scene;
+
+    SceneLoader loader(resourceManager);
+    REQUIRE(loader.prepare(file.path()));
+    REQUIRE(loader.load(scene, animationWorld));
+
+    const glm::vec3 expected = glm::pow(glm::vec3(0.5f, 0.25f, 1.0f), glm::vec3(2.2f));
+
+    glm::vec3 ambientColor;
+    float ambientIntensity = 0.0f;
+    REQUIRE(scene.getAmbientLight(ambientColor, ambientIntensity));
+    CHECK(ambientColor == expected);
+
+    glm::vec3 direction;
+    glm::vec3 color;
+    float intensity = 0.0f;
+    bool castsShadow = false;
+    REQUIRE(scene.getDirectionalLight(0, direction, color, intensity, castsShadow));
+    CHECK(color == expected);
+}
