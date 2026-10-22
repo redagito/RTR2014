@@ -14,16 +14,6 @@ uniform int tonemap_enabled;
 // Lit fragment
 out vec3 color;
 
-// Filmic tonemapping operation based on "Uncharted 2" presentation 
-// http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
-// slide 140
-// Includes gamma correction with gamma value 2.2f
-vec3 filmicTonemapGamma(vec3 color)
-{
-	vec3 temp = max(vec3(0.f), color - 0.004);
-	return (temp * (6.2f * temp + 0.5f)) / (temp * (6.2f * temp + 1.7f) + 0.06f);
-}
-
 // a = shoulder strength
 // b = linear strength
 // c = linear angle
@@ -46,9 +36,8 @@ vec3 filmicTonemap(vec3 color)
 	float e = 0.01f;
 	float f = 0.3f;
 
-	// The linear white point, the radiance that is displayed as white. It is
-	// the brightest value of the sky, the sun of the environment.
-	vec3 linearWhite = vec3(2.0f);
+	// The linear white point, the radiance that is displayed as white.
+	vec3 linearWhite = vec3(1.5f);
 
 	vec3 num = filmicTonemapOperator(color, a, b, c, d, e, f);
 	vec3 denom = filmicTonemapOperator(linearWhite, a, b, c, d, e, f);
