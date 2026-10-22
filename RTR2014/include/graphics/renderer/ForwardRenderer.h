@@ -4,9 +4,13 @@
 
 // Required for inheritance
 #include "Renderer.h"
+#include "graphics/renderer/DisplayPass.h"
 #include "graphics/renderer/ForwardRenderPass.h"
+#include "graphics/renderer/FrameBuffer.h"
+#include "graphics/renderer/RenderBuffer.h"
 
 class IResourceManager;
+class Texture;
 
 /**
  * \brief Forward renderer.
@@ -46,4 +50,11 @@ class ForwardRenderer : public Renderer
 
    private:
     ForwardRenderPass m_forwardRenderPass;
+    DisplayPass m_displayPass;
+
+    // The scene is rendered into a buffer that holds the linear radiance, it
+    // is mapped to the display range by the display pass.
+    FrameBuffer m_sceneBuffer;
+    std::shared_ptr<Texture> m_sceneTexture;
+    std::shared_ptr<RenderBuffer> m_depthBuffer;
 };

@@ -119,6 +119,7 @@ const std::string shadowMapTextureUniformName =
 const std::string shadowCubeTextureUniformName = "shadow_cube";
 const std::string sceneTextureUniformName = "scene_texture";
 const std::string blurTextureUniformName = "blur_texture";
+const std::string tonemapEnabledUniformName = "tonemap_enabled";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";

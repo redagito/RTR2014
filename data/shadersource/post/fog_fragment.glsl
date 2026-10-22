@@ -36,7 +36,10 @@ vec3 applyFog(vec3 color, float d)
         fogFactor = exp(-pow(fogD*z, 2.0f));
     }
     
-    return mix(color, vec3(0.7, 0.6, 0.5), 1.0f - clamp(fogFactor, 0.0f, 1.0f));
+    // The color of the fog is authored as sRGB, the scene is in linear space.
+    vec3 fogColor = pow(vec3(0.7, 0.6, 0.5), vec3(2.2));
+
+    return mix(color, fogColor, 1.0f - clamp(fogFactor, 0.0f, 1.0f));
 }
 
 void main(void)

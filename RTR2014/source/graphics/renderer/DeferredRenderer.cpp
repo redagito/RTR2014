@@ -104,7 +104,9 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Select rendering mode
     if (camera.getFeatureInfo().renderMode == RenderMode::Color)
     {
-        m_displayPass.renderToScreen(window, manager, m_geometryPass.getDiffuseGlowTexture());
+        // The debug views show the raw data of the buffer they display.
+        m_displayPass.renderToScreen(window, manager, m_geometryPass.getDiffuseGlowTexture(),
+                                     false);
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Depth)
     {
@@ -117,7 +119,8 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     }
     else if (camera.getFeatureInfo().renderMode == RenderMode::Normals)
     {
-        m_displayPass.renderToScreen(window, manager, m_geometryPass.getNormalSpecularTexture());
+        m_displayPass.renderToScreen(window, manager, m_geometryPass.getNormalSpecularTexture(),
+                                     false);
     }
     else  // Final mode
     {

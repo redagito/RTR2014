@@ -18,7 +18,7 @@ DisplayPass::DisplayPass() { return; }
 DisplayPass::~DisplayPass() { return; }
 
 void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
-                         const std::shared_ptr<Texture>& texture)
+                         const std::shared_ptr<Texture>& texture, bool toneMap)
 {
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -38,7 +38,7 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
         fatalError("Mesh object for illumination pass could not be retrieved.");
     }
 
-    // Scene texture
+    // The scene texture
     texture->setActive(displayPassSceneTextureUnit);
     displayShader->setUniform(sceneTextureUniformName, displayPassSceneTextureUnit);
 
@@ -46,15 +46,22 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
     displayShader->setUniform(screenWidthUniformName, (float)window.getWidth());
     displayShader->setUniform(screenHeightUniformName, (float)window.getHeight());
 
+    // The radiance is mapped to the display range, the debug views show the
+    // raw data of the buffer they display
+    displayShader->setUniform(tonemapEnabledUniformName, toneMap ? 1 : 0);
+
+    // The image covers the whole screen, it is not hidden by anything.
+    glDisable(GL_DEPTH_TEST);
+
     Renderer::draw(quadMesh);
 }
 
 void DisplayPass::renderToScreen(const IWindow& window, const IGraphicsResourceManager& manager,
-                                 const std::shared_ptr<Texture>& texture)
+                                 const std::shared_ptr<Texture>& texture, bool toneMap)
 {
     // Set main FBO active
     FrameBuffer::setDefaultActive();
-    render(window, manager, texture);
+    render(window, manager, texture, toneMap);
 }
 
 bool DisplayPass::init(IResourceManager* manager)

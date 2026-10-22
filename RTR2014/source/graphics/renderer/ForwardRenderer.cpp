@@ -8,6 +8,7 @@
 #include "graphics/IScene.h"
 #include "graphics/ISceneQuery.h"
 #include "graphics/IWindow.h"
+#include "graphics/Texture.h"
 #include "graphics/renderer/core/RendererCoreConfig.h"
 #include "resource/IResourceManager.h"
 #include "util/FatalError.h"
@@ -37,7 +38,33 @@ bool ForwardRenderer::init(IResourceManager* manager, const std::string& skyCube
     glFrontFace(GL_CCW);
 
     // Load and init default shaders
-    return m_forwardRenderPass.init(manager);
+    if (!m_forwardRenderPass.init(manager, skyCubemapFile))
+    {
+        fatalError("Failed to initialize the forward render pass.");
+    }
+
+    // The scene is rendered into a buffer that holds the linear radiance.
+    m_sceneTexture = std::make_shared<Texture>();
+    if (!m_sceneTexture->init(800, 600, GL_RGBA16F))
+    {
+        fatalError("Failed to initialize the scene texture.");
+    }
+    m_depthBuffer = std::make_shared<RenderBuffer>();
+    if (!m_depthBuffer->init(800, 600, GL_DEPTH_COMPONENT24))
+    {
+        fatalError("Failed to initialize the depth buffer.");
+    }
+    m_sceneBuffer.attach(m_sceneTexture, GL_COLOR_ATTACHMENT0);
+    m_sceneBuffer.attach(m_depthBuffer, GL_DEPTH_ATTACHMENT);
+    m_sceneBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // The display pass maps the radiance to the display range.
+    if (!m_displayPass.init(manager))
+    {
+        fatalError("Failed to initialize the display pass.");
+    }
+
+    return true;
 }
 
 void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& window,
@@ -47,7 +74,9 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
     window.setActive();
 
     // Initializiation
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // The scene is rendered into the buffer that holds the linear radiance.
+    m_sceneBuffer.resize(window.getWidth(), window.getHeight());
+    m_sceneBuffer.setActive(GL_FRAMEBUFFER);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -59,7 +88,13 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
         m_forwardRenderPass.render(scene, camera, window, manager);
     }
 
-    // Post draw error check
+    m_sceneBuffer.setInactive(GL_FRAMEBUFFER);
+
+    // The radiance is mapped to the display range.
+    {
+        ScopedTimer timer(profiler(), "displayPass");
+        m_displayPass.renderToScreen(window, manager, m_sceneTexture);
+    }
 }
 
 std::unique_ptr<ForwardRenderer> ForwardRenderer::create(IResourceManager* manager,

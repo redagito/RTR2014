@@ -107,20 +107,17 @@ void ForwardRenderPass::draw(Mesh* mesh, const glm::mat4& translation, const glm
         shader->setUniform(projectionMatrixUniformName, m_currentProjection);
     }
 
+    // The model matrix holds the translation, the rotation and the scale of
+    // the object, the forward shader does not need them separately.
     shader->setUniform(modelMatrixUniformName, translation * rotation * scale);
-    shader->setUniform(rotationMatrixUniformName, rotation);
-    shader->setUniform(translationMatrixUniformName, translation);
     Renderer::bindTexture(shader, diffuseTextureUniformName, diffuseTextureUnit,
                           material->getDiffuse(), manager.getDefaultDiffuseTexture());
-    Renderer::bindTexture(shader, normalTextureUniformName, normalTextureUnit,
-                          material->getNormal(), manager.getDefaultNormalTexture());
     Renderer::bindTexture(shader, specularTextureUniformName, specularTextureUnit,
                           material->getSpecular(), manager.getDefaultSpecularTexture());
     Renderer::bindTexture(shader, glowTextureUniformName, glowTextureUnit, material->getGlow(),
                           manager.getDefaultGlowTexture());
     // TODO Sort materials with alpha texture for blending.
-    Renderer::bindTexture(shader, alphaTextureUniformName, alphaTextureUnit, material->getAlpha(),
-                          manager.getDefaultAlphaTexture());
+    // The forward shader uses neither the normal map nor the alpha texture.
 
     // Draw mesh
     // TODO Consider custom shader bindings for meshes

@@ -28,15 +28,18 @@ class DisplayPass
 
     /**
      * \brief Copies the texture to the currently bound framebuffer.
+     *
+     * The texture holds the linear radiance of the scene, it is mapped to the
+     * display range, unless the texture holds data that is not a radiance.
      */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
-                const std::shared_ptr<Texture>& texture);
+                const std::shared_ptr<Texture>& texture, bool toneMap = true);
 
     /**
      * \brief Draws the texture to the screen.
      */
     void renderToScreen(const IWindow& window, const IGraphicsResourceManager& manager,
-                        const std::shared_ptr<Texture>& texture);
+                        const std::shared_ptr<Texture>& texture, bool toneMap = true);
 
    private:
     ResourceId m_displayPassShaderId = -1;
