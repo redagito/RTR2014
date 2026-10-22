@@ -64,6 +64,13 @@ bool ForwardRenderer::init(IResourceManager* manager, const std::string& skyCube
         fatalError("Failed to initialize the display pass.");
     }
 
+    // The metering pass measures the brightness of the frame, it sets the
+    // exposure of the display.
+    if (!m_meteringPass.init(manager))
+    {
+        fatalError("Failed to initialize the metering pass.");
+    }
+
     return true;
 }
 
@@ -90,10 +97,17 @@ void ForwardRenderer::draw(const IScene& scene, const ICamera& camera, const IWi
 
     m_sceneBuffer.setInactive(GL_FRAMEBUFFER);
 
+    // Measure the brightness of the frame, it sets the exposure of the display
+    {
+        ScopedTimer timer(profiler(), "meteringPass");
+        m_meteringPass.render(window, manager, m_sceneTexture);
+    }
+
     // The radiance is mapped to the display range.
     {
         ScopedTimer timer(profiler(), "displayPass");
-        m_displayPass.renderToScreen(window, manager, m_sceneTexture);
+        m_displayPass.renderToScreen(window, manager, m_sceneTexture, true,
+                                    m_meteringPass.getMeasurementTexture());
     }
 }
 

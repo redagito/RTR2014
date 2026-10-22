@@ -8,6 +8,7 @@
 #include "GeometryPass.h"
 #include "IlluminationPass.h"
 #include "LightPass.h"
+#include "MeteringPass.h"
 #include "PostProcessPass.h"
 #include "Renderer.h"
 #include "resource/ResourceConfig.h"
@@ -46,6 +47,9 @@ class DeferredRenderer : public Renderer
 
     // Post processing pass
     PostProcessPass m_postProcessPass;
+
+    // Metering pass, it measures the brightness of the frame
+    MeteringPass m_meteringPass;
 
     // Display pass for final screen draw
     DisplayPass m_displayPass;

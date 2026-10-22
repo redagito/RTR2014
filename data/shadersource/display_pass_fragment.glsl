@@ -11,6 +11,15 @@ uniform float screen_height;
 // the raw data of the buffer they display
 uniform int tonemap_enabled;
 
+// Whether the measured brightness of the frame sets the exposure
+uniform int exposure_enabled;
+
+// The texture that holds the measurement of the brightness of the frame
+uniform sampler2D exposure_texture;
+
+// The key of the exposure, the luminance the average of the frame is mapped to
+uniform float exposure_key;
+
 // Lit fragment
 out vec3 color;
 
@@ -62,9 +71,23 @@ void main(void)
 
 	if (tonemap_enabled != 0)
 	{
+		vec3 exposedRadiance = radiance;
+		if (exposure_enabled != 0)
+		{
+			// The measurement is the average of the logarithm of the luminance
+			// of the frame, the top level of the mipmap chain holds it.
+			float level = log2(float(textureSize(exposure_texture, 0).x));
+			float averageLuminance =
+				exp2(textureLod(exposure_texture, vec2(0.5), level).r);
+
+			// The key maps the average luminance of the frame to the middle
+			// grey of the display range.
+			exposedRadiance = radiance * (exposure_key / max(averageLuminance, 0.0001f));
+		}
+
 		// The radiance is mapped to the display range, the curve is applied to
 		// the whole image, so that the sky and the scene have the same range.
-		radiance = gammaCorrection(filmicTonemap(radiance));
+		radiance = gammaCorrection(filmicTonemap(exposedRadiance));
 	}
 
 	// Write texture to screen

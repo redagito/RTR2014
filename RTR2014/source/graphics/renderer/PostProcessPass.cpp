@@ -42,7 +42,7 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
         else
         {
             // Passthrough
-            m_displayPass.render(window, manager, texture);
+            m_displayPass.render(window, manager, texture, false);
         }
     }
 
@@ -82,12 +82,13 @@ void PostProcessPass::render(const ICamera& camera, const IWindow& window,
     else
     {
         // Passthrough
-        m_displayPass.render(window, manager, m_postProcessPassTexture1);
+        m_displayPass.render(window, manager, m_postProcessPassTexture1, false);
     }
     // Processed scene in tex 0
 
     m_postProcessPassFrameBuffer2.setActive(GL_FRAMEBUFFER);
-    m_displayPass.render(window, manager, m_postProcessPassTexture0);
+    // The output stays linear, the display pass maps it to the display range
+    m_displayPass.render(window, manager, m_postProcessPassTexture0, false);
 
     // Set output texture
     m_postProcessPassOutputTexture = m_postProcessPassTexture2;

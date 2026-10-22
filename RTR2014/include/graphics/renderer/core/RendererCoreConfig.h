@@ -86,6 +86,10 @@ const GLint fogPassDepthTextureUnit = 1;
 
 // Texture units for display pass
 const GLint displayPassSceneTextureUnit = 0;
+const GLint displayPassExposureTextureUnit = 1;
+
+// Texture units for metering pass
+const GLint meteringPassSceneTextureUnit = 0;
 
 // Texture units for FXAA pass
 const GLint fxaaPassInputTextureUnit = 0;
@@ -120,6 +124,11 @@ const std::string shadowCubeTextureUniformName = "shadow_cube";
 const std::string sceneTextureUniformName = "scene_texture";
 const std::string blurTextureUniformName = "blur_texture";
 const std::string tonemapEnabledUniformName = "tonemap_enabled";
+const std::string meteringWidthUniformName = "metering_width";
+const std::string meteringHeightUniformName = "metering_height";
+const std::string exposureEnabledUniformName = "exposure_enabled";
+const std::string exposureTextureUniformName = "exposure_texture";
+const std::string exposureKeyUniformName = "exposure_key";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";

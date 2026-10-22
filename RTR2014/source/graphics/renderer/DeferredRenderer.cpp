@@ -47,6 +47,12 @@ bool DeferredRenderer::init(IResourceManager* manager, const std::string& skyCub
         fatalError("Failed to initialize post processing pass.");
     }
 
+    // Metering pass
+    if (!m_meteringPass.init(manager))
+    {
+        fatalError("Failed to initialize metering pass.");
+    }
+
     // Display pass
     if (!m_displayPass.init(manager))
     {
@@ -99,6 +105,12 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
                                  m_geometryPass.getDepthTexture());
     }
 
+    // Measure the brightness of the frame, it sets the exposure of the display
+    {
+        ScopedTimer timer(profiler(), "meteringPass");
+        m_meteringPass.render(window, manager, m_postProcessPass.getOutputTexture());
+    }
+
     FrameBuffer::setDefaultActive();
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // Select rendering mode
@@ -125,7 +137,8 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     else  // Final mode
     {
         // Final display pass
-        m_displayPass.renderToScreen(window, manager, m_postProcessPass.getOutputTexture());
+        m_displayPass.renderToScreen(window, manager, m_postProcessPass.getOutputTexture(), true,
+                                    m_meteringPass.getMeasurementTexture());
     }
 
     // Post draw error check

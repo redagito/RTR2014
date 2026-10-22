@@ -7,6 +7,7 @@
 #include "graphics/renderer/DisplayPass.h"
 #include "graphics/renderer/ForwardRenderPass.h"
 #include "graphics/renderer/FrameBuffer.h"
+#include "graphics/renderer/MeteringPass.h"
 #include "graphics/renderer/RenderBuffer.h"
 
 class IResourceManager;
@@ -51,6 +52,7 @@ class ForwardRenderer : public Renderer
    private:
     ForwardRenderPass m_forwardRenderPass;
     DisplayPass m_displayPass;
+    MeteringPass m_meteringPass;
 
     // The scene is rendered into a buffer that holds the linear radiance, it
     // is mapped to the display range by the display pass.

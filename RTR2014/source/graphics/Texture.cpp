@@ -83,9 +83,9 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, 
     return init(image, width, height, internalFormat, createMipmaps);
 }
 
-bool Texture::init(unsigned int width, unsigned int height, GLint format)
+bool Texture::init(unsigned int width, unsigned int height, GLint format, bool createMipmaps)
 {
-    return init({}, width, height, format, false);
+    return init({}, width, height, format, createMipmaps);
 }
 
 void Texture::resize(unsigned int width, unsigned int height)
@@ -213,6 +213,11 @@ bool Texture::init(const std::vector<unsigned char>& image, unsigned int width, 
         break;
     case GL_RG8:  // Red and green component
         m_externalFormat = GL_RG;
+        bytePerPixel = 2;
+        break;
+    case GL_R16F:  // Red component with half float precision
+        m_externalFormat = GL_RED;
+        type = GL_HALF_FLOAT;
         bytePerPixel = 2;
         break;
     case GL_RGB:  // RGB texture with values from 0-255

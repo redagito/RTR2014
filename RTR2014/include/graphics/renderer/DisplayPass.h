@@ -31,15 +31,18 @@ class DisplayPass
      *
      * The texture holds the linear radiance of the scene, it is mapped to the
      * display range, unless the texture holds data that is not a radiance.
+     * The measurement of the brightness of the frame sets the exposure.
      */
     void render(const IWindow& window, const IGraphicsResourceManager& manager,
-                const std::shared_ptr<Texture>& texture, bool toneMap = true);
+                const std::shared_ptr<Texture>& texture, bool toneMap = true,
+                const std::shared_ptr<Texture>& exposureTexture = nullptr);
 
     /**
      * \brief Draws the texture to the screen.
      */
     void renderToScreen(const IWindow& window, const IGraphicsResourceManager& manager,
-                        const std::shared_ptr<Texture>& texture, bool toneMap = true);
+                        const std::shared_ptr<Texture>& texture, bool toneMap = true,
+                        const std::shared_ptr<Texture>& exposureTexture = nullptr);
 
    private:
     ResourceId m_displayPassShaderId = -1;

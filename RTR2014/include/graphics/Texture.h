@@ -42,7 +42,7 @@ class Texture
               ColorFormat format, ColorSpace colorSpace = ColorSpace::Linear,
               bool createMipmaps = true);
 
-    bool init(unsigned int width, unsigned int height, GLint format);
+    bool init(unsigned int width, unsigned int height, GLint format, bool createMipmaps = false);
 
     /**
      * \brief Resizes texture.

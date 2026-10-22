@@ -13,12 +13,19 @@
 #include "resource/IResourceManager.h"
 #include "util/FatalError.h"
 
+namespace
+{
+// The luminance the average luminance of the frame is mapped to.
+constexpr float kExposureKey = 0.10f;
+}  // namespace
+
 DisplayPass::DisplayPass() { return; }
 
 DisplayPass::~DisplayPass() { return; }
 
 void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& manager,
-                         const std::shared_ptr<Texture>& texture, bool toneMap)
+                         const std::shared_ptr<Texture>& texture, bool toneMap,
+                         const std::shared_ptr<Texture>& exposureTexture)
 {
     // Reset viewport
     glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -50,6 +57,16 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
     // raw data of the buffer they display
     displayShader->setUniform(tonemapEnabledUniformName, toneMap ? 1 : 0);
 
+    // The measurement of the brightness of the frame sets the exposure
+    const bool exposureEnabled = exposureTexture != nullptr;
+    displayShader->setUniform(exposureEnabledUniformName, exposureEnabled ? 1 : 0);
+    if (exposureEnabled)
+    {
+        exposureTexture->setActive(displayPassExposureTextureUnit);
+        displayShader->setUniform(exposureTextureUniformName, displayPassExposureTextureUnit);
+        displayShader->setUniform(exposureKeyUniformName, kExposureKey);
+    }
+
     // The image covers the whole screen, it is not hidden by anything.
     glDisable(GL_DEPTH_TEST);
 
@@ -57,11 +74,12 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
 }
 
 void DisplayPass::renderToScreen(const IWindow& window, const IGraphicsResourceManager& manager,
-                                 const std::shared_ptr<Texture>& texture, bool toneMap)
+                                 const std::shared_ptr<Texture>& texture, bool toneMap,
+                                 const std::shared_ptr<Texture>& exposureTexture)
 {
     // Set main FBO active
     FrameBuffer::setDefaultActive();
-    render(window, manager, texture, toneMap);
+    render(window, manager, texture, toneMap, exposureTexture);
 }
 
 bool DisplayPass::init(IResourceManager* manager)
