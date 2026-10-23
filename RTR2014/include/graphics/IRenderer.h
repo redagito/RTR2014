@@ -20,5 +20,5 @@ class IRenderer
      * \brief Draw scene viewed from camera into window.
      */
     virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-                      const IGraphicsResourceManager& manager) = 0;
+                      const IGraphicsResourceManager& manager, float deltaTime) = 0;
 };

@@ -17,6 +17,7 @@ namespace
 {
 // The luminance the average luminance of the frame is mapped to.
 constexpr float kExposureKey = 0.10f;
+constexpr float kMaxExposure = 8.0f;
 }  // namespace
 
 DisplayPass::DisplayPass() { return; }
@@ -65,6 +66,7 @@ void DisplayPass::render(const IWindow& window, const IGraphicsResourceManager& 
         exposureTexture->setActive(displayPassExposureTextureUnit);
         displayShader->setUniform(exposureTextureUniformName, displayPassExposureTextureUnit);
         displayShader->setUniform(exposureKeyUniformName, kExposureKey);
+        displayShader->setUniform(maxExposureUniformName, kMaxExposure);
     }
 
     // The image covers the whole screen, it is not hidden by anything.

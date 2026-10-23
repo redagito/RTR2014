@@ -36,7 +36,7 @@ class ForwardRenderer : public Renderer
      * selects rendering targets and manages render passes.
      */
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-              const IGraphicsResourceManager& manager) override;
+              const IGraphicsResourceManager& manager, float deltaTime) override;
 
     /**
      * \brief Performs resource aqucisition and initialization.

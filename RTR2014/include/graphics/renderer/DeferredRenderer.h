@@ -30,7 +30,7 @@ class DeferredRenderer : public Renderer
     bool init(IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-              const IGraphicsResourceManager& manager) override;
+              const IGraphicsResourceManager& manager, float deltaTime) override;
 
     static std::unique_ptr<DeferredRenderer> create(
         IResourceManager* manager, const std::string& skyCubemapFile = std::string());

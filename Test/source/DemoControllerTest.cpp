@@ -26,12 +26,14 @@ class FakeRenderer : public IRenderer
 {
    public:
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-              const IGraphicsResourceManager& manager) override
+              const IGraphicsResourceManager& manager, float deltaTime) override
     {
         ++drawCount;
+        lastDeltaTime = deltaTime;
     }
 
     int drawCount = 0;
+    float lastDeltaTime = 0.0f;
 };
 
 class FakeWindow : public IWindow
@@ -155,6 +157,15 @@ TEST_CASE("Demo controller draws the initial renderer", "[demo]")
 
     REQUIRE(f.deferredRenderer.drawCount == 1);
     REQUIRE(f.forwardRenderer.drawCount == 0);
+}
+
+TEST_CASE("Demo controller passes the frame time to the renderer", "[demo]")
+{
+    Fixture f;
+
+    f.controller->update(0.025f);
+
+    REQUIRE(f.deferredRenderer.lastDeltaTime == 0.025f);
 }
 
 TEST_CASE("Demo controller respects a forward renderer passed as initial", "[demo]")

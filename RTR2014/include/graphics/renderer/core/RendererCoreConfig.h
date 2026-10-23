@@ -91,6 +91,10 @@ const GLint displayPassExposureTextureUnit = 1;
 // Texture units for metering pass
 const GLint meteringPassSceneTextureUnit = 0;
 
+// Texture units for exposure adaptation pass
+const GLint exposureAdaptationCurrentTextureUnit = 0;
+const GLint exposureAdaptationPreviousTextureUnit = 1;
+
 // Texture units for FXAA pass
 const GLint fxaaPassInputTextureUnit = 0;
 
@@ -129,6 +133,10 @@ const std::string meteringHeightUniformName = "metering_height";
 const std::string exposureEnabledUniformName = "exposure_enabled";
 const std::string exposureTextureUniformName = "exposure_texture";
 const std::string exposureKeyUniformName = "exposure_key";
+const std::string maxExposureUniformName = "max_exposure";
+const std::string currentMeasurementUniformName = "current_measurement";
+const std::string previousExposureUniformName = "previous_exposure";
+const std::string adaptationFactorUniformName = "adaptation_factor";
 
 // Generic texture names
 const std::string texture0UniformName = "texture0";

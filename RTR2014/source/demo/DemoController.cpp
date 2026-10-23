@@ -54,7 +54,7 @@ void DemoController::update(float timeDiff)
     // new state of the objects.
     m_animationWorld->update(timeDiff);
 
-    m_renderer->draw(*m_scene, *m_camera, *m_window, *m_graphicsResourceManager);
+    m_renderer->draw(*m_scene, *m_camera, *m_window, *m_graphicsResourceManager, timeDiff);
 
     updateDebugInfo(timeDiff);
 

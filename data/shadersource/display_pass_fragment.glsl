@@ -20,6 +20,10 @@ uniform sampler2D exposure_texture;
 // The key of the exposure, the luminance the average of the frame is mapped to
 uniform float exposure_key;
 
+// The largest factor the exposure may scale by, so that a dark frame does not
+// push the lit surfaces far past white.
+uniform float max_exposure;
+
 // Lit fragment
 out vec3 color;
 
@@ -46,7 +50,7 @@ vec3 filmicTonemap(vec3 color)
 	float f = 0.3f;
 
 	// The linear white point, the radiance that is displayed as white.
-	vec3 linearWhite = vec3(1.5f);
+	vec3 linearWhite = vec3(2.0f);
 
 	vec3 num = filmicTonemapOperator(color, a, b, c, d, e, f);
 	vec3 denom = filmicTonemapOperator(linearWhite, a, b, c, d, e, f);
@@ -81,8 +85,11 @@ void main(void)
 				exp2(textureLod(exposure_texture, vec2(0.5), level).r);
 
 			// The key maps the average luminance of the frame to the middle
-			// grey of the display range.
-			exposedRadiance = radiance * (exposure_key / max(averageLuminance, 0.0001f));
+			// grey of the display range. The cap keeps a frame that is mostly
+			// black from scaling the lit surfaces far past white.
+			float exposure =
+				min(exposure_key / max(averageLuminance, 0.0001f), max_exposure);
+			exposedRadiance = radiance * exposure;
 		}
 
 		// The radiance is mapped to the display range, the curve is applied to

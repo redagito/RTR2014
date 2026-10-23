@@ -67,7 +67,7 @@ bool DeferredRenderer::init(IResourceManager* manager, const std::string& skyCub
 }
 
 void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IWindow& window,
-                            const IGraphicsResourceManager& manager)
+                            const IGraphicsResourceManager& manager, float deltaTime)
 {
     ScopedTimer frameTimer(profiler(), "frame");
 
@@ -108,7 +108,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     // Measure the brightness of the frame, it sets the exposure of the display
     {
         ScopedTimer timer(profiler(), "meteringPass");
-        m_meteringPass.render(window, manager, m_postProcessPass.getOutputTexture());
+        m_meteringPass.render(window, manager, m_postProcessPass.getOutputTexture(), deltaTime);
     }
 
     FrameBuffer::setDefaultActive();
@@ -138,7 +138,7 @@ void DeferredRenderer::draw(const IScene& scene, const ICamera& camera, const IW
     {
         // Final display pass
         m_displayPass.renderToScreen(window, manager, m_postProcessPass.getOutputTexture(), true,
-                                    m_meteringPass.getMeasurementTexture());
+                                     m_meteringPass.getMeasurementTexture());
     }
 
     // Post draw error check
