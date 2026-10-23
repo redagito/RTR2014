@@ -206,33 +206,28 @@ void Cubemap::generateMipLevels(const std::vector<unsigned char>& base, unsigned
         const unsigned int size = faceSize >> level;
         const unsigned int previousSize = size * 2;
         const size_t levelBytes = (size_t)size * size * 3;
+        const size_t previousLevelBytes = (size_t)previousSize * previousSize * 3;
 
         previous.swap(current);
         current.assign(6 * levelBytes, 0);
+        const std::array<float, 256>& toLinear = srgbBytesToLinear();
 
         for (int f = 0; f < 6; ++f)
         {
+            const unsigned char* source = previous.data() + f * previousLevelBytes;
             for (unsigned int y = 0; y < size; ++y)
             {
                 for (unsigned int x = 0; x < size; ++x)
                 {
+                    const size_t top = (size_t)(y * 2) * previousSize + x * 2;
+                    const size_t bottom = top + previousSize;
                     glm::vec3 sum(0.0f);
-                    // The four texels of the previous level this texel covers
-                    // may lie on a neighbouring face.
-                    for (unsigned int dy = 0; dy < 2; ++dy)
+                    for (int c = 0; c < 3; ++c)
                     {
-                        for (unsigned int dx = 0; dx < 2; ++dx)
-                        {
-                            const float s = (x * 2 + dx + 0.5f) / (float)previousSize;
-                            const float t = (y * 2 + dy + 0.5f) / (float)previousSize;
-                            const glm::vec3 direction = cubemapFaceDirection(f, s, t);
-                            const CubemapCoordinates coordinates =
-                                cubemapCoordinatesForDirection(direction);
-                            const glm::vec3 texel =
-                                sampleCubemapFace(previous.data(), previousSize, coordinates.face,
-                                                  coordinates.s, coordinates.t);
-                            sum += texel;
-                        }
+                        sum[c] = toLinear[source[(top + 0) * 3 + c]] +
+                                 toLinear[source[(top + 1) * 3 + c]] +
+                                 toLinear[source[(bottom + 0) * 3 + c]] +
+                                 toLinear[source[(bottom + 1) * 3 + c]];
                     }
                     // The level is stored sRGB encoded, like the base level.
                     const glm::vec3 encoded = linearToSRGB(sum / 4.0f);
