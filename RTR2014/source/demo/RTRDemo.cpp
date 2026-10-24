@@ -1,12 +1,16 @@
 #include "demo/RTRDemo.h"
 
+#include <json/json.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 #include <stb_image_write.h>
 
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <future>
 #include <string>
+#include <system_error>
 #include <thread>
 #include <vector>
 
@@ -51,6 +55,37 @@ namespace
 // The capture renders the frames with a fixed time step, so that the captured
 // image does not depend on the speed of the machine.
 constexpr float kCaptureFrameDelta = 1.0f / 60.0f;
+
+// stb writes through a C file stream, which cannot open non-ASCII paths on
+// Windows. Writing the encoded PNG to an std::ofstream avoids that limit.
+void writeToStream(void* context, void* data, int size)
+{
+    static_cast<std::ofstream*>(context)->write(static_cast<const char*>(data), size);
+}
+
+Json::Value toJsonArray(const glm::vec3& value)
+{
+    Json::Value array(Json::arrayValue);
+    array.append(value.x);
+    array.append(value.y);
+    array.append(value.z);
+    return array;
+}
+
+Json::Value toJsonArray(const glm::mat4& matrix)
+{
+    Json::Value rows(Json::arrayValue);
+    for (int row = 0; row < 4; ++row)
+    {
+        Json::Value values(Json::arrayValue);
+        for (int column = 0; column < 4; ++column)
+        {
+            values.append(matrix[column][row]);
+        }
+        rows.append(values);
+    }
+    return rows;
+}
 }  // namespace
 
 RTRDemo::RTRDemo() {}
@@ -275,18 +310,21 @@ int RTRDemo::run()
         m_soundEngine->updateListener(m_camera->getPosition(),
                                       -glm::vec3(view[0][2], view[1][2], view[2][2]));
 
-        // The capture is taken from the back buffer, before it is presented.
-        if (!m_captureFile.empty())
+        ++m_renderedFrames;
+
+        if (m_demoController->consumeScreenshotRequest() && !captureScreenshot())
         {
-            m_renderedFrames++;
-            if (m_renderedFrames >= m_captureFrames)
+            spdlog::error("Failed to save the screenshot.");
+        }
+
+        // The capture is taken from the back buffer, before it is presented.
+        if (!m_captureFile.empty() && m_renderedFrames >= m_captureFrames)
+        {
+            if (!captureFrame(m_captureFile))
             {
-                if (!captureFrame(m_captureFile))
-                {
-                    return 1;
-                }
-                return 0;
+                return 1;
             }
+            return 0;
         }
 
         m_window->swapBuffer();
@@ -305,7 +343,7 @@ void RTRDemo::setFrameCapture(const std::string& file, int frames)
     m_captureFrames = frames > 0 ? frames : 1;
 }
 
-bool RTRDemo::captureFrame(const std::string& file)
+bool RTRDemo::captureFrame(const std::filesystem::path& file)
 {
     const unsigned int width = m_window->getWidth();
     const unsigned int height = m_window->getHeight();
@@ -318,13 +356,113 @@ bool RTRDemo::captureFrame(const std::string& file)
                  GL_UNSIGNED_BYTE, pixels.data());
     // The first row of the framebuffer is the bottom of the image.
     stbi_flip_vertically_on_write(1);
-    if (stbi_write_png(file.c_str(), static_cast<int>(width), static_cast<int>(height), 3,
-                       pixels.data(), static_cast<int>(width * 3)) == 0)
+
+    std::ofstream out(file, std::ios::binary);
+    if (!out.is_open())
     {
-        spdlog::error("Failed to write the captured image to {}.", file);
+        spdlog::error("Failed to open the captured image file {}.", file.string());
         return false;
     }
-    spdlog::info("Wrote the captured image to {}.", file);
+    const int written = stbi_write_png_to_func(&writeToStream, &out, static_cast<int>(width),
+                                               static_cast<int>(height), 3, pixels.data(),
+                                               static_cast<int>(width * 3));
+    out.close();
+    if (written == 0 || !out)
+    {
+        spdlog::error("Failed to write the captured image to {}.", file.string());
+        return false;
+    }
+    spdlog::info("Wrote the captured image to {}.", file.string());
+    return true;
+}
+
+bool RTRDemo::captureScreenshot()
+{
+    const std::filesystem::path directory("screenshots");
+    std::error_code error;
+    std::filesystem::create_directories(directory, error);
+    if (error)
+    {
+        spdlog::error("Failed to create the screenshot directory {}: {}.", directory.string(),
+                      error.message());
+        return false;
+    }
+
+    const std::string baseName = createTimeStamp() + "_" + std::to_string(m_renderedFrames);
+    const std::filesystem::path imageFile = directory / (baseName + ".png");
+    const std::filesystem::path metadataFile = directory / (baseName + ".json");
+
+    if (!captureFrame(imageFile))
+    {
+        return false;
+    }
+
+    return writeScreenshotMetadata(metadataFile, imageFile.filename().string());
+}
+
+bool RTRDemo::writeScreenshotMetadata(const std::filesystem::path& file,
+                                      const std::string& imageFile)
+{
+    Json::Value root;
+    root["image"] = imageFile;
+    root["frame"] = m_renderedFrames;
+    root["window"]["width"] = m_window->getWidth();
+    root["window"]["height"] = m_window->getHeight();
+
+    const char* rendererName = "Unknown";
+    if (m_renderer == m_deferredRenderer)
+    {
+        rendererName = "Deferred";
+    }
+    else if (m_renderer == m_forwardRenderer)
+    {
+        rendererName = "Forward";
+    }
+    root["renderer"] = rendererName;
+
+    root["camera"]["position"] = toJsonArray(m_camera->getPosition());
+    root["camera"]["yaw_degrees"] = m_camera->getYawDegrees();
+    root["camera"]["pitch_degrees"] = m_camera->getPitchDegrees();
+    root["camera"]["field_of_view"] = m_camera->getFieldOfView();
+    root["camera"]["z_near"] = m_camera->getZNear();
+    root["camera"]["z_far"] = m_camera->getZFar();
+    root["camera"]["view"] = toJsonArray(m_camera->getView());
+    root["camera"]["projection"] = toJsonArray(m_camera->getProjection());
+
+    root["mouse"]["x"] = m_cameraController->getMouseX();
+    root["mouse"]["y"] = m_cameraController->getMouseY();
+    root["mouse"]["captured"] = m_window->isMouseCaptured();
+
+    root["sequence"]["running"] = m_cameraController->isSequenceRunning();
+    root["sequence"]["time"] = m_cameraController->getSequenceTime();
+
+    Json::Value values(Json::arrayValue);
+    for (const DebugValue& value : m_debugInfo->getValues())
+    {
+        Json::Value entry;
+        entry["key"] = value.key;
+        entry["setting"] = value.setting;
+        entry["status"] = value.status;
+        values.append(entry);
+    }
+    root["debug"] = values;
+
+    Json::StreamWriterBuilder builder;
+    builder["indentation"] = "  ";
+    std::ofstream out(file);
+    if (!out.is_open())
+    {
+        spdlog::error("Failed to write the screenshot metadata to {}.", file.string());
+        return false;
+    }
+    out << Json::writeString(builder, root);
+    out.close();
+    if (!out)
+    {
+        spdlog::error("Failed to write the screenshot metadata to {}.", file.string());
+        return false;
+    }
+    spdlog::info("Wrote the screenshot metadata to {}.", file.string());
     return true;
 }
 

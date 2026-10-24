@@ -4,7 +4,12 @@
 #include <spdlog/spdlog.h>
 
 #include <cmath>
+#include <iomanip>
+#include <locale>
+#include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "animation/AnimationWorld.h"
 #include "debug/DebugInfo.h"
@@ -15,6 +20,58 @@
 #include "graphics/IWindow.h"
 #include "graphics/camera/IControllableCamera.h"
 #include "input/IInputProvider.h"
+
+namespace
+{
+const char* renderModeName(RenderMode mode)
+{
+    switch (mode)
+    {
+    case RenderMode::Final:
+        return "Final";
+    case RenderMode::Color:
+        return "Color";
+    case RenderMode::Depth:
+        return "Depth";
+    case RenderMode::Normals:
+        return "Normals";
+    case RenderMode::Lights:
+        return "Lights";
+    }
+    return "Unknown";
+}
+
+const char* fogTypeName(FogType type)
+{
+    switch (type)
+    {
+    case FogType::None:
+        return "None";
+    case FogType::Linear:
+        return "Linear";
+    case FogType::Exp:
+        return "Exp";
+    case FogType::Exp2:
+        return "Exp2";
+    }
+    return "Unknown";
+}
+
+std::string formatFloat(float value, int precision)
+{
+    std::ostringstream out;
+    // The overlay and the screenshot metadata use a dot as the decimal separator.
+    out.imbue(std::locale::classic());
+    out << std::fixed << std::setprecision(precision) << value;
+    return out.str();
+}
+
+std::string formatPosition(const glm::vec3& position)
+{
+    return "(" + formatFloat(position.x, 2) + ", " + formatFloat(position.y, 2) + ", " +
+           formatFloat(position.z, 2) + ")";
+}
+}  // namespace
 
 DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRenderer,
                                IRenderer* forwardRenderer, IScene* scene,
@@ -56,6 +113,7 @@ void DemoController::update(float timeDiff)
 
     m_renderer->draw(*m_scene, *m_camera, *m_window, *m_graphicsResourceManager, timeDiff);
 
+    ++m_frameCount;
     updateDebugInfo(timeDiff);
 
     ++m_currentFrameCount;
@@ -81,7 +139,7 @@ void DemoController::updateInput(float timeDiff)
     m_f3Cooldown -= timeDiff;
     m_f4Cooldown -= timeDiff;
     m_f5Cooldown -= timeDiff;
-    m_k1Cooldown -= timeDiff;
+    m_f12Cooldown -= timeDiff;
     m_fpsCoolDown -= timeDiff;
 
     if (m_fpsCoolDown < 0)
@@ -90,12 +148,6 @@ void DemoController::updateInput(float timeDiff)
         m_fpsCoolDown = std::fmod(m_fpsCoolDown, 1.0) + 1.0;
         m_lastFrameCount = m_currentFrameCount;
         m_currentFrameCount = 0;
-    }
-
-    if (m_inputProvider->isKeyPressed(GLFW_KEY_1) && m_k1Cooldown <= 0.f)
-    {
-        m_k1Cooldown = 0.3f;
-        m_displayDebugInfo = !m_displayDebugInfo;
     }
 
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F1) && m_f1Cooldown <= 0.f)
@@ -108,18 +160,17 @@ void DemoController::updateInput(float timeDiff)
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F2) && m_f2Cooldown <= 0.f)
     {
         m_f2Cooldown = 0.3f;
-        if (m_deferredRenderer != nullptr)
-        {
-            m_renderer = m_deferredRenderer;
-        }
+        m_displayDebugInfo = !m_displayDebugInfo;
     }
 
     if (m_inputProvider->isKeyPressed(GLFW_KEY_F3) && m_f3Cooldown <= 0.f)
     {
         m_f3Cooldown = 0.3f;
-        if (m_forwardRenderer != nullptr)
+        IRenderer* otherRenderer =
+            m_renderer == m_deferredRenderer ? m_forwardRenderer : m_deferredRenderer;
+        if (otherRenderer != nullptr)
         {
-            m_renderer = m_forwardRenderer;
+            m_renderer = otherRenderer;
         }
     }
 
@@ -135,6 +186,12 @@ void DemoController::updateInput(float timeDiff)
         m_f5Cooldown = 0.3f;
         startCameraSequence();
     }
+
+    if (m_inputProvider->isKeyPressed(GLFW_KEY_F12) && m_f12Cooldown <= 0.f)
+    {
+        m_f12Cooldown = 0.5f;
+        m_screenshotRequested = true;
+    }
 }
 
 void DemoController::startCameraSequence()
@@ -142,19 +199,76 @@ void DemoController::startCameraSequence()
     m_cameraController->loadSequence("data/democam.json");
 }
 
+bool DemoController::consumeScreenshotRequest()
+{
+    const bool requested = m_screenshotRequested;
+    m_screenshotRequested = false;
+    return requested;
+}
+
 void DemoController::updateDebugInfo(float timeDiff)
 {
-    if (!m_displayDebugInfo)
+    if (!m_displayDebugInfo && !m_screenshotRequested)
     {
         return;
     }
 
-    m_debugInfo->setValue("TimeDiff", std::to_string(timeDiff));
-    m_debugInfo->setValue("Camera x", std::to_string(m_camera->getPosition().x));
-    m_debugInfo->setValue("Camera y", std::to_string(m_camera->getPosition().y));
-    m_debugInfo->setValue("Camera z", std::to_string(m_camera->getPosition().z));
-    m_debugInfo->setValue("FPS", std::to_string(m_lastFrameCount));
-    m_debugInfo->setValue("VSync", m_vSync ? "on" : "off");
+    const FeatureInfo& features = m_camera->getFeatureInfo();
 
-    m_debugInfoDisplay->draw(*m_debugInfo);
+    const char* rendererName = "Unknown";
+    if (m_renderer == m_deferredRenderer)
+    {
+        rendererName = "Deferred";
+    }
+    else if (m_renderer == m_forwardRenderer)
+    {
+        rendererName = "Forward";
+    }
+
+    const glm::vec3& position = m_camera->getPosition();
+
+    std::vector<DebugValue> values;
+    values.reserve(32);
+
+    values.push_back({"F1", "Mouse capture", m_window->isMouseCaptured() ? "On" : "Off"});
+    values.push_back({"F2", "Debug overlay", m_displayDebugInfo ? "On" : "Off"});
+    values.push_back({"F3", "Renderer", rendererName});
+    values.push_back({"F4", "VSync", m_vSync ? "On" : "Off"});
+    values.push_back(
+        {"F5", "Camera sequence", m_cameraController->isSequenceRunning() ? "Running" : "Manual"});
+    values.push_back({"F12", "Screenshot", ""});
+    values.push_back({"C", "Manual camera", ""});
+    values.push_back({"B", "Rewind 2x", ""});
+    values.push_back({"N", "Forward 4x", ""});
+    values.push_back({"M", "Forward 8x", ""});
+    values.push_back({"W/S", "Move forward/back", ""});
+    values.push_back({"A/D", "Strafe", ""});
+    values.push_back({"Q/E", "Down/up", ""});
+    values.push_back({"Space", "Speed 6x", ""});
+    values.push_back({"Arrows", "Look", ""});
+    values.push_back({"R", "Render mode", renderModeName(features.renderMode)});
+    values.push_back({"T", "Fog", fogTypeName(features.fogType)});
+    values.push_back({"Z", "Shadows", features.shadowsActive ? "On" : "Off"});
+    values.push_back({"U", "FXAA", features.fxaaActive ? "On" : "Off"});
+    values.push_back({"I", "Depth of field", features.dofActive ? "On" : "Off"});
+    values.push_back({"O", "Normal mapping", features.normalMappingActive ? "On" : "Off"});
+    values.push_back({"Esc", "Quit", ""});
+
+    values.push_back({"Frame", "Count", std::to_string(m_frameCount)});
+    values.push_back({"FPS", "Rate", std::to_string(m_lastFrameCount)});
+    values.push_back({"TimeDiff", "Frame time", formatFloat(timeDiff, 4)});
+    values.push_back(
+        {"Sequence", "Time", formatFloat(m_cameraController->getSequenceTime(), 2) + " s"});
+    values.push_back({"Camera", "Position", formatPosition(position)});
+    values.push_back({"Mouse", "X", std::to_string(m_cameraController->getMouseX())});
+    values.push_back({"Mouse", "Y", std::to_string(m_cameraController->getMouseY())});
+    values.push_back({"Yaw", "Camera", formatFloat(m_camera->getYawDegrees(), 2) + " deg"});
+    values.push_back({"Pitch", "Camera", formatFloat(m_camera->getPitchDegrees(), 2) + " deg"});
+
+    m_debugInfo->setValues(std::move(values));
+
+    if (m_displayDebugInfo)
+    {
+        m_debugInfoDisplay->draw(*m_debugInfo, m_window->getWidth(), m_window->getHeight());
+    }
 }

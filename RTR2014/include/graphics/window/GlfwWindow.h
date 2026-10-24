@@ -46,6 +46,7 @@ class GlfwWindow : public IWindow
      * \brief Toggles mouse capture state.
      */
     void toggleMouseCapture() override;
+    bool isMouseCaptured() const override;
 
     void pollEvents() override;
 

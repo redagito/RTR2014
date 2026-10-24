@@ -61,6 +61,19 @@ TEST_CASE("FirstPersonCamera lookAt clamps the elevation of the target", "[camer
     REQUIRE(pitchDegrees(camera) == Catch::Approx(45.f).margin(0.1f));
 }
 
+TEST_CASE("FirstPersonCamera reports its yaw and pitch", "[camera]")
+{
+    auto camera = makeCamera();
+
+    REQUIRE(camera.getYawDegrees() == Catch::Approx(180.f).margin(0.1f));
+    REQUIRE(camera.getPitchDegrees() == Catch::Approx(0.f).margin(0.1f));
+
+    camera.lookAt(glm::vec3(0.f), glm::vec3(1.f, 0.5f, 0.f));
+
+    REQUIRE(camera.getYawDegrees() == Catch::Approx(90.f).margin(0.1f));
+    REQUIRE(camera.getPitchDegrees() == Catch::Approx(26.565f).margin(0.1f));
+}
+
 TEST_CASE("FirstPersonCamera lookAt survives a target straight above", "[camera]")
 {
     auto camera = makeCamera();

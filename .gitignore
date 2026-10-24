@@ -5,3 +5,7 @@
 /log/*.log
 /rtr2014_tmp_*
 /log/
+
+# Runtime output of the screenshot shortcut, the documentation images live in
+# docs/screenshots.
+/screenshots/

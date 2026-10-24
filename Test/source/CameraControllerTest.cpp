@@ -108,6 +108,19 @@ TEST_CASE("Camera controller keeps the camera finite while a sequence runs", "[d
     }
 }
 
+TEST_CASE("Camera controller tracks the mouse position", "[demo]")
+{
+    auto camera = std::make_shared<FirstPersonCamera>(glm::vec3(0.f), glm::vec3(0.f, 0.f, -1.f),
+                                                      1.f, 1.33f, 0.01f, 1000.f);
+    CameraController controller;
+    controller.setCamera(camera);
+
+    controller.handleMouseMovementEvent(120, 80);
+
+    REQUIRE(controller.getMouseX() == 120);
+    REQUIRE(controller.getMouseY() == 80);
+}
+
 TEST_CASE("Camera controller ignores key events without a camera", "[demo]")
 {
     CameraController controller;

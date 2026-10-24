@@ -16,7 +16,7 @@ class IDebugInfoDisplay
     virtual ~IDebugInfoDisplay();
 
     /**
-     * \brief Draws the debug information.
+     * \brief Draws the debug information into a viewport of the given size.
      */
-    virtual void draw(const DebugInfo& info) = 0;
+    virtual void draw(const DebugInfo& info, unsigned int width, unsigned int height) = 0;
 };

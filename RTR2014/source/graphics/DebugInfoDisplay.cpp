@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
+
 #include "debug/DebugInfo.h"
 #include "graphics/ShaderProgram.h"
 #include "graphics/Texture.h"
@@ -119,20 +121,21 @@ bool DebugInfoDisplay::loadFont(const std::string& path)
     return true;
 }
 
-void textToBuffers(const std::string& text, unsigned int x, unsigned int y, unsigned int size,
-                   std::vector<float>& vertices, std::vector<float>& UVs)
+void textToBuffers(const std::string& text, int x, int y, int size, std::vector<float>& vertices,
+                   std::vector<float>& UVs)
 {
     size_t length = text.size();
 
-    unsigned int hSize = (unsigned int)(size * 0.6f);
-    unsigned int vSize = size;
+    const int hSize = (int)(size * 0.6f);
+    const int vSize = size;
 
     for (size_t i = 0; i < length; i++)
     {
-        glm::vec2 vertex_up_left = glm::vec2(x + i * hSize, y + vSize);
-        glm::vec2 vertex_up_right = glm::vec2(x + i * hSize + hSize, y + vSize);
-        glm::vec2 vertex_down_right = glm::vec2(x + i * hSize + hSize, y);
-        glm::vec2 vertex_down_left = glm::vec2(x + i * hSize, y);
+        const int glyphX = x + (int)i * hSize;
+        glm::vec2 vertex_up_left = glm::vec2(glyphX, y + vSize);
+        glm::vec2 vertex_up_right = glm::vec2(glyphX + hSize, y + vSize);
+        glm::vec2 vertex_down_right = glm::vec2(glyphX + hSize, y);
+        glm::vec2 vertex_down_left = glm::vec2(glyphX, y);
 
         vertices.push_back(vertex_up_left.x);
         vertices.push_back(vertex_up_left.y);
@@ -174,7 +177,24 @@ void textToBuffers(const std::string& text, unsigned int x, unsigned int y, unsi
     }
 }
 
-void DebugInfoDisplay::draw(const DebugInfo& info)
+DebugPanelLayout computeDebugPanelLayout(int fontSize, int logLineCount, int valueCount,
+                                         unsigned int width, unsigned int height)
+{
+    DebugPanelLayout layout;
+    layout.keyX = 360;
+    layout.settingX = 430;
+    layout.statusX = 600;
+    layout.logBottom = fontSize * logLineCount;
+    layout.rowsTop = static_cast<int>(height);
+    layout.panelWidth = static_cast<int>(width);
+
+    const int available = layout.rowsTop - layout.logBottom;
+    const bool fits = fontSize > 0 && available > 0 && valueCount > 0;
+    layout.visibleRows = fits ? std::min(valueCount, available / fontSize) : 0;
+    return layout;
+}
+
+void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned int height)
 {
     if (m_overlayShader == nullptr || m_textShader == nullptr || m_texture == nullptr)
     {
@@ -191,13 +211,12 @@ void DebugInfoDisplay::draw(const DebugInfo& info)
 
     // The values are read once, the getters copy them.
     const std::list<std::string> log = info.getLog();
-    const std::unordered_map<std::string, std::string> values = info.getValues();
+    const auto values = info.getValues();
 
-    int hOffsetLog = 0;
-    int vOffsetLog = (int)info.getLogBufferSize() * m_fontSize;
-    int hOffsetKeys = 500;
-    int hOffsetValues = 650;
-    int vOffsetKeyValues = 600;
+    const DebugPanelLayout layout =
+        computeDebugPanelLayout(m_fontSize, static_cast<int>(info.getLogBufferSize()),
+                                static_cast<int>(values.size()), width, height);
+    const int hOffsetLog = 0;
 
     // ===
     // render overlays
@@ -207,34 +226,34 @@ void DebugInfoDisplay::draw(const DebugInfo& info)
 
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back(800.f);
-    overlayVertices.push_back((float)vOffsetLog);
+    overlayVertices.push_back((float)layout.panelWidth);
+    overlayVertices.push_back((float)layout.logBottom);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back((float)vOffsetLog);
+    overlayVertices.push_back((float)layout.logBottom);
 
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back(800.f);
+    overlayVertices.push_back((float)layout.panelWidth);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back(800.f);
-    overlayVertices.push_back((float)vOffsetLog);
+    overlayVertices.push_back((float)layout.panelWidth);
+    overlayVertices.push_back((float)layout.logBottom);
 
-    overlayVertices.push_back((float)hOffsetKeys);
-    overlayVertices.push_back((float)vOffsetKeyValues);
-    overlayVertices.push_back((float)hOffsetKeys);
-    overlayVertices.push_back(
-        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
-    overlayVertices.push_back(800.f);
-    overlayVertices.push_back((float)vOffsetKeyValues);
+    if (layout.panelWidth > layout.keyX && layout.rowsTop > layout.logBottom)
+    {
+        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back((float)layout.logBottom);
+        overlayVertices.push_back((float)layout.panelWidth);
+        overlayVertices.push_back((float)layout.rowsTop);
+        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back((float)layout.rowsTop);
 
-    overlayVertices.push_back(800.f);
-    overlayVertices.push_back((float)vOffsetKeyValues);
-    overlayVertices.push_back((float)hOffsetKeys);
-    overlayVertices.push_back(
-        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
-    overlayVertices.push_back(800.f);
-    overlayVertices.push_back(
-        (float)(vOffsetKeyValues - m_fontSize * static_cast<int>(values.size())));
+        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back((float)layout.logBottom);
+        overlayVertices.push_back((float)layout.panelWidth);
+        overlayVertices.push_back((float)layout.logBottom);
+        overlayVertices.push_back((float)layout.panelWidth);
+        overlayVertices.push_back((float)layout.rowsTop);
+    }
 
     m_overlaysBuffer->setData(overlayVertices);
 
@@ -255,18 +274,23 @@ void DebugInfoDisplay::draw(const DebugInfo& info)
     int lineCount = 0;
     for (const std::string& line : log)
     {
-        textToBuffers(line, hOffsetLog, vOffsetLog - m_fontSize * ++lineCount, m_fontSize, vertices,
-                      UVs);
+        textToBuffers(line, hOffsetLog, layout.logBottom - m_fontSize * ++lineCount, m_fontSize,
+                      vertices, UVs);
     }
 
     int valueCount = 0;
-    for (const auto& keyValuePair : values)
+    for (const DebugValue& value : values)
     {
+        if (valueCount >= layout.visibleRows)
+        {
+            break;
+        }
+
         ++valueCount;
-        textToBuffers(keyValuePair.first, hOffsetKeys, vOffsetKeyValues - m_fontSize * valueCount,
-                      m_fontSize, vertices, UVs);
-        textToBuffers(keyValuePair.second, hOffsetValues,
-                      vOffsetKeyValues - m_fontSize * valueCount, m_fontSize, vertices, UVs);
+        const int y = layout.rowsTop - m_fontSize * valueCount;
+        textToBuffers(value.key, layout.keyX, y, m_fontSize, vertices, UVs);
+        textToBuffers(value.setting, layout.settingX, y, m_fontSize, vertices, UVs);
+        textToBuffers(value.status, layout.statusX, y, m_fontSize, vertices, UVs);
     }
 
     m_verticesBuffer->setData(vertices);

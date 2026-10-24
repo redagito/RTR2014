@@ -41,13 +41,13 @@ size_t DebugInfo::getLogBufferSize() const
     return m_logBufferSize;
 }
 
-void DebugInfo::setValue(const std::string& key, const std::string& value)
+void DebugInfo::setValues(std::vector<DebugValue> values)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_values[key] = value;
+    m_values = std::move(values);
 }
 
-std::unordered_map<std::string, std::string> DebugInfo::getValues() const
+std::vector<DebugValue> DebugInfo::getValues() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_values;

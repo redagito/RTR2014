@@ -69,6 +69,11 @@ class IWindow
     virtual void toggleMouseCapture() = 0;
 
     /**
+     * \brief Returns whether the mouse is captured.
+     */
+    virtual bool isMouseCaptured() const = 0;
+
+    /**
      * \brief Processes pending window events.
      */
     virtual void pollEvents() = 0;

@@ -118,6 +118,13 @@ float FirstPersonCamera::getZNear() const { return m_zNear; }
 
 float FirstPersonCamera::getZFar() const { return m_zFar; }
 
+float FirstPersonCamera::getYawDegrees() const
+{
+    return glm::degrees(std::atan2(m_forward.x, m_forward.y));
+}
+
+float FirstPersonCamera::getPitchDegrees() const { return glm::degrees(-m_pitch); }
+
 void FirstPersonCamera::setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar)
 {
     m_fieldOfView = fieldOfView;

@@ -1,15 +1,15 @@
 # Screenshots
 
-![Screen1](https://github.com/redagito/RTR2014/wiki/screenshots/screen1.png)
-![Screen2](https://github.com/redagito/RTR2014/wiki/screenshots/screen2.png)
-![Screen3](https://github.com/redagito/RTR2014/wiki/screenshots/screen3.png)
-![Screen4](https://github.com/redagito/RTR2014/wiki/screenshots/screen4.png)
-![Screen5](https://github.com/redagito/RTR2014/wiki/screenshots/screen5.png)
-![Screen6](https://github.com/redagito/RTR2014/wiki/screenshots/screen6.png)
-![Screen7](https://github.com/redagito/RTR2014/wiki/screenshots/screen7.png)
-![Screen8](https://github.com/redagito/RTR2014/wiki/screenshots/screen8.png)
-![Screen9](https://github.com/redagito/RTR2014/wiki/screenshots/screen9.png)
-![Screen10](https://github.com/redagito/RTR2014/wiki/screenshots/screen10.png)
+![Screen1](docs/screenshots/screen1.png)
+![Screen2](docs/screenshots/screen2.png)
+![Screen3](docs/screenshots/screen3.png)
+![Screen4](docs/screenshots/screen4.png)
+![Screen5](docs/screenshots/screen5.png)
+![Screen6](docs/screenshots/screen6.png)
+![Screen7](docs/screenshots/screen7.png)
+![Screen8](docs/screenshots/screen8.png)
+![Screen9](docs/screenshots/screen9.png)
+![Screen10](docs/screenshots/screen10.png)
 
 # Introduction
 
@@ -69,3 +69,9 @@ build/App/Release/RTRDemo.exe --capture shot.png --frames 2400
 ```
 
 The number of frames selects the point on the camera sequence of `data/democam.json` that is captured, one frame is a sixtieth of a second.
+
+## Taking a screenshot
+
+While the demo is running, press `F12` to write the current frame to `screenshots/<timestamp>_<frame>.png`. A JSON file with the same name next to it records the camera, window, mouse, camera sequence and debug overlay state.
+
+The `screenshots` folder is created on demand and is not tracked by git. The images in `docs/screenshots` are the gallery above.

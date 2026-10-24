@@ -169,6 +169,14 @@ void CameraController::animate(float dt)
     }
 }
 
+bool CameraController::isSequenceRunning() const { return m_isRunningSequence; }
+
+float CameraController::getSequenceTime() const { return m_sequenceTime; }
+
+int CameraController::getMouseX() const { return m_lastX; }
+
+int CameraController::getMouseY() const { return m_lastY; }
+
 void CameraController::animateSequence(float dt)
 {
     if (m_inputProvider->isKeyPressed(GLFW_KEY_C))

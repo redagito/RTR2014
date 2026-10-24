@@ -45,11 +45,24 @@ TEST_CASE("DebugInfo ring buffer keeps only the configured number of entries", "
     REQUIRE(log.front() == "[info]: two");
 }
 
-TEST_CASE("DebugInfo stores key value pairs", "[debug]")
+TEST_CASE("DebugInfo stores debug rows in order", "[debug]")
 {
     auto debugInfo = std::make_shared<DebugInfo>();
 
-    debugInfo->setValue("FPS", "60");
+    debugInfo->setValues({
+        {"F2", "Debug overlay", "On"},
+        {"Mouse", "X", "120"},
+        {"Mouse", "Y", "80"},
+    });
 
-    REQUIRE(debugInfo->getValues().at("FPS") == "60");
+    const auto values = debugInfo->getValues();
+    REQUIRE(values.size() == 3);
+    REQUIRE(values[0].key == "F2");
+    REQUIRE(values[0].setting == "Debug overlay");
+    REQUIRE(values[0].status == "On");
+    REQUIRE(values[1].key == "Mouse");
+    REQUIRE(values[1].setting == "X");
+    REQUIRE(values[1].status == "120");
+    REQUIRE(values[2].setting == "Y");
+    REQUIRE(values[2].status == "80");
 }

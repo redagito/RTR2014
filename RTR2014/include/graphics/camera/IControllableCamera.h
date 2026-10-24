@@ -33,5 +33,15 @@ class IControllableCamera : public ICamera
     virtual float getZNear() const = 0;
     virtual float getZFar() const = 0;
 
+    /**
+     * \brief Returns the horizontal heading in degrees, zero looking along +Z.
+     */
+    virtual float getYawDegrees() const = 0;
+
+    /**
+     * \brief Returns the elevation in degrees, positive looking up.
+     */
+    virtual float getPitchDegrees() const = 0;
+
     virtual void setProjection(float fieldOfView, float aspectRatio, float zNear, float zFar) = 0;
 };

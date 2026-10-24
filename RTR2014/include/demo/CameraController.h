@@ -25,6 +25,11 @@ class CameraController : public IInputListener, public IWindowListener
 
     void animate(float dt);
 
+    bool isSequenceRunning() const;
+    float getSequenceTime() const;
+    int getMouseX() const;
+    int getMouseY() const;
+
     virtual void handleKeyEvent(KeyEventType type, int keyCode) override;
     virtual void handleMouseMovementEvent(int x, int y) override;
     virtual void handleMouseButtonEvent(MouseButtonEventType type, int buttonCode) override;

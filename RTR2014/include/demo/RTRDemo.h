@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -71,7 +72,17 @@ class RTRDemo
     /**
      * \brief Writes the rendered image to a file.
      */
-    bool captureFrame(const std::string& file);
+    bool captureFrame(const std::filesystem::path& file);
+
+    /**
+     * \brief Captures a screenshot and writes the debug metadata beside it.
+     */
+    bool captureScreenshot();
+
+    /**
+     * \brief Writes the debug metadata for a screenshot.
+     */
+    bool writeScreenshotMetadata(const std::filesystem::path& file, const std::string& imageFile);
 
     /**
      * \brief Presents a black frame and processes window events.
@@ -110,7 +121,7 @@ class RTRDemo
     std::unique_ptr<SceneLoader> m_sceneLoader;
     std::string m_sceneFile; /**< Scene file to load. */
 
-    std::string m_captureFile; /**< File the captured frame is written to. */
-    int m_captureFrames = 0;   /**< Number of frames to render before the capture. */
-    int m_renderedFrames = 0;  /**< Number of frames rendered since the scene was loaded. */
+    std::filesystem::path m_captureFile; /**< File the captured frame is written to. */
+    int m_captureFrames = 0;             /**< Number of frames to render before the capture. */
+    int m_renderedFrames = 0; /**< Number of frames rendered since the scene was loaded. */
 };

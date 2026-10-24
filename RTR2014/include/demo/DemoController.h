@@ -38,6 +38,11 @@ class DemoController
      */
     void startCameraSequence();
 
+    /**
+     * \brief Returns whether a screenshot was requested and clears the request.
+     */
+    bool consumeScreenshotRequest();
+
    private:
     /**
      * \brief Returns whether everything needed to draw a frame is present.
@@ -69,15 +74,17 @@ class DemoController
 
     bool m_displayDebugInfo = false;
     bool m_vSync = true;
+    bool m_screenshotRequested = false;
 
     double m_f1Cooldown = 0.0;
     double m_f2Cooldown = 0.0;
     double m_f3Cooldown = 0.0;
     double m_f4Cooldown = 0.0;
     double m_f5Cooldown = 0.0;
-    double m_k1Cooldown = 0.0;
+    double m_f12Cooldown = 0.0;
 
     double m_fpsCoolDown = 1.0;
     unsigned int m_lastFrameCount = 0;
     unsigned int m_currentFrameCount = 0;
+    unsigned long long m_frameCount = 0;
 };

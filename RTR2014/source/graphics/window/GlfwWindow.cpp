@@ -158,6 +158,8 @@ void GlfwWindow::toggleMouseCapture()
     m_mouseCaptured = !m_mouseCaptured;
 }
 
+bool GlfwWindow::isMouseCaptured() const { return m_mouseCaptured; }
+
 GLFWwindow* GlfwWindow::getGlfwHandle() const { return m_window; }
 
 void GlfwWindow::pollEvents() { glfwPollEvents(); }
