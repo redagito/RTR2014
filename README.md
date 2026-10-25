@@ -1,21 +1,12 @@
-# Screenshots
-
 ![Screen1](docs/screenshots/screen1.png)
-![Screen2](docs/screenshots/screen2.png)
-![Screen3](docs/screenshots/screen3.png)
-![Screen4](docs/screenshots/screen4.png)
-![Screen5](docs/screenshots/screen5.png)
-![Screen6](docs/screenshots/screen6.png)
-![Screen7](docs/screenshots/screen7.png)
-![Screen8](docs/screenshots/screen8.png)
-![Screen9](docs/screenshots/screen9.png)
-![Screen10](docs/screenshots/screen10.png)
 
 # Introduction
 
 This demo was created for the realtime rendering university course. It features a data driven deferred OpenGL based renderer with post processing capabilities.
 
 The original version of this project is preserved at the [`v1`](https://github.com/redagito/RTR2014/tree/v1) tag.
+
+![Screen2](docs/screenshots/screen2.png)
 
 ## Features
 * Deferred rendering
@@ -27,6 +18,8 @@ The original version of this project is preserved at the [`v1`](https://github.c
 * Depth of field effect
 * FXAA
 
+![Screen3](docs/screenshots/screen3.png)
+
 # Building
 
 ## Prerequisites
@@ -36,6 +29,8 @@ The original version of this project is preserved at the [`v1`](https://github.c
 * A C++23 capable compiler
 * An OpenGL 4.6 capable GPU and driver
 
+![Screen4](docs/screenshots/screen4.png)
+
 ## Debug build
 
 ```
@@ -43,6 +38,8 @@ conan install . --build=missing -s build_type=Debug
 cmake --preset conan-default
 cmake --build build --config Debug
 ```
+
+![Screen5](docs/screenshots/screen5.png)
 
 ## Release build
 
@@ -54,11 +51,15 @@ cmake --build build --config Release
 
 # Running
 
+![Screen6](docs/screenshots/screen6.png)
+
 The demo reads its data from the `data` folder, it is started from the project directory or from the directory the data was copied to.
 
 ```
 build/App/Release/RTRDemo.exe
 ```
+
+![Screen7](docs/screenshots/screen7.png)
 
 ## Capturing a frame
 
@@ -70,8 +71,13 @@ build/App/Release/RTRDemo.exe --capture shot.png --frames 2400
 
 The number of frames selects the point on the camera sequence of `data/democam.json` that is captured, one frame is a sixtieth of a second.
 
+![Screen8](docs/screenshots/screen8.png)
+
 ## Taking a screenshot
 
 While the demo is running, press `F12` to write the current frame to `screenshots/<timestamp>_<frame>.png`. A JSON file with the same name next to it records the camera, window, mouse, camera sequence and debug overlay state.
 
 The `screenshots` folder is created on demand and is not tracked by git. The images in `docs/screenshots` are the gallery above.
+
+![Screen9](docs/screenshots/screen9.png)
+![Screen10](docs/screenshots/screen10.png)
