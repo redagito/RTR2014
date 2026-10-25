@@ -30,6 +30,8 @@ class Scene : public IScene
     void setObject(ResourceId id, ResourceId mesh, ResourceId material, const glm::vec3& position,
                    const glm::vec3& rotation, const glm::vec3& scale) override;
 
+    void removeObject(SceneObjectId id) override;
+
     SceneObjectId createPointLight(const glm::vec3& position, float radius, const glm::vec3& color,
                                    float intensity, bool castsShadow) override;
 

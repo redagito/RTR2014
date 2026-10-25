@@ -30,6 +30,7 @@
 // Resource system
 #include "demo/CameraController.h"
 #include "demo/DemoController.h"
+#include "demo/SceneEditor.h"
 #include "demo/ScreenshotMetadata.h"
 #include "graphics/DebugInfoDisplay.h"
 #include "graphics/GraphicsResourceManager.h"
@@ -73,6 +74,7 @@ RTRDemo::~RTRDemo()
     // The demo controller and the camera controller hold raw pointers to objects
     // owned here, so they have to be destroyed before those objects
     m_demoController.reset();
+    m_sceneEditor.reset();
     m_cameraController.reset();
     m_soundEngine.reset();
 
@@ -248,11 +250,18 @@ int RTRDemo::run()
         sceneLoaded = true;
     }
 
+    // The capture does not take over the mouse and must not modify the scene.
+    if (m_captureFile.empty())
+    {
+        m_sceneEditor = std::make_unique<SceneEditor>(*m_scene, *m_camera, *m_inputProvider,
+                                                      *m_resourceManager, m_sceneFile);
+    }
+
     m_demoController = std::make_unique<DemoController>(
         m_renderer.get(), m_deferredRenderer.get(), m_forwardRenderer.get(), m_scene.get(),
         m_camera.get(), m_cameraController.get(), m_inputProvider.get(), m_window.get(),
         m_graphicsResourceManager.get(), m_debugInfo.get(), m_debugInfoDisplay.get(),
-        m_animationWorld.get());
+        m_animationWorld.get(), m_sceneEditor.get());
 
     // The capture mode does not take over the mouse.
     if (m_captureFile.empty())

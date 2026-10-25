@@ -29,6 +29,10 @@ bool Scene::getObject(SceneObjectId id, ResourceId& mesh, ResourceId& material, 
     {
         return false;
     }
+    if (m_objects.at(id).m_removed)
+    {
+        return false;
+    }
 
     // Write data
     mesh = m_objects.at(id).m_mesh;
@@ -49,6 +53,11 @@ void Scene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
         spdlog::error("Invalid objects id {}.", id);
         return;
     }
+    if (m_objects[id].m_removed)
+    {
+        spdlog::error("The object with id {} was removed.", id);
+        return;
+    }
 
     // Write data
     m_objects[id].m_mesh = mesh;
@@ -58,6 +67,18 @@ void Scene::setObject(ResourceId id, ResourceId mesh, ResourceId material,
     m_objects[id].m_scale = scale;
     m_objects[id].updateWorldBounds();
     return;
+}
+
+void Scene::removeObject(SceneObjectId id)
+{
+    if (id < 0 || static_cast<size_t>(id) >= m_objects.size())
+    {
+        spdlog::error("Invalid objects id {}.", id);
+        return;
+    }
+    // The object stays in the storage, so that the ids of the later objects do
+    // not change. Queries and bounds skip it.
+    m_objects[id].m_removed = true;
 }
 
 SceneObjectId Scene::createPointLight(const glm::vec3& position, float radius,
@@ -166,7 +187,7 @@ bool Scene::getSceneBounds(glm::vec3& center, float& radius) const
     std::vector<const SceneObject*> casters;
     for (const SceneObject& object : m_objects)
     {
-        if (object.m_castsShadow)
+        if (object.m_castsShadow && !object.m_removed)
         {
             casters.push_back(&object);
         }
@@ -214,7 +235,7 @@ std::unique_ptr<ISceneQuery> Scene::createQuery(const glm::mat4& viewProjection)
     // TODO Occlusion culling, better data structure for objects
     for (unsigned int i = 0; i < m_objects.size(); ++i)
     {
-        if (!frustum.intersects(m_objects[i].m_worldBounds))
+        if (m_objects[i].m_removed || !frustum.intersects(m_objects[i].m_worldBounds))
         {
             continue;
         }

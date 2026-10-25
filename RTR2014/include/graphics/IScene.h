@@ -46,6 +46,14 @@ class IScene
                            const glm::vec3& scale) = 0;
 
     /**
+     * \brief Removes an object from the scene.
+     *
+     * The id stays reserved, it is not reused by an object created later. The
+     * object is no longer drawn, returned by a query or reported by getObject.
+     */
+    virtual void removeObject(SceneObjectId id) = 0;
+
+    /**
      * \brief Creates point light in scene and returns id.
      */
     virtual SceneObjectId createPointLight(const glm::vec3& position, float radius,

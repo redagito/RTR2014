@@ -28,4 +28,5 @@ struct SceneObject
     OrientedBoundingBox m_localBounds; /**< Bounds of the mesh in mesh space. */
     OrientedBoundingBox m_worldBounds; /**< Bounds of the object in world space. */
     bool m_castsShadow = true;         /**< Whether the object casts a shadow. */
+    bool m_removed = false;            /**< Removed objects stay in place so ids do not shift. */
 };

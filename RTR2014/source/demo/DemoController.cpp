@@ -14,6 +14,7 @@
 #include "animation/AnimationWorld.h"
 #include "debug/DebugInfo.h"
 #include "demo/CameraController.h"
+#include "demo/SceneEditor.h"
 #include "graphics/IDebugInfoDisplay.h"
 #include "graphics/IRenderer.h"
 #include "graphics/IScene.h"
@@ -79,7 +80,7 @@ DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRe
                                IInputProvider* inputProvider, IWindow* window,
                                IGraphicsResourceManager* graphicsResourceManager,
                                DebugInfo* debugInfo, IDebugInfoDisplay* debugInfoDisplay,
-                               AnimationWorld* animationWorld)
+                               AnimationWorld* animationWorld, SceneEditor* sceneEditor)
     : m_renderer(initialRenderer != nullptr ? initialRenderer : deferredRenderer),
       m_deferredRenderer(deferredRenderer),
       m_forwardRenderer(forwardRenderer),
@@ -91,7 +92,8 @@ DemoController::DemoController(IRenderer* initialRenderer, IRenderer* deferredRe
       m_graphicsResourceManager(graphicsResourceManager),
       m_debugInfo(debugInfo),
       m_debugInfoDisplay(debugInfoDisplay),
-      m_animationWorld(animationWorld)
+      m_animationWorld(animationWorld),
+      m_sceneEditor(sceneEditor)
 {
     return;
 }
@@ -104,6 +106,11 @@ void DemoController::update(float timeDiff)
     }
 
     updateInput(timeDiff);
+
+    if (m_sceneEditor != nullptr)
+    {
+        m_sceneEditor->update(timeDiff);
+    }
 
     m_cameraController->animate(timeDiff);
 
@@ -210,6 +217,20 @@ unsigned long long DemoController::getFrameCount() const { return m_frameCount; 
 
 void DemoController::updateDebugInfo(float timeDiff)
 {
+    const bool editorActive = m_sceneEditor != nullptr && m_sceneEditor->isActive();
+
+    // While the editor is open it owns the overlay, so that its control list is
+    // always visible and not pushed around by the demo rows.
+    if (editorActive)
+    {
+        std::vector<DebugInfo::Value> editorValues;
+        editorValues.reserve(24);
+        m_sceneEditor->appendDebugInfo(editorValues);
+        m_debugInfo->setValues(std::move(editorValues));
+        m_debugInfoDisplay->draw(*m_debugInfo, m_window->getWidth(), m_window->getHeight());
+        return;
+    }
+
     if (!m_displayDebugInfo && !m_screenshotRequested)
     {
         return;
@@ -222,7 +243,7 @@ void DemoController::updateDebugInfo(float timeDiff)
     const glm::vec3& position = m_camera->getPosition();
 
     std::vector<DebugInfo::Value> values;
-    values.reserve(32);
+    values.reserve(48);
 
     const auto shortcut = [](std::string key, std::string setting, std::string status = {})
     {
@@ -242,6 +263,7 @@ void DemoController::updateDebugInfo(float timeDiff)
     values.push_back(shortcut("F5", "Camera sequence",
                               m_cameraController->isSequenceRunning() ? "Running" : "Manual"));
     values.push_back(shortcut("F12", "Screenshot"));
+    values.push_back(shortcut("Tab", "Scene editor", "Off"));
     values.push_back(shortcut("C", "Manual camera"));
     values.push_back(shortcut("B", "Rewind 2x"));
     values.push_back(shortcut("N", "Forward 4x"));
@@ -273,8 +295,5 @@ void DemoController::updateDebugInfo(float timeDiff)
 
     m_debugInfo->setValues(std::move(values));
 
-    if (m_displayDebugInfo)
-    {
-        m_debugInfoDisplay->draw(*m_debugInfo, m_window->getWidth(), m_window->getHeight());
-    }
+    m_debugInfoDisplay->draw(*m_debugInfo, m_window->getWidth(), m_window->getHeight());
 }

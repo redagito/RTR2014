@@ -10,6 +10,7 @@ class IInputProvider;
 class IRenderer;
 class IScene;
 class IWindow;
+class SceneEditor;
 
 /**
  * \brief Platform independent demo logic.
@@ -26,7 +27,7 @@ class DemoController
                    CameraController* cameraController, IInputProvider* inputProvider,
                    IWindow* window, IGraphicsResourceManager* graphicsResourceManager,
                    DebugInfo* debugInfo, IDebugInfoDisplay* debugInfoDisplay,
-                   AnimationWorld* animationWorld);
+                   AnimationWorld* animationWorld, SceneEditor* sceneEditor = nullptr);
 
     /**
      * \brief Performs the per frame update.
@@ -76,6 +77,7 @@ class DemoController
     DebugInfo* m_debugInfo = nullptr;
     IDebugInfoDisplay* m_debugInfoDisplay = nullptr;
     AnimationWorld* m_animationWorld = nullptr;
+    SceneEditor* m_sceneEditor = nullptr;
 
     bool m_displayDebugInfo = false;
     bool m_vSync = true;

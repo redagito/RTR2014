@@ -28,6 +28,7 @@ class IDebugInfoDisplay;
 
 // Demo
 class DemoController;
+class SceneEditor;
 class SceneLoader;
 
 // Audio
@@ -116,6 +117,9 @@ class RTRDemo
 
     // Platform independent demo logic
     std::unique_ptr<DemoController> m_demoController;
+
+    // In-game scene editor, only present when the demo is not capturing a frame
+    std::unique_ptr<SceneEditor> m_sceneEditor;
 
     // Scene loading
     std::unique_ptr<SceneLoader> m_sceneLoader;
