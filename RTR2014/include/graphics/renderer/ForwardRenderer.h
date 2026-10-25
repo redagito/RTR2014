@@ -29,6 +29,8 @@ class ForwardRenderer : public Renderer
      */
     ~ForwardRenderer();
 
+    const char* getName() const override;
+
     /**
      * \brief Draws whole scene.
      * Implements the draw call as specified by the renderer interface.

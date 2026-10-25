@@ -27,8 +27,8 @@ class CameraController : public IInputListener, public IWindowListener
 
     bool isSequenceRunning() const;
     float getSequenceTime() const;
-    int getMouseX() const;
-    int getMouseY() const;
+    int getLastMouseX() const;
+    int getLastMouseY() const;
 
     virtual void handleKeyEvent(KeyEventType type, int keyCode) override;
     virtual void handleMouseMovementEvent(int x, int y) override;

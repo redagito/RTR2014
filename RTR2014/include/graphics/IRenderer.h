@@ -17,6 +17,11 @@ class IRenderer
     virtual ~IRenderer();
 
     /**
+     * \brief Returns the display name of the renderer.
+     */
+    virtual const char* getName() const { return "Unknown"; }
+
+    /**
      * \brief Draw scene viewed from camera into window.
      */
     virtual void draw(const IScene& scene, const ICamera& camera, const IWindow& window,

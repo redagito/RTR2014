@@ -117,8 +117,8 @@ TEST_CASE("Camera controller tracks the mouse position", "[demo]")
 
     controller.handleMouseMovementEvent(120, 80);
 
-    REQUIRE(controller.getMouseX() == 120);
-    REQUIRE(controller.getMouseY() == 80);
+    REQUIRE(controller.getLastMouseX() == 120);
+    REQUIRE(controller.getLastMouseY() == 80);
 }
 
 TEST_CASE("Camera controller ignores key events without a camera", "[demo]")

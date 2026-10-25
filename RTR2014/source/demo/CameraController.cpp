@@ -173,9 +173,9 @@ bool CameraController::isSequenceRunning() const { return m_isRunningSequence; }
 
 float CameraController::getSequenceTime() const { return m_sequenceTime; }
 
-int CameraController::getMouseX() const { return m_lastX; }
+int CameraController::getLastMouseX() const { return m_lastX; }
 
-int CameraController::getMouseY() const { return m_lastY; }
+int CameraController::getLastMouseY() const { return m_lastY; }
 
 void CameraController::animateSequence(float dt)
 {

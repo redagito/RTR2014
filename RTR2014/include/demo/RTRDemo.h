@@ -123,5 +123,5 @@ class RTRDemo
 
     std::filesystem::path m_captureFile; /**< File the captured frame is written to. */
     int m_captureFrames = 0;             /**< Number of frames to render before the capture. */
-    int m_renderedFrames = 0; /**< Number of frames rendered since the scene was loaded. */
+    int m_renderedFrames = 0;            /**< Number of frames rendered in capture mode. */
 };

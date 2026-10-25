@@ -1,6 +1,5 @@
 #include "demo/RTRDemo.h"
 
-#include <json/json.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 #include <stb_image_write.h>
@@ -31,6 +30,7 @@
 // Resource system
 #include "demo/CameraController.h"
 #include "demo/DemoController.h"
+#include "demo/ScreenshotMetadata.h"
 #include "graphics/DebugInfoDisplay.h"
 #include "graphics/GraphicsResourceManager.h"
 #include "graphics/IDebugInfoDisplay.h"
@@ -61,30 +61,6 @@ constexpr float kCaptureFrameDelta = 1.0f / 60.0f;
 void writeToStream(void* context, void* data, int size)
 {
     static_cast<std::ofstream*>(context)->write(static_cast<const char*>(data), size);
-}
-
-Json::Value toJsonArray(const glm::vec3& value)
-{
-    Json::Value array(Json::arrayValue);
-    array.append(value.x);
-    array.append(value.y);
-    array.append(value.z);
-    return array;
-}
-
-Json::Value toJsonArray(const glm::mat4& matrix)
-{
-    Json::Value rows(Json::arrayValue);
-    for (int row = 0; row < 4; ++row)
-    {
-        Json::Value values(Json::arrayValue);
-        for (int column = 0; column < 4; ++column)
-        {
-            values.append(matrix[column][row]);
-        }
-        rows.append(values);
-    }
-    return rows;
 }
 }  // namespace
 
@@ -310,21 +286,23 @@ int RTRDemo::run()
         m_soundEngine->updateListener(m_camera->getPosition(),
                                       -glm::vec3(view[0][2], view[1][2], view[2][2]));
 
-        ++m_renderedFrames;
-
         if (m_demoController->consumeScreenshotRequest() && !captureScreenshot())
         {
             spdlog::error("Failed to save the screenshot.");
         }
 
         // The capture is taken from the back buffer, before it is presented.
-        if (!m_captureFile.empty() && m_renderedFrames >= m_captureFrames)
+        if (!m_captureFile.empty())
         {
-            if (!captureFrame(m_captureFile))
+            ++m_renderedFrames;
+            if (m_renderedFrames >= m_captureFrames)
             {
-                return 1;
+                if (!captureFrame(m_captureFile))
+                {
+                    return 1;
+                }
+                return 0;
             }
-            return 0;
         }
 
         m_window->swapBuffer();
@@ -388,7 +366,8 @@ bool RTRDemo::captureScreenshot()
         return false;
     }
 
-    const std::string baseName = createTimeStamp() + "_" + std::to_string(m_renderedFrames);
+    const std::string baseName =
+        createTimeStamp() + "_" + std::to_string(m_demoController->getFrameCount());
     const std::filesystem::path imageFile = directory / (baseName + ".png");
     const std::filesystem::path metadataFile = directory / (baseName + ".json");
 
@@ -403,59 +382,17 @@ bool RTRDemo::captureScreenshot()
 bool RTRDemo::writeScreenshotMetadata(const std::filesystem::path& file,
                                       const std::string& imageFile)
 {
-    Json::Value root;
-    root["image"] = imageFile;
-    root["frame"] = m_renderedFrames;
-    root["window"]["width"] = m_window->getWidth();
-    root["window"]["height"] = m_window->getHeight();
+    const std::string metadata =
+        buildScreenshotMetadata(imageFile, m_demoController->getFrameCount(), *m_renderer,
+                                *m_window, *m_camera, *m_cameraController, *m_debugInfo);
 
-    const char* rendererName = "Unknown";
-    if (m_renderer == m_deferredRenderer)
-    {
-        rendererName = "Deferred";
-    }
-    else if (m_renderer == m_forwardRenderer)
-    {
-        rendererName = "Forward";
-    }
-    root["renderer"] = rendererName;
-
-    root["camera"]["position"] = toJsonArray(m_camera->getPosition());
-    root["camera"]["yaw_degrees"] = m_camera->getYawDegrees();
-    root["camera"]["pitch_degrees"] = m_camera->getPitchDegrees();
-    root["camera"]["field_of_view"] = m_camera->getFieldOfView();
-    root["camera"]["z_near"] = m_camera->getZNear();
-    root["camera"]["z_far"] = m_camera->getZFar();
-    root["camera"]["view"] = toJsonArray(m_camera->getView());
-    root["camera"]["projection"] = toJsonArray(m_camera->getProjection());
-
-    root["mouse"]["x"] = m_cameraController->getMouseX();
-    root["mouse"]["y"] = m_cameraController->getMouseY();
-    root["mouse"]["captured"] = m_window->isMouseCaptured();
-
-    root["sequence"]["running"] = m_cameraController->isSequenceRunning();
-    root["sequence"]["time"] = m_cameraController->getSequenceTime();
-
-    Json::Value values(Json::arrayValue);
-    for (const DebugValue& value : m_debugInfo->getValues())
-    {
-        Json::Value entry;
-        entry["key"] = value.key;
-        entry["setting"] = value.setting;
-        entry["status"] = value.status;
-        values.append(entry);
-    }
-    root["debug"] = values;
-
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
     std::ofstream out(file);
     if (!out.is_open())
     {
         spdlog::error("Failed to write the screenshot metadata to {}.", file.string());
         return false;
     }
-    out << Json::writeString(builder, root);
+    out << metadata;
     out.close();
     if (!out)
     {

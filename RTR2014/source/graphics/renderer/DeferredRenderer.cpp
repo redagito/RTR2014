@@ -20,6 +20,8 @@ DeferredRenderer::DeferredRenderer() { return; }
 
 DeferredRenderer::~DeferredRenderer() { return; }
 
+const char* DeferredRenderer::getName() const { return "Deferred"; }
+
 bool DeferredRenderer::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     spdlog::info("Initializing deferred renderer.");

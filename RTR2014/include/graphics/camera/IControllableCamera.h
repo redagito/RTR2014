@@ -24,6 +24,12 @@ class IControllableCamera : public ICamera
     virtual void rotate(const glm::vec3& axis, float amount) = 0;
     virtual void pitch(float amount) = 0;
     virtual void roll(float amount) = 0;
+
+    /**
+     * \brief Turns the camera around the world up axis.
+     *
+     * A positive amount turns towards +X, so it increases getYawDegrees().
+     */
     virtual void yaw(float amount) = 0;
 
     virtual void lookAt(const glm::vec3& target) = 0;
@@ -35,6 +41,8 @@ class IControllableCamera : public ICamera
 
     /**
      * \brief Returns the horizontal heading in degrees, zero looking along +Z.
+     *
+     * Positive angles turn towards +X, so 90 looks along +X and 180 along -Z.
      */
     virtual float getYawDegrees() const = 0;
 

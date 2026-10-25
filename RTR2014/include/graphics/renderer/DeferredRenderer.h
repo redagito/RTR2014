@@ -27,6 +27,8 @@ class DeferredRenderer : public Renderer
     DeferredRenderer();
     ~DeferredRenderer();
 
+    const char* getName() const override;
+
     bool init(IResourceManager* manager, const std::string& skyCubemapFile = std::string());
 
     void draw(const IScene& scene, const ICamera& camera, const IWindow& window,

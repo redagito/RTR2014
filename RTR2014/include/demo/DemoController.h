@@ -43,6 +43,11 @@ class DemoController
      */
     bool consumeScreenshotRequest();
 
+    /**
+     * \brief Returns the number of frames that were updated.
+     */
+    unsigned long long getFrameCount() const;
+
    private:
     /**
      * \brief Returns whether everything needed to draw a frame is present.

@@ -50,9 +50,9 @@ TEST_CASE("DebugInfo stores debug rows in order", "[debug]")
     auto debugInfo = std::make_shared<DebugInfo>();
 
     debugInfo->setValues({
-        {"F2", "Debug overlay", "On"},
-        {"Mouse", "X", "120"},
-        {"Mouse", "Y", "80"},
+        {"F2", "Debug overlay", "On", DebugInfo::ValueKind::Shortcut},
+        {"Mouse", "X", "120", DebugInfo::ValueKind::State},
+        {"Mouse", "Y", "80", DebugInfo::ValueKind::State},
     });
 
     const auto values = debugInfo->getValues();
@@ -60,9 +60,13 @@ TEST_CASE("DebugInfo stores debug rows in order", "[debug]")
     REQUIRE(values[0].key == "F2");
     REQUIRE(values[0].setting == "Debug overlay");
     REQUIRE(values[0].status == "On");
+    REQUIRE(values[0].kind == DebugInfo::ValueKind::Shortcut);
     REQUIRE(values[1].key == "Mouse");
     REQUIRE(values[1].setting == "X");
     REQUIRE(values[1].status == "120");
+    REQUIRE(values[1].kind == DebugInfo::ValueKind::State);
+    REQUIRE(values[2].key == "Mouse");
     REQUIRE(values[2].setting == "Y");
     REQUIRE(values[2].status == "80");
+    REQUIRE(values[2].kind == DebugInfo::ValueKind::State);
 }

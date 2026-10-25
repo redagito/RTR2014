@@ -177,16 +177,36 @@ void textToBuffers(const std::string& text, int x, int y, int size, std::vector<
     }
 }
 
+int computeDebugFontSize(unsigned int height)
+{
+    // One font step per 50 pixels of window height keeps the text readable when
+    // the window is enlarged. The atlas has 32 pixel glyphs, so larger sizes
+    // would only blur.
+    constexpr int kMinFontSize = 12;
+    constexpr int kMaxFontSize = 32;
+    const int fontSize = static_cast<int>((height + 25u) / 50u);
+    return std::clamp(fontSize, kMinFontSize, kMaxFontSize);
+}
+
 DebugPanelLayout computeDebugPanelLayout(int fontSize, int logLineCount, int valueCount,
                                          unsigned int width, unsigned int height)
 {
+    // Column widths in characters, sized to the longest rows.
+    constexpr int kKeyChars = 6;       // "Arrows"
+    constexpr int kSettingChars = 17;  // "Move forward/back"
+    constexpr int kStatusChars = 20;   // Camera position.
+
+    const int glyphWidth = std::max(1, static_cast<int>(fontSize * 0.6f));
+    const int padding = std::max(4, fontSize / 2);
+
     DebugPanelLayout layout;
-    layout.keyX = 360;
-    layout.settingX = 430;
-    layout.statusX = 600;
+    layout.keyX = padding;
+    layout.settingX = layout.keyX + (kKeyChars + 2) * glyphWidth;
+    layout.statusX = layout.settingX + (kSettingChars + 2) * glyphWidth;
     layout.logBottom = fontSize * logLineCount;
     layout.rowsTop = static_cast<int>(height);
-    layout.panelWidth = static_cast<int>(width);
+    layout.panelWidth = std::min(static_cast<int>(width),
+                                 layout.statusX + (kStatusChars + 1) * glyphWidth + padding);
 
     const int available = layout.rowsTop - layout.logBottom;
     const bool fits = fontSize > 0 && available > 0 && valueCount > 0;
@@ -213,9 +233,11 @@ void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned 
     const std::list<std::string> log = info.getLog();
     const auto values = info.getValues();
 
+    const int fontSize = computeDebugFontSize(height);
     const DebugPanelLayout layout =
-        computeDebugPanelLayout(m_fontSize, static_cast<int>(info.getLogBufferSize()),
+        computeDebugPanelLayout(fontSize, static_cast<int>(info.getLogBufferSize()),
                                 static_cast<int>(values.size()), width, height);
+    const glm::vec2 resolution(static_cast<float>(width), static_cast<float>(height));
     const int hOffsetLog = 0;
 
     // ===
@@ -224,30 +246,31 @@ void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned 
 
     std::vector<float> overlayVertices;
 
+    // The log uses the full window width, the rows only the width of their columns.
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back((float)layout.panelWidth);
+    overlayVertices.push_back(static_cast<float>(width));
     overlayVertices.push_back((float)layout.logBottom);
     overlayVertices.push_back(0.f);
     overlayVertices.push_back((float)layout.logBottom);
 
     overlayVertices.push_back(0.f);
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back((float)layout.panelWidth);
+    overlayVertices.push_back(static_cast<float>(width));
     overlayVertices.push_back(0.f);
-    overlayVertices.push_back((float)layout.panelWidth);
+    overlayVertices.push_back(static_cast<float>(width));
     overlayVertices.push_back((float)layout.logBottom);
 
-    if (layout.panelWidth > layout.keyX && layout.rowsTop > layout.logBottom)
+    if (layout.panelWidth > 0 && layout.rowsTop > layout.logBottom)
     {
-        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back(0.f);
         overlayVertices.push_back((float)layout.logBottom);
         overlayVertices.push_back((float)layout.panelWidth);
         overlayVertices.push_back((float)layout.rowsTop);
-        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back(0.f);
         overlayVertices.push_back((float)layout.rowsTop);
 
-        overlayVertices.push_back((float)layout.keyX);
+        overlayVertices.push_back(0.f);
         overlayVertices.push_back((float)layout.logBottom);
         overlayVertices.push_back((float)layout.panelWidth);
         overlayVertices.push_back((float)layout.logBottom);
@@ -258,6 +281,7 @@ void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned 
     m_overlaysBuffer->setData(overlayVertices);
 
     m_overlayShader->setActive();
+    m_overlayShader->setUniform("resolution", resolution);
     m_overlayShader->setUniform("color", glm::vec4(0.0f, 0.0f, 0.0f, 0.6f));
 
     m_overlayVAO->setActive();
@@ -274,12 +298,12 @@ void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned 
     int lineCount = 0;
     for (const std::string& line : log)
     {
-        textToBuffers(line, hOffsetLog, layout.logBottom - m_fontSize * ++lineCount, m_fontSize,
+        textToBuffers(line, hOffsetLog, layout.logBottom - fontSize * ++lineCount, fontSize,
                       vertices, UVs);
     }
 
     int valueCount = 0;
-    for (const DebugValue& value : values)
+    for (const DebugInfo::Value& value : values)
     {
         if (valueCount >= layout.visibleRows)
         {
@@ -287,16 +311,17 @@ void DebugInfoDisplay::draw(const DebugInfo& info, unsigned int width, unsigned 
         }
 
         ++valueCount;
-        const int y = layout.rowsTop - m_fontSize * valueCount;
-        textToBuffers(value.key, layout.keyX, y, m_fontSize, vertices, UVs);
-        textToBuffers(value.setting, layout.settingX, y, m_fontSize, vertices, UVs);
-        textToBuffers(value.status, layout.statusX, y, m_fontSize, vertices, UVs);
+        const int y = layout.rowsTop - fontSize * valueCount;
+        textToBuffers(value.key, layout.keyX, y, fontSize, vertices, UVs);
+        textToBuffers(value.setting, layout.settingX, y, fontSize, vertices, UVs);
+        textToBuffers(value.status, layout.statusX, y, fontSize, vertices, UVs);
     }
 
     m_verticesBuffer->setData(vertices);
     m_uvsBuffer->setData(UVs);
 
     m_textShader->setActive();
+    m_textShader->setUniform("resolution", resolution);
 
     m_texture->setActive(0);
 

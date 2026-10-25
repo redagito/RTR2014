@@ -33,6 +33,9 @@ class FakeRenderer : public IRenderer
         lastDeltaTime = deltaTime;
     }
 
+    const char* getName() const override { return name.c_str(); }
+
+    std::string name = "Fake";
     int drawCount = 0;
     float lastDeltaTime = 0.0f;
 };
@@ -158,6 +161,9 @@ struct Fixture
           graphicsResourceManager(),
           animationWorld()
     {
+        deferredRenderer.name = "Deferred";
+        forwardRenderer.name = "Forward";
+
         cameraController->setCamera(camera);
         cameraController->setInputProvider(&inputProvider);
         cameraController->setWindow(&window);
@@ -318,6 +324,17 @@ TEST_CASE("Debug overlay shows camera and mouse values", "[demo]")
     REQUIRE(debugValue(f.debugInfo, "Frame") == "1");
 }
 
+TEST_CASE("Debug overlay shows the name of the active renderer", "[demo]")
+{
+    Fixture f;
+    f.deferredRenderer.name = "Custom renderer";
+    f.inputProvider.press(GLFW_KEY_F2);
+
+    f.controller->update(0.016f);
+
+    REQUIRE(debugValue(f.debugInfo, "F3") == "Custom renderer");
+}
+
 TEST_CASE("Demo controller toggles mouse capture on F1", "[demo]")
 {
     Fixture f;
@@ -354,6 +371,17 @@ TEST_CASE("Demo controller requests a screenshot on F12", "[demo]")
 
     f.controller->update(0.016f);
     REQUIRE_FALSE(f.controller->consumeScreenshotRequest());
+}
+
+TEST_CASE("Demo controller counts the frames it updates", "[demo]")
+{
+    Fixture f;
+    REQUIRE(f.controller->getFrameCount() == 0);
+
+    f.controller->update(0.016f);
+    f.controller->update(0.016f);
+
+    REQUIRE(f.controller->getFrameCount() == 2);
 }
 
 TEST_CASE("Demo controller survives a missing renderer", "[demo]")

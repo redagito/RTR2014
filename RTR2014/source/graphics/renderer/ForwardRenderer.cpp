@@ -21,6 +21,8 @@ ForwardRenderer::~ForwardRenderer()
     // TODO Cleanup
 }
 
+const char* ForwardRenderer::getName() const { return "Forward"; }
+
 bool ForwardRenderer::init(IResourceManager* manager, const std::string& skyCubemapFile)
 {
     // Set clear color

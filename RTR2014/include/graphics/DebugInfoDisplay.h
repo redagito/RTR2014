@@ -31,9 +31,18 @@ struct DebugPanelLayout
 };
 
 /**
+ * \brief Computes the font size for a window height.
+ *
+ * The text scales with the window so it stays readable on large or high-DPI
+ * framebuffers. The result is clamped to the resolution of the bitmap font.
+ */
+int computeDebugFontSize(unsigned int height);
+
+/**
  * \brief Computes the debug panel layout for a window size.
  *
- * Rows that would overlap the log panel are clipped.
+ * Rows that would overlap the log panel are clipped. The row panel is only as
+ * wide as its columns need, the log panel keeps the full window width.
  */
 DebugPanelLayout computeDebugPanelLayout(int fontSize, int logLineCount, int valueCount,
                                          unsigned int width, unsigned int height);
@@ -59,6 +68,4 @@ class DebugInfoDisplay : public IDebugInfoDisplay
     std::unique_ptr<VertexBuffer> m_verticesBuffer = nullptr;
     std::unique_ptr<VertexBuffer> m_uvsBuffer = nullptr;
     std::unique_ptr<VertexBuffer> m_overlaysBuffer = nullptr;
-
-    int m_fontSize = 12;
 };

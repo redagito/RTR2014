@@ -206,6 +206,8 @@ bool DemoController::consumeScreenshotRequest()
     return requested;
 }
 
+unsigned long long DemoController::getFrameCount() const { return m_frameCount; }
+
 void DemoController::updateDebugInfo(float timeDiff)
 {
     if (!m_displayDebugInfo && !m_screenshotRequested)
@@ -215,55 +217,59 @@ void DemoController::updateDebugInfo(float timeDiff)
 
     const FeatureInfo& features = m_camera->getFeatureInfo();
 
-    const char* rendererName = "Unknown";
-    if (m_renderer == m_deferredRenderer)
-    {
-        rendererName = "Deferred";
-    }
-    else if (m_renderer == m_forwardRenderer)
-    {
-        rendererName = "Forward";
-    }
+    const char* rendererName = m_renderer->getName();
 
     const glm::vec3& position = m_camera->getPosition();
 
-    std::vector<DebugValue> values;
+    std::vector<DebugInfo::Value> values;
     values.reserve(32);
 
-    values.push_back({"F1", "Mouse capture", m_window->isMouseCaptured() ? "On" : "Off"});
-    values.push_back({"F2", "Debug overlay", m_displayDebugInfo ? "On" : "Off"});
-    values.push_back({"F3", "Renderer", rendererName});
-    values.push_back({"F4", "VSync", m_vSync ? "On" : "Off"});
-    values.push_back(
-        {"F5", "Camera sequence", m_cameraController->isSequenceRunning() ? "Running" : "Manual"});
-    values.push_back({"F12", "Screenshot", ""});
-    values.push_back({"C", "Manual camera", ""});
-    values.push_back({"B", "Rewind 2x", ""});
-    values.push_back({"N", "Forward 4x", ""});
-    values.push_back({"M", "Forward 8x", ""});
-    values.push_back({"W/S", "Move forward/back", ""});
-    values.push_back({"A/D", "Strafe", ""});
-    values.push_back({"Q/E", "Down/up", ""});
-    values.push_back({"Space", "Speed 6x", ""});
-    values.push_back({"Arrows", "Look", ""});
-    values.push_back({"R", "Render mode", renderModeName(features.renderMode)});
-    values.push_back({"T", "Fog", fogTypeName(features.fogType)});
-    values.push_back({"Z", "Shadows", features.shadowsActive ? "On" : "Off"});
-    values.push_back({"U", "FXAA", features.fxaaActive ? "On" : "Off"});
-    values.push_back({"I", "Depth of field", features.dofActive ? "On" : "Off"});
-    values.push_back({"O", "Normal mapping", features.normalMappingActive ? "On" : "Off"});
-    values.push_back({"Esc", "Quit", ""});
+    const auto shortcut = [](std::string key, std::string setting, std::string status = {})
+    {
+        return DebugInfo::Value{std::move(key), std::move(setting), std::move(status),
+                                DebugInfo::ValueKind::Shortcut};
+    };
+    const auto state = [](std::string key, std::string setting, std::string status)
+    {
+        return DebugInfo::Value{std::move(key), std::move(setting), std::move(status),
+                                DebugInfo::ValueKind::State};
+    };
 
-    values.push_back({"Frame", "Count", std::to_string(m_frameCount)});
-    values.push_back({"FPS", "Rate", std::to_string(m_lastFrameCount)});
-    values.push_back({"TimeDiff", "Frame time", formatFloat(timeDiff, 4)});
+    values.push_back(shortcut("F1", "Mouse capture", m_window->isMouseCaptured() ? "On" : "Off"));
+    values.push_back(shortcut("F2", "Debug overlay", m_displayDebugInfo ? "On" : "Off"));
+    values.push_back(shortcut("F3", "Renderer", rendererName));
+    values.push_back(shortcut("F4", "VSync", m_vSync ? "On" : "Off"));
+    values.push_back(shortcut("F5", "Camera sequence",
+                              m_cameraController->isSequenceRunning() ? "Running" : "Manual"));
+    values.push_back(shortcut("F12", "Screenshot"));
+    values.push_back(shortcut("C", "Manual camera"));
+    values.push_back(shortcut("B", "Rewind 2x"));
+    values.push_back(shortcut("N", "Forward 4x"));
+    values.push_back(shortcut("M", "Forward 8x"));
+    values.push_back(shortcut("W/S", "Move forward/back"));
+    values.push_back(shortcut("A/D", "Strafe"));
+    values.push_back(shortcut("Q/E", "Down/up"));
+    values.push_back(shortcut("Space", "Speed 6x"));
+    values.push_back(shortcut("Arrows", "Look"));
+    values.push_back(shortcut("R", "Render mode", renderModeName(features.renderMode)));
+    values.push_back(shortcut("T", "Fog", fogTypeName(features.fogType)));
+    values.push_back(shortcut("Z", "Shadows", features.shadowsActive ? "On" : "Off"));
+    values.push_back(shortcut("U", "FXAA", features.fxaaActive ? "On" : "Off"));
+    values.push_back(shortcut("I", "Depth of field", features.dofActive ? "On" : "Off"));
+    values.push_back(shortcut("O", "Normal mapping", features.normalMappingActive ? "On" : "Off"));
+    values.push_back(shortcut("Esc", "Quit"));
+
+    values.push_back(state("Frame", "Count", std::to_string(m_frameCount)));
+    values.push_back(state("FPS", "Rate", std::to_string(m_lastFrameCount)));
+    values.push_back(state("TimeDiff", "Frame time", formatFloat(timeDiff, 4)));
     values.push_back(
-        {"Sequence", "Time", formatFloat(m_cameraController->getSequenceTime(), 2) + " s"});
-    values.push_back({"Camera", "Position", formatPosition(position)});
-    values.push_back({"Mouse", "X", std::to_string(m_cameraController->getMouseX())});
-    values.push_back({"Mouse", "Y", std::to_string(m_cameraController->getMouseY())});
-    values.push_back({"Yaw", "Camera", formatFloat(m_camera->getYawDegrees(), 2) + " deg"});
-    values.push_back({"Pitch", "Camera", formatFloat(m_camera->getPitchDegrees(), 2) + " deg"});
+        state("Sequence", "Time", formatFloat(m_cameraController->getSequenceTime(), 2) + " s"));
+    values.push_back(state("Camera", "Position", formatPosition(position)));
+    values.push_back(state("Mouse", "X", std::to_string(m_cameraController->getLastMouseX())));
+    values.push_back(state("Mouse", "Y", std::to_string(m_cameraController->getLastMouseY())));
+    values.push_back(state("Yaw", "Camera", formatFloat(m_camera->getYawDegrees(), 2) + " deg"));
+    values.push_back(
+        state("Pitch", "Camera", formatFloat(m_camera->getPitchDegrees(), 2) + " deg"));
 
     m_debugInfo->setValues(std::move(values));
 
